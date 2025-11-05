@@ -60,11 +60,18 @@ endif()
 # Select between an OpenCL API (default) or a CUDA API (beta)
 option(OPENCL "Build CLBlast with an OpenCL API (default)" ON)
 option(CUDA "Build CLBlast with a CUDA API (beta)" OFF)
-if(NOT OPENCL AND NOT CUDA)
+option(VULKAN "Build CLBlast with a Vulkan API (you must not value your time and/or sanity)" OFF)
+if(NOT OPENCL AND NOT CUDA AND NOT VULKAN)
   message(FATAL_ERROR "No API selected, choose from OpenCL (-DOPENCL=ON) or CUDA (-DCUDA=ON)")
 endif()
 if(OPENCL AND CUDA)
   message(FATAL_ERROR "Multiple APIs selected, choose either OpenCL (-DOPENCL=ON -DCUDA=OFF) or CUDA (-DCUDA=ON -DOPENCL=OFF)")
+endif()
+if(OPENCL AND VULKAN)
+  message(FATAL_ERROR "CUDA????? A certain toenail fungus enjoyer will be very cross about you using proprietary dependencies")
+endif()
+if(OPENCL AND VULKAN)
+  message(FATAL_ERROR "don't use opencl and vulkan you dummy")
 endif()
 if(OPENCL)
   message("-- Building CLBlast with OpenCL API (default)")
@@ -72,6 +79,9 @@ if(OPENCL)
 elseif(CUDA)
   message("-- Building CLBlast with CUDA API (beta)")
   add_definitions(-DCUDA_API)
+elseif(VULKAN)
+  message("-- Building CLBlast with VULKAN API (cover your butts)")
+  add_definitions(-DVULKAN_API)
 endif()
 
 # Compile in verbose mode with additional diagnostic messages
@@ -178,6 +188,11 @@ elseif(CUDA)
   set(API_LIBRARIES cuda nvrtc)
   set(API_INCLUDE_DIRS ${CUDA_INCLUDE_DIRS})
   link_directories(${CUDA_TOOLKIT_ROOT_DIR}/lib64)
+elseif(VULKAN)
+  # we need Tart, the vulkan frontend thingy
+  add_subdirectory(${PROJECT_SOURCE_DIR}/tart)
+  set(API_LIBRARIES tart)
+  #set(API_INCLUDE_DIRS tart/include)
 endif()
 
 # Don't search for system libraries when cross-compiling
@@ -241,6 +256,8 @@ if(OPENCL)
 elseif(CUDA)
   set(SAMPLE_PROGRAMS_CPP daxpy_cuda sgemm_cuda)
   set(SAMPLE_PROGRAMS_C )
+elseif(VULKAN)
+  # nothing yet :c
 endif()
 
 # ==================================================================================================
@@ -296,6 +313,9 @@ if(OPENCL)
 elseif(CUDA)
   set(SOURCES ${SOURCES} src/clblast_cuda.cpp)
   set(HEADERS ${HEADERS} include/clblast_cuda.h src/cupp11.hpp)
+elseif(VULKAN)
+  set(SOURCES ${SOURCES} src/clblast_vk.cpp)
+  set(HEADERS ${HEADERS} include/clblast_vk.h src/vkpp11.hpp)
 endif()
 foreach(ROUTINE ${LEVEL1_ROUTINES})
   set(SOURCES ${SOURCES} src/routines/level1/${ROUTINE}.cpp)
@@ -353,10 +373,13 @@ endif()
 # Installs the library
 include(GNUInstallDirs)
 
-install(TARGETS clblast EXPORT CLBlast
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+if (NOT VULKAN)
+  install(TARGETS clblast EXPORT CLBlast
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+endif()
 
 install(FILES include/clblast_half.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 if(OPENCL)
@@ -367,10 +390,14 @@ if(OPENCL)
   endif()
 elseif(CUDA)
   install(FILES include/clblast_cuda.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+elseif(VULKAN)
+  install(FILES include/clblast_vk.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 endif()
 
 # Installs the config for find_package in dependent projects
-install(EXPORT CLBlast DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/CLBlast FILE CLBlastConfig.cmake)
+if(NOT VULKAN)
+  install(EXPORT CLBlast DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/CLBlast FILE CLBlastConfig.cmake)
+endif()
 
 # Install pkg-config file on Linux
 if(UNIX OR MINGW)
@@ -440,6 +467,7 @@ if(TUNERS)
     # Adds CLBlast's interface include paths because we can't link to CLBlast here
     target_include_directories(tuners_common_library PRIVATE
                                $<TARGET_PROPERTY:clblast,INTERFACE_INCLUDE_DIRECTORIES>
+                               $<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES>
                                ${clblast_SOURCE_DIR} ${API_INCLUDE_DIRS})
     set(TUNERS_COMMON $<TARGET_OBJECTS:tuners_common_library>)
   endif()
@@ -449,14 +477,14 @@ if(TUNERS)
   foreach(KERNEL ${ALLKERNELS})
     add_executable(clblast_tuner_${KERNEL} ${TUNERS_COMMON} src/tuning/kernels/${KERNEL}.cpp)
     target_link_libraries(clblast_tuner_${KERNEL} ${API_LIBRARIES})
-    target_include_directories(clblast_tuner_${KERNEL} PUBLIC $<TARGET_PROPERTY:clblast,INTERFACE_INCLUDE_DIRECTORIES> ${API_INCLUDE_DIRS})
+    target_include_directories(clblast_tuner_${KERNEL} PUBLIC $<TARGET_PROPERTY:clblast,INTERFACE_INCLUDE_DIRECTORIES> $<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES> ${API_INCLUDE_DIRS})
     install(TARGETS clblast_tuner_${KERNEL} DESTINATION bin)
   endforeach()
   if(OPENCL)
     foreach(ROUTINE_TUNER ${ROUTINE_TUNERS})
       add_executable(clblast_tuner_routine_${ROUTINE_TUNER} ${TUNERS_COMMON} src/tuning/routines/${ROUTINE_TUNER}.cpp test/test_utilities.cpp)
       target_link_libraries(clblast_tuner_routine_${ROUTINE_TUNER} clblast)
-      target_include_directories(clblast_tuner_routine_${ROUTINE_TUNER} PUBLIC $<TARGET_PROPERTY:clblast,INTERFACE_INCLUDE_DIRECTORIES> ${API_INCLUDE_DIRS} ${clblast_SOURCE_DIR})
+      target_include_directories(clblast_tuner_routine_${ROUTINE_TUNER} PUBLIC $<TARGET_PROPERTY:clblast,INTERFACE_INCLUDE_DIRECTORIES> $<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES> ${API_INCLUDE_DIRS} ${clblast_SOURCE_DIR})
       install(TARGETS clblast_tuner_routine_${ROUTINE_TUNER} DESTINATION bin)
     endforeach()
   endif()
@@ -553,6 +581,7 @@ if(CLIENTS)
     # Adds CLBlast's interface include paths because we can't link to CLBlast here
     target_include_directories(test_performance_common PRIVATE
                                $<TARGET_PROPERTY:clblast,INTERFACE_INCLUDE_DIRECTORIES>
+                               $<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES>
                                ${clblast_SOURCE_DIR} ${REF_INCLUDES})
     set(CLIENTS_COMMON ${CLIENTS_COMMON} $<TARGET_OBJECTS:test_performance_common>)
   endif()
@@ -605,6 +634,7 @@ if(TESTS)
                 test/test_utilities.cpp test/correctness/tester.cpp test/correctness/testblas.cpp)
     target_include_directories(test_correctness_common PUBLIC
                                $<TARGET_PROPERTY:clblast,INTERFACE_INCLUDE_DIRECTORIES>
+                               $<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES>
                                ${clblast_SOURCE_DIR} ${REF_INCLUDES})
     set(TESTS_COMMON ${TESTS_COMMON} $<TARGET_OBJECTS:test_correctness_common>)
   endif()
@@ -658,6 +688,7 @@ if(TESTS)
   target_link_libraries(clblast_test_diagnostics clblast ${REF_LIBRARIES} ${API_LIBRARIES})
   target_include_directories(clblast_test_diagnostics PUBLIC
                              $<TARGET_PROPERTY:clblast,INTERFACE_INCLUDE_DIRECTORIES>
+                             $<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES>
                              ${clblast_SOURCE_DIR} ${REF_INCLUDES})
 
   # Adds 'alltests' target: runs all tests

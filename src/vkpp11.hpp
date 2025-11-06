@@ -46,6 +46,7 @@
 #include <vector>		 // std::vector
 #include <map>
 
+
 // Android support (missing C++11 functions to_string, stod, and stoi)
 #ifdef __ANDROID__
 #include "utilities/android.hpp"	// IWYU pragma: export
@@ -58,6 +59,7 @@
 #define CL_DEMP_DEFS
 #define CL_SUCCESS 0
 #endif
+#include "tart.hpp"
 
 namespace clblast {
 // =================================================================================================
@@ -113,7 +115,6 @@ public:
 	// Regular constructor with memory management
 	explicit Event()
 	{
-		
 	}
 
 	// Waits for completion of this event
@@ -138,11 +139,12 @@ public:
 	const cl_event& operator()() const { return *event_; }
 	cl_event* pointer() { return &(*event_); }
 	const cl_event* pointer() const { return &(*event_); }
-
 private:
 	std::shared_ptr<cl_event> event_;
 };
+#endif
 
+#if 0
 // Pointer to an OpenCL event
 using EventPointer = cl_event*;
 #endif
@@ -150,7 +152,10 @@ using EventPointer = cl_event*;
 #if 0
 // Raw platform ID type
 using RawPlatformID = cl_platform_id;
+#endif
 
+// Vulkan doesn't have any direct equivalent to this. It is likely not needed.
+#if 0
 // C++11 version of 'cl_platform_id'
 class Platform {
 public:
@@ -201,7 +206,10 @@ private:
 		return result;
 	}
 };
+#endif
 
+// not applicable for vulkan
+#if 0
 // Retrieves a vector with all platforms
 inline std::vector<Platform> GetAllPlatforms() {
 	auto num_platforms = cl_uint{0};
@@ -213,13 +221,17 @@ inline std::vector<Platform> GetAllPlatforms() {
 	return all_platforms;
 }
 #endif
+
 // =================================================================================================
 #if 0
 // Raw device ID type
 using RawDeviceID = cl_device_id;
 
+// Tart already has a base device class that already covers a lot of this.
+// Lets seee..............
 // C++11 version of 'cl_device_id'
 class Device {
+
 public:
 	// Constructor based on the regular OpenCL data-type
 	explicit Device(const cl_device_id device) : device_(device) {}
@@ -273,11 +285,14 @@ public:
 	std::vector<size_t> MaxWorkItemSizes() const { return GetInfoVector<size_t>(CL_DEVICE_MAX_WORK_ITEM_SIZES); }
 	unsigned long LocalMemSize() const { return static_cast<unsigned long>(GetInfo<cl_ulong>(CL_DEVICE_LOCAL_MEM_SIZE)); }
 
+	// Not sure if Tart has a public method for querying extensions; might be a good idea to implement this.
 	std::string Capabilities() const { return GetInfoString(CL_DEVICE_EXTENSIONS); }
 	bool HasExtension(const std::string& extension) const {
 		const auto extensions = Capabilities();
 		return extensions.find(extension) != std::string::npos;
 	}
+	
+	// Tart already has this
 	bool SupportsFP64() const { return HasExtension("cl_khr_fp64"); }
 	bool SupportsFP16() const {
 		if (Name() == "Mali-T628") {
@@ -285,13 +300,20 @@ public:
 		}	// supports fp16 but not cl_khr_fp16 officially
 		return HasExtension("cl_khr_fp16");
 	}
-
+	// Vulkan does not allow you to do this
 	size_t CoreClock() const { return static_cast<size_t>(GetInfo<cl_uint>(CL_DEVICE_MAX_CLOCK_FREQUENCY)); }
+	// or this either.
 	size_t ComputeUnits() const { return static_cast<size_t>(GetInfo<cl_uint>(CL_DEVICE_MAX_COMPUTE_UNITS)); }
+	
+	// Vulkan has a way to do this, but I have been too lazy to implement it completely in Tart aside from error checking.
+	// Will have to do this eventually
 	unsigned long MemorySize() const { return static_cast<unsigned long>(GetInfo<cl_ulong>(CL_DEVICE_GLOBAL_MEM_SIZE)); }
+	// this can be retrieved from Tart, but may not be public
 	unsigned long MaxAllocSize() const {
 		return static_cast<unsigned long>(GetInfo<cl_ulong>(CL_DEVICE_MAX_MEM_ALLOC_SIZE));
 	}
+	
+	// neither of these can be queried in Vulkan either
 	size_t MemoryClock() const { return 0; }		 // Not exposed in OpenCL
 	size_t MemoryBusWidth() const { return 0; }	// Not exposed in OpenCL
 
@@ -379,7 +401,7 @@ public:
 
 	// Accessor to the private data-member
 	const RawDeviceID& operator()() const { return device_; }
-
+	
 private:
 	cl_device_id device_;
 
@@ -412,12 +434,16 @@ private:
 };
 #endif
 // =================================================================================================
-#if 0
+
+// ok, so the `Device` is more like `vk::PhysicalDevice` and the `Context` is more akin to `vk::Device`
+// that makes sense.
+
 // Raw context type
-using RawContext = cl_context;
+using RawContext = tart::device_ptr;
 
 // C++11 version of 'cl_context'
 class Context {
+
 public:
 	// Constructor based on the regular OpenCL data-type: memory management is handled elsewhere
 	explicit Context(const cl_context context) : context_(new cl_context) { *context_ = context; }
@@ -450,6 +476,7 @@ using ContextPointer = cl_context*;
 // =================================================================================================
 
 // C++11 version of 'cl_program'.
+// I may keep this abstraction, actually
 class Program {
 	std::string mSource;
 	tart::device_ptr mDevice = nullptr;
@@ -507,6 +534,8 @@ public:
 // Raw command-queue type
 using RawCommandQueue = cl_command_queue;
 
+// no idea how to handle this, since Tart uses a single queue
+// pretty sure I will just end up scrapping it, since tart::Device handles all this already
 // C++11 version of 'cl_command_queue'
 class Queue {
 public:
@@ -558,9 +587,10 @@ private:
 // C++11 version of host memory
 template <typename T>
 class BufferHost {
+
 public:
 	// Regular constructor with memory management
-	explicit BufferHost(tart::device_ptr device, const size_t size) : buffer_(new std::vector<T>(size)) {}
+	explicit BufferHost(const Context&, const size_t size) : buffer_(new std::vector<T>(size)) {}
 
 	// Retrieves the actual allocated size in bytes
 	size_t GetSize() const { return buffer_->size() * sizeof(T); }
@@ -578,7 +608,8 @@ private:
 };
 
 // =================================================================================================
-#if 0
+
+#if 1
 // Enumeration of buffer access types
 enum class BufferAccess { kReadOnly, kWriteOnly, kReadWrite, kNotOwned };
 
@@ -586,7 +617,9 @@ enum class BufferAccess { kReadOnly, kWriteOnly, kReadWrite, kNotOwned };
 // C++11 version of 'cl_mem'
 template <typename T>
 class Buffer {
+
 public:
+
 	// Constructor based on the regular OpenCL data-type: memory management is handled elsewhere
 	explicit Buffer(const cl_mem buffer) : buffer_(new cl_mem), access_(BufferAccess::kNotOwned) { *buffer_ = buffer; }
 
@@ -711,13 +744,16 @@ public:
 	// Accessor to the private data-member
 	const cl_mem& operator()() const { return *buffer_; }
 
+
 private:
+
 	std::shared_ptr<cl_mem> buffer_;
 	BufferAccess access_;
 };
 #endif
 // =================================================================================================
 
+// ahh, right. I remember how it works now
 // C++11 version of 'cl_kernel'
 class Kernel {
 	std::string mEntryPoint;

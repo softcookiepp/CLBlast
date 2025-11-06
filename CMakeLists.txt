@@ -12,6 +12,10 @@
 # Technically the minimum is 2.8.11 but to be compatible with CMake 4 this is set to 3.10
 cmake_minimum_required(VERSION 3.10)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 # Overrides for MSVC static runtime
 option(OVERRIDE_MSVC_FLAGS_TO_MT "Override compiler flags for MSVC to build with a static runtime (/MT instead of /MD)" ON)
 if(OVERRIDE_MSVC_FLAGS_TO_MT)

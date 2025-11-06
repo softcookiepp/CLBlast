@@ -20,6 +20,10 @@
 
 #include "cupp11.hpp"  // IWYU pragma: export
 
+#elif VULKAN_API
+#include <clblast_vk.h>
+#include "vkpp11.hpp"
+
 #endif
 
 #include "cxpp11_common.hpp"  // IWYU pragma: export

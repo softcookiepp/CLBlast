@@ -15,7 +15,7 @@
 #include <cstdlib>        // For size_t
 #include <string>         // For OverrideParameters function
 #include <unordered_map>  // For OverrideParameters function
-#incldue "tart.hpp"       // For Vulkan
+#include "tart.hpp"       // For Vulkan
 
 // Exports library functions under Windows when building a DLL. See also:
 // https://msdn.microsoft.com/en-us/library/a90k134d.aspx

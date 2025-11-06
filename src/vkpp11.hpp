@@ -45,26 +45,6 @@
 #include <string>     // std::string
 #include <vector>     // std::vector
 
-// OpenCL
-#ifndef CL_TARGET_OPENCL_VERSION
-#define CL_TARGET_OPENCL_VERSION 110
-#define CL_USE_DEPRECATED_OPENCL_1_1_APIS  // to disable deprecation warnings
-#define CL_USE_DEPRECATED_OPENCL_1_2_APIS  // to disable deprecation warnings
-#define CL_USE_DEPRECATED_OPENCL_2_0_APIS  // to disable deprecation warnings
-#elif defined(CL_TARGET_OPENCL_VERSION) && CL_TARGET_OPENCL_VERSION < 110
-#pragma warning "OpenCL Version must be at least 1.1 (110) to use CLBlast, redefining"
-#undef CL_TARGET_OPENCL_VERSION
-#define CL_TARGET_OPENCL_VERSION 110
-#define CL_USE_DEPRECATED_OPENCL_1_1_APIS  // to disable deprecation warnings
-#define CL_USE_DEPRECATED_OPENCL_1_2_APIS  // to disable deprecation warnings
-#define CL_USE_DEPRECATED_OPENCL_2_0_APIS  // to disable deprecation warnings
-#endif
-#if defined(__APPLE__) || defined(__MACOSX)
-#include <OpenCL/opencl.h>  // IWYU pragma: export
-#else
-#include <CL/opencl.h>  // IWYU pragma: export
-#endif
-
 // Android support (missing C++11 functions to_string, stod, and stoi)
 #ifdef __ANDROID__
 #include "utilities/android.hpp"  // IWYU pragma: export
@@ -79,16 +59,16 @@ namespace clblast {
 // Represents a runtime error returned by an OpenCL API function
 class CLCudaAPIError : public ErrorCode<DeviceError, cl_int> {
  public:
-  explicit CLCudaAPIError(cl_int status, const std::string& where)
+  explicit CLCudaAPIError(int32_t status, const std::string& where)
       : ErrorCode(status, where, "OpenCL error: " + where + ": " + std::to_string(static_cast<int>(status))) {}
 
-  static void Check(const cl_int status, const std::string& where) {
+  static void Check(const int32_t status, const std::string& where) {
     if (status != CL_SUCCESS) {
       throw CLCudaAPIError(status, where);
     }
   }
 
-  static void CheckDtor(const cl_int status, const std::string& where) {
+  static void CheckDtor(const int32_t status, const std::string& where) {
     if (status != CL_SUCCESS) {
       fprintf(stderr, "CLBlast: %s (ignoring)\n", CLCudaAPIError(status, where).what());
     }
@@ -507,7 +487,7 @@ class Program {
   }
 
   // Confirms whether a certain status code is an actual compilation error or warning
-  bool StatusIsCompilationWarningOrError(const cl_int status) const { return (status == CL_BUILD_PROGRAM_FAILURE); }
+  bool StatusIsCompilationWarningOrError(const int32_t status) const { return (status == -11); }
 
   // Retrieves the warning/error message from the compiler (if any)
   std::string GetBuildInfo(const Device& device) const {

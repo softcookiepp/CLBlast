@@ -96,35 +96,48 @@ using CLCudaAPIBuildError = CLCudaAPIError;
 
 // =================================================================================================
 
+typedef std::vector<tart::command_sequence_ptr> sequence_ptr_list;
+
 // not used in tart (yet)
 // however, for API compatibility, it needs to be preserved
-#if 1
 // C++11 version of 'cl_event'
 class Event {
 	// An event, in regards to Tart compatibility (for now)
 	// will just be a list of sequences that the device will away the completion of.
 	// which means Tart must be modified to be able to get the parent device from a sequence?
 	// ugh
-	std::vector<tart::command_sequence_ptr> mSequences;
+	std::shared_ptr<sequence_ptr_list> mSequences = nullptr;
 public:
-#if 0
+
 	// Constructor based on the regular OpenCL data-type: memory management is handled elsewhere
-	explicit Event(const cl_event event) : event_(new cl_event) { *event_ = event; }
-#endif
+	explicit Event(const sequence_ptr_list& event) { mSequences = std::make_shared<sequence_ptr_list>(event); }
 
 	// Regular constructor with memory management
 	explicit Event()
 	{
+		mSequences = std::make_shared<std::vector<tart::command_sequence_ptr> >();
 	}
 
 	// Waits for completion of this event
-	void WaitForCompletion() const { CheckError(clWaitForEvents(1, &(*event_))); }
+	void WaitForCompletion() const
+	{
+		if (mSequences->size() > 0)
+		{
+			// devices should (hopefully) all be the same across sequences
+			tart::device_ptr device = (*mSequences)[0]->getDevice();
+			device->sync(*mSequences);
+		}
+	}
 
 	// Retrieves the elapsed time of the last recorded event.
 	// (Note that there is a bug in Apple's OpenCL implementation of the 'clGetEventProfilingInfo' function:
 	//	http://stackoverflow.com/questions/26145603/clgeteventprofilinginfo-bug-in-macosx)
 	// However, in our case the reply size is fixed to be cl_ulong, so we are not affected.
 	float GetElapsedTime() const {
+#if 1
+		// not implemented yet :c
+		return 1.0;
+#else
 		WaitForCompletion();
 		const auto bytes = sizeof(cl_ulong);
 		auto time_start = cl_ulong{0};
@@ -132,49 +145,36 @@ public:
 		auto time_end = cl_ulong{0};
 		CheckError(clGetEventProfilingInfo(*event_, CL_PROFILING_COMMAND_END, bytes, &time_end, nullptr));
 		return static_cast<float>(time_end - time_start) * 1.0e-6f;
+#endif
 	}
 
 	// Accessor to the private data-member
-	cl_event& operator()() { return *event_; }
-	const cl_event& operator()() const { return *event_; }
-	cl_event* pointer() { return &(*event_); }
-	const cl_event* pointer() const { return &(*event_); }
-private:
-	std::shared_ptr<cl_event> event_;
+	sequence_ptr_list& operator()() { return *mSequences; }
+	const sequence_ptr_list& operator()() const { return *mSequences; }
+	std::shared_ptr<sequence_ptr_list> pointer() { return mSequences; }
+	const std::shared_ptr<sequence_ptr_list> pointer() const { return mSequences; }
 };
-#endif
 
-#if 0
-// Pointer to an OpenCL event
-using EventPointer = cl_event*;
-#endif
+
+// Pointer to...this dumb crap
+using EventPointer = std::shared_ptr<sequence_ptr_list>;
+
 // =================================================================================================
-#if 0
+
 // Raw platform ID type
-using RawPlatformID = cl_platform_id;
-#endif
+// since Vulkan doesn't have platforms like OpenCL does, there will only be a single platform that has all the devices.
+using RawPlatformID = size_t;
 
-// Vulkan doesn't have any direct equivalent to this. It is likely not needed.
-#if 0
-// C++11 version of 'cl_platform_id'
+// Vulkan doesn't have any direct equivalent to this, just use it to encapsulate device..or maybe instance?
 class Platform {
+	// we need this to get the number of devices
+	tart::Instance mDummyInstance;
 public:
-	// Constructor based on the regular OpenCL data-type
-	explicit Platform(const cl_platform_id platform) : platform_(platform) {}
-
 	// Initializes the platform
 	explicit Platform(const size_t platform_id) {
-		auto num_platforms = cl_uint{0};
-		CheckError(clGetPlatformIDs(0, nullptr, &num_platforms));
-		if (num_platforms == 0) {
-			throw RuntimeError("Platform: no platforms found");
-		}
-		if (platform_id >= num_platforms) {
-			throw RuntimeError("Platform: invalid platform ID " + std::to_string(platform_id));
-		}
-		auto platforms = std::vector<cl_platform_id>(num_platforms);
-		CheckError(clGetPlatformIDs(num_platforms, platforms.data(), nullptr));
-		platform_ = platforms[platform_id];
+		// there can only be one, this is Vulkan c:
+		if (platform_id != 0) {
+		throw LogicError("Vulkan back-end requires a platform ID of 0");
 	}
 
 	// Methods to retrieve platform information
@@ -184,9 +184,7 @@ public:
 
 	// Returns the number of devices on this platform
 	size_t NumDevices() const {
-		auto result = cl_uint{0};
-		CheckError(clGetDeviceIDs(platform_, CL_DEVICE_TYPE_ALL, 0, nullptr, &result));
-		return static_cast<size_t>(result);
+		return static_cast<size_t>mDummyInstance.getNumDevices();
 	}
 
 	// Accessor to the private data-member
@@ -197,6 +195,10 @@ private:
 
 	// Private helper functions
 	std::string GetInfoString(const cl_device_info info) const {
+#if 1
+		// no idea what this is supposed to do; we find out L A T E R
+		return "not implemented";
+#else
 		auto bytes = size_t{0};
 		CheckError(clGetPlatformInfo(platform_, info, 0, nullptr, &bytes));
 		auto result = std::string{};
@@ -204,14 +206,18 @@ private:
 		CheckError(clGetPlatformInfo(platform_, info, bytes, &result[0], nullptr));
 		result.resize(strlen(result.c_str()));	// Removes any trailing '\0'-characters
 		return result;
+#endif
 	}
 };
-#endif
 
 // not applicable for vulkan
-#if 0
 // Retrieves a vector with all platforms
 inline std::vector<Platform> GetAllPlatforms() {
+#if 1
+	// TODO: populate this based on single vulkan devices.
+	std::vector<Platform> platforms({{0}});
+	return platforms;
+#else
 	auto num_platforms = cl_uint{0};
 	CheckError(clGetPlatformIDs(0, nullptr, &num_platforms));
 	auto all_platforms = std::vector<Platform>();
@@ -219,91 +225,64 @@ inline std::vector<Platform> GetAllPlatforms() {
 		all_platforms.push_back(Platform(platform_id));
 	}
 	return all_platforms;
-}
 #endif
+}
 
 // =================================================================================================
-#if 0
 // Raw device ID type
-using RawDeviceID = cl_device_id;
+using RawDeviceID = tart::device_ptr;
 
 // Tart already has a base device class that already covers a lot of this.
 // Lets seee..............
 // C++11 version of 'cl_device_id'
 class Device {
-
+	tart::device_ptr mDevice;
 public:
-	// Constructor based on the regular OpenCL data-type
-	explicit Device(const cl_device_id device) : device_(device) {}
+	// Constructor based on the regular thingy
+	explicit Device(const tart::device_ptr device) : mDevice(device) {}
 
 	// Initialize the device. Note that this constructor can throw exceptions!
 	explicit Device(const Platform& platform, const size_t device_id) {
-		auto num_devices = platform.NumDevices();
-		if (num_devices == 0) {
-			throw RuntimeError("Device: no devices found");
-		}
-		if (device_id >= num_devices) {
-			throw RuntimeError("Device: invalid device ID " + std::to_string(device_id));
-		}
-
-		auto devices = std::vector<cl_device_id>(num_devices);
-		CheckError(
-				clGetDeviceIDs(platform(), CL_DEVICE_TYPE_ALL, static_cast<cl_uint>(num_devices), devices.data(), nullptr));
-		device_ = devices[device_id];
+		raise RuntimeError("not implemented! (unsure of how to handle multiple tart::Instance...");
 	}
 
 	// Methods to retrieve device information
-	RawPlatformID PlatformID() const { return GetInfo<cl_platform_id>(CL_DEVICE_PLATFORM); }
-	std::string Version() const { return GetInfoString(CL_DEVICE_VERSION); }
+	// (platform id is always 0)
+	RawPlatformID PlatformID() const { return 0; }
+	std::string Version() const { return "Vulkan 1.2"; } // pretty sure this will work?
 	size_t VersionNumber() const {
-		std::string version_string = Version().substr(7);
-		// Space separates the end of the OpenCL version number from the beginning of the
-		// vendor-specific information.
-		size_t next_whitespace = version_string.find(' ');
-		size_t version = (size_t)(100.0 * std::stod(version_string.substr(0, next_whitespace)));
-		return version;
+		return 120;
 	}
-	std::string Vendor() const { return GetInfoString(CL_DEVICE_VENDOR); }
-	std::string Name() const { return GetInfoString(CL_DEVICE_NAME); }
-	std::string Type() const {
-		auto type = GetInfo<cl_device_type>(CL_DEVICE_TYPE);
-		switch (type) {
-			case CL_DEVICE_TYPE_CPU:
-				return "CPU";
-			case CL_DEVICE_TYPE_GPU:
-				return "GPU";
-			case CL_DEVICE_TYPE_ACCELERATOR:
-				return "accelerator";
-			default:
-				return "default";
-		}
+	// TODO: implement some of this stuff in tart
+	std::string Vendor() const { return "vendor name not implemented"; }
+	std::string Name() const { return "device name not implemented"; }
+	std::string Type() const { return "GPU"; } // everything is a GPU when it comes to Vulkan! (for the most part)
+	size_t MaxWorkGroupSize() const { return 1000000; } // straight-up no idea how to even go about doing this. in Vulkan, each dimension can be different.
+	size_t MaxWorkItemDimensions() const { return 3; } // it is always 3 in vulkan
+	std::vector<size_t> MaxWorkItemSizes() const { return {1000000, 1000000, 1000000}; } // TODO: implement in Tart
+	unsigned long LocalMemSize() const
+	{
+#if 1
+		// TODO: actually implement in Tart
+		return 0;
+#else
+		return static_cast<unsigned long>(GetInfo<cl_ulong>(CL_DEVICE_LOCAL_MEM_SIZE));
+#endif
 	}
-	size_t MaxWorkGroupSize() const { return GetInfo<size_t>(CL_DEVICE_MAX_WORK_GROUP_SIZE); }
-	size_t MaxWorkItemDimensions() const {
-		return static_cast<size_t>(GetInfo<cl_uint>(CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS));
-	}
-	std::vector<size_t> MaxWorkItemSizes() const { return GetInfoVector<size_t>(CL_DEVICE_MAX_WORK_ITEM_SIZES); }
-	unsigned long LocalMemSize() const { return static_cast<unsigned long>(GetInfo<cl_ulong>(CL_DEVICE_LOCAL_MEM_SIZE)); }
 
 	// Not sure if Tart has a public method for querying extensions; might be a good idea to implement this.
 	std::string Capabilities() const { return GetInfoString(CL_DEVICE_EXTENSIONS); }
 	bool HasExtension(const std::string& extension) const {
-		const auto extensions = Capabilities();
-		return extensions.find(extension) != std::string::npos;
+		return mDevice->supportsExtension(extension);
 	}
 	
 	// Tart already has this
-	bool SupportsFP64() const { return HasExtension("cl_khr_fp64"); }
-	bool SupportsFP16() const {
-		if (Name() == "Mali-T628") {
-			return true;
-		}	// supports fp16 but not cl_khr_fp16 officially
-		return HasExtension("cl_khr_fp16");
-	}
+	bool SupportsFP64() const { return mDevice->getMetadata().double_; }
+	bool SupportsFP16() const { return mDevice->getMetadata().half_; }
 	// Vulkan does not allow you to do this
-	size_t CoreClock() const { return static_cast<size_t>(GetInfo<cl_uint>(CL_DEVICE_MAX_CLOCK_FREQUENCY)); }
+	size_t CoreClock() const { return 0; }
 	// or this either.
-	size_t ComputeUnits() const { return static_cast<size_t>(GetInfo<cl_uint>(CL_DEVICE_MAX_COMPUTE_UNITS)); }
+	size_t ComputeUnits() const { return 0; }
 	
 	// Vulkan has a way to do this, but I have been too lazy to implement it completely in Tart aside from error checking.
 	// Will have to do this eventually
@@ -432,7 +411,6 @@ private:
 		return result;
 	}
 };
-#endif
 // =================================================================================================
 
 // ok, so the `Device` is more like `vk::PhysicalDevice` and the `Context` is more akin to `vk::Device`
@@ -472,7 +450,6 @@ private:
 
 // Pointer to an OpenCL context
 using ContextPointer = cl_context*;
-#endif
 // =================================================================================================
 
 // C++11 version of 'cl_program'.

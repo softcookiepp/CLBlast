@@ -23,6 +23,9 @@
 
 #elif CUDA_API
 #include "clblast_cuda.h"
+
+#elif VULKAN_API
+#include "clblast_vk.h"
 #endif
 
 namespace clblast {

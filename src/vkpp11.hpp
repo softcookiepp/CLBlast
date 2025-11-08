@@ -58,6 +58,7 @@
 #ifndef CL_TEMP_DEFS
 #define CL_DEMP_DEFS
 #define CL_SUCCESS 0
+#define cl_device_info size_t
 #endif
 #include "tart.hpp"
 
@@ -178,7 +179,13 @@ public:
 	}
 
 	// Methods to retrieve platform information
-	std::string Name() const { return GetInfoString(CL_PLATFORM_NAME); }
+	std::string Name() const {
+#if 1
+		return "not implemented";
+#else
+		return GetInfoString(CL_PLATFORM_NAME);
+#endif
+	}
 	std::string Vendor() const { return GetInfoString(CL_PLATFORM_VENDOR); }
 	std::string Version() const { return GetInfoString(CL_PLATFORM_VERSION); }
 
@@ -297,8 +304,18 @@ public:
 	size_t MemoryBusWidth() const { return 0; }	// Not exposed in OpenCL
 
 	// Configuration-validity checks
-	bool IsLocalMemoryValid(const cl_ulong local_mem_usage) const { return (local_mem_usage <= LocalMemSize()); }
+	bool IsLocalMemoryValid(const cl_ulong local_mem_usage) const
+	{
+#if 1
+		// not yet implemented
+		return true;
+#else
+		return (local_mem_usage <= LocalMemSize());
+#endif
+	}
 	bool IsThreadConfigValid(const std::vector<size_t>& local) const {
+#if 1
+#else
 		auto local_size = size_t{1};
 		for (const auto& item : local) {
 			local_size *= item;
@@ -315,24 +332,64 @@ public:
 			return false;
 		}
 		return true;
+#endif
 	}
 
 	// Query for a specific type of device or brand
 	bool IsCPU() const { return Type() == "CPU"; }
 	bool IsGPU() const { return Type() == "GPU"; }
-	bool IsAMD() const {
+	bool IsAMD() const
+	{
+#if 1
+		// Not implemented yet. Will have to figure this out later :c
+		return false;
+#else
 		return Vendor() == "AMD" || Vendor() == "Advanced Micro Devices, Inc." || Vendor() == "AuthenticAMD";
+#endif
 	}
-	bool IsNVIDIA() const { return Vendor() == "NVIDIA" || Vendor() == "NVIDIA Corporation"; }
-	bool IsIntel() const {
+	bool IsNVIDIA() const
+	{
+#if 1
+		// just assume true for now, since testing devices are of the leather jacket variety
+		return true;
+#else
+		return Vendor() == "NVIDIA" || Vendor() == "NVIDIA Corporation";
+#endif
+	}
+	bool IsIntel() const
+	{
+#if 1
+		// nope
+		return false;
+#else
 		return Vendor() == "INTEL" || Vendor() == "Intel" || Vendor() == "GenuineIntel" ||
 					 Vendor() == "Intel(R) Corporation";
+#endif
 	}
-	bool IsARM() const { return Vendor() == "ARM"; }
-	bool IsQualcomm() const { return Vendor() == "QUALCOMM"; }
+	bool IsARM() const
+	{
+#if 1
+		return false;
+#else
+		return Vendor() == "ARM";
+#endif
+	}
+	bool IsQualcomm() const
+	{
+#if 1
+		return false;
+#else
+		return Vendor() == "QUALCOMM";
+#endif
+	}
 
 	// Platform specific extensions
-	std::string AMDBoardName() const {	// check for 'cl_amd_device_attribute_query' first
+	std::string AMDBoardName() const
+	{
+#if 1
+		return "not implemented";
+#else
+		// check for 'cl_amd_device_attribute_query' first
 #ifndef CL_DEVICE_BOARD_NAME_AMD
 #define CL_DEVICE_BOARD_NAME_AMD 0x4038
 #endif
@@ -347,27 +404,42 @@ public:
 #endif
 		return std::string{"SM"} + std::to_string(GetInfo<cl_uint>(CL_DEVICE_COMPUTE_CAPABILITY_MAJOR_NV)) +
 					 std::string{"."} + std::to_string(GetInfo<cl_uint>(CL_DEVICE_COMPUTE_CAPABILITY_MINOR_NV));
+#endif
 	}
 
 	// Returns if the Nvidia chip is a Volta or later archicture (sm_70 or higher)
-	bool IsPostNVIDIAVolta() const {
+	bool IsPostNVIDIAVolta() const
+	{
+#if 1
+		return false;
+#else
 		if (HasExtension("cl_nv_device_attribute_query")) {
 			return GetInfo<cl_uint>(CL_DEVICE_COMPUTE_CAPABILITY_MAJOR_NV) >= 7;
 		}
 		return false;
+#endif
 	}
 
 	// Returns the Qualcomm Adreno GPU version (i.e. a650, a730, a740, etc.)
-	std::string AdrenoVersion() const {
+	std::string AdrenoVersion() const
+	{
+#if 1
+		return "not implemented";
+#else
 		if (IsQualcomm()) {
 			return GetInfoString(CL_DEVICE_OPENCL_C_VERSION);
 		} else {
 			return std::string{""};
 		}
+#endif
 	}
 
 	// Retrieves the above extra information (if present)
-	std::string GetExtraInfo() const {
+	std::string GetExtraInfo() const
+	{
+#if 1
+		return "not implemented";
+#else
 		if (HasExtension("cl_amd_device_attribute_query")) {
 			return AMDBoardName();
 		}
@@ -376,13 +448,13 @@ public:
 		} else {
 			return std::string{""};
 		}
+#endif
 	}
 
 	// Accessor to the private data-member
-	const RawDeviceID& operator()() const { return device_; }
+	const RawDeviceID operator()() const { return mDevice; }
 	
 private:
-	cl_device_id device_;
 
 	// Private helper functions
 	template <typename T>

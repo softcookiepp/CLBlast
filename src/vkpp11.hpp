@@ -133,17 +133,17 @@ public:
 	// Retrieves the elapsed time of the last recorded event.
 	// (Note that there is a bug in Apple's OpenCL implementation of the 'clGetEventProfilingInfo' function:
 	//	http://stackoverflow.com/questions/26145603/clgeteventprofilinginfo-bug-in-macosx)
-	// However, in our case the reply size is fixed to be cl_ulong, so we are not affected.
+	// However, in our case the reply size is fixed to be uint64_t, so we are not affected.
 	float GetElapsedTime() const {
 #if 1
 		// not implemented yet :c
 		return 1.0;
 #else
 		WaitForCompletion();
-		const auto bytes = sizeof(cl_ulong);
-		auto time_start = cl_ulong{0};
+		const auto bytes = sizeof(uint64_t);
+		auto time_start = uint64_t{0};
 		CheckError(clGetEventProfilingInfo(*event_, CL_PROFILING_COMMAND_START, bytes, &time_start, nullptr));
-		auto time_end = cl_ulong{0};
+		auto time_end = uint64_t{0};
 		CheckError(clGetEventProfilingInfo(*event_, CL_PROFILING_COMMAND_END, bytes, &time_end, nullptr));
 		return static_cast<float>(time_end - time_start) * 1.0e-6f;
 #endif
@@ -273,7 +273,7 @@ public:
 		// TODO: actually implement in Tart
 		return 0;
 #else
-		return static_cast<unsigned long>(GetInfo<cl_ulong>(CL_DEVICE_LOCAL_MEM_SIZE));
+		return static_cast<unsigned long>(GetInfo<uint64_t>(CL_DEVICE_LOCAL_MEM_SIZE));
 #endif
 	}
 
@@ -293,10 +293,10 @@ public:
 	
 	// Vulkan has a way to do this, but I have been too lazy to implement it completely in Tart aside from error checking.
 	// Will have to do this eventually
-	unsigned long MemorySize() const { return static_cast<unsigned long>(GetInfo<cl_ulong>(CL_DEVICE_GLOBAL_MEM_SIZE)); }
+	unsigned long MemorySize() const { return static_cast<unsigned long>(GetInfo<uint64_t>(CL_DEVICE_GLOBAL_MEM_SIZE)); }
 	// this can be retrieved from Tart, but may not be public
 	unsigned long MaxAllocSize() const {
-		return static_cast<unsigned long>(GetInfo<cl_ulong>(CL_DEVICE_MAX_MEM_ALLOC_SIZE));
+		return static_cast<unsigned long>(GetInfo<uint64_t>(CL_DEVICE_MAX_MEM_ALLOC_SIZE));
 	}
 	
 	// neither of these can be queried in Vulkan either
@@ -304,7 +304,7 @@ public:
 	size_t MemoryBusWidth() const { return 0; }	// Not exposed in OpenCL
 
 	// Configuration-validity checks
-	bool IsLocalMemoryValid(const cl_ulong local_mem_usage) const
+	bool IsLocalMemoryValid(const uint64_t local_mem_usage) const
 	{
 #if 1
 		// not yet implemented
@@ -493,35 +493,28 @@ using RawContext = tart::device_ptr;
 
 // C++11 version of 'cl_context'
 class Context {
+	tart::device_ptr mDevice = nullptr;
 
 public:
-	// Constructor based on the regular OpenCL data-type: memory management is handled elsewhere
-	explicit Context(const cl_context context) : context_(new cl_context) { *context_ = context; }
+	// Constructor based on tart::device_ptr
+	explicit Context(tart::device_ptr context) { mDevice = context; }
 
 	// Regular constructor with memory management
 	explicit Context(const Device& device)
-			: context_(new cl_context, [](cl_context* c) {
-					if (*c) {
-						CheckErrorDtor(clReleaseContext(*c));
-					}
-					delete c;
-				}) {
-		auto status = CL_SUCCESS;
-		const cl_device_id dev = device();
-		*context_ = clCreateContext(nullptr, 1, &dev, nullptr, nullptr, &status);
-		CLCudaAPIError::Check(status, "clCreateContext");
+	{
+		mDevice = device();
 	}
 
 	// Accessor to the private data-member
-	const RawContext& operator()() const { return *context_; }
-	RawContext* pointer() const { return &(*context_); }
+	const RawContext operator()() const { return mDevice; }
+	RawContext pointer() const { return mDevice; }
 
-private:
-	std::shared_ptr<cl_context> context_;
+//private:
+	//std::shared_ptr<cl_context> context_;
 };
 
 // Pointer to an OpenCL context
-using ContextPointer = cl_context*;
+using ContextPointer = tart::device_ptr;
 // =================================================================================================
 
 // C++11 version of 'cl_program'.
@@ -579,58 +572,39 @@ public:
 // =================================================================================================
 // Tart does not expose queues (yet?)
 // since each device only has a single compute queue
-#if 0
 // Raw command-queue type
-using RawCommandQueue = cl_command_queue;
+using RawCommandQueue = tart::device_ptr;
 
 // no idea how to handle this, since Tart uses a single queue
-// pretty sure I will just end up scrapping it, since tart::Device handles all this already
+// pretty sure I will just end up scrapping it, since tart::Device handles all this already (actually I can't)
 // C++11 version of 'cl_command_queue'
 class Queue {
+	tart::device_ptr mDevice = nullptr;
 public:
 	// Constructor based on the regular OpenCL data-type: memory management is handled elsewhere
-	explicit Queue(const cl_command_queue queue) : queue_(new cl_command_queue) { *queue_ = queue; }
+	explicit Queue(const tart::device_ptr queue) { mDevice = queue; }
 
 	// Regular constructor with memory management
 	explicit Queue(const Context& context, const Device& device)
-			: queue_(new cl_command_queue, [](cl_command_queue* s) {
-					if (*s) {
-						CheckErrorDtor(clReleaseCommandQueue(*s));
-					}
-					delete s;
-				}) {
-		auto status = CL_SUCCESS;
-		*queue_ = clCreateCommandQueue(context(), device(), CL_QUEUE_PROFILING_ENABLE, &status);
-		CLCudaAPIError::Check(status, "clCreateCommandQueue");
+	{
+		mDevice = context.ptr();
 	}
 
 	// Synchronizes the queue
 	void Finish(Event&) const { Finish(); }
-	void Finish() const { CheckError(clFinish(*queue_)); }
+	void Finish() const { mDevice->sync(); }
 
 	// Retrieves the corresponding context or device
 	Context GetContext() const {
-		auto bytes = size_t{0};
-		CheckError(clGetCommandQueueInfo(*queue_, CL_QUEUE_CONTEXT, 0, nullptr, &bytes));
-		cl_context result;
-		CheckError(clGetCommandQueueInfo(*queue_, CL_QUEUE_CONTEXT, bytes, &result, nullptr));
-		return Context(result);
+		return Context(mDevice);
 	}
 	Device GetDevice() const {
-		auto bytes = size_t{0};
-		CheckError(clGetCommandQueueInfo(*queue_, CL_QUEUE_DEVICE, 0, nullptr, &bytes));
-		cl_device_id result;
-		CheckError(clGetCommandQueueInfo(*queue_, CL_QUEUE_DEVICE, bytes, &result, nullptr));
-		return Device(result);
+		return Device(mDevice);
 	}
 
 	// Accessor to the private data-member
-	const RawCommandQueue& operator()() const { return *queue_; }
-
-private:
-	std::shared_ptr<cl_command_queue> queue_;
+	const RawCommandQueue& operator()() const { return mDevice; }
 };
-#endif
 // =================================================================================================
 
 // C++11 version of host memory
@@ -658,11 +632,10 @@ private:
 
 // =================================================================================================
 
-#if 1
 // Enumeration of buffer access types
 enum class BufferAccess { kReadOnly, kWriteOnly, kReadWrite, kNotOwned };
 
-// Tart has this all built-in.
+// Tart has this all built-in (but we still need to go through this silliness
 // C++11 version of 'cl_mem'
 template <typename T>
 class Buffer {
@@ -670,30 +643,15 @@ class Buffer {
 public:
 
 	// Constructor based on the regular OpenCL data-type: memory management is handled elsewhere
-	explicit Buffer(const cl_mem buffer) : buffer_(new cl_mem), access_(BufferAccess::kNotOwned) { *buffer_ = buffer; }
+	explicit Buffer(const tart::buffer_ptr buffer) : access_(BufferAccess::kNotOwned) { buffer_ = buffer; }
 
 	// Regular constructor with memory management. If this class does not own the buffer object, then
 	// the memory will not be freed automatically afterwards. If the size is set to 0, this will
 	// become a stub containing a nullptr
-	explicit Buffer(const Context& context, const BufferAccess access, const size_t size)
-			: buffer_(new cl_mem,
-								[access, size](cl_mem* m) {
-									if (access != BufferAccess::kNotOwned && size > 0) {
-										CheckError(clReleaseMemObject(*m));
-									}
-									delete m;
-								}),
-				access_(access) {
-		auto flags = cl_mem_flags{CL_MEM_READ_WRITE};
-		if (access_ == BufferAccess::kReadOnly) {
-			flags = CL_MEM_READ_ONLY;
-		}
-		if (access_ == BufferAccess::kWriteOnly) {
-			flags = CL_MEM_WRITE_ONLY;
-		}
-		auto status = CL_SUCCESS;
-		*buffer_ = (size > 0) ? clCreateBuffer(context(), flags, size * sizeof(T), nullptr, &status) : nullptr;
-		CLCudaAPIError::Check(status, "clCreateBuffer");
+	explicit Buffer(const Context& context, const BufferAccess access, const size_t size) :
+				access_(access)
+	{
+		buffer_ = context.pointer()->allocateBuffer(size);
 	}
 
 	// As above, but now with read/write access as a default
@@ -702,22 +660,33 @@ public:
 	// Constructs a new buffer based on an existing host-container
 	template <typename Iterator>
 	explicit Buffer(const Context& context, const Queue& queue, Iterator start, Iterator end)
-			: Buffer(context, BufferAccess::kReadWrite, static_cast<size_t>(end - start)) {
+			: Buffer(context, BufferAccess::kReadWrite, static_cast<size_t>(end - start))
+	{
 		auto size = static_cast<size_t>(end - start);
 		auto pointer = &*start;
-		CheckError(clEnqueueWriteBuffer(queue(), *buffer_, CL_FALSE, 0, size * sizeof(T), pointer, 0, nullptr, nullptr));
-		queue.Finish();
+		// may be unsafe, but literally the only option here :c
+		context.pointer()->allocateBuffer(pointer, size);
 	}
 
 	// Copies from device to host: reading the device buffer a-synchronously
-	void ReadAsync(const Queue& queue, const size_t size, T* host, const size_t offset = 0) const {
-		if (access_ == BufferAccess::kWriteOnly) {
+	// (this is currently impossible in tart, so it will just sync for now)
+	void ReadAsync(const Queue& queue, const size_t size, T* host, const size_t offset = 0) const
+	{
+		if (access_ == BufferAccess::kWriteOnly)
+		{
 			throw LogicError("Buffer: reading from a write-only buffer");
 		}
+		
+		// we don't have offsets in tart yet, because I am dumb.
+		if (offset > 0) throw LogicError("not implemented");
+		buffer_->copyOut(host, size);
+#if 0
 		CheckError(clEnqueueReadBuffer(queue(), *buffer_, CL_FALSE, offset * sizeof(T), size * sizeof(T), host, 0, nullptr,
 																	 nullptr));
+#endif
 	}
-	void ReadAsync(const Queue& queue, const size_t size, std::vector<T>& host, const size_t offset = 0) const {
+	void ReadAsync(const Queue& queue, const size_t size, std::vector<T>& host, const size_t offset = 0) const
+	{
 		if (host.size() < size) {
 			throw LogicError("Buffer: target host buffer is too small");
 		}
@@ -750,8 +719,10 @@ public:
 		if (GetSize() < (offset + size) * sizeof(T)) {
 			throw LogicError("Buffer: target device buffer is too small");
 		}
-		CheckError(clEnqueueWriteBuffer(queue(), *buffer_, CL_FALSE, offset * sizeof(T), size * sizeof(T), host, 0, nullptr,
-																		nullptr));
+		if (offset > 0) throw LogicError("offsets greater than zero are not implemented :c");
+		buffer_->copyIn(host, size);
+		//CheckError(clEnqueueWriteBuffer(queue(), *buffer_, CL_FALSE, offset * sizeof(T), size * sizeof(T), host, 0, nullptr,
+		//																nullptr));
 	}
 	void WriteAsync(const Queue& queue, const size_t size, const std::vector<T>& host, const size_t offset = 0) {
 		WriteAsync(queue, size, host.data(), offset);
@@ -775,7 +746,9 @@ public:
 	// Copies the contents of this buffer into another device buffer
 	void CopyToAsync(const Queue& queue, const size_t size, const Buffer<T>& destination,
 									 EventPointer event = nullptr) const {
-		CheckError(clEnqueueCopyBuffer(queue(), *buffer_, destination(), 0, 0, size * sizeof(T), 0, nullptr, event));
+		if (event != nullptr) throw LogicError("copying with events is not implemented yet");
+		buffer_->copyTo(destination, 0, 0, size);
+		//CheckError(clEnqueueCopyBuffer(queue(), *buffer_, destination(), 0, 0, size * sizeof(T), 0, nullptr, event));
 	}
 	void CopyTo(const Queue& queue, const size_t size, const Buffer<T>& destination) const {
 		CopyToAsync(queue, size, destination);
@@ -784,26 +757,24 @@ public:
 
 	// Retrieves the actual allocated size in bytes
 	size_t GetSize() const {
-		const auto bytes = sizeof(size_t);
-		auto result = size_t{0};
-		CheckError(clGetMemObjectInfo(*buffer_, CL_MEM_SIZE, bytes, &result, nullptr));
-		return result;
+		return buffer_->getSize();
 	}
 
 	// Accessor to the private data-member
-	const cl_mem& operator()() const { return *buffer_; }
+	tart::buffer_ptr operator()() const { return buffer_; }
 
 
 private:
 
-	std::shared_ptr<cl_mem> buffer_;
+	tart::buffer_ptr buffer_;
 	BufferAccess access_;
 };
-#endif
+
 // =================================================================================================
 
 // ahh, right. I remember how it works now
 // C++11 version of 'cl_kernel'
+typedef std::pair<std::string, >
 class Kernel {
 	std::string mEntryPoint;
 	tart::cl_program_ptr mCLProgram;
@@ -811,12 +782,9 @@ class Kernel {
 	std::map<size_t, std::vector<uint8_t> mNonBufferArgs;
 	std::map<size_t, tart::buffer_ptr> mBufferArgs;
 public:
-#if 0
-	// disabling until I know how to implement it.
 	// difference between Vulkan and OpenCL as far as local sizes go will influence this outcome greatly...
-	// Constructor based on the regular OpenCL data-type: memory management is handled elsewhere
 	explicit Kernel(const cl_kernel kernel) : kernel_(new cl_kernel) { *kernel_ = kernel; }
-#endif
+	
 	// Regular constructor with memory management
 	explicit Kernel(const std::shared_ptr<Program> program, const std::string& name)
 	{
@@ -861,9 +829,9 @@ public:
 		// It will likely have something to with SPIR-V reflection...
 		return 0;
 #else
-		const auto bytes = sizeof(cl_ulong);
+		const auto bytes = sizeof(uint64_t);
 		auto query = cl_kernel_work_group_info{CL_KERNEL_LOCAL_MEM_SIZE};
-		auto result = cl_ulong{0};
+		auto result = uint64_t{0};
 		CheckError(clGetKernelWorkGroupInfo(*kernel_, device(), query, bytes, &result, nullptr));
 		return static_cast<unsigned long>(result);
 #endif

@@ -156,7 +156,7 @@ public:
 	const std::shared_ptr<sequence_ptr_list> pointer() const { return mSequences; }
 };
 
-
+#if 1
 // Pointer to...this dumb crap
 using EventPointer = std::shared_ptr<sequence_ptr_list>;
 
@@ -172,10 +172,10 @@ class Platform {
 	tart::Instance mDummyInstance;
 public:
 	// Initializes the platform
-	explicit Platform(const size_t platform_id) {
+	explicit Platform(const size_t platform_id)
+	{
 		// there can only be one, this is Vulkan c:
-		if (platform_id != 0) {
-		throw LogicError("Vulkan back-end requires a platform ID of 0");
+		if (platform_id != 0) throw LogicError("Vulkan back-end requires a platform ID of 0");
 	}
 
 	// Methods to retrieve platform information
@@ -186,43 +186,36 @@ public:
 		return GetInfoString(CL_PLATFORM_NAME);
 #endif
 	}
-	std::string Vendor() const { return GetInfoString(CL_PLATFORM_VENDOR); }
-	std::string Version() const { return GetInfoString(CL_PLATFORM_VERSION); }
+	std::string Vendor() const { return "not implemented"; }
+	std::string Version() const { return "not implemented"; }
 
 	// Returns the number of devices on this platform
-	size_t NumDevices() const {
-		return static_cast<size_t>mDummyInstance.getNumDevices();
+	size_t NumDevices()
+	{
+		return static_cast<size_t>(mDummyInstance.getNumDevices());
 	}
 
 	// Accessor to the private data-member
 	const RawPlatformID& operator()() const { return platform_; }
 
 private:
-	cl_platform_id platform_;
+	size_t platform_ = 0;
 
 	// Private helper functions
 	std::string GetInfoString(const cl_device_info info) const {
-#if 1
 		// no idea what this is supposed to do; we find out L A T E R
 		return "not implemented";
-#else
-		auto bytes = size_t{0};
-		CheckError(clGetPlatformInfo(platform_, info, 0, nullptr, &bytes));
-		auto result = std::string{};
-		result.resize(bytes);
-		CheckError(clGetPlatformInfo(platform_, info, bytes, &result[0], nullptr));
-		result.resize(strlen(result.c_str()));	// Removes any trailing '\0'-characters
-		return result;
-#endif
 	}
 };
+#endif
 
+#if 1
 // not applicable for vulkan
 // Retrieves a vector with all platforms
 inline std::vector<Platform> GetAllPlatforms() {
 #if 1
 	// TODO: populate this based on single vulkan devices.
-	std::vector<Platform> platforms({{0}});
+	std::vector<Platform> platforms({Platform(0)});
 	return platforms;
 #else
 	auto num_platforms = cl_uint{0};
@@ -234,7 +227,9 @@ inline std::vector<Platform> GetAllPlatforms() {
 	return all_platforms;
 #endif
 }
+#endif
 
+#if 1
 // =================================================================================================
 // Raw device ID type
 using RawDeviceID = tart::device_ptr;
@@ -250,7 +245,7 @@ public:
 
 	// Initialize the device. Note that this constructor can throw exceptions!
 	explicit Device(const Platform& platform, const size_t device_id) {
-		raise RuntimeError("not implemented! (unsure of how to handle multiple tart::Instance...");
+		throw RuntimeError("not implemented! (unsure of how to handle multiple tart::Instance...");
 	}
 
 	// Methods to retrieve device information
@@ -278,7 +273,7 @@ public:
 	}
 
 	// Not sure if Tart has a public method for querying extensions; might be a good idea to implement this.
-	std::string Capabilities() const { return GetInfoString(CL_DEVICE_EXTENSIONS); }
+	std::string Capabilities() const { return "not implemented"; }
 	bool HasExtension(const std::string& extension) const {
 		return mDevice->supportsExtension(extension);
 	}
@@ -293,10 +288,10 @@ public:
 	
 	// Vulkan has a way to do this, but I have been too lazy to implement it completely in Tart aside from error checking.
 	// Will have to do this eventually
-	unsigned long MemorySize() const { return static_cast<unsigned long>(GetInfo<uint64_t>(CL_DEVICE_GLOBAL_MEM_SIZE)); }
+	unsigned long MemorySize() const { return 0; }
 	// this can be retrieved from Tart, but may not be public
 	unsigned long MaxAllocSize() const {
-		return static_cast<unsigned long>(GetInfo<uint64_t>(CL_DEVICE_MAX_MEM_ALLOC_SIZE));
+		return 0;
 	}
 	
 	// neither of these can be queried in Vulkan either
@@ -455,7 +450,7 @@ public:
 	const RawDeviceID operator()() const { return mDevice; }
 	
 private:
-
+#if 0
 	// Private helper functions
 	template <typename T>
 	T GetInfo(const cl_device_info info) const {
@@ -482,12 +477,14 @@ private:
 		result.resize(strlen(result.c_str()));	// Removes any trailing '\0'-characters
 		return result;
 	}
+#endif
 };
+#endif
 // =================================================================================================
 
 // ok, so the `Device` is more like `vk::PhysicalDevice` and the `Context` is more akin to `vk::Device`
 // that makes sense.
-
+#if 1
 // Raw context type
 using RawContext = tart::device_ptr;
 
@@ -512,7 +509,8 @@ public:
 //private:
 	//std::shared_ptr<cl_context> context_;
 };
-
+#endif
+#if 1
 // Pointer to an OpenCL context
 using ContextPointer = tart::device_ptr;
 // =================================================================================================
@@ -544,7 +542,7 @@ public:
 		// compile the shader module
 		mShaderModule = mDevice->compileCL(mSource);
 		// load it into the actual CL program handler thingy
-		mCLProgram = mDevice->createCLProgram();
+		mCLProgram = mDevice->createCLProgram(mShaderModule);
 #if 0
 		// this is where the options happen.
 		auto options_string = std::accumulate(options.begin(), options.end(), std::string{" "});
@@ -568,13 +566,14 @@ public:
 	// Accessor to the private data-member
 	tart::cl_program_ptr operator()() const { return mCLProgram; }
 };
+#endif
 
 // =================================================================================================
 // Tart does not expose queues (yet?)
 // since each device only has a single compute queue
 // Raw command-queue type
 using RawCommandQueue = tart::device_ptr;
-
+#if 1
 // no idea how to handle this, since Tart uses a single queue
 // pretty sure I will just end up scrapping it, since tart::Device handles all this already (actually I can't)
 // C++11 version of 'cl_command_queue'
@@ -587,7 +586,7 @@ public:
 	// Regular constructor with memory management
 	explicit Queue(const Context& context, const Device& device)
 	{
-		mDevice = context.ptr();
+		mDevice = context.pointer();
 	}
 
 	// Synchronizes the queue
@@ -605,8 +604,9 @@ public:
 	// Accessor to the private data-member
 	const RawCommandQueue& operator()() const { return mDevice; }
 };
+#endif
 // =================================================================================================
-
+#if 1
 // C++11 version of host memory
 template <typename T>
 class BufferHost {
@@ -630,8 +630,9 @@ private:
 	std::shared_ptr<std::vector<T>> buffer_;
 };
 
+#endif
 // =================================================================================================
-
+#if 1
 // Enumeration of buffer access types
 enum class BufferAccess { kReadOnly, kWriteOnly, kReadWrite, kNotOwned };
 
@@ -680,10 +681,6 @@ public:
 		// we don't have offsets in tart yet, because I am dumb.
 		if (offset > 0) throw LogicError("not implemented");
 		buffer_->copyOut(host, size);
-#if 0
-		CheckError(clEnqueueReadBuffer(queue(), *buffer_, CL_FALSE, offset * sizeof(T), size * sizeof(T), host, 0, nullptr,
-																	 nullptr));
-#endif
 	}
 	void ReadAsync(const Queue& queue, const size_t size, std::vector<T>& host, const size_t offset = 0) const
 	{
@@ -769,21 +766,25 @@ private:
 	tart::buffer_ptr buffer_;
 	BufferAccess access_;
 };
+#endif
 
 // =================================================================================================
 
+#if 1
+typedef std::pair<std::string, tart::cl_program_ptr> kernel_t;
+
 // ahh, right. I remember how it works now
-// C++11 version of 'cl_kernel'
-typedef std::pair<std::string, >
+// C++11 version of 'kernel_t'
 class Kernel {
 	std::string mEntryPoint;
 	tart::cl_program_ptr mCLProgram;
 	// arguments
-	std::map<size_t, std::vector<uint8_t> mNonBufferArgs;
+	kernel_t kernel_;
+	std::map<size_t, std::vector<uint8_t>> mNonBufferArgs;
 	std::map<size_t, tart::buffer_ptr> mBufferArgs;
 public:
 	// difference between Vulkan and OpenCL as far as local sizes go will influence this outcome greatly...
-	explicit Kernel(const cl_kernel kernel) : kernel_(new cl_kernel) { *kernel_ = kernel; }
+	explicit Kernel(const kernel_t kernel) { kernel_ = kernel; }
 	
 	// Regular constructor with memory management
 	explicit Kernel(const std::shared_ptr<Program> program, const std::string& name)
@@ -830,7 +831,7 @@ public:
 		return 0;
 #else
 		const auto bytes = sizeof(uint64_t);
-		auto query = cl_kernel_work_group_info{CL_KERNEL_LOCAL_MEM_SIZE};
+		auto query = kernel_t_work_group_info{CL_KERNEL_LOCAL_MEM_SIZE};
 		auto result = uint64_t{0};
 		CheckError(clGetKernelWorkGroupInfo(*kernel_, device(), query, bytes, &result, nullptr));
 		return static_cast<unsigned long>(result);
@@ -865,14 +866,32 @@ public:
 	// As above, but with an event waiting list
 	void Launch(const Queue& queue, const std::vector<size_t>& global, const std::vector<size_t>& local,
 							EventPointer event, const std::vector<Event>& waitForEvents) {
-		// Builds a plain version of the events waiting list
-		auto waitForEventsPlain = std::vector<cl_event>();
-		for (auto& waitEvent : waitForEvents) {
-			if (waitEvent()) {
-				waitForEventsPlain.push_back(waitEvent());
+		// there is no such thing as events in tart yet, so just do a global sync for now
+		queue.Finish();
+
+		if (global.size() != local.size() ) throw LogicError("local and global size must be same length");
+		std::vector<uint32_t> adjusted_global(global.size());
+		for (size_t i = 0; i < global.size(); i += 1 )
+		{
+			if (global[i] % local[i] > 0) throw LogicError("global size must be divisible by local size");
+			adjusted_global[i] = global[i] / local[i];
+		}
+		
+		// parse push constants
+		// will optimize later, now it just needs to work
+		std::vector<uint8_t> push;
+		for (auto& kv : mNonBufferArgs)
+		{
+			for (uint8_t v : kv.second)
+			{
+				push.push_back(v);
 			}
 		}
-
+		
+		tart::pipeline_ptr pipeline = mCLProgram->getPipeline(mEntryPoint, local, push);
+		tart::command_sequence_ptr sequence = mDevice->createSequence();
+		sequence->recordPipeline(pipeline, adjusted_global, bufs, push);
+		
 		// Launches the kernel while waiting for other events
 		CheckError(clEnqueueNDRangeKernel(queue(), *kernel_, static_cast<cl_uint>(global.size()), nullptr, global.data(),
 																			!local.empty() ? local.data() : nullptr,
@@ -881,7 +900,7 @@ public:
 	}
 
 	// Accessor to the private data-member
-	const cl_kernel& operator()() const { return *kernel_; }
+	const kernel_t& operator()() const { return *kernel_; }
 
 private:
 	// Internal implementation for the recursive SetArguments function.
@@ -895,6 +914,7 @@ private:
 		SetArgumentsRecursive(index + 1, args...);
 	}
 };
+#endif
 
 // =================================================================================================
 }	// namespace clblast

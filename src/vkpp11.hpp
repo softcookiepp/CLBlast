@@ -363,87 +363,39 @@ public:
 	}
 	bool IsARM() const
 	{
-#if 1
 		return false;
-#else
-		return Vendor() == "ARM";
-#endif
 	}
 	bool IsQualcomm() const
 	{
-#if 1
 		return false;
-#else
-		return Vendor() == "QUALCOMM";
-#endif
 	}
 
 	// Platform specific extensions
 	std::string AMDBoardName() const
 	{
-#if 1
 		return "not implemented";
-#else
-		// check for 'cl_amd_device_attribute_query' first
-#ifndef CL_DEVICE_BOARD_NAME_AMD
-#define CL_DEVICE_BOARD_NAME_AMD 0x4038
-#endif
-		return GetInfoString(CL_DEVICE_BOARD_NAME_AMD);
 	}
 	std::string NVIDIAComputeCapability() const {	// check for 'cl_nv_device_attribute_query' first
-#ifndef CL_DEVICE_COMPUTE_CAPABILITY_MAJOR_NV
-#define CL_DEVICE_COMPUTE_CAPABILITY_MAJOR_NV 0x4000
-#endif
-#ifndef CL_DEVICE_COMPUTE_CAPABILITY_MINOR_NV
-#define CL_DEVICE_COMPUTE_CAPABILITY_MINOR_NV 0x4001
-#endif
-		return std::string{"SM"} + std::to_string(GetInfo<cl_uint>(CL_DEVICE_COMPUTE_CAPABILITY_MAJOR_NV)) +
-					 std::string{"."} + std::to_string(GetInfo<cl_uint>(CL_DEVICE_COMPUTE_CAPABILITY_MINOR_NV));
-#endif
+		// dummy
+		return "SM3.7";
 	}
 
 	// Returns if the Nvidia chip is a Volta or later archicture (sm_70 or higher)
 	bool IsPostNVIDIAVolta() const
 	{
-#if 1
 		return false;
-#else
-		if (HasExtension("cl_nv_device_attribute_query")) {
-			return GetInfo<cl_uint>(CL_DEVICE_COMPUTE_CAPABILITY_MAJOR_NV) >= 7;
-		}
-		return false;
-#endif
 	}
 
 	// Returns the Qualcomm Adreno GPU version (i.e. a650, a730, a740, etc.)
 	std::string AdrenoVersion() const
 	{
-#if 1
 		return "not implemented";
-#else
-		if (IsQualcomm()) {
-			return GetInfoString(CL_DEVICE_OPENCL_C_VERSION);
-		} else {
-			return std::string{""};
-		}
-#endif
 	}
 
 	// Retrieves the above extra information (if present)
 	std::string GetExtraInfo() const
 	{
-#if 1
 		return "not implemented";
-#else
-		if (HasExtension("cl_amd_device_attribute_query")) {
-			return AMDBoardName();
-		}
-		if (HasExtension("cl_nv_device_attribute_query")) {
-			return NVIDIAComputeCapability();
-		} else {
-			return std::string{""};
-		}
-#endif
 	}
 
 	// Accessor to the private data-member
@@ -537,7 +489,7 @@ public:
 	}
 
 	// Compiles the device program and checks whether or not there are any warnings/errors
-	void Build(std::vector<std::string>& options) {
+	void Build(const clblast::Device& device, std::vector<std::string>& options) {
 		// TODO: parse options (look for dflags, etc.)
 		// compile the shader module
 		mShaderModule = mDevice->compileCL(mSource);
@@ -553,7 +505,7 @@ public:
 	bool StatusIsCompilationWarningOrError(const int32_t status) const { return (status == -11); }
 
 	// Retrieves the warning/error message from the compiler (if any)
-	std::string GetBuildInfo() const {
+	std::string GetBuildInfo(const clblast::Device& device) const {
 		return "not implemented yet :c";
 	}
 
@@ -778,6 +730,7 @@ typedef std::pair<std::string, tart::cl_program_ptr> kernel_t;
 class Kernel {
 	std::string mEntryPoint;
 	tart::cl_program_ptr mCLProgram;
+	tart::device_ptr mDevice;
 	// arguments
 	kernel_t kernel_;
 	std::map<size_t, std::vector<uint8_t>> mNonBufferArgs;
@@ -796,6 +749,7 @@ public:
 		// tart::CLProgram takes care of this, but it must be adapted to this library
 		mEntryPoint = name;
 		mCLProgram = program->operator()();
+		mDevice = mCLProgram->getDevice();
 	}
 
 	// Sets a kernel argument at the indicated position
@@ -840,16 +794,7 @@ public:
 
 	// Retrieves the name of the kernel
 	std::string GetFunctionName() const {
-#if 1
 		return mEntryPoint;
-#else
-		auto bytes = size_t{0};
-		CheckError(clGetKernelInfo(*kernel_, CL_KERNEL_FUNCTION_NAME, 0, nullptr, &bytes));
-		auto result = std::string{};
-		result.resize(bytes);
-		CheckError(clGetKernelInfo(*kernel_, CL_KERNEL_FUNCTION_NAME, bytes, &result[0], nullptr));
-		return std::string{result.c_str()};	// Removes any trailing '\0'-characters
-#endif
 	}
 
 	// Launches a kernel onto the specified queue
@@ -866,9 +811,12 @@ public:
 	// As above, but with an event waiting list
 	void Launch(const Queue& queue, const std::vector<size_t>& global, const std::vector<size_t>& local,
 							EventPointer event, const std::vector<Event>& waitForEvents) {
-		// there is no such thing as events in tart yet, so just do a global sync for now
+#if 1
+		// will get the sequences to wait for list from the events later; for now just do this
 		queue.Finish();
-
+#else
+		// TODO: implement event waiting
+#endif
 		if (global.size() != local.size() ) throw LogicError("local and global size must be same length");
 		std::vector<uint32_t> adjusted_global(global.size());
 		for (size_t i = 0; i < global.size(); i += 1 )
@@ -888,19 +836,30 @@ public:
 			}
 		}
 		
-		tart::pipeline_ptr pipeline = mCLProgram->getPipeline(mEntryPoint, local, push);
+		// parse buffer constants
+		std::vector<tart::buffer_ptr> bufs;
+		for (auto& kv : mBufferArgs)
+		{
+			bufs.push_back(kv.second);
+		}
+		
+		// convert local to uint32_t
+		std::vector<uint32_t> local32(local.size());
+		for (size_t i = 0; i < local.size(); i += 1)
+		{
+			local32[i] = local[i];
+		}
+		
+		tart::pipeline_ptr pipeline = mCLProgram->getPipeline(mEntryPoint, local32, push);
 		tart::command_sequence_ptr sequence = mDevice->createSequence();
 		sequence->recordPipeline(pipeline, adjusted_global, bufs, push);
 		
-		// Launches the kernel while waiting for other events
-		CheckError(clEnqueueNDRangeKernel(queue(), *kernel_, static_cast<cl_uint>(global.size()), nullptr, global.data(),
-																			!local.empty() ? local.data() : nullptr,
-																			static_cast<cl_uint>(waitForEventsPlain.size()),
-																			!waitForEventsPlain.empty() ? waitForEventsPlain.data() : nullptr, event));
+		// send it!
+		mDevice->submitSequence(sequence);
 	}
 
 	// Accessor to the private data-member
-	const kernel_t& operator()() const { return *kernel_; }
+	const kernel_t& operator()() const { return kernel_; }
 
 private:
 	// Internal implementation for the recursive SetArguments function.

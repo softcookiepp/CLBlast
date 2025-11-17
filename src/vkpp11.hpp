@@ -97,37 +97,60 @@ using CLCudaAPIBuildError = CLCudaAPIError;
 
 // =================================================================================================
 
-typedef std::vector<tart::command_sequence_ptr> sequence_ptr_list;
-
 // not used in tart (yet)
 // however, for API compatibility, it needs to be preserved
+// this wrapper class should help
+class SequenceWrapper
+{
+	tart::command_sequence_ptr mSequence;
+public:
+	SequenceWrapper() {}
+	SequenceWrapper(tart::command_sequence_ptr sequence)
+	{
+		mSequence = sequence;
+	}
+	
+	void setSequence(tart::command_sequence_ptr sequence)
+	{
+		if (mSequence != nullptr)
+			throw LogicError("Sequence already set!");
+		mSequence = sequence;
+	}
+	tart::command_sequence_ptr getSequence()
+	{
+		if (mSequence == nullptr)
+			throw LogicError("Sequence not set!");
+		return mSequence;
+	}
+};
+
 // C++11 version of 'cl_event'
 class Event {
 	// An event, in regards to Tart compatibility (for now)
 	// will just be a list of sequences that the device will away the completion of.
 	// which means Tart must be modified to be able to get the parent device from a sequence?
 	// ugh
-	std::shared_ptr<sequence_ptr_list> mSequences = nullptr;
+	std::shared_ptr<SequenceWrapper> mEvent = nullptr;
 public:
 
 	// Constructor based on the regular OpenCL data-type: memory management is handled elsewhere
-	explicit Event(const sequence_ptr_list& event) { mSequences = std::make_shared<sequence_ptr_list>(event); }
+	explicit Event(const std::shared_ptr<SequenceWrapper> event) { mEvent = event; }
 
 	// Regular constructor with memory management
 	explicit Event()
 	{
-		mSequences = std::make_shared<std::vector<tart::command_sequence_ptr> >();
+		// ok, we are actually going to want to change this
+		// the problem is that 
+		mEvent = std::make_shared<SequenceWrapper>();
 	}
 
 	// Waits for completion of this event
 	void WaitForCompletion() const
 	{
-		if (mSequences->size() > 0)
-		{
-			// devices should (hopefully) all be the same across sequences
-			tart::device_ptr device = (*mSequences)[0]->getDevice();
-			device->sync(*mSequences);
-		}
+		if (mEvent == nullptr)
+			throw LogicError("Sequence cannot be null!");
+		auto sequence = mEvent->getSequence();
+		sequence->getDevice()->sync({sequence});
 	}
 
 	// Retrieves the elapsed time of the last recorded event.
@@ -150,15 +173,15 @@ public:
 	}
 
 	// Accessor to the private data-member
-	sequence_ptr_list& operator()() { return *mSequences; }
-	const sequence_ptr_list& operator()() const { return *mSequences; }
-	std::shared_ptr<sequence_ptr_list> pointer() { return mSequences; }
-	const std::shared_ptr<sequence_ptr_list> pointer() const { return mSequences; }
+	std::shared_ptr<SequenceWrapper> operator()() { return mEvent; }
+	const std::shared_ptr<SequenceWrapper> operator()() const { return mEvent; }
+	std::shared_ptr<SequenceWrapper>  pointer() { return mEvent; }
+	const std::shared_ptr<SequenceWrapper> pointer() const { return mEvent; }
 };
 
 #if 1
 // Pointer to...this dumb crap
-using EventPointer = std::shared_ptr<sequence_ptr_list>;
+using EventPointer = std::shared_ptr<SequenceWrapper>;
 
 // =================================================================================================
 
@@ -476,18 +499,27 @@ class Program {
 	tart::cl_program_ptr mCLProgram = nullptr;
 public:
 	// Source-based constructor with memory management
-	explicit Program(tart::device_ptr device, const std::string& source) {
+	explicit Program(const clblast::Context& context, const std::string& source) {
 		mSource = source;
-		mDevice = device;
+		mDevice = context.pointer();
 	}
 
 	// Binary-based constructor with memory management
-	explicit Program(tart::device_ptr device, std::vector<uint32_t>& binary) {
-		mDevice = device;
-		mShaderModule = device->loadShader(binary);
-		mCLProgram = device->createCLProgram(mShaderModule);
+	explicit Program(const clblast::Device& device, const clblast::Context& context, std::string& binary) {
+		mDevice = context.pointer();
+		
+		std::cout << "BINARY STRING:\n\n" << binary << "\n\n\n";
+		throw LogicError("Construction from string not implement yet; may need to reinterpret as spv or something");
+		
+		//mShaderModule = mDevice->loadShader(binary);
+		//mCLProgram = mDevice->createCLProgram(mShaderModule);
 	}
 
+	// Compiles the device program and checks whether or not there are any warnings/errors
+	void Build(const clblast::Device& device, const clblast::Context& context, std::vector<std::string>& options) {
+		Build(device, options);
+	}
+	
 	// Compiles the device program and checks whether or not there are any warnings/errors
 	void Build(const clblast::Device& device, std::vector<std::string>& options) {
 		// TODO: parse options (look for dflags, etc.)
@@ -495,10 +527,6 @@ public:
 		mShaderModule = mDevice->compileCL(mSource);
 		// load it into the actual CL program handler thingy
 		mCLProgram = mDevice->createCLProgram(mShaderModule);
-#if 0
-		// this is where the options happen.
-		auto options_string = std::accumulate(options.begin(), options.end(), std::string{" "});
-#endif
 	}
 
 	// Confirms whether a certain status code is an actual compilation error or warning
@@ -669,7 +697,9 @@ public:
 			throw LogicError("Buffer: target device buffer is too small");
 		}
 		if (offset > 0) throw LogicError("offsets greater than zero are not implemented :c");
-		buffer_->copyIn(host, size);
+		const void* hostbufVoid = host;
+		void* hostptr = const_cast<void*>(hostbufVoid);
+		buffer_->copyIn(hostptr, size);
 		//CheckError(clEnqueueWriteBuffer(queue(), *buffer_, CL_FALSE, offset * sizeof(T), size * sizeof(T), host, 0, nullptr,
 		//																nullptr));
 	}
@@ -696,7 +726,7 @@ public:
 	void CopyToAsync(const Queue& queue, const size_t size, const Buffer<T>& destination,
 									 EventPointer event = nullptr) const {
 		if (event != nullptr) throw LogicError("copying with events is not implemented yet");
-		buffer_->copyTo(destination, 0, 0, size);
+		buffer_->copyTo(destination(), 0, 0, size);
 		//CheckError(clEnqueueCopyBuffer(queue(), *buffer_, destination(), 0, 0, size * sizeof(T), 0, nullptr, event));
 	}
 	void CopyTo(const Queue& queue, const size_t size, const Buffer<T>& destination) const {
@@ -738,6 +768,7 @@ class Kernel {
 public:
 	// difference between Vulkan and OpenCL as far as local sizes go will influence this outcome greatly...
 	explicit Kernel(const kernel_t kernel) { kernel_ = kernel; }
+	explicit Kernel(tart::cl_program_ptr kernel) { kernel_ = {"none", kernel}; }
 	
 	// Regular constructor with memory management
 	explicit Kernel(const std::shared_ptr<Program> program, const std::string& name)
@@ -761,7 +792,7 @@ public:
 		// i got some tricks up me sleeve!
 		// we will just cast it to bytes. easy.
 		std::vector<uint8_t> value_cast(sizeof(T));
-		std::memcpy(value_cast.data, &value, sizeof(T));
+		std::memcpy(value_cast.data(), &value, sizeof(T));
 		mNonBufferArgs[index] = value_cast;
 	}
 	template <typename T>
@@ -801,7 +832,8 @@ public:
 	void Launch(const Queue& queue, const std::vector<size_t>& global, const std::vector<size_t>& local,
 							EventPointer event) {
 #if 1
-		
+		const std::vector<Event> dummyWaitlist;
+		Launch(queue, global, local, event, dummyWaitlist);
 #else
 		CheckError(clEnqueueNDRangeKernel(queue(), *kernel_, static_cast<cl_uint>(global.size()), nullptr, global.data(),
 																			local.data(), 0, nullptr, event));
@@ -810,12 +842,22 @@ public:
 
 	// As above, but with an event waiting list
 	void Launch(const Queue& queue, const std::vector<size_t>& global, const std::vector<size_t>& local,
-							EventPointer event, const std::vector<Event>& waitForEvents) {
+							EventPointer event, const std::vector<Event>& waitForEvents)
+	{
+		std::vector<tart::command_sequence_ptr> waitlist(waitForEvents.size());
 #if 1
-		// will get the sequences to wait for list from the events later; for now just do this
-		queue.Finish();
+		// get the waitlist
+		if (waitForEvents.size() > 0)
+		{
+			for (size_t i = 0; i < waitlist.size(); i += 1)
+			{
+				waitlist[i] = waitForEvents[i].pointer()->getSequence();
+			}
+			
+		}
 #else
 		// TODO: implement event waiting
+		queue.Finish();
 #endif
 		if (global.size() != local.size() ) throw LogicError("local and global size must be same length");
 		std::vector<uint32_t> adjusted_global(global.size());
@@ -855,7 +897,13 @@ public:
 		sequence->recordPipeline(pipeline, adjusted_global, bufs, push);
 		
 		// send it!
-		mDevice->submitSequence(sequence);
+		mDevice->submitSequence(sequence, 0, waitlist);
+		
+		// if event is valid, set the sequence
+		if (event)
+		{
+			event->setSequence(sequence);
+		}
 	}
 
 	// Accessor to the private data-member

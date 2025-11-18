@@ -9,7 +9,7 @@
 //
 // =================================================================================================
 
-//#include "clblast.h"
+#include "clblast_vk.h"
 
 #include <complex>
 #include <cstddef>

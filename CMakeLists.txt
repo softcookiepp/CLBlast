@@ -12,7 +12,7 @@
 # Technically the minimum is 2.8.11 but to be compatible with CMake 4 this is set to 3.10
 cmake_minimum_required(VERSION 3.10)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -195,8 +195,10 @@ elseif(CUDA)
 elseif(VULKAN)
   # we need Tart, the vulkan frontend thingy
   add_subdirectory(${PROJECT_SOURCE_DIR}/tart)
-  set(API_LIBRARIES tart)
-  target_compile_features(subprocess PRIVATE cxx_std_17)
+  set(API_LIBRARIES tart tart_vulkan subprocess)
+  set(API_INCLUDE_DIRS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tart/include>  
+    $<INSTALL_INTERFACE:tart/include>  # <prefix>/include/mylib
+  )
 endif()
 
 # Don't search for system libraries when cross-compiling
@@ -377,7 +379,7 @@ endif()
 # Installs the library
 include(GNUInstallDirs)
 
-install(TARGETS clblast EXPORT CLBlast
+install(TARGETS clblast tart tart_vulkan subprocess EXPORT CLBlast
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
@@ -396,9 +398,7 @@ elseif(VULKAN)
 endif()
 
 # Installs the config for find_package in dependent projects
-if(NOT VULKAN)
-  install(EXPORT CLBlast DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/CLBlast FILE CLBlastConfig.cmake)
-endif()
+install(EXPORT CLBlast DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/CLBlast FILE CLBlastConfig.cmake)
 
 # Install pkg-config file on Linux
 if(UNIX OR MINGW)

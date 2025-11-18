@@ -135,99 +135,99 @@ enum class Precision {
 template <typename T>
 StatusCode Rotg(tart::buffer_ptr sa_buffer, const size_t sa_offset, tart::buffer_ptr sb_buffer, const size_t sb_offset, tart::buffer_ptr sc_buffer,
                 const size_t sc_offset, tart::buffer_ptr ss_buffer, const size_t ss_offset, tart::device_ptr queue,
-                tart::command_sequence_ptr event = nullptr);
+                tart::event_ptr event = nullptr);
 
 // Generate modified givens plane rotation: SROTMG/DROTMG
 template <typename T>
 StatusCode Rotmg(tart::buffer_ptr sd1_buffer, const size_t sd1_offset, tart::buffer_ptr sd2_buffer, const size_t sd2_offset,
                  tart::buffer_ptr sx1_buffer, const size_t sx1_offset, const tart::buffer_ptr sy1_buffer, const size_t sy1_offset,
-                 tart::buffer_ptr sparam_buffer, const size_t sparam_offset, tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                 tart::buffer_ptr sparam_buffer, const size_t sparam_offset, tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Apply givens plane rotation: SROT/DROT
 template <typename T>
 StatusCode Rot(const size_t n, tart::buffer_ptr x_buffer, const size_t x_offset, const size_t x_inc, tart::buffer_ptr y_buffer,
                const size_t y_offset, const size_t y_inc, const T cos, const T sin, tart::device_ptr queue,
-               tart::command_sequence_ptr event = nullptr);
+               tart::event_ptr event = nullptr);
 
 // Apply modified givens plane rotation: SROTM/DROTM
 template <typename T>
 StatusCode Rotm(const size_t n, tart::buffer_ptr x_buffer, const size_t x_offset, const size_t x_inc, tart::buffer_ptr y_buffer,
                 const size_t y_offset, const size_t y_inc, tart::buffer_ptr sparam_buffer, const size_t sparam_offset,
-                tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Swap two vectors: SSWAP/DSWAP/CSWAP/ZSWAP/HSWAP
 template <typename T>
 StatusCode Swap(const size_t n, tart::buffer_ptr x_buffer, const size_t x_offset, const size_t x_inc, tart::buffer_ptr y_buffer,
-                const size_t y_offset, const size_t y_inc, tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                const size_t y_offset, const size_t y_inc, tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Vector scaling: SSCAL/DSCAL/CSCAL/ZSCAL/HSCAL
 template <typename T>
 StatusCode Scal(const size_t n, const T alpha, tart::buffer_ptr x_buffer, const size_t x_offset, const size_t x_inc,
-                tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Vector copy: SCOPY/DCOPY/CCOPY/ZCOPY/HCOPY
 template <typename T>
 StatusCode Copy(const size_t n, const tart::buffer_ptr x_buffer, const size_t x_offset, const size_t x_inc, tart::buffer_ptr y_buffer,
-                const size_t y_offset, const size_t y_inc, tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                const size_t y_offset, const size_t y_inc, tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Vector-times-constant plus vector: SAXPY/DAXPY/CAXPY/ZAXPY/HAXPY
 template <typename T>
 StatusCode Axpy(const size_t n, const T alpha, const tart::buffer_ptr x_buffer, const size_t x_offset, const size_t x_inc,
                 tart::buffer_ptr y_buffer, const size_t y_offset, const size_t y_inc, tart::device_ptr queue,
-                tart::command_sequence_ptr event = nullptr);
+                tart::event_ptr event = nullptr);
 
 // Dot product of two vectors: SDOT/DDOT/HDOT
 template <typename T>
 StatusCode Dot(const size_t n, tart::buffer_ptr dot_buffer, const size_t dot_offset, const tart::buffer_ptr x_buffer, const size_t x_offset,
                const size_t x_inc, const tart::buffer_ptr y_buffer, const size_t y_offset, const size_t y_inc,
-               tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+               tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Dot product of two complex vectors: CDOTU/ZDOTU
 template <typename T>
 StatusCode Dotu(const size_t n, tart::buffer_ptr dot_buffer, const size_t dot_offset, const tart::buffer_ptr x_buffer,
                 const size_t x_offset, const size_t x_inc, const tart::buffer_ptr y_buffer, const size_t y_offset,
-                const size_t y_inc, tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                const size_t y_inc, tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Dot product of two complex vectors, one conjugated: CDOTC/ZDOTC
 template <typename T>
 StatusCode Dotc(const size_t n, tart::buffer_ptr dot_buffer, const size_t dot_offset, const tart::buffer_ptr x_buffer,
                 const size_t x_offset, const size_t x_inc, const tart::buffer_ptr y_buffer, const size_t y_offset,
-                const size_t y_inc, tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                const size_t y_inc, tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Euclidian norm of a vector: SNRM2/DNRM2/ScNRM2/DzNRM2/HNRM2
 template <typename T>
 StatusCode Nrm2(const size_t n, tart::buffer_ptr nrm2_buffer, const size_t nrm2_offset, const tart::buffer_ptr x_buffer,
-                const size_t x_offset, const size_t x_inc, tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                const size_t x_offset, const size_t x_inc, tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Absolute sum of values in a vector: SASUM/DASUM/ScASUM/DzASUM/HASUM
 template <typename T>
 StatusCode Asum(const size_t n, tart::buffer_ptr asum_buffer, const size_t asum_offset, const tart::buffer_ptr x_buffer,
-                const size_t x_offset, const size_t x_inc, tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                const size_t x_offset, const size_t x_inc, tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Sum of values in a vector (non-BLAS function): SSUM/DSUM/ScSUM/DzSUM/HSUM
 template <typename T>
 StatusCode Sum(const size_t n, tart::buffer_ptr sum_buffer, const size_t sum_offset, const tart::buffer_ptr x_buffer, const size_t x_offset,
-               const size_t x_inc, tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+               const size_t x_inc, tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Index of absolute maximum value in a vector: iSAMAX/iDAMAX/iCAMAX/iZAMAX/iHAMAX
 template <typename T>
 StatusCode Amax(const size_t n, tart::buffer_ptr imax_buffer, const size_t imax_offset, const tart::buffer_ptr x_buffer,
-                const size_t x_offset, const size_t x_inc, tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                const size_t x_offset, const size_t x_inc, tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Index of absolute minimum value in a vector (non-BLAS function): iSAMIN/iDAMIN/iCAMIN/iZAMIN/iHAMIN
 template <typename T>
 StatusCode Amin(const size_t n, tart::buffer_ptr imin_buffer, const size_t imin_offset, const tart::buffer_ptr x_buffer,
-                const size_t x_offset, const size_t x_inc, tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                const size_t x_offset, const size_t x_inc, tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Index of maximum value in a vector (non-BLAS function): iSMAX/iDMAX/iCMAX/iZMAX/iHMAX
 template <typename T>
 StatusCode Max(const size_t n, tart::buffer_ptr imax_buffer, const size_t imax_offset, const tart::buffer_ptr x_buffer,
-               const size_t x_offset, const size_t x_inc, tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+               const size_t x_offset, const size_t x_inc, tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Index of minimum value in a vector (non-BLAS function): iSMIN/iDMIN/iCMIN/iZMIN/iHMIN
 template <typename T>
 StatusCode Min(const size_t n, tart::buffer_ptr imin_buffer, const size_t imin_offset, const tart::buffer_ptr x_buffer,
-               const size_t x_offset, const size_t x_inc, tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+               const size_t x_offset, const size_t x_inc, tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // =================================================================================================
 // BLAS level-2 (matrix-vector) routines
@@ -238,167 +238,167 @@ template <typename T>
 StatusCode Gemv(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const T alpha,
                 const tart::buffer_ptr a_buffer, const size_t a_offset, const size_t a_ld, const tart::buffer_ptr x_buffer,
                 const size_t x_offset, const size_t x_inc, const T beta, tart::buffer_ptr y_buffer, const size_t y_offset,
-                const size_t y_inc, tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                const size_t y_inc, tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // General banded matrix-vector multiplication: SGBMV/DGBMV/CGBMV/ZGBMV/HGBMV
 template <typename T>
 StatusCode Gbmv(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const size_t kl,
                 const size_t ku, const T alpha, const tart::buffer_ptr a_buffer, const size_t a_offset, const size_t a_ld,
                 const tart::buffer_ptr x_buffer, const size_t x_offset, const size_t x_inc, const T beta, tart::buffer_ptr y_buffer,
-                const size_t y_offset, const size_t y_inc, tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                const size_t y_offset, const size_t y_inc, tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Hermitian matrix-vector multiplication: CHEMV/ZHEMV
 template <typename T>
 StatusCode Hemv(const Layout layout, const Triangle triangle, const size_t n, const T alpha, const tart::buffer_ptr a_buffer,
                 const size_t a_offset, const size_t a_ld, const tart::buffer_ptr x_buffer, const size_t x_offset,
                 const size_t x_inc, const T beta, tart::buffer_ptr y_buffer, const size_t y_offset, const size_t y_inc,
-                tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Hermitian banded matrix-vector multiplication: CHBMV/ZHBMV
 template <typename T>
 StatusCode Hbmv(const Layout layout, const Triangle triangle, const size_t n, const size_t k, const T alpha,
                 const tart::buffer_ptr a_buffer, const size_t a_offset, const size_t a_ld, const tart::buffer_ptr x_buffer,
                 const size_t x_offset, const size_t x_inc, const T beta, tart::buffer_ptr y_buffer, const size_t y_offset,
-                const size_t y_inc, tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                const size_t y_inc, tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Hermitian packed matrix-vector multiplication: CHPMV/ZHPMV
 template <typename T>
 StatusCode Hpmv(const Layout layout, const Triangle triangle, const size_t n, const T alpha, const tart::buffer_ptr ap_buffer,
                 const size_t ap_offset, const tart::buffer_ptr x_buffer, const size_t x_offset, const size_t x_inc, const T beta,
                 tart::buffer_ptr y_buffer, const size_t y_offset, const size_t y_inc, tart::device_ptr queue,
-                tart::command_sequence_ptr event = nullptr);
+                tart::event_ptr event = nullptr);
 
 // Symmetric matrix-vector multiplication: SSYMV/DSYMV/HSYMV
 template <typename T>
 StatusCode Symv(const Layout layout, const Triangle triangle, const size_t n, const T alpha, const tart::buffer_ptr a_buffer,
                 const size_t a_offset, const size_t a_ld, const tart::buffer_ptr x_buffer, const size_t x_offset,
                 const size_t x_inc, const T beta, tart::buffer_ptr y_buffer, const size_t y_offset, const size_t y_inc,
-                tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Symmetric banded matrix-vector multiplication: SSBMV/DSBMV/HSBMV
 template <typename T>
 StatusCode Sbmv(const Layout layout, const Triangle triangle, const size_t n, const size_t k, const T alpha,
                 const tart::buffer_ptr a_buffer, const size_t a_offset, const size_t a_ld, const tart::buffer_ptr x_buffer,
                 const size_t x_offset, const size_t x_inc, const T beta, tart::buffer_ptr y_buffer, const size_t y_offset,
-                const size_t y_inc, tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                const size_t y_inc, tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Symmetric packed matrix-vector multiplication: SSPMV/DSPMV/HSPMV
 template <typename T>
 StatusCode Spmv(const Layout layout, const Triangle triangle, const size_t n, const T alpha, const tart::buffer_ptr ap_buffer,
                 const size_t ap_offset, const tart::buffer_ptr x_buffer, const size_t x_offset, const size_t x_inc, const T beta,
                 tart::buffer_ptr y_buffer, const size_t y_offset, const size_t y_inc, tart::device_ptr queue,
-                tart::command_sequence_ptr event = nullptr);
+                tart::event_ptr event = nullptr);
 
 // Triangular matrix-vector multiplication: STRMV/DTRMV/CTRMV/ZTRMV/HTRMV
 template <typename T>
 StatusCode Trmv(const Layout layout, const Triangle triangle, const Transpose a_transpose, const Diagonal diagonal,
                 const size_t n, const tart::buffer_ptr a_buffer, const size_t a_offset, const size_t a_ld, tart::buffer_ptr x_buffer,
-                const size_t x_offset, const size_t x_inc, tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                const size_t x_offset, const size_t x_inc, tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Triangular banded matrix-vector multiplication: STBMV/DTBMV/CTBMV/ZTBMV/HTBMV
 template <typename T>
 StatusCode Tbmv(const Layout layout, const Triangle triangle, const Transpose a_transpose, const Diagonal diagonal,
                 const size_t n, const size_t k, const tart::buffer_ptr a_buffer, const size_t a_offset, const size_t a_ld,
                 tart::buffer_ptr x_buffer, const size_t x_offset, const size_t x_inc, tart::device_ptr queue,
-                tart::command_sequence_ptr event = nullptr);
+                tart::event_ptr event = nullptr);
 
 // Triangular packed matrix-vector multiplication: STPMV/DTPMV/CTPMV/ZTPMV/HTPMV
 template <typename T>
 StatusCode Tpmv(const Layout layout, const Triangle triangle, const Transpose a_transpose, const Diagonal diagonal,
                 const size_t n, const tart::buffer_ptr ap_buffer, const size_t ap_offset, tart::buffer_ptr x_buffer, const size_t x_offset,
-                const size_t x_inc, tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                const size_t x_inc, tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Solves a triangular system of equations: STRSV/DTRSV/CTRSV/ZTRSV
 template <typename T>
 StatusCode Trsv(const Layout layout, const Triangle triangle, const Transpose a_transpose, const Diagonal diagonal,
                 const size_t n, const tart::buffer_ptr a_buffer, const size_t a_offset, const size_t a_ld, tart::buffer_ptr x_buffer,
-                const size_t x_offset, const size_t x_inc, tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                const size_t x_offset, const size_t x_inc, tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Solves a banded triangular system of equations: STBSV/DTBSV/CTBSV/ZTBSV
 template <typename T>
 StatusCode Tbsv(const Layout layout, const Triangle triangle, const Transpose a_transpose, const Diagonal diagonal,
                 const size_t n, const size_t k, const tart::buffer_ptr a_buffer, const size_t a_offset, const size_t a_ld,
                 tart::buffer_ptr x_buffer, const size_t x_offset, const size_t x_inc, tart::device_ptr queue,
-                tart::command_sequence_ptr event = nullptr);
+                tart::event_ptr event = nullptr);
 
 // Solves a packed triangular system of equations: STPSV/DTPSV/CTPSV/ZTPSV
 template <typename T>
 StatusCode Tpsv(const Layout layout, const Triangle triangle, const Transpose a_transpose, const Diagonal diagonal,
                 const size_t n, const tart::buffer_ptr ap_buffer, const size_t ap_offset, tart::buffer_ptr x_buffer, const size_t x_offset,
-                const size_t x_inc, tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                const size_t x_inc, tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // General rank-1 matrix update: SGER/DGER/HGER
 template <typename T>
 StatusCode Ger(const Layout layout, const size_t m, const size_t n, const T alpha, const tart::buffer_ptr x_buffer,
                const size_t x_offset, const size_t x_inc, const tart::buffer_ptr y_buffer, const size_t y_offset,
                const size_t y_inc, tart::buffer_ptr a_buffer, const size_t a_offset, const size_t a_ld, tart::device_ptr queue,
-               tart::command_sequence_ptr event = nullptr);
+               tart::event_ptr event = nullptr);
 
 // General rank-1 complex matrix update: CGERU/ZGERU
 template <typename T>
 StatusCode Geru(const Layout layout, const size_t m, const size_t n, const T alpha, const tart::buffer_ptr x_buffer,
                 const size_t x_offset, const size_t x_inc, const tart::buffer_ptr y_buffer, const size_t y_offset,
                 const size_t y_inc, tart::buffer_ptr a_buffer, const size_t a_offset, const size_t a_ld, tart::device_ptr queue,
-                tart::command_sequence_ptr event = nullptr);
+                tart::event_ptr event = nullptr);
 
 // General rank-1 complex conjugated matrix update: CGERC/ZGERC
 template <typename T>
 StatusCode Gerc(const Layout layout, const size_t m, const size_t n, const T alpha, const tart::buffer_ptr x_buffer,
                 const size_t x_offset, const size_t x_inc, const tart::buffer_ptr y_buffer, const size_t y_offset,
                 const size_t y_inc, tart::buffer_ptr a_buffer, const size_t a_offset, const size_t a_ld, tart::device_ptr queue,
-                tart::command_sequence_ptr event = nullptr);
+                tart::event_ptr event = nullptr);
 
 // Hermitian rank-1 matrix update: CHER/ZHER
 template <typename T>
 StatusCode Her(const Layout layout, const Triangle triangle, const size_t n, const T alpha, const tart::buffer_ptr x_buffer,
                const size_t x_offset, const size_t x_inc, tart::buffer_ptr a_buffer, const size_t a_offset, const size_t a_ld,
-               tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+               tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Hermitian packed rank-1 matrix update: CHPR/ZHPR
 template <typename T>
 StatusCode Hpr(const Layout layout, const Triangle triangle, const size_t n, const T alpha, const tart::buffer_ptr x_buffer,
                const size_t x_offset, const size_t x_inc, tart::buffer_ptr ap_buffer, const size_t ap_offset,
-               tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+               tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Hermitian rank-2 matrix update: CHER2/ZHER2
 template <typename T>
 StatusCode Her2(const Layout layout, const Triangle triangle, const size_t n, const T alpha, const tart::buffer_ptr x_buffer,
                 const size_t x_offset, const size_t x_inc, const tart::buffer_ptr y_buffer, const size_t y_offset,
                 const size_t y_inc, tart::buffer_ptr a_buffer, const size_t a_offset, const size_t a_ld, tart::device_ptr queue,
-                tart::command_sequence_ptr event = nullptr);
+                tart::event_ptr event = nullptr);
 
 // Hermitian packed rank-2 matrix update: CHPR2/ZHPR2
 template <typename T>
 StatusCode Hpr2(const Layout layout, const Triangle triangle, const size_t n, const T alpha, const tart::buffer_ptr x_buffer,
                 const size_t x_offset, const size_t x_inc, const tart::buffer_ptr y_buffer, const size_t y_offset,
                 const size_t y_inc, tart::buffer_ptr ap_buffer, const size_t ap_offset, tart::device_ptr queue,
-                tart::command_sequence_ptr event = nullptr);
+                tart::event_ptr event = nullptr);
 
 // Symmetric rank-1 matrix update: SSYR/DSYR/HSYR
 template <typename T>
 StatusCode Syr(const Layout layout, const Triangle triangle, const size_t n, const T alpha, const tart::buffer_ptr x_buffer,
                const size_t x_offset, const size_t x_inc, tart::buffer_ptr a_buffer, const size_t a_offset, const size_t a_ld,
-               tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+               tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Symmetric packed rank-1 matrix update: SSPR/DSPR/HSPR
 template <typename T>
 StatusCode Spr(const Layout layout, const Triangle triangle, const size_t n, const T alpha, const tart::buffer_ptr x_buffer,
                const size_t x_offset, const size_t x_inc, tart::buffer_ptr ap_buffer, const size_t ap_offset,
-               tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+               tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Symmetric rank-2 matrix update: SSYR2/DSYR2/HSYR2
 template <typename T>
 StatusCode Syr2(const Layout layout, const Triangle triangle, const size_t n, const T alpha, const tart::buffer_ptr x_buffer,
                 const size_t x_offset, const size_t x_inc, const tart::buffer_ptr y_buffer, const size_t y_offset,
                 const size_t y_inc, tart::buffer_ptr a_buffer, const size_t a_offset, const size_t a_ld, tart::device_ptr queue,
-                tart::command_sequence_ptr event = nullptr);
+                tart::event_ptr event = nullptr);
 
 // Symmetric packed rank-2 matrix update: SSPR2/DSPR2/HSPR2
 template <typename T>
 StatusCode Spr2(const Layout layout, const Triangle triangle, const size_t n, const T alpha, const tart::buffer_ptr x_buffer,
                 const size_t x_offset, const size_t x_inc, const tart::buffer_ptr y_buffer, const size_t y_offset,
                 const size_t y_inc, tart::buffer_ptr ap_buffer, const size_t ap_offset, tart::device_ptr queue,
-                tart::command_sequence_ptr event = nullptr);
+                tart::event_ptr event = nullptr);
 
 // =================================================================================================
 // BLAS level-3 (matrix-matrix) routines
@@ -410,63 +410,63 @@ StatusCode Gemm(const Layout layout, const Transpose a_transpose, const Transpos
                 const size_t n, const size_t k, const T alpha, const tart::buffer_ptr a_buffer, const size_t a_offset,
                 const size_t a_ld, const tart::buffer_ptr b_buffer, const size_t b_offset, const size_t b_ld, const T beta,
                 tart::buffer_ptr c_buffer, const size_t c_offset, const size_t c_ld, tart::device_ptr queue,
-                tart::command_sequence_ptr event = nullptr, tart::buffer_ptr temp_buffer = nullptr);
+                tart::event_ptr event = nullptr, tart::buffer_ptr temp_buffer = nullptr);
 
 // Symmetric matrix-matrix multiplication: SSYMM/DSYMM/CSYMM/ZSYMM/HSYMM
 template <typename T>
 StatusCode Symm(const Layout layout, const Side side, const Triangle triangle, const size_t m, const size_t n,
                 const T alpha, const tart::buffer_ptr a_buffer, const size_t a_offset, const size_t a_ld, const tart::buffer_ptr b_buffer,
                 const size_t b_offset, const size_t b_ld, const T beta, tart::buffer_ptr c_buffer, const size_t c_offset,
-                const size_t c_ld, tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                const size_t c_ld, tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Hermitian matrix-matrix multiplication: CHEMM/ZHEMM
 template <typename T>
 StatusCode Hemm(const Layout layout, const Side side, const Triangle triangle, const size_t m, const size_t n,
                 const T alpha, const tart::buffer_ptr a_buffer, const size_t a_offset, const size_t a_ld, const tart::buffer_ptr b_buffer,
                 const size_t b_offset, const size_t b_ld, const T beta, tart::buffer_ptr c_buffer, const size_t c_offset,
-                const size_t c_ld, tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                const size_t c_ld, tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Rank-K update of a symmetric matrix: SSYRK/DSYRK/CSYRK/ZSYRK/HSYRK
 template <typename T>
 StatusCode Syrk(const Layout layout, const Triangle triangle, const Transpose a_transpose, const size_t n,
                 const size_t k, const T alpha, const tart::buffer_ptr a_buffer, const size_t a_offset, const size_t a_ld,
                 const T beta, tart::buffer_ptr c_buffer, const size_t c_offset, const size_t c_ld, tart::device_ptr queue,
-                tart::command_sequence_ptr event = nullptr);
+                tart::event_ptr event = nullptr);
 
 // Rank-K update of a hermitian matrix: CHERK/ZHERK
 template <typename T>
 StatusCode Herk(const Layout layout, const Triangle triangle, const Transpose a_transpose, const size_t n,
                 const size_t k, const T alpha, const tart::buffer_ptr a_buffer, const size_t a_offset, const size_t a_ld,
                 const T beta, tart::buffer_ptr c_buffer, const size_t c_offset, const size_t c_ld, tart::device_ptr queue,
-                tart::command_sequence_ptr event = nullptr);
+                tart::event_ptr event = nullptr);
 
 // Rank-2K update of a symmetric matrix: SSYR2K/DSYR2K/CSYR2K/ZSYR2K/HSYR2K
 template <typename T>
 StatusCode Syr2k(const Layout layout, const Triangle triangle, const Transpose ab_transpose, const size_t n,
                  const size_t k, const T alpha, const tart::buffer_ptr a_buffer, const size_t a_offset, const size_t a_ld,
                  const tart::buffer_ptr b_buffer, const size_t b_offset, const size_t b_ld, const T beta, tart::buffer_ptr c_buffer,
-                 const size_t c_offset, const size_t c_ld, tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                 const size_t c_offset, const size_t c_ld, tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Rank-2K update of a hermitian matrix: CHER2K/ZHER2K
 template <typename T, typename U>
 StatusCode Her2k(const Layout layout, const Triangle triangle, const Transpose ab_transpose, const size_t n,
                  const size_t k, const T alpha, const tart::buffer_ptr a_buffer, const size_t a_offset, const size_t a_ld,
                  const tart::buffer_ptr b_buffer, const size_t b_offset, const size_t b_ld, const U beta, tart::buffer_ptr c_buffer,
-                 const size_t c_offset, const size_t c_ld, tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                 const size_t c_offset, const size_t c_ld, tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Triangular matrix-matrix multiplication: STRMM/DTRMM/CTRMM/ZTRMM/HTRMM
 template <typename T>
 StatusCode Trmm(const Layout layout, const Side side, const Triangle triangle, const Transpose a_transpose,
                 const Diagonal diagonal, const size_t m, const size_t n, const T alpha, const tart::buffer_ptr a_buffer,
                 const size_t a_offset, const size_t a_ld, tart::buffer_ptr b_buffer, const size_t b_offset, const size_t b_ld,
-                tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Solves a triangular system of equations: STRSM/DTRSM/CTRSM/ZTRSM
 template <typename T>
 StatusCode Trsm(const Layout layout, const Side side, const Triangle triangle, const Transpose a_transpose,
                 const Diagonal diagonal, const size_t m, const size_t n, const T alpha, const tart::buffer_ptr a_buffer,
                 const size_t a_offset, const size_t a_ld, tart::buffer_ptr b_buffer, const size_t b_offset, const size_t b_ld,
-                tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // =================================================================================================
 // Extra non-BLAS routines (level-X)
@@ -476,13 +476,13 @@ StatusCode Trsm(const Layout layout, const Side side, const Triangle triangle, c
 template <typename T>
 StatusCode Had(const size_t n, const T alpha, const tart::buffer_ptr x_buffer, const size_t x_offset, const size_t x_inc,
                const tart::buffer_ptr y_buffer, const size_t y_offset, const size_t y_inc, const T beta, tart::buffer_ptr z_buffer,
-               const size_t z_offset, const size_t z_inc, tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+               const size_t z_offset, const size_t z_inc, tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Scaling and out-place transpose/copy (non-BLAS function): SOMATCOPY/DOMATCOPY/COMATCOPY/ZOMATCOPY/HOMATCOPY
 template <typename T>
 StatusCode Omatcopy(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const T alpha,
                     const tart::buffer_ptr a_buffer, const size_t a_offset, const size_t a_ld, tart::buffer_ptr b_buffer,
-                    const size_t b_offset, const size_t b_ld, tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                    const size_t b_offset, const size_t b_ld, tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Im2col function (non-BLAS function): SIM2COL/DIM2COL/CIM2COL/ZIM2COL/HIM2COL
 template <typename T>
@@ -490,7 +490,7 @@ StatusCode Im2col(const KernelMode kernel_mode, const size_t channels, const siz
                   const size_t kernel_h, const size_t kernel_w, const size_t pad_h, const size_t pad_w,
                   const size_t stride_h, const size_t stride_w, const size_t dilation_h, const size_t dilation_w,
                   const tart::buffer_ptr im_buffer, const size_t im_offset, tart::buffer_ptr col_buffer, const size_t col_offset,
-                  tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                  tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Col2im function (non-BLAS function): SCOL2IM/DCOL2IM/CCOL2IM/ZCOL2IM/HCOL2IM
 template <typename T>
@@ -498,7 +498,7 @@ StatusCode Col2im(const KernelMode kernel_mode, const size_t channels, const siz
                   const size_t kernel_h, const size_t kernel_w, const size_t pad_h, const size_t pad_w,
                   const size_t stride_h, const size_t stride_w, const size_t dilation_h, const size_t dilation_w,
                   const tart::buffer_ptr col_buffer, const size_t col_offset, tart::buffer_ptr im_buffer, const size_t im_offset,
-                  tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                  tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Batched convolution as GEMM (non-BLAS function): SCONVGEMM/DCONVGEMM/HCONVGEMM
 template <typename T>
@@ -507,13 +507,13 @@ StatusCode Convgemm(const KernelMode kernel_mode, const size_t channels, const s
                     const size_t stride_h, const size_t stride_w, const size_t dilation_h, const size_t dilation_w,
                     const size_t num_kernels, const size_t batch_count, const tart::buffer_ptr im_buffer, const size_t im_offset,
                     const tart::buffer_ptr kernel_buffer, const size_t kernel_offset, tart::buffer_ptr result_buffer,
-                    const size_t result_offset, tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                    const size_t result_offset, tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Batched version of AXPY: SAXPYBATCHED/DAXPYBATCHED/CAXPYBATCHED/ZAXPYBATCHED/HAXPYBATCHED
 template <typename T>
 StatusCode AxpyBatched(const size_t n, const T* alphas, const tart::buffer_ptr x_buffer, const size_t* x_offsets,
                        const size_t x_inc, tart::buffer_ptr y_buffer, const size_t* y_offsets, const size_t y_inc,
-                       const size_t batch_count, tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                       const size_t batch_count, tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // Batched version of GEMM: SGEMMBATCHED/DGEMMBATCHED/CGEMMBATCHED/ZGEMMBATCHED/HGEMMBATCHED
 template <typename T>
@@ -521,7 +521,7 @@ StatusCode GemmBatched(const Layout layout, const Transpose a_transpose, const T
                        const size_t n, const size_t k, const T* alphas, const tart::buffer_ptr a_buffer, const size_t* a_offsets,
                        const size_t a_ld, const tart::buffer_ptr b_buffer, const size_t* b_offsets, const size_t b_ld,
                        const T* betas, tart::buffer_ptr c_buffer, const size_t* c_offsets, const size_t c_ld,
-                       const size_t batch_count, tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                       const size_t batch_count, tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // StridedBatched version of GEMM:
 // SGEMMSTRIDEDBATCHED/DGEMMSTRIDEDBATCHED/CGEMMSTRIDEDBATCHED/ZGEMMSTRIDEDBATCHED/HGEMMSTRIDEDBATCHED
@@ -531,7 +531,7 @@ StatusCode GemmStridedBatched(const Layout layout, const Transpose a_transpose, 
                               const size_t a_offset, const size_t a_ld, const size_t a_stride, const tart::buffer_ptr b_buffer,
                               const size_t b_offset, const size_t b_ld, const size_t b_stride, const T beta,
                               tart::buffer_ptr c_buffer, const size_t c_offset, const size_t c_ld, const size_t c_stride,
-                              const size_t batch_count, tart::device_ptr queue, tart::command_sequence_ptr event = nullptr);
+                              const size_t batch_count, tart::device_ptr queue, tart::event_ptr event = nullptr);
 
 // =================================================================================================
 

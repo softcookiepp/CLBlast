@@ -96,32 +96,8 @@ using CLCudaAPIBuildError = CLCudaAPIError;
 
 // =================================================================================================
 
-// not used in tart (yet)
-// however, for API compatibility, it needs to be preserved
-// this wrapper class should help
-class SequenceWrapper
-{
-	tart::command_sequence_ptr mSequence;
-public:
-	SequenceWrapper() {}
-	SequenceWrapper(tart::command_sequence_ptr sequence)
-	{
-		mSequence = sequence;
-	}
-	
-	void setSequence(tart::command_sequence_ptr sequence)
-	{
-		if (mSequence != nullptr)
-			throw LogicError("Sequence already set!");
-		mSequence = sequence;
-	}
-	tart::command_sequence_ptr getSequence()
-	{
-		if (mSequence == nullptr)
-			throw LogicError("Sequence not set!");
-		return mSequence;
-	}
-};
+// pointer to event
+typedef tart::event_ptr EventPointer;
 
 // C++11 version of 'cl_event'
 class Event {
@@ -129,18 +105,18 @@ class Event {
 	// will just be a list of sequences that the device will away the completion of.
 	// which means Tart must be modified to be able to get the parent device from a sequence?
 	// ugh
-	std::shared_ptr<SequenceWrapper> mEvent = nullptr;
+	tart::event_ptr mEvent = nullptr;
 public:
 
 	// Constructor based on the regular OpenCL data-type: memory management is handled elsewhere
-	explicit Event(const std::shared_ptr<SequenceWrapper> event) { mEvent = event; }
+	explicit Event(const tart::event_ptr event) { mEvent = event; }
 
 	// Regular constructor with memory management
 	explicit Event()
 	{
 		// ok, we are actually going to want to change this
 		// the problem is that 
-		mEvent = std::make_shared<SequenceWrapper>();
+		mEvent = std::make_shared<tart::Event>(nullptr);
 	}
 
 	// Waits for completion of this event
@@ -172,16 +148,13 @@ public:
 	}
 
 	// Accessor to the private data-member
-	std::shared_ptr<SequenceWrapper> operator()() { return mEvent; }
-	const std::shared_ptr<SequenceWrapper> operator()() const { return mEvent; }
-	std::shared_ptr<SequenceWrapper>  pointer() { return mEvent; }
-	const std::shared_ptr<SequenceWrapper> pointer() const { return mEvent; }
+	tart::event_ptr operator()() { return mEvent; }
+	const tart::event_ptr operator()() const { return mEvent; }
+	tart::event_ptr  pointer() { return mEvent; }
+	const tart::event_ptr pointer() const { return mEvent; }
 };
 
 #if 1
-// Pointer to...this dumb crap
-using EventPointer = std::shared_ptr<SequenceWrapper>;
-
 // =================================================================================================
 
 // Raw platform ID type

@@ -362,7 +362,6 @@ endforeach()
 # Creates and links the library
 if(BUILD_SHARED_LIBS)
   add_library(clblast SHARED ${SOURCES} ${HEADERS})
-  message("SOURCES: ${SOURCES}")
 else(BUILD_SHARED_LIBS)
   add_library(clblast STATIC ${SOURCES} ${HEADERS})
 endif()

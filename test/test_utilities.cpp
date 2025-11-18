@@ -18,7 +18,6 @@
 #include <string>
 #include <vector>
 
-#include "clblast_vk.h"
 //#include "clblast.h"
 #include "clblast_half.h"
 #include "utilities/backend.hpp"

@@ -9,8 +9,8 @@
 //
 // =================================================================================================
 
-#ifndef CLBLAST_VK_H_
-#define CLBLAST_VK_H_
+#ifndef CLBLAST_CLBLAST_VK_H_
+#define CLBLAST_CLBLAST_VK_H_
 
 #include <cstdlib>        // For size_t
 #include <string>         // For OverrideParameters function
@@ -36,7 +36,7 @@
 
 namespace clblast {
 // =================================================================================================
-
+#if 1
 // Status codes. These codes can be returned by functions declared in this header file. The error
 // codes match either the standard OpenCL error codes or the clBLAS error codes.
 enum class StatusCode {
@@ -108,7 +108,7 @@ enum class StatusCode {
   kInvalidIncrementZ = -2037,         // Increment of vector Z cannot be zero
   kInsufficientMemoryZ = -2036,       // Vector Z's OpenCL buffer is too small
 };
-
+#endif
 // Matrix layout and transpose types
 enum class Layout { kRowMajor = 101, kColMajor = 102 };
 enum class Transpose { kNo = 111, kYes = 112, kConjugate = 113 };

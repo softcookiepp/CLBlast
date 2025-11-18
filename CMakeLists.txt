@@ -61,6 +61,9 @@ if(AMD_SI_EMPTY_KERNEL_WORKAROUND)
   add_definitions(-DAMD_SI_EMPTY_KERNEL_WORKAROUND)
 endif()
 
+# debugging
+include(CheckCXXSymbolExists)
+
 # Select between an OpenCL API (default) or a CUDA API (beta)
 option(OPENCL "Build CLBlast with an OpenCL API (default)" ON)
 option(CUDA "Build CLBlast with a CUDA API (beta)" OFF)
@@ -198,6 +201,8 @@ elseif(VULKAN)
   set(API_LIBRARIES tart tart_vulkan subprocess)
   set(API_INCLUDE_DIRS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tart/include>  
     $<INSTALL_INTERFACE:tart/include>  # <prefix>/include/mylib
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tart/include>  
+    $<INSTALL_INTERFACE:tart/include>  # <prefix>/include/mylib
   )
 endif()
 
@@ -264,6 +269,8 @@ elseif(CUDA)
   set(SAMPLE_PROGRAMS_C )
 elseif(VULKAN)
   # nothing yet :c
+  set(SAMPLE_PROGRAMS_CPP)
+  set(SAMPLE_PROGRAMS_C)
 endif()
 
 # ==================================================================================================
@@ -355,12 +362,15 @@ endforeach()
 # Creates and links the library
 if(BUILD_SHARED_LIBS)
   add_library(clblast SHARED ${SOURCES} ${HEADERS})
+  message("SOURCES: ${SOURCES}")
 else(BUILD_SHARED_LIBS)
   add_library(clblast STATIC ${SOURCES} ${HEADERS})
 endif()
 set_target_properties(clblast PROPERTIES VERSION ${clblast_VERSION} SOVERSION ${clblast_SOVERSION})
 
 target_link_libraries(clblast ${API_LIBRARIES})
+
+check_cxx_symbol_exists(clblast::Swap<float> "clblast_vk.h" HAVE_SYMBOL_THINGY)
 
 # Includes directories: CLBlast and OpenCL
 target_include_directories(clblast PUBLIC
@@ -379,10 +389,17 @@ endif()
 # Installs the library
 include(GNUInstallDirs)
 
+if(VULKAN)
 install(TARGETS clblast tart tart_vulkan subprocess EXPORT CLBlast
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+else()
+	install(TARGETS clblast EXPORT CLBlast
+		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif()
 
 install(FILES include/clblast_half.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 if(OPENCL)
@@ -468,8 +485,10 @@ if(TUNERS)
     # Adds CLBlast's interface include paths because we can't link to CLBlast here
     target_include_directories(tuners_common_library PRIVATE
                                $<TARGET_PROPERTY:clblast,INTERFACE_INCLUDE_DIRECTORIES>
-                               $<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES>
                                ${clblast_SOURCE_DIR} ${API_INCLUDE_DIRS})
+	if(VULKAN)
+		target_include_directories(tuners_common_library PRIVATE $<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES>)
+	endif()
     set(TUNERS_COMMON $<TARGET_OBJECTS:tuners_common_library>)
   endif()
 
@@ -478,14 +497,17 @@ if(TUNERS)
   foreach(KERNEL ${ALLKERNELS})
     add_executable(clblast_tuner_${KERNEL} ${TUNERS_COMMON} src/tuning/kernels/${KERNEL}.cpp)
     target_link_libraries(clblast_tuner_${KERNEL} ${API_LIBRARIES})
-    target_include_directories(clblast_tuner_${KERNEL} PUBLIC $<TARGET_PROPERTY:clblast,INTERFACE_INCLUDE_DIRECTORIES> $<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES> ${API_INCLUDE_DIRS})
+    target_include_directories(clblast_tuner_${KERNEL} PUBLIC $<TARGET_PROPERTY:clblast,INTERFACE_INCLUDE_DIRECTORIES> ${API_INCLUDE_DIRS})
+    if(VULKAN)
+		target_include_directories(clblast_tuner_${KERNEL} PUBLIC $<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES>)
+    endif()
     install(TARGETS clblast_tuner_${KERNEL} DESTINATION bin)
   endforeach()
   if(OPENCL)
     foreach(ROUTINE_TUNER ${ROUTINE_TUNERS})
       add_executable(clblast_tuner_routine_${ROUTINE_TUNER} ${TUNERS_COMMON} src/tuning/routines/${ROUTINE_TUNER}.cpp test/test_utilities.cpp)
       target_link_libraries(clblast_tuner_routine_${ROUTINE_TUNER} clblast)
-      target_include_directories(clblast_tuner_routine_${ROUTINE_TUNER} PUBLIC $<TARGET_PROPERTY:clblast,INTERFACE_INCLUDE_DIRECTORIES> $<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES> ${API_INCLUDE_DIRS} ${clblast_SOURCE_DIR})
+      target_include_directories(clblast_tuner_routine_${ROUTINE_TUNER} PUBLIC $<TARGET_PROPERTY:clblast,INTERFACE_INCLUDE_DIRECTORIES> ${API_INCLUDE_DIRS} ${clblast_SOURCE_DIR})
       install(TARGETS clblast_tuner_routine_${ROUTINE_TUNER} DESTINATION bin)
     endforeach()
   endif()
@@ -582,7 +604,7 @@ if(CLIENTS)
     # Adds CLBlast's interface include paths because we can't link to CLBlast here
     target_include_directories(test_performance_common PRIVATE
                                $<TARGET_PROPERTY:clblast,INTERFACE_INCLUDE_DIRECTORIES>
-                               $<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES>
+                               #$<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES>
                                ${clblast_SOURCE_DIR} ${REF_INCLUDES})
     set(CLIENTS_COMMON ${CLIENTS_COMMON} $<TARGET_OBJECTS:test_performance_common>)
   endif()
@@ -635,7 +657,7 @@ if(TESTS)
                 test/test_utilities.cpp test/correctness/tester.cpp test/correctness/testblas.cpp)
     target_include_directories(test_correctness_common PUBLIC
                                $<TARGET_PROPERTY:clblast,INTERFACE_INCLUDE_DIRECTORIES>
-                               $<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES>
+                               #$<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES>
                                ${clblast_SOURCE_DIR} ${REF_INCLUDES})
     set(TESTS_COMMON ${TESTS_COMMON} $<TARGET_OBJECTS:test_correctness_common>)
   endif()
@@ -670,7 +692,7 @@ if(TESTS)
 
   # Miscellaneous tests
   set(MISC_TESTS override_parameters retrieve_parameters)
-  if(NOT CUDA)
+  if(NOT (CUDA OR VULKAN) )
     set(MISC_TESTS ${MISC_TESTS} preprocessor)
   endif()
   if(MSVC)
@@ -689,9 +711,11 @@ if(TESTS)
   target_link_libraries(clblast_test_diagnostics clblast ${REF_LIBRARIES} ${API_LIBRARIES})
   target_include_directories(clblast_test_diagnostics PUBLIC
                              $<TARGET_PROPERTY:clblast,INTERFACE_INCLUDE_DIRECTORIES>
-                             $<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES>
                              ${clblast_SOURCE_DIR} ${REF_INCLUDES})
-
+  if(VULKAN)
+    target_include_directories(clblast_test_diagnostics PUBLIC $<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES>)
+  endif()
+  
   # Adds 'alltests' target: runs all tests
   set(ALLTESTS )
   set(ALLTESTSDEPENDS )
@@ -701,6 +725,13 @@ if(TESTS)
   endforeach()
   add_custom_target(alltests ${ALLTESTS} DEPENDS ${ALLTESTSDEPENDS})
 
+endif()
+
+# tiny test just to see if it will even link at all
+if(VULKAN)
+	add_executable(linktest samples/sgemm_vk.cpp)
+	target_link_libraries(linktest ${API_LIBRARIES} clblast)
+	target_include_directories(linktest PUBLIC $<TARGET_PROPERTY:clblast,INTERFACE_INCLUDE_DIRECTORIES> $<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES>)
 endif()
 
 # ==================================================================================================

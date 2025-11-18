@@ -58,7 +58,6 @@
 #ifndef CL_TEMP_DEFS
 #define CL_DEMP_DEFS
 #define CL_SUCCESS 0
-#define cl_device_info size_t
 #endif
 #include "tart.hpp"
 
@@ -225,7 +224,7 @@ private:
 	size_t platform_ = 0;
 
 	// Private helper functions
-	std::string GetInfoString(const cl_device_info info) const {
+	std::string GetInfoString(const size_t info) const {
 		// no idea what this is supposed to do; we find out L A T E R
 		return "not implemented";
 	}
@@ -428,7 +427,7 @@ private:
 #if 0
 	// Private helper functions
 	template <typename T>
-	T GetInfo(const cl_device_info info) const {
+	T GetInfo(const size_t info) const {
 		auto bytes = size_t{0};
 		CheckError(clGetDeviceInfo(device_, info, 0, nullptr, &bytes));
 		auto result = T(0);
@@ -436,14 +435,14 @@ private:
 		return result;
 	}
 	template <typename T>
-	std::vector<T> GetInfoVector(const cl_device_info info) const {
+	std::vector<T> GetInfoVector(const size_t info) const {
 		auto bytes = size_t{0};
 		CheckError(clGetDeviceInfo(device_, info, 0, nullptr, &bytes));
 		auto result = std::vector<T>(bytes / sizeof(T));
 		CheckError(clGetDeviceInfo(device_, info, bytes, result.data(), nullptr));
 		return result;
 	}
-	std::string GetInfoString(const cl_device_info info) const {
+	std::string GetInfoString(const size_t info) const {
 		auto bytes = size_t{0};
 		CheckError(clGetDeviceInfo(device_, info, 0, nullptr, &bytes));
 		auto result = std::string{};

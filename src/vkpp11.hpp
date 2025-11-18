@@ -499,6 +499,12 @@ public:
 		mShaderModule = mDevice->compileCL(mSource);
 		// load it into the actual CL program handler thingy
 		mCLProgram = mDevice->createCLProgram(mShaderModule);
+		std::cout << "here are the options: \n";
+		for (std::string& option : options)
+		{
+			std::cout << option << "\n";
+		}
+		std::cout << "\n\nandhere is the source: " << mSource << std::endl;
 	}
 
 	// Confirms whether a certain status code is an actual compilation error or warning

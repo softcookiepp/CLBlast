@@ -18,8 +18,8 @@
 #include <cstdio>
 #include <string>
 #include <vector>
-
-#include "clblast.h"
+#include "clblast_vk.h"
+//#include "clblast.h"
 #include "routine.hpp"
 #include "test/correctness/tester.hpp"
 #include "test/test_utilities.hpp"

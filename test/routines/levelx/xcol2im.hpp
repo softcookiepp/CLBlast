@@ -97,6 +97,14 @@ class TestXcol2im {
                             buffers.a_mat(), args.a_offset,  // im
                             queue.GetContext()(), queue.GetDevice()());
     cuStreamSynchronize(queue());
+#elif VULKAN_API
+	auto queue_plain = queue();
+    auto status = Col2im<T>(args.kernel_mode, args.channels, args.height, args.width, args.kernel_h, args.kernel_w,
+                            args.pad_h, args.pad_w, args.stride_h, args.stride_w, args.dilation_h, args.dilation_w,
+                            buffers.b_mat(), args.b_offset,  // col
+                            buffers.a_mat(), args.a_offset,  // im
+                            queue_plain, nullptr);
+	queue_plain->sync();
 #endif
     return status;
   }

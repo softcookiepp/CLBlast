@@ -116,6 +116,8 @@ Buffer<T> CreateInvalidBuffer(const Context& context, const size_t size) {
 #elif CUDA_API
   CUdeviceptr raw_buffer;
   cuMemAlloc(&raw_buffer, size * sizeof(T));
+#elif VULKAN_API
+  tart::buffer_ptr raw_buffer = context.pointer()->allocateBuffer(size);
 #endif
   return Buffer<T>(raw_buffer);
 }

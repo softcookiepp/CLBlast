@@ -64,6 +64,10 @@ class TestXscal {
     auto status =
         Scal(args.n, args.alpha, buffers.x_vec(), args.x_offset, args.x_inc, queue.GetContext()(), queue.GetDevice()());
     cuStreamSynchronize(queue());
+#elif VULKAN_API
+	auto queue_plain = queue();
+    auto status = Scal(args.n, args.alpha, buffers.x_vec(), args.x_offset, args.x_inc, queue_plain, nullptr);
+	queue_plain->sync();
 #endif
     return status;
   }

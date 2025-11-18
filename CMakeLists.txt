@@ -196,7 +196,6 @@ elseif(VULKAN)
   # we need Tart, the vulkan frontend thingy
   add_subdirectory(${PROJECT_SOURCE_DIR}/tart)
   set(API_LIBRARIES tart)
-  #set(API_INCLUDE_DIRS tart/include)
   target_compile_features(subprocess PRIVATE cxx_std_17)
 endif()
 
@@ -378,13 +377,10 @@ endif()
 # Installs the library
 include(GNUInstallDirs)
 
-if (NOT VULKAN)
-  install(TARGETS clblast EXPORT CLBlast
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-
-endif()
+install(TARGETS clblast EXPORT CLBlast
+	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 install(FILES include/clblast_half.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 if(OPENCL)

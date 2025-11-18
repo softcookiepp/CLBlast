@@ -69,6 +69,11 @@ class TestXswap {
     auto status = Swap<T>(args.n, buffers.x_vec(), args.x_offset, args.x_inc, buffers.y_vec(), args.y_offset,
                           args.y_inc, queue.GetContext()(), queue.GetDevice()());
     cuStreamSynchronize(queue());
+#elif VULKAN_API
+	auto queue_plain = queue();
+    auto status = Swap<T>(args.n, buffers.x_vec(), args.x_offset, args.x_inc, buffers.y_vec(), args.y_offset,
+		args.y_inc, queue_plain, nullptr);
+	queue_plain->sync();
 #endif
     return status;
   }

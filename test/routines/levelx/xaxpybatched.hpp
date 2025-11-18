@@ -85,6 +85,12 @@ class TestXaxpyBatched {
         AxpyBatched(args.n, args.alphas.data(), buffers.x_vec(), args.x_offsets.data(), args.x_inc, buffers.y_vec(),
                     args.y_offsets.data(), args.y_inc, args.batch_count, queue.GetContext()(), queue.GetDevice()());
     cuStreamSynchronize(queue());
+#elif VULKAN_API
+	auto queue_plain = queue();
+    auto status =
+        AxpyBatched(args.n, args.alphas.data(), buffers.x_vec(), args.x_offsets.data(), args.x_inc, buffers.y_vec(),
+                    args.y_offsets.data(), args.y_inc, args.batch_count, queue_plain, nullptr);
+	queue_plain->sync();
 #endif
     return status;
   }

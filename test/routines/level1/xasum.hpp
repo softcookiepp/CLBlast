@@ -69,6 +69,9 @@ class TestXasum {
     auto status = Asum<T>(args.n, buffers.scalar(), args.asum_offset, buffers.x_vec(), args.x_offset, args.x_inc,
                           queue.GetContext()(), queue.GetDevice()());
     cuStreamSynchronize(queue());
+#elif VULKAN_API
+	auto status = Asum<T>(args.n, buffers.scalar(), args.asum_offset, buffers.x_vec(), args.x_offset, args.x_inc, queue(), nullptr);
+	queue()->sync();
 #endif
     return status;
   }

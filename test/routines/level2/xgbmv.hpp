@@ -88,6 +88,12 @@ class TestXgbmv {
                        args.a_offset, args.a_ld, buffers.x_vec(), args.x_offset, args.x_inc, args.beta, buffers.y_vec(),
                        args.y_offset, args.y_inc, queue.GetContext()(), queue.GetDevice()());
     cuStreamSynchronize(queue());
+#elif VULKAN_API
+    auto queue_plain = queue();
+    auto status = Gbmv(args.layout, args.a_transpose, args.m, args.n, args.kl, args.ku, args.alpha, buffers.a_mat(),
+                       args.a_offset, args.a_ld, buffers.x_vec(), args.x_offset, args.x_inc, args.beta, buffers.y_vec(),
+                       args.y_offset, args.y_inc, queue_plain);
+	queue_plain->sync();
 #endif
     return status;
   }

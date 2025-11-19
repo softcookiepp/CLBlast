@@ -16,7 +16,7 @@
 #include <string>
 #include <vector>
 
-#include "clblast.h"
+//#include "clblast.h"
 #include "clblast_half.h"
 #include "test/test_utilities.hpp"
 #include "test/wrapper_cuda.hpp"
@@ -124,6 +124,12 @@ class TestXhad {
                       args.y_inc, args.beta, buffers.c_mat(), 0, 1,  // used for 'vector z'
                       queue.GetContext()(), queue.GetDevice()());
     cuStreamSynchronize(queue());
+#elif VULKAN_API
+    auto queue_plain = queue();
+    auto status = Had(args.n, args.alpha, buffers.x_vec(), args.x_offset, args.x_inc, buffers.y_vec(), args.y_offset,
+                      args.y_inc, args.beta, buffers.c_mat(), 0, 1,  // used for 'vector z'
+                      queue_plain);
+    queue_plain->sync();
 #endif
     return status;
   }

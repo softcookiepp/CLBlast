@@ -71,6 +71,11 @@ class TestXhpr {
     auto status = Hpr(args.layout, args.triangle, args.n, args.alpha, buffers.x_vec(), args.x_offset, args.x_inc,
                       buffers.ap_mat(), args.ap_offset, queue.GetContext()(), queue.GetDevice()());
     cuStreamSynchronize(queue());
+#elif VULKAN_API
+    auto queue_plain = queue();
+    auto status = Hpr(args.layout, args.triangle, args.n, args.alpha, buffers.x_vec(), args.x_offset, args.x_inc,
+                      buffers.ap_mat(), args.ap_offset, queue_plain);
+    queue_plain->sync();
 #endif
     return status;
   }

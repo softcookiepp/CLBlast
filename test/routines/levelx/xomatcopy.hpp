@@ -152,6 +152,11 @@ class TestXomatcopy {
         Omatcopy<T>(args.layout, args.a_transpose, args.m, args.n, args.alpha, buffers.a_mat(), args.a_offset,
                     args.a_ld, buffers.b_mat(), args.b_offset, args.b_ld, queue.GetContext()(), queue.GetDevice()());
     cuStreamSynchronize(queue());
+#elif VULKAN_API
+    auto queue_plain = queue();
+    auto status = Omatcopy<T>(args.layout, args.a_transpose, args.m, args.n, args.alpha, buffers.a_mat(), args.a_offset,
+                              args.a_ld, buffers.b_mat(), args.b_offset, args.b_ld, queue_plain);
+    queue_plain->sync();
 #endif
     return status;
   }

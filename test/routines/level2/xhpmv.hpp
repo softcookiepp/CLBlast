@@ -76,6 +76,12 @@ class TestXhpmv {
                        buffers.x_vec(), args.x_offset, args.x_inc, args.beta, buffers.y_vec(), args.y_offset,
                        args.y_inc, queue.GetContext()(), queue.GetDevice()());
     cuStreamSynchronize(queue());
+#elif VULKAN_API
+    auto queue_plain = queue();
+    auto status =
+        Hpmv(args.layout, args.triangle, args.n, args.alpha, buffers.ap_mat(), args.ap_offset, buffers.x_vec(),
+             args.x_offset, args.x_inc, args.beta, buffers.y_vec(), args.y_offset, args.y_inc, queue_plain);
+    queue_plain->sync();
 #endif
     return status;
   }

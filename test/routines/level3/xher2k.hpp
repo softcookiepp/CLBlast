@@ -87,6 +87,12 @@ class TestXher2k {
                         args.a_offset, args.a_ld, buffers.b_mat(), args.b_offset, args.b_ld, args.beta, buffers.c_mat(),
                         args.c_offset, args.c_ld, queue.GetContext()(), queue.GetDevice()());
     cuStreamSynchronize(queue());
+#elif VULKAN_API
+    auto queue_plain = queue();
+    auto status = Her2k(args.layout, args.triangle, args.a_transpose, args.n, args.k, alpha2, buffers.a_mat(),
+                        args.a_offset, args.a_ld, buffers.b_mat(), args.b_offset, args.b_ld, args.beta, buffers.c_mat(),
+                        args.c_offset, args.c_ld, queue_plain);
+    queue_plain->sync();
 #endif
     return status;
   }

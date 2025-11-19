@@ -125,6 +125,13 @@ class TestXgemmBatched {
         args.a_offsets.data(), args.a_ld, buffers.b_mat(), args.b_offsets.data(), args.b_ld, args.betas.data(),
         buffers.c_mat(), args.c_offsets.data(), args.c_ld, args.batch_count, queue.GetContext()(), queue.GetDevice()());
     cuStreamSynchronize(queue());
+#elif VULKAN_API
+    auto queue_plain = queue();
+    auto status = GemmBatched(args.layout, args.a_transpose, args.b_transpose, args.m, args.n, args.k,
+                              args.alphas.data(), buffers.a_mat(), args.a_offsets.data(), args.a_ld, buffers.b_mat(),
+                              args.b_offsets.data(), args.b_ld, args.betas.data(), buffers.c_mat(),
+                              args.c_offsets.data(), args.c_ld, args.batch_count, queue_plain);
+    queue_plain->sync();
 #endif
     return status;
   }

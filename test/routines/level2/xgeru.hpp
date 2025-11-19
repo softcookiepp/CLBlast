@@ -80,6 +80,12 @@ class TestXgeru {
                        buffers.y_vec(), args.y_offset, args.y_inc, buffers.a_mat(), args.a_offset, args.a_ld,
                        queue.GetContext()(), queue.GetDevice()());
     cuStreamSynchronize(queue());
+#elif VULKAN_API
+    auto queue_plain = queue();
+    auto status =
+        Geru(args.layout, args.m, args.n, args.alpha, buffers.x_vec(), args.x_offset, args.x_inc, buffers.y_vec(),
+             args.y_offset, args.y_inc, buffers.a_mat(), args.a_offset, args.a_ld, queue_plain);
+    queue_plain->sync();
 #endif
     return status;
   }

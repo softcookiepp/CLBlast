@@ -92,6 +92,11 @@ class TestXtrsv {
         Trsv<T>(args.layout, args.triangle, args.a_transpose, args.diagonal, args.n, buffers.a_mat(), args.a_offset,
                 args.a_ld, buffers.x_vec(), args.x_offset, args.x_inc, queue.GetContext()(), queue.GetDevice()());
     cuStreamSynchronize(queue());
+#elif VULKAN_API
+    auto queue_plain = queue();
+    auto status = Trsv<T>(args.layout, args.triangle, args.a_transpose, args.diagonal, args.n, buffers.a_mat(),
+                          args.a_offset, args.a_ld, buffers.x_vec(), args.x_offset, args.x_inc, queue_plain);
+    queue_plain->sync();
 #endif
     return status;
   }

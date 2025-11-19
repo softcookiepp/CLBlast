@@ -102,6 +102,13 @@ class TestXconvgemm {
                               args.num_kernels, args.batch_count, buffers.a_mat(), args.a_offset, buffers.b_mat(),
                               args.b_offset, buffers.c_mat(), args.c_offset, queue.GetContext()(), queue.GetDevice()());
     cuStreamSynchronize(queue());
+#elif VULKAN_API
+    auto queue_plain = queue();
+    auto status = Convgemm<T>(args.kernel_mode, args.channels, args.height, args.width, args.kernel_h, args.kernel_w,
+                              args.pad_h, args.pad_w, args.stride_h, args.stride_w, args.dilation_h, args.dilation_w,
+                              args.num_kernels, args.batch_count, buffers.a_mat(), args.a_offset, buffers.b_mat(),
+                              args.b_offset, buffers.c_mat(), args.c_offset, queue_plain);
+    queue_plain->sync();
 #endif
     return status;
   }

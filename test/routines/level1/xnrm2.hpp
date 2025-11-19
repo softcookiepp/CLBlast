@@ -69,6 +69,11 @@ class TestXnrm2 {
     auto status = Nrm2<T>(args.n, buffers.scalar(), args.nrm2_offset, buffers.x_vec(), args.x_offset, args.x_inc,
                           queue.GetContext()(), queue.GetDevice()());
     cuStreamSynchronize(queue());
+#elif VULKAN_API
+    auto queue_plain = queue();
+    auto status = Nrm2<T>(args.n, buffers.scalar(), args.nrm2_offset, buffers.x_vec(), args.x_offset, args.x_inc,
+                          queue_plain);
+    queue_plain->sync();
 #endif
     return status;
   }

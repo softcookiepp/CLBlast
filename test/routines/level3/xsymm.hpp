@@ -90,6 +90,12 @@ class TestXsymm {
                        args.a_offset, args.a_ld, buffers.b_mat(), args.b_offset, args.b_ld, args.beta, buffers.c_mat(),
                        args.c_offset, args.c_ld, queue.GetContext()(), queue.GetDevice()());
     cuStreamSynchronize(queue());
+#elif VULKAN_API
+    auto queue_plain = queue();
+    auto status = Symm(args.layout, args.side, args.triangle, args.m, args.n, args.alpha, buffers.a_mat(),
+                       args.a_offset, args.a_ld, buffers.b_mat(), args.b_offset, args.b_ld, args.beta, buffers.c_mat(),
+                       args.c_offset, args.c_ld, queue_plain);
+    queue_plain->sync();
 #endif
     return status;
   }

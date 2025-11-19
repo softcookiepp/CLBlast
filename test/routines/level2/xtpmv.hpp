@@ -72,6 +72,11 @@ class TestXtpmv {
         Tpmv<T>(args.layout, args.triangle, args.a_transpose, args.diagonal, args.n, buffers.ap_mat(), args.ap_offset,
                 buffers.x_vec(), args.x_offset, args.x_inc, queue.GetContext()(), queue.GetDevice()());
     cuStreamSynchronize(queue());
+#elif VULKAN_API
+    auto queue_plain = queue();
+    auto status = Tpmv<T>(args.layout, args.triangle, args.a_transpose, args.diagonal, args.n, buffers.ap_mat(),
+                          args.ap_offset, buffers.x_vec(), args.x_offset, args.x_inc, queue_plain);
+    queue_plain->sync();
 #endif
     return status;
   }

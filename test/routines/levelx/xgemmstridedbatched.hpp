@@ -100,6 +100,14 @@ class TestXgemmStridedBatched {
                            args.b_offset, args.b_ld, PerBatchSizeB(args), args.beta, buffers.c_mat(), args.c_offset,
                            args.c_ld, PerBatchSizeC(args), args.batch_count, queue.GetContext()(), queue.GetDevice()());
     cuStreamSynchronize(queue());
+#elif VULKAN_API
+    auto queue_plain = queue();
+    auto status =
+        GemmStridedBatched(args.layout, args.a_transpose, args.b_transpose, args.m, args.n, args.k, args.alpha,
+                           buffers.a_mat(), args.a_offset, args.a_ld, PerBatchSizeA(args), buffers.b_mat(),
+                           args.b_offset, args.b_ld, PerBatchSizeB(args), args.beta, buffers.c_mat(), args.c_offset,
+                           args.c_ld, PerBatchSizeC(args), args.batch_count, queue_plain);
+    queue_plain->sync();
 #endif
     return status;
   }

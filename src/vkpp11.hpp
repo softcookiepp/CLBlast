@@ -760,6 +760,10 @@ public:
 		mCLProgram = program->operator()();
 		mDevice = mCLProgram->getDevice();
 	}
+	
+	void SetArgument(const size_t index, tart::buffer_ptr value) {
+		mBufferArgs[index] = value;
+	}
 
 	// Sets a kernel argument at the indicated position
 	template <typename T>
@@ -772,10 +776,6 @@ public:
 		std::vector<uint8_t> value_cast(sizeof(T));
 		std::memcpy(value_cast.data(), &value, sizeof(T));
 		mNonBufferArgs[index] = value_cast;
-	}
-	template <typename T>
-	void SetArgument(const size_t index, tart::buffer_ptr value) {
-		mBufferArgs[index] = value;
 	}
 
 	// Sets all arguments in one go using parameter packs. Note that this overwrites previously set
@@ -855,6 +855,9 @@ public:
 				push.push_back(v);
 			}
 		}
+		
+		std::cout << "buffer arg size: " << mBufferArgs.size()
+			<< "\nnon-buffer arg size: " << mNonBufferArgs.size() << std::endl;
 		
 		// parse buffer constants
 		std::vector<tart::buffer_ptr> bufs;

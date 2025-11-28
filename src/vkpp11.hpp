@@ -163,8 +163,6 @@ using RawPlatformID = size_t;
 
 // Vulkan doesn't have any direct equivalent to this, just use it to encapsulate device..or maybe instance?
 class Platform {
-	// we need this to get the number of devices
-	tart::Instance mInstance;
 public:
 	// Initializes the platform
 	explicit Platform(const size_t platform_id)
@@ -187,12 +185,12 @@ public:
 	// Returns the number of devices on this platform
 	size_t NumDevices()
 	{
-		return static_cast<size_t>(mInstance.getNumDevices());
+		return static_cast<size_t>(tart::init().getNumDevices());
 	}
 
 	// Accessor to the private data-member
 	const RawPlatformID& operator()() const { return platform_; }
-	tart::Instance& getInstance() { return mInstance; }
+	tart::Instance& getInstance() { return tart::init(); }
 
 private:
 	size_t platform_ = 0;
@@ -242,7 +240,7 @@ public:
 	// Initialize the device. Note that this constructor can throw exceptions!
 	explicit Device(const Platform& platform, const size_t device_id) {
 		// Use the global instance by default (this will mostly just be used for testing afaik)
-		mDevice = tartInstance.createDevice(device_id);
+		mDevice = tart::init().createDevice(device_id);
 	}
 
 	// Methods to retrieve device information
@@ -612,7 +610,7 @@ public:
 	explicit Buffer(const Context& context, const BufferAccess access, const size_t size) :
 				access_(access)
 	{
-		buffer_ = context.pointer()->allocateBuffer(size);
+		buffer_ = context.pointer()->allocateBuffer(size*sizeof(T));
 	}
 
 	// As above, but now with read/write access as a default
@@ -716,6 +714,7 @@ public:
 
 	// Retrieves the actual allocated size in bytes
 	size_t GetSize() const {
+		std::cout << "size: " << buffer_->getSize() << std::endl;
 		return buffer_->getSize();
 	}
 

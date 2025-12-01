@@ -504,7 +504,6 @@ public:
 		{
 			std::cout << option << "\n";
 		}
-		std::cout << "\n\nandhere is the source: " << mSource << std::endl;
 	}
 
 	// Confirms whether a certain status code is an actual compilation error or warning
@@ -714,7 +713,6 @@ public:
 
 	// Retrieves the actual allocated size in bytes
 	size_t GetSize() const {
-		std::cout << "size: " << buffer_->getSize() << std::endl;
 		return buffer_->getSize();
 	}
 
@@ -851,14 +849,13 @@ public:
 		std::vector<uint8_t> push;
 		for (auto& kv : mNonBufferArgs)
 		{
+			std::cout << "	non buffer arg index: " << kv.first
+				<< "; size: " << kv.second.size() << std::endl;
 			for (uint8_t v : kv.second)
 			{
 				push.push_back(v);
 			}
 		}
-		
-		std::cout << "buffer arg size: " << mBufferArgs.size()
-			<< "\nnon-buffer arg size: " << mNonBufferArgs.size() << std::endl;
 		
 		// parse buffer constants
 		std::vector<tart::buffer_ptr> bufs;

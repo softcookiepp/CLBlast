@@ -287,8 +287,10 @@ public:
 
 	// Not sure if Tart has a public method for querying extensions; might be a good idea to implement this.
 	std::string Capabilities() const { return "not implemented"; }
-	bool HasExtension(const std::string& extension) const {
-		return mDevice->supportsExtension(extension);
+	bool HasExtension(const std::string& extension) const
+	{
+		// yeah, this doesn't work..
+		return false;//return mDevice->supportsExtension(extension);
 	}
 	
 	// Tart already has this

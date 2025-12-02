@@ -125,7 +125,12 @@ public:
 		if (mEvent == nullptr)
 			throw LogicError("Sequence cannot be null!");
 		auto sequence = mEvent->getSequence();
+#if 1
+		// not going to bother with this now
+		sequence->getDevice()->sync();
+#else
 		sequence->getDevice()->sync({sequence});
+#endif
 	}
 
 	// Retrieves the elapsed time of the last recorded event.
@@ -251,7 +256,20 @@ public:
 		return 120;
 	}
 	// TODO: implement some of this stuff in tart
-	std::string Vendor() const { return "vendor name not implemented"; }
+	std::string Vendor() const
+	{
+		switch(mDevice->getMetadata().physicalDeviceProperties.vendorID)
+		{
+		case tart::VendorID::eNVIDIA:
+			return "NVIDIA";
+		case tart::VendorID::eAMD:
+			return "AMD";
+		case tart::VendorID::eIntel:
+			return "INTEL";
+		default:
+			return "Unknown vendor";
+		}
+	}
 	std::string Name() const { return "device name not implemented"; }
 	std::string Type() const { return "GPU"; } // everything is a GPU when it comes to Vulkan! (for the most part)
 	size_t MaxWorkGroupSize() const { return 1000000; } // straight-up no idea how to even go about doing this. in Vulkan, each dimension can be different.
@@ -330,39 +348,23 @@ public:
 	bool IsGPU() const { return Type() == "GPU"; }
 	bool IsAMD() const
 	{
-#if 1
-		// Not implemented yet. Will have to figure this out later :c
-		return false;
-#else
-		return Vendor() == "AMD" || Vendor() == "Advanced Micro Devices, Inc." || Vendor() == "AuthenticAMD";
-#endif
+		return Vendor() == "AMD";
 	}
 	bool IsNVIDIA() const
 	{
-#if 1
-		// just assume true for now, since testing devices are of the leather jacket variety
-		return true;
-#else
-		return Vendor() == "NVIDIA" || Vendor() == "NVIDIA Corporation";
-#endif
+		return Vendor() == "NVIDIA";
 	}
 	bool IsIntel() const
 	{
-#if 1
-		// nope
-		return false;
-#else
-		return Vendor() == "INTEL" || Vendor() == "Intel" || Vendor() == "GenuineIntel" ||
-					 Vendor() == "Intel(R) Corporation";
-#endif
+		return Vendor() == "INTEL";
 	}
 	bool IsARM() const
 	{
-		return false;
+		return Vendor() == "ARM";
 	}
 	bool IsQualcomm() const
 	{
-		return false;
+		return Vendor() == "Qualcomm";
 	}
 
 	// Platform specific extensions
@@ -811,13 +813,8 @@ public:
 	// Launches a kernel onto the specified queue
 	void Launch(const Queue& queue, const std::vector<size_t>& global, const std::vector<size_t>& local,
 							EventPointer event) {
-#if 1
 		const std::vector<Event> dummyWaitlist;
 		Launch(queue, global, local, event, dummyWaitlist);
-#else
-		CheckError(clEnqueueNDRangeKernel(queue(), *kernel_, static_cast<cl_uint>(global.size()), nullptr, global.data(),
-																			local.data(), 0, nullptr, event));
-#endif
 	}
 
 	// As above, but with an event waiting list
@@ -825,7 +822,7 @@ public:
 							EventPointer event, const std::vector<Event>& waitForEvents)
 	{
 		std::vector<tart::command_sequence_ptr> waitlist(waitForEvents.size());
-#if 1
+#if 0
 		// get the waitlist
 		if (waitForEvents.size() > 0)
 		{
@@ -877,7 +874,11 @@ public:
 		sequence->recordPipeline(pipeline, adjusted_global, bufs, push);
 		
 		// send it!
+#if 1
+		mDevice->submitSequence(sequence);
+#else
 		mDevice->submitSequence(sequence, 0, waitlist);
+#endif
 		
 		// if event is valid, set the sequence
 		if (event)

@@ -354,7 +354,9 @@ public:
 	}
 	bool IsNVIDIA() const
 	{
-		return Vendor() == "NVIDIA";
+		// ugh, stupid assumptions about subgroup this and that...
+		return false;
+		//return Vendor() == "NVIDIA";
 	}
 	bool IsIntel() const
 	{

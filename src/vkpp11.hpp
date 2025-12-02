@@ -609,7 +609,10 @@ public:
 	explicit Buffer(const Context& context, const BufferAccess access, const size_t size) :
 				access_(access)
 	{
-		buffer_ = context.pointer()->allocateBuffer(size*sizeof(T));
+		if (size == 0)
+			buffer_ = nullptr;
+		else
+			buffer_ = context.pointer()->allocateBuffer(size*sizeof(T));
 	}
 
 	// As above, but now with read/write access as a default

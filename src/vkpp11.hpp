@@ -614,7 +614,7 @@ public:
 		if (size == 0)
 			buffer_ = nullptr;
 		else
-			buffer_ = context.pointer()->allocateBuffer(size*sizeof(T));
+			buffer_ = context.pointer()->allocateBuffer(size*sizeof(T)*2);
 	}
 
 	// As above, but now with read/write access as a default

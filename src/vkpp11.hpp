@@ -849,8 +849,6 @@ public:
 		std::vector<uint8_t> push;
 		for (auto& kv : mNonBufferArgs)
 		{
-			std::cout << "	non buffer arg index: " << kv.first
-				<< "; size: " << kv.second.size() << std::endl;
 			for (uint8_t v : kv.second)
 			{
 				push.push_back(v);

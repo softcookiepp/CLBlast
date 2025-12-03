@@ -28,7 +28,11 @@ template <typename T>
 Xnrm2<T>::Xnrm2(Queue& queue, EventPointer event, const std::string& name)
     : Routine(queue, event, name, {"Xdot"}, PrecisionValue<T>(), {},
               {
-#include "../../kernels/level1/xnrm2.opencl"
+#if VULKAN_API
+	#include "../../kernels-vk/level1/xnrm2.opencl"
+#else
+	#include "../../kernels/level1/xnrm2.opencl"
+#endif
               }) {
 }
 

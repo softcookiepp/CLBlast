@@ -30,25 +30,47 @@ XgemmBatched<T>::XgemmBatched(Queue& queue, EventPointer event, const std::strin
     : Routine(queue, event, name, {"Copy", "Pad", "Transpose", "Padtranspose", "Xgemm", "XgemmDirect", "GemmRoutine"},
               PrecisionValue<T>(), {},
               {
-#include "../../kernels/level3/level3.opencl"
-// (comment to prevent auto-re-ordering)
-#include "../../kernels/level3/copy_fast.opencl"
-#include "../../kernels/level3/copy_pad.opencl"
-#include "../../kernels/level3/transpose_fast.opencl"
-#include "../../kernels/level3/transpose_pad.opencl"
-                  ,  // separated in multiple parts to prevent C1091 in MSVC 2013
-#include "../../kernels/level3/xgemm_direct_part1.opencl"
-#include "../../kernels/level3/xgemm_direct_part2.opencl"
-#include "../../kernels/level3/xgemm_direct_part3.opencl"
-                  ,  // separated in multiple parts to prevent C1091 in MSVC 2013
-#include "../../kernels/level3/xgemm_part1.opencl"
-#include "../../kernels/level3/xgemm_part2.opencl"
-                  ,  // separated in multiple parts to prevent C1091 in MSVC 2013
-#include "../../kernels/level3/xgemm_part3.opencl"
-#include "../../kernels/level3/xgemm_part4.opencl"
-                  ,  // separated in multiple parts to prevent C1091 in MSVC 2013
-#include "../../kernels/level3/xgemm_batched.opencl"
-#include "../../kernels/level3/xgemm_direct_batched.opencl"
+#if VULKAN_API
+	#include "../../kernels-vk/level3/level3.opencl"
+	// (comment to prevent auto-re-ordering)
+	#include "../../kernels-vk/level3/copy_fast.opencl"
+	#include "../../kernels-vk/level3/copy_pad.opencl"
+	#include "../../kernels-vk/level3/transpose_fast.opencl"
+	#include "../../kernels-vk/level3/transpose_pad.opencl"
+					  ,  // separated in multiple parts to prevent C1091 in MSVC 2013
+	#include "../../kernels-vk/level3/xgemm_direct_part1.opencl"
+	#include "../../kernels-vk/level3/xgemm_direct_part2.opencl"
+	#include "../../kernels-vk/level3/xgemm_direct_part3.opencl"
+					  ,  // separated in multiple parts to prevent C1091 in MSVC 2013
+	#include "../../kernels-vk/level3/xgemm_part1.opencl"
+	#include "../../kernels-vk/level3/xgemm_part2.opencl"
+					  ,  // separated in multiple parts to prevent C1091 in MSVC 2013
+	#include "../../kernels-vk/level3/xgemm_part3.opencl"
+	#include "../../kernels-vk/level3/xgemm_part4.opencl"
+					  ,  // separated in multiple parts to prevent C1091 in MSVC 2013
+	#include "../../kernels-vk/level3/xgemm_batched.opencl"
+	#include "../../kernels-vk/level3/xgemm_direct_batched.opencl"
+#else
+	#include "../../kernels/level3/level3.opencl"
+	// (comment to prevent auto-re-ordering)
+	#include "../../kernels/level3/copy_fast.opencl"
+	#include "../../kernels/level3/copy_pad.opencl"
+	#include "../../kernels/level3/transpose_fast.opencl"
+	#include "../../kernels/level3/transpose_pad.opencl"
+					  ,  // separated in multiple parts to prevent C1091 in MSVC 2013
+	#include "../../kernels/level3/xgemm_direct_part1.opencl"
+	#include "../../kernels/level3/xgemm_direct_part2.opencl"
+	#include "../../kernels/level3/xgemm_direct_part3.opencl"
+					  ,  // separated in multiple parts to prevent C1091 in MSVC 2013
+	#include "../../kernels/level3/xgemm_part1.opencl"
+	#include "../../kernels/level3/xgemm_part2.opencl"
+					  ,  // separated in multiple parts to prevent C1091 in MSVC 2013
+	#include "../../kernels/level3/xgemm_part3.opencl"
+	#include "../../kernels/level3/xgemm_part4.opencl"
+					  ,  // separated in multiple parts to prevent C1091 in MSVC 2013
+	#include "../../kernels/level3/xgemm_batched.opencl"
+	#include "../../kernels/level3/xgemm_direct_batched.opencl"
+#endif
               }) {
 }
 

@@ -28,9 +28,15 @@ template <typename T>
 Xger<T>::Xger(Queue& queue, EventPointer event, const std::string& name)
     : Routine(queue, event, name, {"Xger"}, PrecisionValue<T>(), {},
               {
-#include "../../kernels/level2/level2.opencl"
-// (comment to prevent auto-re-ordering)
-#include "../../kernels/level2/xger.opencl"
+#if VULKAN_API
+	#include "../../kernels-vk/level2/level2.opencl"
+	// (comment to prevent auto-re-ordering)
+	#include "../../kernels-vk/level2/xger.opencl"
+#else
+	#include "../../kernels/level2/level2.opencl"
+	// (comment to prevent auto-re-ordering)
+	#include "../../kernels/level2/xger.opencl"
+#endif
               }) {
 }
 

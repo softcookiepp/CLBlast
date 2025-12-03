@@ -57,7 +57,18 @@ void Xaxpy<T>::DoAxpy(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 
   // Determines whether or not the fast-version can be used
   const auto use_faster_kernel =
-      (x_offset == 0) && (x_inc == 1) && (y_offset == 0) && (y_inc == 1) && IsMultiple(n, db_["WPT"] * db_["VW"]);
+#if VULKAN_API
+	true
+#else
+      (x_offset == 0)
+#endif
+	&& (x_inc == 1) &&
+#if VULKAN_API
+	true
+#else
+	(y_offset == 0)
+#endif
+	&& (y_inc == 1) && IsMultiple(n, db_["WPT"] * db_["VW"]);
   const auto use_fastest_kernel = use_faster_kernel && IsMultiple(n, db_["WGS"] * db_["WPT"] * db_["VW"]);
 
   // If possible, run the fast-version of the kernel
@@ -70,17 +81,29 @@ void Xaxpy<T>::DoAxpy(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
   if (use_faster_kernel || use_fastest_kernel) {
     kernel.SetArgument(0, static_cast<int>(n));
     kernel.SetArgument(1, GetRealArg(alpha));
+#if VULKAN_API
+	kernel.SetArgument(2, x_buffer.view(x_offset));
+    kernel.SetArgument(3, y_buffer.view(y_offset));
+#else
     kernel.SetArgument(2, x_buffer());
     kernel.SetArgument(3, y_buffer());
+#endif
   } else {
     kernel.SetArgument(0, static_cast<int>(n));
     kernel.SetArgument(1, GetRealArg(alpha));
+#if VULKAN_API
+    kernel.SetArgument(2, x_buffer.view(x_offset));
+    kernel.SetArgument(3, static_cast<int>(x_inc));
+    kernel.SetArgument(4, y_buffer.view(y_offset));
+    kernel.SetArgument(5, static_cast<int>(y_inc));
+#else
     kernel.SetArgument(2, x_buffer());
     kernel.SetArgument(3, static_cast<int>(x_offset));
     kernel.SetArgument(4, static_cast<int>(x_inc));
     kernel.SetArgument(5, y_buffer());
     kernel.SetArgument(6, static_cast<int>(y_offset));
     kernel.SetArgument(7, static_cast<int>(y_inc));
+#endif
   }
 
   // Launches the kernel

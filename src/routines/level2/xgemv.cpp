@@ -28,9 +28,15 @@ template <typename T>
 Xgemv<T>::Xgemv(Queue& queue, EventPointer event, const std::string& name)
     : Routine(queue, event, name, {"Xgemv", "XgemvFast", "XgemvFastRot", "TrsvRoutine"}, PrecisionValue<T>(), {},
               {
-#include "../../kernels/level2/xgemv.opencl"
-#include "../../kernels/level2/xgemv_fast.opencl"
-#include "../../kernels/level2/xtrsv.opencl"
+#if VULKAN_API
+	#include "../../kernels-vk/level2/xgemv.opencl"
+	#include "../../kernels-vk/level2/xgemv_fast.opencl"
+	#include "../../kernels-vk/level2/xtrsv.opencl"
+#else
+	#include "../../kernels/level2/xgemv.opencl"
+	#include "../../kernels/level2/xgemv_fast.opencl"
+	#include "../../kernels/level2/xtrsv.opencl"
+#endif
               }) {
 }
 

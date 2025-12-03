@@ -32,14 +32,25 @@ Xconvgemm<T>::Xconvgemm(Queue& queue, EventPointer event, const std::string& nam
     : Routine(queue, event, name, {"Xconvgemm"}, PrecisionValue<T>(), {},
               {
                   (method == ConvGemmMethod::kWithIm2Col) ? "#define CONVGEMM_WITH_IM2COL\n" : "",
-#include "../../kernels/level3/level3.opencl"
+#if VULKAN_API
+	#include "../../kernels-vk/level3/level3.opencl"
                   ,  // separated in multiple parts to prevent C1091 in MSVC 2013
-#include "../../kernels/level3/xgemm_direct_part1.opencl"
-#include "../../kernels/level3/xgemm_direct_part2.opencl"
-#include "../../kernels/level3/xgemm_direct_part3.opencl"
-                  ,  // separated in multiple parts to prevent C1091 in MSVC 2013
-#include "../../kernels/levelx/xconvgemm_part1.opencl"
-#include "../../kernels/levelx/xconvgemm_part2.opencl"
+	#include "../../kernels-vk/level3/xgemm_direct_part1.opencl"
+	#include "../../kernels-vk/level3/xgemm_direct_part2.opencl"
+	#include "../../kernels-vk/level3/xgemm_direct_part3.opencl"
+					  ,  // separated in multiple parts to prevent C1091 in MSVC 2013
+	#include "../../kernels-vk/levelx/xconvgemm_part1.opencl"
+	#include "../../kernels-vk/levelx/xconvgemm_part2.opencl"
+#else
+	#include "../../kernels/level3/level3.opencl"
+					  ,  // separated in multiple parts to prevent C1091 in MSVC 2013
+	#include "../../kernels/level3/xgemm_direct_part1.opencl"
+	#include "../../kernels/level3/xgemm_direct_part2.opencl"
+	#include "../../kernels/level3/xgemm_direct_part3.opencl"
+					  ,  // separated in multiple parts to prevent C1091 in MSVC 2013
+	#include "../../kernels/levelx/xconvgemm_part1.opencl"
+	#include "../../kernels/levelx/xconvgemm_part2.opencl"
+#endif
               }),
       method_(method) {
 }

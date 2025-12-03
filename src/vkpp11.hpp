@@ -741,7 +741,7 @@ public:
 	tart::buffer_ptr operator()() const { return buffer_; }
 	
 	// get elementwise view of underlying buffer
-	tart::buffer_ptr elementwiseView(size_t nElements)
+	tart::buffer_ptr view(size_t nElements) const
 	{
 		return buffer_->view(nElements*sizeof(T));
 	}

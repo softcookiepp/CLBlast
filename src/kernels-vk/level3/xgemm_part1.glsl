@@ -221,11 +221,11 @@ INLINE_FUNC void GlobalToLocalA(const __global realM* restrict agm, LOCAL_PTR re
 																const int kSizeM, const int tid, const int kwg) {
 	const int la0 = tid % MDIMA;
 	const int la1 = tid / MDIMA;
-	#pragma unroll
-	for (int _mia = 0; _mia < MWA/VWM; _mia += 1) {
-		#pragma unroll
-		for (int _kia = 0; _kia < KWA; _kia += 1) {
-
+	
+	for (int _mia = 0; _mia < MWA/VWM; _mia += 1)
+	{
+		for (int _kia = 0; _kia < KWA; _kia += 1)
+		{
 			// Computes the indices based on strided/non-strided access
 			#if STRM == 0
 				int mg = _mia + la0*(MWA/VWM);
@@ -251,9 +251,9 @@ INLINE_FUNC void GlobalToLocalB(const __global realN* restrict bgm, LOCAL_PTR re
 																const int kSizeN, const int tid, const int kwg) {
 	const int lb0 = tid % NDIMB;
 	const int lb1 = tid / NDIMB;
-	#pragma unroll
+	
 	for (int _kib = 0; _kib < KWB; _kib += 1) {
-		#pragma unroll
+		
 		for (int _nib = 0; _nib < NWB/VWN; _nib += 1) {
 
 			// Computes the indices based on strided/non-strided access
@@ -284,9 +284,11 @@ INLINE_FUNC realM GlobalToPrivateA(const __global realM* restrict agm, const int
 																	 const int kSizeM, const int idk, const int kwg) {
 	// Computes the indices based on strided/non-strided access
 	#if STRM == 0
-		int mg = _mi + get_local_id(0)*(MWI/VWM);
+		//int mg = _mi + get_local_id(0)*(MWI/VWM);
+		int mg = _mi + gl_LocalInvocationID[0]*(MWI/VWM);
 	#elif STRM == 1
-		int mg = get_local_id(0) + _mi*MDIMC;
+		//int mg = get_local_id(0) + _mi*MDIMC;
+		int mg = gl_LocalInvocationID[0] + _mi*MDIMC;
 	#endif
 
 	// Computes the indices for the global memory
@@ -303,9 +305,10 @@ INLINE_FUNC realN GlobalToPrivateB(const __global realN* restrict bgm, const int
 																	 const int kSizeN, const int idk) {
 	// Computes the indices based on strided/non-strided access
 	#if STRN == 0
-		int ng = _ni + get_local_id(1)*(NWI/VWN);
+		//int ng = _ni + get_local_id(1)*(NWI/VWN);
+		int ng = _ni + gl_LocalInvocationID[1]*(NWI/VWN);
 	#elif STRN == 1
-		int ng = get_local_id(1) + _ni*NDIMC;
+		int ng = gl_LocalInvocationID[1] + _ni*NDIMC;
 	#endif
 
 	// Computes the indices for the global memory

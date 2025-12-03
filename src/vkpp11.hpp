@@ -469,7 +469,6 @@ using ContextPointer = tart::device_ptr;
 // =================================================================================================
 
 // C++11 version of 'cl_program'.
-// I may keep this abstraction, actually
 class Program {
 	std::string mSource;
 	tart::device_ptr mDevice = nullptr;

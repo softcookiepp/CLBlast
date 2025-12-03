@@ -468,10 +468,23 @@ public:
 using ContextPointer = tart::device_ptr;
 // =================================================================================================
 
+// class for bundling both tart::CLProgram and multi-pipeline GLSL modules into the same object for easy sharing
+class ProgramContainerThingy
+{
+	tart::cl_program_ptr mCLProgram = nullptr;
+public:
+	ProgramContainerThingy(tart::cl_program_ptr clProgram)
+	{
+		mCLProgram = clProgram;
+	}
+	ProgramContainerThingy(std::string);
+};
+
 // C++11 version of 'cl_program'.
 class Program {
 	std::string mSource;
 	tart::device_ptr mDevice = nullptr;
+	std::shared_ptr<ProgramContainerThingy> mProgramContainer = nullptr;
 	tart::shader_module_ptr mShaderModule = nullptr;
 	tart::cl_program_ptr mCLProgram = nullptr;
 public:

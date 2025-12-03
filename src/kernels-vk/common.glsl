@@ -45,46 +45,46 @@
 
 // Half-precision
 #if PRECISION == 16
-	typedef float16_t real;
-	typedef f16vec2 real2;
-	typedef f16vec4 real4;
-	//typedef half8 real8;
-	//typedef half16 real16;
+	#define real float16_t
+	#define real2 f16vec2
+	#define real4 f16vec4
+	//#define half8 real8;
+	//#define half16 real16;
 	#define ZERO 0
 	#define ONE 1
 	#define SMALLEST -1.0e14
 
 // Single-precision
 #elif PRECISION == 32
-	typedef float real;
-	typedef vec2 real2;
-	typedef vec4 real4;
-	//typedef float8 real8;
-	//typedef float16 real16;
+	#define real float
+	#define real2 vec2
+	#define real4 vec4
+	//#define float8 real8;
+	//#define float16 real16;
 	#define ZERO 0.0f
 	#define ONE 1.0f
 	#define SMALLEST -1.0e37f
 
 // Double-precision 
 #elif PRECISION == 64
-	typedef double real;
-	typedef dvec2 real2;
-	typedef dvec4 real4;
-	//typedef double8 real8;
-	//typedef double16 real16;
+	#define real double
+	#define real2 dvec2
+	#define real4 dvec4
+	//#define double8 real8;
+	//#define double16 real16;
 	#define ZERO 0.0
 	#define ONE 1.0
 	#define SMALLEST -1.0e37
 
 // Complex single-precision
 #elif PRECISION == 3232
-	typedef vec2 real;
-	typedef struct cfloat2 {real x; real y;} real2;
-	typedef struct cfloat4 {real x; real y; real z; real w;} real4;
+	#define real vec2
+	#define real2 struct cfloat2 {real x; real y;}
+	#define real4 struct cfloat4 {real x; real y; real z; real w;}
 	// come back to this later, it may be useful
-	typedef struct cfloat8 {real s0; real s1; real s2; real s3;
+	#define struct cfloat8 {real s0; real s1; real s2; real s3;
 													real s4; real s5; real s6; real s7;} real8;
-	typedef struct cfloat16 {real s0; real s1; real s2; real s3;
+	#define struct cfloat16 {real s0; real s1; real s2; real s3;
 													 real s4; real s5; real s6; real s7;
 													 real s8; real s9; real sA; real sB;
 													 real sC; real sD; real sE; real sF;} real16;
@@ -94,12 +94,12 @@
 
 // Complex double-precision
 #elif PRECISION == 6464
-	typedef dvec2 real;
-	typedef struct cdouble2 {real x; real y;} real2;
-	typedef struct cdouble4 {real x; real y; real z; real w;} real4;
-	typedef struct cdouble8 {real s0; real s1; real s2; real s3;
+	#define dvec2 real;
+	#define real2 struct cdouble2 {real x; real y;} 
+	#define struct cdouble4 {real x; real y; real z; real w;} real4;
+	#define struct cdouble8 {real s0; real s1; real s2; real s3;
 													 real s4; real s5; real s6; real s7;} real8;
-	typedef struct cdouble16 {real s0; real s1; real s2; real s3;
+	#define struct cdouble16 {real s0; real s1; real s2; real s3;
 														real s4; real s5; real s6; real s7;
 														real s8; real s9; real sA; real sB;
 														real sC; real sD; real sE; real sF;} real16;
@@ -110,22 +110,24 @@
 
 // Single-element version of a complex number
 #if PRECISION == 3232
-	typedef float singlereal;
+	#define singlereal float 
 #elif PRECISION == 6464
-	typedef double singlereal;
+	#define singlereal double 
 #else
-	typedef real singlereal;
+	#define singlereal real 
 #endif
 
 // Converts a 'real argument' value to a 'real' value as passed to the kernel. Normally there is no
 // conversion, but half-precision is not supported as kernel argument so it is converted from float.
 #if PRECISION == 16
-	typedef float real_arg;
+	#define real_arg float 
 	#define GetRealArg(x) float16_t(x);
 #else
-	typedef real real_arg;
+	#define real_arg real 
 	#define GetRealArg(x) x
 #endif
+
+
 
 // Pointers to local memory objects (using a define because CUDA doesn't need them)
 #ifndef LOCAL_PTR
@@ -276,6 +278,12 @@
 
 // =================================================================================================
 
+// vector load methods
+#define vload2_single_alignment(index, buf) real2(INDEX(buf, index), INDEX(buf, index+1))
+#define vload4_signle_alignment(index, buf) real4(INDEX(buf, index), INDEX(buf, index+1), INDEX(buf, index+2), INDEX(buf, index+3))
+
+// =================================================================================================
+
 // Shuffled workgroup indices to avoid partition camping, see below. For specific devices, this is
 // enabled (see src/routine.cc).
 #ifndef USE_STAGGERED_INDICES
@@ -300,9 +308,9 @@
 	}
 #else
 	//INLINE_FUNC int GetGroupID1() { return get_group_id(1); }
-	int GetGroupID1() { return gl_WorkGroupSize.y; }
+	uint GetGroupID1() { return gl_WorkGroupSize.y; }
 	//INLINE_FUNC int GetGroupID0() { return get_group_id(0); }
-	int GetGroupID0() { return gl_WorkGroupSize.x; }
+	uint GetGroupID0() { return gl_WorkGroupSize.x; }
 #endif
 
 #define GET_GLOBAL_SIZE(idx) (gl_NumWorkGroups[idx] * gl_WorkGroupSize[idx])

@@ -28,9 +28,15 @@ template <typename T>
 Xaxpy<T>::Xaxpy(Queue& queue, EventPointer event, const std::string& name)
     : Routine(queue, event, name, {"Xaxpy"}, PrecisionValue<T>(), {},
               {
-#include "../../kernels/level1/level1.opencl"
-// (comment to prevent auto-re-ordering)
-#include "../../kernels/level1/xaxpy.opencl"
+#if VULKAN_API
+	#include "../../kernels-vk/level1/level1.opencl"
+	// (comment to prevent auto-re-ordering)
+	#include "../../kernels-vk/level1/xaxpy.opencl"
+#else
+	#include "../../kernels/level1/level1.opencl"
+	// (comment to prevent auto-re-ordering)
+	#include "../../kernels/level1/xaxpy.opencl"
+#endif
               }) {
 }
 

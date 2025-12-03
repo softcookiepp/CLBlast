@@ -12,6 +12,7 @@ namespace database {
 
 const DatabaseEntry CopyDouble = {
   "Copy", Precision::kDouble, {"COPY_DIMX", "COPY_DIMY", "COPY_VW", "COPY_WPT"}, {
+#if 0
     { // AMD GPUs
       kDeviceTypeGPU, "AMD", {
         { "Ellesmere", {
@@ -285,10 +286,12 @@ const DatabaseEntry CopyDouble = {
         } },
       }
     },
+#endif
     { // Default
       kDeviceTypeAll, "default", {
         { "default", {
-          { kDeviceNameDefault                                        , Params{ 8, 8, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } },
+          //{ kDeviceNameDefault                                        , Params{ 8, 8, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } },
+          { kDeviceNameDefault                                        , Params{ 8, 8, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } },
         } },
       }
     },

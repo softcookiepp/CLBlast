@@ -27,7 +27,11 @@ template <typename T>
 Xcol2im<T>::Xcol2im(Queue& queue, EventPointer event, const std::string& name)
     : Routine(queue, event, name, {"Copy"}, PrecisionValue<T>(), {},
               {
-#include "../../kernels/levelx/col2im.opencl"
+#if VULKAN_API
+	#include "../../kernels-vk/levelx/col2im.opencl"
+#else
+	#include "../../kernels/levelx/col2im.opencl"
+#endif
               }) {
 }
 

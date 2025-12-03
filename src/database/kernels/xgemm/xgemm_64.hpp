@@ -12,6 +12,7 @@ namespace database {
 
 const DatabaseEntry XgemmDouble = {
   "Xgemm", Precision::kDouble, {"GEMMK", "KREG", "KWG", "KWI", "MDIMA", "MDIMC", "MWG", "NDIMB", "NDIMC", "NWG", "SA", "SB", "STRM", "STRN", "VWM", "VWN"}, {
+#if 0
     { // AMD GPUs
       kDeviceTypeGPU, "AMD", {
         { "Ellesmere", {
@@ -281,10 +282,12 @@ const DatabaseEntry XgemmDouble = {
         } },
       }
     },
+#endif
     { // Default
       kDeviceTypeAll, "default", {
         { "default", {
-          { kDeviceNameDefault                                        , Params{ 0, 1, 32, 2, 8, 8, 16, 8, 8, 32, 1, 1, 0, 0, 1, 4 } },
+          //{ kDeviceNameDefault                                        , Params{ 0, 1, 32, 2, 8, 8, 16, 8, 8, 32, 1, 1, 0, 0, 1, 4 } },
+          { kDeviceNameDefault                                        , Params{ 0, 1, 32, 2, 8, 8, 16, 8, 8, 32, 1, 1, 0, 0, 1, 1 } },
         } },
       }
     },

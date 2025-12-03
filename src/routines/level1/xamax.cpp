@@ -28,7 +28,11 @@ template <typename T>
 Xamax<T>::Xamax(Queue& queue, EventPointer event, const std::string& name)
     : Routine(queue, event, name, {"Xdot"}, PrecisionValue<T>(), {},
               {
-#include "../../kernels/level1/xamax.opencl"
+#if VULKAN_API
+	#include "../../kernels-vk/level1/xamax.opencl"
+#else
+	#include "../../kernels/level1/xamax.opencl"
+#endif
               }) {
 }
 

@@ -12,6 +12,7 @@ namespace database {
 
 const DatabaseEntry CopyHalf = {
   "Copy", Precision::kHalf, {"COPY_DIMX", "COPY_DIMY", "COPY_VW", "COPY_WPT"}, {
+#if 0
     { // AMD GPUs
       kDeviceTypeGPU, "AMD", {
         { "Ellesmere", {
@@ -161,10 +162,12 @@ const DatabaseEntry CopyHalf = {
         } },
       }
     },
+#endif
     { // Default
       kDeviceTypeAll, "default", {
         { "default", {
-          { kDeviceNameDefault                                        , Params{ 16, 8, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } },
+          //{ kDeviceNameDefault                                        , Params{ 16, 8, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } },
+          { kDeviceNameDefault                                        , Params{ 16, 8, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } },
         } },
       }
     },

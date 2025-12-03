@@ -12,6 +12,7 @@ namespace database {
 
 const DatabaseEntry CopySingle = {
   "Copy", Precision::kSingle, {"COPY_DIMX", "COPY_DIMY", "COPY_VW", "COPY_WPT"}, {
+#if 0
     { // AMD GPUs
       kDeviceTypeGPU, "AMD", {
         { "Ellesmere", {
@@ -355,10 +356,12 @@ const DatabaseEntry CopySingle = {
         } },
       }
     },
+#endif
     { // Default
       kDeviceTypeAll, "default", {
         { "default", {
-          { kDeviceNameDefault                                        , Params{ 8, 8, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } },
+          //{ kDeviceNameDefault                                        , Params{ 8, 8, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } },
+          { kDeviceNameDefault                                        , Params{ 8, 8, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } },
         } },
       }
     },

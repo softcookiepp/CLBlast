@@ -28,7 +28,11 @@ template <typename T>
 Xasum<T>::Xasum(Queue& queue, EventPointer event, const std::string& name)
     : Routine(queue, event, name, {"Xdot"}, PrecisionValue<T>(), {},
               {
-#include "../../kernels/level1/xasum.opencl"
+#if VULKAN_API
+	#include "../../kernels-vk/level1/xasum.opencl"
+#else
+	#include "../../kernels/level1/xasum.opencl"
+#endif
               }) {
 }
 

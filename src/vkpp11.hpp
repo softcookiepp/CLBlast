@@ -739,6 +739,12 @@ public:
 
 	// Accessor to the private data-member
 	tart::buffer_ptr operator()() const { return buffer_; }
+	
+	// get elementwise view of underlying buffer
+	tart::buffer_ptr elementwiseView(size_t nElements)
+	{
+		return buffer_->view(nElements*sizeof(T));
+	}
 
 
 private:

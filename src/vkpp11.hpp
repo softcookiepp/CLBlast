@@ -513,7 +513,7 @@ public:
 			spec.resize(localSize.size()*sizeof(uint32_t));
 			std::memcpy(spec.data(), localSize.data(), spec.size());
 		}
-		std::cout << "fetching pipeline for kernel: " << entryPoint << std::endl;
+		//std::cout << "fetching pipeline for kernel: " << entryPoint << std::endl;
 		return mDevice.lock()->createPipeline(mShaderModules[entryPoint], "main", spec, push);
 		//throw std::runtime_error("getPipeline not implemented");
 	}

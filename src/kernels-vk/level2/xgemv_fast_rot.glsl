@@ -89,6 +89,8 @@ layout(push_constant) uniform XgemvFastRot
 	int y_inc;
 	//int do_conjugate;
 	//int parameter;
+	//int kl_unused;
+	//int ku_unused;
 } args;
 
 shared real tile[WPT3][WGS3];

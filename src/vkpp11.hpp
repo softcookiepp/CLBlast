@@ -484,8 +484,8 @@ public:
 	}
 	ProgramContainerThingy(tart::device_ptr device, std::map<std::string, tart::shader_module_ptr>& shaderModules):
 		mDevice(device),
-		mShaderModules(shaderModules),
-		mIsGLSL(true)
+		mIsGLSL(true),
+		mShaderModules(shaderModules)
 	{
 	}
 	
@@ -504,7 +504,10 @@ public:
 	
 	tart::pipeline_ptr getPipeline(std::string& entryPoint, std::vector<uint32_t>& localSize, std::vector<uint8_t>& push)
 	{
-		throw std::runtime_error("getPipeline not implemented");
+		std::vector<uint8_t> spec(localSize.size()*sizeof(uint32_t));
+		std::memcpy(spec.data(), localSize.data(), spec.size());
+		return mDevice.lock()->createPipeline(mShaderModules[entryPoint], "main", spec, push);
+		//throw std::runtime_error("getPipeline not implemented");
 	}
 };
 

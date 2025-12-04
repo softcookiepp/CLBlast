@@ -35,7 +35,7 @@ Xgemv<T>::Xgemv(Queue& queue, EventPointer event, const std::string& name)
 	,
 	#include "../../kernels-vk/level2/xgemv_fast_rot.glsl"
 	,
-	#include "../../kernels-vk/level2/xtrsv.glsl"
+	#include "../../kernels-vk/level2/xtrsv-forward.glsl" // no idea if this is the right one or not
 #else
 	#include "../../kernels/level2/xgemv.opencl"
 	#include "../../kernels/level2/xgemv_fast.opencl"

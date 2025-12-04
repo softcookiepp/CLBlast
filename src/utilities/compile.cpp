@@ -97,7 +97,7 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 	if (isGLSL)
 	{
 		header_string +=
-#include "kernels-vk/common.glsl"
+#include "kernels-vk/common.glsl.inl"
 		;
 	}
 	else
@@ -133,7 +133,14 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 	// Compiles the kernel
 	std::shared_ptr<Program> program = nullptr;
 	if (isGLSL)
+	{
+		// append the header to everything
+		for (auto& pair : kernelSources)
+		{
+			pair.second = "#version 450\n\n" + header_string + pair.second;
+		}
 		program = std::make_shared<Program>(context, kernelSources);
+	}
 	else
 		program = std::make_shared<Program>(context, kernel_string);
 	try {

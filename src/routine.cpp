@@ -90,7 +90,7 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 	log_debug(routine_info);
 #if VULKAN_API
 	// no searchy yet
-	if (!mIsGLSL)
+	//if (!mIsGLSL)
 #else
 #endif
 	{
@@ -167,6 +167,9 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 		}
 		std::string dummy("");
 		program_ = CompileFromSource(dummy, precision_, routine_name_, device_, context_, options, 0, false, true, kernelSources);
+		
+		ProgramCache::Instance().Store(ProgramKey{context_(), device_(), precision_, routine_info},
+																	 std::shared_ptr<Program>{program_});
 		
 		//throw std::runtime_error("not implemented!");
 	}

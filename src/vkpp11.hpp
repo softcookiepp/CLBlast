@@ -504,8 +504,16 @@ public:
 	
 	tart::pipeline_ptr getPipeline(std::string& entryPoint, std::vector<uint32_t>& localSize, std::vector<uint8_t>& push)
 	{
-		std::vector<uint8_t> spec(localSize.size()*sizeof(uint32_t));
-		std::memcpy(spec.data(), localSize.data(), spec.size());
+		if (!mIsGLSL && mCLProgram)
+			return mCLProgram->getPipeline(entryPoint, localSize, push);
+
+		std::vector<uint8_t> spec;
+		if (mShaderModules[entryPoint]->getEntryPointData("main").specConstEntries.size() > 0)
+		{
+			spec.resize(localSize.size()*sizeof(uint32_t));
+			std::memcpy(spec.data(), localSize.data(), spec.size());
+		}
+		std::cout << "fetching pipeline for kernel: " << entryPoint << std::endl;
 		return mDevice.lock()->createPipeline(mShaderModules[entryPoint], "main", spec, push);
 		//throw std::runtime_error("getPipeline not implemented");
 	}

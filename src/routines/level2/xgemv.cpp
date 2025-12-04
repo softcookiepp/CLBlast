@@ -29,13 +29,13 @@ Xgemv<T>::Xgemv(Queue& queue, EventPointer event, const std::string& name)
 		: Routine(queue, event, name, {"Xgemv", "XgemvFast", "XgemvFastRot", "TrsvRoutine"}, PrecisionValue<T>(), {},
 							{
 #if VULKAN_API
-	#include "../../kernels-vk/level2/xgemv.glsl"
+	#include "../../kernels-vk/level2/xgemv.glsl.inl"
 	,
-	#include "../../kernels-vk/level2/xgemv_fast.glsl"
+	#include "../../kernels-vk/level2/xgemv_fast.glsl.inl"
 	,
-	#include "../../kernels-vk/level2/xgemv_fast_rot.glsl"
+	#include "../../kernels-vk/level2/xgemv_fast_rot.glsl.inl"
 	,
-	#include "../../kernels-vk/level2/xtrsv-forward.glsl" // no idea if this is the right one or not
+	#include "../../kernels-vk/level2/xtrsv-forward.glsl.inl" // no idea if this is the right one or not
 #else
 	#include "../../kernels/level2/xgemv.opencl"
 	#include "../../kernels/level2/xgemv_fast.opencl"

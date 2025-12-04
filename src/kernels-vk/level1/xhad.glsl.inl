@@ -1,5 +1,3 @@
-#version 450
-#include "../common.glsl"
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -12,9 +10,8 @@
 //
 // =================================================================================================
 
-// Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
-//R"(
+R"(
 
 // =================================================================================================
 
@@ -160,6 +157,6 @@ void XhadFastest(const int n, const real_arg arg_alpha, const real_arg arg_beta,
 // =================================================================================================
 
 // End of the C++11 raw string literal
-//)"
+)"
 
 // =================================================================================================

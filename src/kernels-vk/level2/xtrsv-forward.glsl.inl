@@ -1,6 +1,4 @@
-//#version 450
-//#include "../common.glsl"
-//#define ROUTINE_TRSV 1
+
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -9,9 +7,8 @@
 //
 // =================================================================================================
 
-// Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
-//R"(
+R"(
 
 // =================================================================================================
 #define ROUTINE_TRSV
@@ -37,7 +34,7 @@
 	layout(local_size_x = TRSV_BLOCK_SIZE, local_size_y = 1, local_size_z = 1) in;
 #endif
 
-layout(push_constant) uniform trsv_backward
+layout(push_constant) uniform trsv_forward
 {
 	int n;
 #if USE_BDA
@@ -90,8 +87,8 @@ void main()
 
 	// Computes the result (single-threaded for now)
 	if (tid == 0) {
-		for (int i = args.n - 1; i >= 0; --i) {
-			for (int j = i + 1; j < args.n; ++j) {
+		for (int i = 0; i < args.n; ++i) {
+			for (int j = 0; j < i; ++j) {
 				MultiplySubtract(xlm[i], alm[i][j], xlm[j]);
 			}
 			if (args.is_unit_diagonal == 0) { DivideFull(xlm[i], xlm[i], alm[i][i]); }
@@ -109,6 +106,6 @@ void main()
 // =================================================================================================
 
 // End of the C++11 raw string literal
-//)"
+)"
 
 // =================================================================================================

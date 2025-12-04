@@ -162,7 +162,6 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 		for (size_t i = 0; i < source.size(); i += 1)
 		{
 			std::string kernelSource(db_(kernel_names_[i]).GetDefines());
-			std::cout << kernelSource << std::endl;
 			kernelSources.emplace(kernel_names_[i], preSources[i]);
 		}
 		std::string dummy("");

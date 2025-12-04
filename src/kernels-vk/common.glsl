@@ -42,8 +42,8 @@
 	#define real4 f16vec4
 	//#define half8 real8;
 	//#define half16 real16;
-	#define ZERO 0
-	#define ONE 1
+	#define ZERO float16_t(0.0)
+	#define ONE float16_t(1.0)
 	#define SMALLEST -1.0e14
 
 // Single-precision
@@ -71,30 +71,37 @@
 // Complex single-precision
 #elif PRECISION == 3232
 	#define real vec2
-	#define real2 struct cfloat2 {real x; real y;}
-	#define real4 struct cfloat4 {real x; real y; real z; real w;}
-	// come back to this later, it may be useful
-	#define struct cfloat8 {real s0; real s1; real s2; real s3;
-													real s4; real s5; real s6; real s7;} real8;
-	#define struct cfloat16 {real s0; real s1; real s2; real s3;
+	struct cfloat2 {real x; real y;};
+	#define real2 cfloat2;
+	struct cfloat4 {real x; real y; real z; real w;};
+	#define real4 cfloat4
+	struct cfloat8 {real s0; real s1; real s2; real s3;
+		real s4; real s5; real s6; real s7;};
+	#define real8 cfloat8
+	struct cfloat16 {real s0; real s1; real s2; real s3;
 													 real s4; real s5; real s6; real s7;
 													 real s8; real s9; real sA; real sB;
-													 real sC; real sD; real sE; real sF;} real16;
+													 real sC; real sD; real sE; real sF;};
+	#define real16 cfloat16
 	#define ZERO 0.0f
 	#define ONE 1.0f
 	#define SMALLEST -1.0e37f
 
 // Complex double-precision
 #elif PRECISION == 6464
-	#define dvec2 real;
-	#define real2 struct cdouble2 {real x; real y;} 
-	#define struct cdouble4 {real x; real y; real z; real w;} real4;
-	#define struct cdouble8 {real s0; real s1; real s2; real s3;
-													 real s4; real s5; real s6; real s7;} real8;
-	#define struct cdouble16 {real s0; real s1; real s2; real s3;
+	#define real dvec2
+	struct cdouble2 {real x; real y;};
+	#define real2 cdouble2
+	struct cdouble4 {real x; real y; real z; real w;};
+	#define real4 cdouble4
+	struct cdouble8 {real s0; real s1; real s2; real s3;
+													 real s4; real s5; real s6; real s7;};
+	#define real8 cdouble8
+	struct cdouble16 {real s0; real s1; real s2; real s3;
 														real s4; real s5; real s6; real s7;
 														real s8; real s9; real sA; real sB;
-														real sC; real sD; real sE; real sF;} real16;
+														real sC; real sD; real sE; real sF;};
+	#define real16 cdouble16
 	#define ZERO 0.0
 	#define ONE 1.0
 	#define SMALLEST -1.0e37
@@ -113,7 +120,7 @@
 // conversion, but half-precision is not supported as kernel argument so it is converted from float.
 #if PRECISION == 16
 	#define real_arg float 
-	#define GetRealArg(x) float16_t(x);
+	#define GetRealArg(x) float16_t(x)
 #else
 	#define real_arg real 
 	#define GetRealArg(x) x
@@ -241,7 +248,8 @@
 
 // The scalar AXPBY function
 #if PRECISION == 3232 || PRECISION == 6464
-	#define AXPBY(e,a,b,c,d) e.x = MulReal(a,b) + MulReal(c,d); e.y = MulImag(a,b) + MulImag(c,d)
+	//#define AXPBY(e,a,b,c,d) e.x = MulReal(a,b) + MulReal(c,d); e.y = MulImag(a,b) + MulImag(c,d)
+	#define AXPBY(e,a,b,c,d) e = real(MulReal(a,b) + MulReal(c,d), MulImag(a,b) + MulImag(c,d))
 #else
 	#define AXPBY(e,a,b,c,d) e = a*b + c*d
 #endif

@@ -26,8 +26,20 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
                                            const std::string& routine_name, const Device& device,
                                            const Context& context, std::vector<std::string>& options,
                                            const size_t run_preprocessor,  // 0: platform dependent, 1: always, 2: never
+                                           const bool silent
+#if VULKAN_API
+										, bool isGLSL,
+											std::map<std::string, std::string>& kernelSources
+#endif
+                                           );
+// fewer arguments because stuff is picky    
+#if VULKAN_API
+std::shared_ptr<Program> CompileFromSource(const std::string& source_string, const Precision precision,
+                                           const std::string& routine_name, const Device& device,
+                                           const Context& context, std::vector<std::string>& options,
+                                           const size_t run_preprocessor,  // 0: platform dependent, 1: always, 2: never
                                            const bool silent = false);
-
+#endif
 // =================================================================================================
 }  // namespace clblast
 

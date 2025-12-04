@@ -14,14 +14,6 @@
 
 #define USE_BDA 0
 
-#if 0 // defined(cl_khr_expect_assume)
-#pragma OPENCL EXTENSION cl_khr_expect_assume : enable
-#endif
-
-#if 0 // !defined(__has_builtin)
-#define __has_builtin(x) 0
-#endif
-
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this file is used outside of the CLBlast library.
 #ifndef PRECISION
@@ -151,7 +143,7 @@
 // ensure all spec constants related to workgroup size are here and ready
 #if RELAX_WORKGROUP_SIZE
 	layout(local_size_x_id = 0, local_size_y_id = 1, local_size_z_id = 2) in;
-#else
+#endif
 
 // Sets a variable to zero
 #if PRECISION == 3232 || PRECISION == 6464
@@ -315,9 +307,16 @@
 
 #define GET_GLOBAL_SIZE(idx) (gl_NumWorkGroups[idx] * gl_WorkGroupSize[idx])
 
+// because I am extremely lazy hehe
+#define get_global_id(dim) int(gl_GlobalInvocationID[dim])
+#define get_local_id(dim) int(gl_LocalInvocationID[dim])
+#define get_group_id(dim) int(gl_WorkGroupID[dim])
+
+
 // =================================================================================================
 
 // End of the C++11 raw string literal
+
 //)"
 
 // =================================================================================================

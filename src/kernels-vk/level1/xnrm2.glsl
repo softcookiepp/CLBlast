@@ -27,7 +27,6 @@
 
 // The main reduction kernel, performing the multiplication and the majority of the operation
 #if RELAX_WORKGROUP_SIZE == 0
-	//__kernel __attribute__((reqd_work_group_size(WGS, 1, 1)))
 	layout(local_size_x = WGS1, local_size_y = 1, local_size_z = 1) in;
 #endif
 

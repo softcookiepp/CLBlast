@@ -30,14 +30,23 @@ Xgemv<T>::Xgemv(Queue& queue, EventPointer event, const std::string& name)
               {
 #if VULKAN_API
 	#include "../../kernels-vk/level2/xgemv.opencl"
+	,
 	#include "../../kernels-vk/level2/xgemv_fast.opencl"
+	,
+	#include "../../kernels-vk/level2/xgemv_fast_rot.opencl"
+	,
 	#include "../../kernels-vk/level2/xtrsv.opencl"
 #else
 	#include "../../kernels/level2/xgemv.opencl"
 	#include "../../kernels/level2/xgemv_fast.opencl"
 	#include "../../kernels/level2/xtrsv.opencl"
 #endif
-              }) {
+              }
+#if VULKAN_API
+	, true
+#endif
+	)
+{
 }
 
 // =================================================================================================

@@ -471,13 +471,26 @@ using ContextPointer = tart::device_ptr;
 // class for bundling both tart::CLProgram and multi-pipeline GLSL modules into the same object for easy sharing
 class ProgramContainerThingy
 {
+	bool mIsGLSL = false;
 	tart::cl_program_ptr mCLProgram = nullptr;
+	std::map<std::string, tart::shader_module_ptr> mShaderModules;
 public:
 	ProgramContainerThingy(tart::cl_program_ptr clProgram)
 	{
+		mIsGLSL = false;
 		mCLProgram = clProgram;
 	}
-	ProgramContainerThingy(std::string);
+	ProgramContainerThingy(std::map<std::string, tart::shader_module_ptr>& shaderModules):
+		mShaderModules(shaderModules),
+		mIsGLSL(true)
+	{
+	}
+	
+	ProgramContainerThingy(std::map<std::string, std::string>& shaderSources):
+		mIsGLSL(true)
+	{
+		throw std::runtime_error("not implemented!");
+	}
 };
 
 // C++11 version of 'cl_program'.
@@ -489,9 +502,16 @@ class Program {
 	tart::cl_program_ptr mCLProgram = nullptr;
 public:
 	// Source-based constructor with memory management
-	explicit Program(const clblast::Context& context, const std::string& source) {
+	explicit Program(const clblast::Context& context, const std::string& source)
+	{
 		mSource = source;
 		mDevice = context.pointer();
+	}
+	
+	// constructor for GLSL-based stuff
+	explicit Program()
+	{
+		
 	}
 
 	// Binary-based constructor with memory management
@@ -844,20 +864,10 @@ public:
 							EventPointer event, const std::vector<Event>& waitForEvents)
 	{
 		std::vector<tart::command_sequence_ptr> waitlist(waitForEvents.size());
-#if 0
-		// get the waitlist
-		if (waitForEvents.size() > 0)
-		{
-			for (size_t i = 0; i < waitlist.size(); i += 1)
-			{
-				waitlist[i] = waitForEvents[i].pointer()->getSequence();
-			}
-			
-		}
-#else
+
 		// TODO: implement event waiting
 		queue.Finish();
-#endif
+
 		if (global.size() != local.size() ) throw LogicError("local and global size must be same length");
 		std::vector<uint32_t> adjusted_global(global.size());
 		for (size_t i = 0; i < global.size(); i += 1 )
@@ -892,21 +902,12 @@ public:
 		}
 		
 		tart::pipeline_ptr pipeline = mCLProgram->getPipeline(mEntryPoint, local32, push);
+		
 		tart::command_sequence_ptr sequence = mDevice->createSequence();
 		sequence->recordPipeline(pipeline, adjusted_global, bufs, push);
 		
 		// send it!
-#if 1
 		mDevice->submitSequence(sequence);
-#else
-		mDevice->submitSequence(sequence, 0, waitlist);
-#endif
-		
-		// if event is valid, set the sequence
-		if (event)
-		{
-			event->setSequence(sequence);
-		}
 	}
 
 	// Accessor to the private data-member

@@ -471,25 +471,39 @@ using ContextPointer = tart::device_ptr;
 // class for bundling both tart::CLProgram and multi-pipeline GLSL modules into the same object for easy sharing
 class ProgramContainerThingy
 {
+	tart::device_ref mDevice;
 	bool mIsGLSL = false;
 	tart::cl_program_ptr mCLProgram = nullptr;
 	std::map<std::string, tart::shader_module_ptr> mShaderModules;
 public:
-	ProgramContainerThingy(tart::cl_program_ptr clProgram)
+	ProgramContainerThingy(tart::device_ptr device, tart::cl_program_ptr clProgram):
+		mDevice(device)
 	{
 		mIsGLSL = false;
 		mCLProgram = clProgram;
 	}
-	ProgramContainerThingy(std::map<std::string, tart::shader_module_ptr>& shaderModules):
+	ProgramContainerThingy(tart::device_ptr device, std::map<std::string, tart::shader_module_ptr>& shaderModules):
+		mDevice(device),
 		mShaderModules(shaderModules),
 		mIsGLSL(true)
 	{
 	}
 	
-	ProgramContainerThingy(std::map<std::string, std::string>& shaderSources):
+	ProgramContainerThingy(tart::device_ptr device, std::map<std::string, std::string>& shaderSources):
+		mDevice(device),
 		mIsGLSL(true)
 	{
-		throw std::runtime_error("not implemented!");
+		for (auto& pair : shaderSources)
+		{
+			mShaderModules[pair.first] = device->compileGLSL(pair.second);
+		}
+	}
+	
+	tart::device_ptr getDevice() { return mDevice.lock(); }
+	
+	tart::pipeline_ptr getPipeline(std::string& entryPoint, std::vector<uint32_t>& localSize, std::vector<uint8_t>& push)
+	{
+		throw std::runtime_error("getPipeline not implemented");
 	}
 };
 
@@ -499,7 +513,7 @@ class Program {
 	tart::device_ptr mDevice = nullptr;
 	std::shared_ptr<ProgramContainerThingy> mProgramContainer = nullptr;
 	tart::shader_module_ptr mShaderModule = nullptr;
-	tart::cl_program_ptr mCLProgram = nullptr;
+	//tart::cl_program_ptr mCLProgram = nullptr;
 public:
 	// Source-based constructor with memory management
 	explicit Program(const clblast::Context& context, const std::string& source)
@@ -508,10 +522,12 @@ public:
 		mDevice = context.pointer();
 	}
 	
-	// constructor for GLSL-based stuff
-	explicit Program()
+	// constructor for GLSL shaders
+	// requires multiple shader sources because each file can only have one entry point :c
+	explicit Program(const clblast::Context& context, std::map<std::string, std::string>& kernelSources):
+		mDevice(context.pointer())
 	{
-		
+		mProgramContainer = std::make_shared<ProgramContainerThingy>(context.pointer(), kernelSources);
 	}
 
 	// Binary-based constructor with memory management
@@ -532,16 +548,15 @@ public:
 	
 	// Compiles the device program and checks whether or not there are any warnings/errors
 	void Build(const clblast::Device& device, std::vector<std::string>& options) {
+		// if program container already here, don't bother
+		if (mProgramContainer) return;
+		
 		// TODO: parse options (look for dflags, etc.)
 		// compile the shader module
 		mShaderModule = mDevice->compileCL(mSource);
 		// load it into the actual CL program handler thingy
-		mCLProgram = mDevice->createCLProgram(mShaderModule);
-		std::cout << "here are the options: \n";
-		for (std::string& option : options)
-		{
-			std::cout << option << "\n";
-		}
+		mProgramContainer = std::make_shared<ProgramContainerThingy>(mDevice, mDevice->createCLProgram(mShaderModule));
+		//mCLProgram = mDevice->createCLProgram(mShaderModule);
 	}
 
 	// Confirms whether a certain status code is an actual compilation error or warning
@@ -559,7 +574,7 @@ public:
 	}
 
 	// Accessor to the private data-member
-	tart::cl_program_ptr operator()() const { return mCLProgram; }
+	std::shared_ptr<ProgramContainerThingy> operator()() const { return mProgramContainer; }
 };
 #endif
 
@@ -783,7 +798,11 @@ typedef std::pair<std::string, tart::cl_program_ptr> kernel_t;
 // C++11 version of 'kernel_t'
 class Kernel {
 	std::string mEntryPoint;
-	tart::cl_program_ptr mCLProgram;
+#if 1
+	std::shared_ptr<ProgramContainerThingy> mProgramContainer = nullptr;
+#else
+	tart::cl_program_ptr mCLProgram = nullptr;
+#endif
 	tart::device_ptr mDevice;
 	// arguments
 	kernel_t kernel_;
@@ -803,8 +822,13 @@ public:
 		// but a fixed local size is used.
 		// tart::CLProgram takes care of this, but it must be adapted to this library
 		mEntryPoint = name;
+#if 1
+		mProgramContainer = program->operator()();
+		mDevice = mProgramContainer->getDevice();
+#else
 		mCLProgram = program->operator()();
 		mDevice = mCLProgram->getDevice();
+#endif
 	}
 	
 	void SetArgument(const size_t index, tart::buffer_ptr value) {
@@ -900,8 +924,11 @@ public:
 		{
 			local32[i] = local[i];
 		}
-		
+#if 1
+		tart::pipeline_ptr pipeline = mProgramContainer->getPipeline(mEntryPoint, local32, push);
+#else
 		tart::pipeline_ptr pipeline = mCLProgram->getPipeline(mEntryPoint, local32, push);
+#endif
 		
 		tart::command_sequence_ptr sequence = mDevice->createSequence();
 		sequence->recordPipeline(pipeline, adjusted_global, bufs, push);

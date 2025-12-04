@@ -133,9 +133,9 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 	// Compiles the kernel
 	std::shared_ptr<Program> program = nullptr;
 	if (isGLSL)
-		throw std::runtime_error("not implemented!");
+		program = std::make_shared<Program>(context, kernelSources);
 	else
-		std::make_shared<Program>(context, kernel_string);
+		program = std::make_shared<Program>(context, kernel_string);
 	try {
 		SetOpenCLKernelStandard(device, options);
 		program->Build(device, options);

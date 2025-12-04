@@ -168,7 +168,7 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 		std::string dummy("");
 		program_ = CompileFromSource(dummy, precision_, routine_name_, device_, context_, options, 0, false, true, kernelSources);
 		
-		throw std::runtime_error("not implemented!");
+		//throw std::runtime_error("not implemented!");
 	}
 	else
 #endif

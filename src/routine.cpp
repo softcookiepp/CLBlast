@@ -162,7 +162,7 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 		for (size_t i = 0; i < source.size(); i += 1)
 		{
 			std::string kernelSource(db_(kernel_names_[i]).GetDefines());
-			kernelSources.emplace(kernel_names_[i], preSources[i]);
+			kernelSources.emplace(kernel_names_[i], kernelSource+preSources[i]);
 		}
 		std::string dummy("");
 		program_ = CompileFromSource(dummy, precision_, routine_name_, device_, context_, options, 0, false, true, kernelSources);

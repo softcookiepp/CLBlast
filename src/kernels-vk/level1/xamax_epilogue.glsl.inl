@@ -1,4 +1,3 @@
-
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -26,11 +25,8 @@ R"(
 
 // The epilogue reduction kernel, performing the final bit of the operation. This kernel has to
 // be launched with a single workgroup only.
-#if RELAX_WORKGROUP_SIZE == 1
-#else
-	// how do we want to do this?
-	//__kernel __attribute__((reqd_work_group_size(WGS2, 1, 1)))
-	DEFINE_LOCAL_SIZE(WGS2, 1, 1)
+#if RELAX_WORKGROUP_SIZE == 0
+	layout(local_size_x = WGS2, local_size_y = 1, local_size_z = 1) in;
 #endif
 
 #if USE_BDA
@@ -41,28 +37,26 @@ R"(
 	layout(binding = 2, std430) buffer imax_buf { uint imax[]; };
 #endif
 
-layout(push_constant) push
+layout(push_constant) uniform XamaxEpilogue
 {
 #if USE_BDA
-	// not yet implemented, but keeping these here to remember easily
-	const __global singlereal* restrict maxgm;
-	const __global unsigned int* restrict imaxgm;
-	__global unsigned int* imax;
+	const __global singlereal* restrict maxgm,
+	const __global unsigned int* restrict imaxgm,
+	__global unsigned int* imax,
 #endif
-	const int imax_offset
+	int imax_offset;
 } args;
 
 shared singlereal maxlm[WGS2];
 shared uint imaxlm[WGS2];
 
-// XamaxEpilogue
-void main(const __global singlereal* restrict maxgm,
-									 const __global unsigned int* restrict imaxgm,
-									 __global unsigned int* imax, const int imax_offset) {
-	const int lid = gl_LocalInvocationID.x;
+void main()
+{
+	const int lid = get_local_id(0);
 
 	// Performs the first step of the reduction while loading the data
-	if (maxgm[lid + WGS2] > maxgm[lid]) {
+	if (maxgm[lid + WGS2] > maxgm[lid])
+	{
 		maxlm[lid] = maxgm[lid + WGS2];
 		imaxlm[lid] = imaxgm[lid + WGS2];
 	}
@@ -70,7 +64,7 @@ void main(const __global singlereal* restrict maxgm,
 		maxlm[lid] = maxgm[lid];
 		imaxlm[lid] = imaxgm[lid];
 	}
-	barrier(CLK_LOCAL_MEM_FENCE);
+	barrier();
 
 	// Performs reduction in local memory
 	for (int s=WGS2/2; s>0; s=s>>1) {
@@ -80,12 +74,12 @@ void main(const __global singlereal* restrict maxgm,
 				imaxlm[lid] = imaxlm[lid + s];
 			}
 		}
-		barrier(CLK_LOCAL_MEM_FENCE);
+		barrier();
 	}
 
 	// Stores the final result
 	if (lid == 0) {
-		imax[imax_offset] = imaxlm[0];
+		imax[args.imax_offset] = imaxlm[0];
 	}
 }
 

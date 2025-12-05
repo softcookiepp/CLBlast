@@ -182,9 +182,9 @@
 
 // The absolute value (component-wise)
 #if 0 //PRECISION == 3232 || PRECISION == 6464
-	#define AbsoluteValue(value) value.x = fabs(value.x); value.y = fabs(value.y)
+	#define AbsoluteValue(value) value.x = abs(value.x); value.y = abs(value.y)
 #else
-	#define AbsoluteValue(value) value = fabs(value)
+	#define AbsoluteValue(value) value = abs(value)
 #endif
 
 // Negation (component-wise)

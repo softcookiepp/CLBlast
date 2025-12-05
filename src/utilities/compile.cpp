@@ -38,7 +38,7 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 
 	// Adds the name of the routine as a define
 	header_string += "#define ROUTINE_" + routine_name + "\n";
-#if VULKAN_API
+#if 0
 	// ugh
 #else
 	// Not all OpenCL compilers support the 'inline' keyword. The keyword is only used for devices on

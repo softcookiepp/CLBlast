@@ -60,9 +60,9 @@ const std::unordered_map<std::string, const std::vector<std::string>> Routine::r
 // The constructor does all heavy work, errors are returned as exceptions
 Routine::Routine(Queue& queue, EventPointer event, const std::string& name,
 	const std::vector<std::string>& kernel_names, const Precision precision,
-	const std::vector<database::DatabaseEntry>& userDatabase, std::initializer_list<const char*> source,
+	const std::vector<database::DatabaseEntry>& userDatabase, std::initializer_list<const char*> source
 #if VULKAN_API
-	bool isGLSL
+	, bool isGLSL, std::vector<std::string> entryPointNames
 #endif
 	)
 		: precision_(precision),
@@ -74,7 +74,7 @@ Routine::Routine(Queue& queue, EventPointer event, const std::string& name,
 			device_(queue_.GetDevice()),
 			db_(kernel_names)
 #if VULKAN_API
-			, mIsGLSL(isGLSL)
+			, mIsGLSL(isGLSL), mEntryPointNames(entryPointNames)
 #endif
 {
 	InitDatabase(device_, kernel_names, precision, userDatabase, db_);
@@ -151,20 +151,42 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 		std::cout << routine_info << std::endl;
 		
 		// the kernel names *must* have the same order as the underlying compute shaders they represent
-		
-		if (source.size() != kernel_names_.size())
+		std::vector<std::string>& kernelNames = mEntryPointNames;
+		if (mEntryPointNames.size() == 0) kernelNames = kernel_names_;
+
+		std::vector<std::string> defines;
+		if (source.size() > kernel_names_.size() and kernel_names_.size() == 1)
+		{
+			// just duplicate the definitions, holy crap.
+			for (size_t i = 0; i < source.size(); i += 1)
+			{
+				defines.push_back(db_(kernel_names_[0]).GetDefines());
+			}
+		}
+		else if (source.size() != kernelNames.size())
+		{
 			throw std::invalid_argument("length of kernel name list must be same size as source list!");
-		
+		}
+		else
+		{
+			// one define set per kernel name...
+			// just duplicate the definitions, holy crap.
+			for (size_t i = 0; i < source.size(); i += 1)
+			{
+				defines.push_back(db_(kernel_names_[i]).GetDefines());
+			}
+		}
+
 		// create a map of kernel names and sources
 		std::map<std::string, std::string> kernelSources;
 		std::vector<std::string> preSources;
 		for (auto& str : source) preSources.push_back(str);
 		for (size_t i = 0; i < source.size(); i += 1)
 		{
-			std::string kernelSource(db_(kernel_names_[i]).GetDefines());
-			kernelSources.emplace(kernel_names_[i], kernelSource+preSources[i]);
+			kernelSources.emplace(kernelNames[i], defines[i]+preSources[i]);
 		}
 		std::string dummy("");
+
 		program_ = CompileFromSource(dummy, precision_, routine_name_, device_, context_, options, 0, false, true, kernelSources);
 		
 		ProgramCache::Instance().Store(ProgramKey{context_(), device_(), precision_, routine_info},

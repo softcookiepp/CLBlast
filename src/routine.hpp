@@ -63,7 +63,7 @@ class Routine {
 									 const Precision precision, const std::vector<database::DatabaseEntry>& userDatabase,
 									 std::initializer_list<const char*> source
 #if VULKAN_API
-					, bool isGLSL = false
+					, bool isGLSL = false, std::vector<std::string> entryPointNames = {}
 #endif
 									 );
 
@@ -80,10 +80,7 @@ class Routine {
  private:
 	// Initializes program_, fetching cached program or building one
 	void InitProgram(std::initializer_list<const char*> source);
-#if VULKAN_API
-	// whether or not this is a GLSL compute shader module
-	bool mIsGLSL = false;
-#endif
+
  protected:
 	// Non-static variable for the precision
 	const Precision precision_;
@@ -103,6 +100,12 @@ class Routine {
 
 	// Connection to the database for all the device-specific parameters
 	Databases db_;
+	
+#if VULKAN_API
+	// whether or not this is a GLSL compute shader module
+	bool mIsGLSL = false;
+	std::vector<std::string> mEntryPointNames;
+#endif
 };
 
 // =================================================================================================

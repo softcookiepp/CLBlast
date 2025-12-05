@@ -1,3 +1,4 @@
+
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -16,26 +17,39 @@ R"(
 	layout(local_size_x = WGS1, local_size_y = WGS2, local_size_z = 1) in;
 #endif
 
+// buffer declarations
+#if USE_BDA == 0
+	layout(binding = 0, std430) buffer xgm_buf { real xgm[]; };
+	layout(binding = 1, std430) buffer ygm_buf { real ygm[]; };
+	layout(binding = 2, std430) buffer agm_buf { real agm[]; };
+#endif
+
 layout(push_constant) uniform Xger
 {
-	const int max1,
-	const int max2,
-	const real_arg arg_alpha,
-	const __global real* restrict xgm,
-	const int x_offset,
-	const int x_inc,
-	const __global real* ygm,
-	const int y_offset,
-	const int y_inc,
+	int max1;
+	int max2;
+	real_arg arg_alpha;
+#if USE_BDA
+	__global real* restrict xgm,
+#endif
+	int x_offset;
+	int x_inc;
+#if USE_BDA
+	__global real* ygm,
+#endif
+	int y_offset;
+	int y_inc;
+#if USE_BDA
 	__global real* restrict agm,
-	const int a_offset,
-	const int a_ld,
-	const int is_rowmajor
+#endif
+	int a_offset;
+	int a_ld;
+	int is_rowmajor;
 } args;
 
 void main()
 {
-	const real alpha = GetRealArg(arg_alpha);
+	const real alpha = GetRealArg(args.arg_alpha);
 
 	// Register storage for X and Y
 	
@@ -44,20 +58,21 @@ void main()
 	real yvalues[WPT];
 
 	// Row-major version
-	if (is_rowmajor) {
+	if (args.is_rowmajor != 0)
+	{
 
 		// Loads the X-vector
 		
 		for (int _w = 0; _w < WPT; _w += 1) {
 			const int id2 = _w*get_global_size(1) + get_global_id(1);
-			xvalues[_w] = LoadVector(id2, max2, xgm, x_offset, x_inc, false);
+			LoadVector(xvalues[_w], id2, args.max2, xgm, args.x_offset, args.x_inc, false);
 		}
 
 		// Loads the Y-vector
 		
 		for (int _w = 0; _w < WPT; _w += 1) {
 			const int id1 = _w*get_global_size(0) + get_global_id(0);
-			yvalues[_w] = LoadVector(id1, max1, ygm, y_offset, y_inc, true);
+			LoadVector(yvalues[_w], id1, args.max1, ygm, args.y_offset, args.y_inc, true);
 		}
 
 		// Loops over the work per thread twice
@@ -71,7 +86,7 @@ void main()
 				const int id2 = _w2*get_global_size(1) + get_global_id(1);
 
 				// Loads A, performs the operation, and stores the result into A
-				MatrixUpdate(id1, id2, max1, max2, agm, a_offset, a_ld,
+				MatrixUpdate(id1, id2, args.max1, args.max2, agm, args.a_offset, args.a_ld,
 										 alpha, xvalues[_w2], yvalues[_w1], false);
 			}
 		}
@@ -84,14 +99,14 @@ void main()
 		
 		for (int _w = 0; _w < WPT; _w += 1) {
 			const int id1 = _w*get_global_size(0) + get_global_id(0);
-			xvalues[_w] = LoadVector(id1, max1, xgm, x_offset, x_inc, false);
+			LoadVector(xvalues[_w], id1, args.max1, xgm, args.x_offset, args.x_inc, false);
 		}
 
 		// Loads the Y-vector
 		
 		for (int _w = 0; _w < WPT; _w += 1) {
 			const int id2 = _w*get_global_size(1) + get_global_id(1);
-			yvalues[_w] = LoadVector(id2, max2, ygm, y_offset, y_inc, true);
+			LoadVector(yvalues[_w], id2, args.max2, ygm, args.y_offset, args.y_inc, true);
 		}
 
 		// Loops over the work per thread twice
@@ -105,7 +120,7 @@ void main()
 				const int id2 = _w2*get_global_size(1) + get_global_id(1);
 
 				// Loads A, performs the operation, and stores the result into A
-				MatrixUpdate(id1, id2, max1, max2, agm, a_offset, a_ld,
+				MatrixUpdate(id1, id2, args.max1, args.max2, agm, args.a_offset, args.a_ld,
 										 alpha, xvalues[_w1], yvalues[_w2], false);
 			}
 		}

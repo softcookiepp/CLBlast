@@ -53,7 +53,7 @@
 	#define real4 vec4
 	//#define float8 real8;
 	//#define float16 real16;
-	#define ZERO 0.0f
+	#define ZERO real(0.0f)
 	#define ONE 1.0f
 	#define SMALLEST -1.0e37f
 
@@ -123,7 +123,7 @@
 	#define GetRealArg(x) float16_t(x)
 #else
 	#define real_arg real 
-	#define GetRealArg(x) x
+	#define GetRealArg(x) real(x)
 #endif
 
 
@@ -225,7 +225,7 @@
 #if PRECISION == 3232 || PRECISION == 6464
 	#define MultiplyAdd(c,a,b) c += real(MulReal(a,b), MulImag(a,b))
 #else
-	#if USE_CL_MAD == 1
+	#if 0 //USE_CL_MAD == 1
 		#define MultiplyAdd(c,a,b) c = mad(a, b, c)
 	#else
 		#define MultiplyAdd(c,a,b) c += a * b

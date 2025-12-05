@@ -495,7 +495,6 @@ public:
 	{
 		for (auto& pair : shaderSources)
 		{
-			std::cout << pair.second << std::endl;
 			mShaderModules[pair.first] = device->compileGLSL(pair.second);
 		}
 	}

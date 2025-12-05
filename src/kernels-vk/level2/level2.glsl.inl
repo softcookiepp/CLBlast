@@ -26,18 +26,18 @@ R"(
 #endif
 
 // =================================================================================================
-
+#if 1
 // Returns an element from a vector
-real LoadVectorImpl(const int id, const int max, real gm_result, const int offset, const int inc, const bool do_conjugate)
-{
+real LoadVectorImpl(real result, const int id, const int max, const int offset, const int inc,
+														const int do_conjugate) {
 	if (id < max) {
-		if (do_conjugate)
-		{
+		//real result = gm[id*inc + offset];
+		if (bool(do_conjugate) ) {
 			#if defined(ROUTINE_GERC) || defined(ROUTINE_HER) || defined(ROUTINE_HPR) || defined(ROUTINE_HER2) || defined(ROUTINE_HPR2)
-				COMPLEX_CONJUGATE(gm_result);
+				COMPLEX_CONJUGATE(result);
 			#endif
 		}
-		return gm_result;
+		return result;
 	}
 	else {
 		real default_result;
@@ -46,17 +46,37 @@ real LoadVectorImpl(const int id, const int max, real gm_result, const int offse
 	}
 }
 
-#define LoadVector(val, id, max, gm, offset, inc, do_conjugate) \
+#define LoadVector(final_result, id, max, gm, offset, inc, do_conjugate) \
 { \
-	real gm_result = gm[id*inc + offset]; \
-	real res = LoadVectorImpl(id, max, gm_result, offset, inc, do_conjugate); \
-	val = res;\
+	real result = gm[id*inc + offset]; \
+	final_result = LoadVectorImpl(result, id, max, offset, inc, int(do_conjugate)); \
 }
 
-int get_a_index(const int id1, const int id2, const int max1, const int max2,
-	const int a_offset, const int a_ld,
-	const real alpha, const real xvalue, const real yvalue,
-	const bool is_upper)
+#else
+// Returns an element from a vector
+INLINE_FUNC real LoadVector(const int id, const int max,
+														const __global real* gm, const int offset, const int inc,
+														const int do_conjugate) {
+	if (id < max) {
+		real result = gm[id*inc + offset];
+		if (do_conjugate) {
+			#if defined(ROUTINE_GERC) || defined(ROUTINE_HER) || defined(ROUTINE_HPR) || defined(ROUTINE_HER2) || defined(ROUTINE_HPR2)
+				COMPLEX_CONJUGATE(result);
+			#endif
+		}
+		return result;
+	}
+	else {
+		real default_result;
+		SetToZero(default_result);
+		return default_result;
+	}
+}
+#endif
+
+#if 1
+
+int GetMatrixUpdateIndex(const int id1, const int id2, const int a_offset, const int a_ld, const int is_upper)
 {
 	#if defined(ROUTINE_SPR) || defined(ROUTINE_HPR)
 		int a_index;
@@ -67,20 +87,75 @@ int get_a_index(const int id1, const int id2, const int max1, const int max2,
 			a_index = (id1 >= id2) ? ((2*a_ld-(id2+1))*id2)/2 + id1 : ((2*a_ld-(id1+1))*id1)/2 + id2;
 		}
 		a_index += a_offset;
+		return a_index;
 	#else
-		int a_index = id2*a_ld + id1 + a_offset;
+		return id2*a_ld + id1 + a_offset;
 	#endif
-	return a_index;
 }
 
+// Performs the rank-1 matrix update
 real MatrixUpdateImpl(const int id1, const int id2, const int max1, const int max2,
-	const int a_index, const real avalue,
-	const int a_offset, const int a_ld,
-	const real alpha, const real xvalue, const real yvalue,
-	const bool is_upper)
+															real avalue, const int a_offset, const int a_ld,
+															const real alpha, const real xvalue, const real yvalue,
+															const int is_upper)
 {
+	// Computes result = alpha * x[i] * y[j] + a[i][j]
+	#if PRECISION == 3232 || PRECISION == 6464
+		real ax;
+		ax.x = MulReal(alpha, xvalue);
+		ax.y = MulImag(alpha, xvalue);
+		real result;
+		result.x = MulReal(ax, yvalue) + avalue.x;
+		result.y = MulImag(ax, yvalue) + avalue.y;
+	#else
+		real result = alpha * xvalue * yvalue + avalue;
+	#endif
+
+	// For hermetian matrices
+	#if defined(ROUTINE_HER) || defined(ROUTINE_HPR)
+		if (id1 == id2) { result.y = ZERO; }
+	#endif
+	
+	// Stores the final result
+	//agm[a_index] = result;
+	return result;
+}
+
+#define MatrixUpdate(id1, id2, max1, max2, agm, a_offset, a_ld, alpha, xvalue, yvalue, is_upper) \
+{ \
+	if (id1 < max1 && id2 < max2) \
+	{ \
+		const int a_index = GetMatrixUpdateIndex(id1, id2, a_offset, a_ld, int(is_upper)); \
+		agm[a_index] = MatrixUpdateImpl(id1, id2, max1, max2, agm[a_index], a_offset, a_ld, alpha, xvalue, yvalue, int(is_upper)); \
+	} \
+}
+
+#else
+// Performs the rank-1 matrix update
+INLINE_FUNC void MatrixUpdate(const int id1, const int id2, const int max1, const int max2,
+															__global real* agm, const int a_offset, const int a_ld,
+															const real alpha, const real xvalue, const real yvalue,
+															const int is_upper) {
+
 	// Bounds of a regular matrix
 	if (id1 < max1 && id2 < max2) {
+
+		#if defined(ROUTINE_SPR) || defined(ROUTINE_HPR)
+			int a_index;
+			if (is_upper) {
+				a_index = (id1 <= id2) ? ((id2+1)*id2)/2 + id1 : ((id1+1)*id1)/2 + id2;
+			}
+			else {
+				a_index = (id1 >= id2) ? ((2*a_ld-(id2+1))*id2)/2 + id1 : ((2*a_ld-(id1+1))*id1)/2 + id2;
+			}
+			a_index += a_offset;
+		#else
+			const int a_index = id2*a_ld + id1 + a_offset;
+		#endif
+
+		// Loads the current value of the A matrix
+		const real avalue = agm[a_index];
+
 		// Computes result = alpha * x[i] * y[j] + a[i][j]
 		#if PRECISION == 3232 || PRECISION == 6464
 			real ax;
@@ -99,18 +174,10 @@ real MatrixUpdateImpl(const int id1, const int id2, const int max1, const int ma
 		#endif
 		
 		// Stores the final result
-		//agm[a_index] = result;
-		return result;
+		agm[a_index] = result;
 	}
 }
-
-#define MatrixUpdate(id1, id2, max1, max2, mat, a_offset, a_ld, alpha, xvalue, yvalue, is_upper) \
-{ \
-	const int a_index = get_a_index(id1, id2, max1, max2, a_offset, a_ld, alpha, xvalue, yvalue, is_upper); \
-	real a_value = mat[a_index];\
-	mat[a_index] = MatrixUpdateImpl(id1, id2, max1, max2, a_index, a_value, a_offset, a_ld, alpha, xvalue, yvalue, is_upper); \
-}
-
+#endif
 #if 0
 // Performs the rank-2 matrix update
 INLINE_FUNC void MatrixUpdate2(const int id1, const int id2, const int max1, const int max2,

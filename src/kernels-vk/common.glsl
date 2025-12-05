@@ -154,7 +154,7 @@
 
 // Sets a variable to zero
 #if PRECISION == 3232 || PRECISION == 6464
-	#define SetToZero(a) a.x = ZERO; a.y = ZERO
+	#define SetToZero(a) a = real(ZERO, ZERO)
 #else
 	#define SetToZero(a) a = ZERO
 #endif
@@ -168,7 +168,7 @@
 
 // Sets a variable to one
 #if PRECISION == 3232 || PRECISION == 6464
-	#define SetToOne(a) a.x = ONE; a.y = ZERO
+	#define SetToOne(a) a = real(ONE, ZERO)
 #else
 	#define SetToOne(a) a = ONE
 #endif
@@ -181,14 +181,14 @@
 #endif
 
 // The absolute value (component-wise)
-#if PRECISION == 3232 || PRECISION == 6464
+#if 0 //PRECISION == 3232 || PRECISION == 6464
 	#define AbsoluteValue(value) value.x = fabs(value.x); value.y = fabs(value.y)
 #else
 	#define AbsoluteValue(value) value = fabs(value)
 #endif
 
 // Negation (component-wise)
-#if PRECISION == 3232 || PRECISION == 6464
+#if 0 //PRECISION == 3232 || PRECISION == 6464
 	#define Negate(value) value.x = (-1.0(value.x)); value.y = (-1.0*(value.y))
 #else
 	#define Negate(value) value = (-1.0*(value))
@@ -196,14 +196,14 @@
 
 // Adds two complex variables
 #if PRECISION == 3232 || PRECISION == 6464
-	#define Add(c,a,b) c.x = a.x + b.x; c.y = a.y + b.y
+	#define Add(c,a,b) c = real(a.x + b.x, a.y + b.y)
 #else
 	#define Add(c,a,b) c = a + b
 #endif
 
 // Subtracts two complex variables
 #if PRECISION == 3232 || PRECISION == 6464
-	#define Subtract(c,a,b) c.x = a.x - b.x; c.y = a.y - b.y
+	#define Subtract(c,a,b) c = real(a.x - b.x, a.y - b.y)
 #else
 	#define Subtract(c,a,b) c = a - b
 #endif
@@ -216,14 +216,14 @@
 
 // The scalar multiply function
 #if PRECISION == 3232 || PRECISION == 6464
-	#define Multiply(c,a,b) c.x = MulReal(a,b); c.y = MulImag(a,b)
+	#define Multiply(c,a,b) c = real(MulReal(a,b), MulImag(a,b))
 #else
 	#define Multiply(c,a,b) c = a * b
 #endif
 
 // The scalar multiply-add function
 #if PRECISION == 3232 || PRECISION == 6464
-	#define MultiplyAdd(c,a,b) c.x += MulReal(a,b); c.y += MulImag(a,b)
+	#define MultiplyAdd(c,a,b) c += real(MulReal(a,b), MulImag(a,b))
 #else
 	#if USE_CL_MAD == 1
 		#define MultiplyAdd(c,a,b) c = mad(a, b, c)
@@ -234,14 +234,14 @@
 
 // The scalar multiply-subtract function
 #if PRECISION == 3232 || PRECISION == 6464
-	#define MultiplySubtract(c,a,b) c.x -= MulReal(a,b); c.y -= MulImag(a,b)
+	#define MultiplySubtract(c,a,b) c -= real(MulReal(a,b), MulImag(a,b))
 #else
 	#define MultiplySubtract(c,a,b) c -= a * b
 #endif
 
 // The scalar division function: full division
 #if PRECISION == 3232 || PRECISION == 6464
-	#define DivideFull(c,a,b) singlereal num_x = (a.x * b.x) + (a.y * b.y); singlereal num_y = (a.y * b.x) - (a.x * b.y); singlereal denom = (b.x * b.x) + (b.y * b.y); c.x = num_x / denom; c.y = num_y / denom
+	#define DivideFull(c,a,b) singlereal num_x = (a.x * b.x) + (a.y * b.y); singlereal num_y = (a.y * b.x) - (a.x * b.y); singlereal denom = (b.x * b.x) + (b.y * b.y); c = real(num_x / denom, num_y / denom)
 #else
 	#define DivideFull(c,a,b) c = a / b
 #endif
@@ -256,7 +256,7 @@
 
 // The complex conjugate operation for complex transforms
 #if PRECISION == 3232 || PRECISION == 6464
-	#define COMPLEX_CONJUGATE(value) value.x = value.x; value.y = (-1.0*value.y)
+	#define COMPLEX_CONJUGATE(value) value = real(value.x, (-1.0*value.y))
 #else
 	#define COMPLEX_CONJUGATE(value) 
 #endif

@@ -169,8 +169,6 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 		
 		ProgramCache::Instance().Store(ProgramKey{context_(), device_(), precision_, routine_info},
 																	 std::shared_ptr<Program>{program_});
-		
-		//throw std::runtime_error("not implemented!");
 	}
 	else
 #endif

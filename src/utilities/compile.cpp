@@ -38,7 +38,9 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 
 	// Adds the name of the routine as a define
 	header_string += "#define ROUTINE_" + routine_name + "\n";
-
+#if VULKAN_API
+	// ugh
+#else
 	// Not all OpenCL compilers support the 'inline' keyword. The keyword is only used for devices on
 	// which it is known to work with all OpenCL platforms.
 	if (device.IsNVIDIA() || device.IsARM() || device.IsQualcomm()) {
@@ -86,6 +88,7 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 	if (device.IsQualcomm()) {
 		header_string += "#define RELAX_WORKGROUP_SIZE 1\n";
 	}
+#endif
 
 // Optionally adds a translation header from OpenCL kernels to CUDA kernels
 #ifdef CUDA_API

@@ -29,15 +29,15 @@
 
 // Data-widths
 #if VW == 1
-	typedef real realV;
+	#define realV real
 #elif VW == 2
-	typedef real2 realV;
+	#define realV real2
 #elif VW == 4
-	typedef real4 realV;
+	#define realV real4
 #elif VW == 8
-	typedef real8 realV;
+	#define realV real8
 #elif VW == 16
-	typedef real16 realV;
+	#define realV real16
 #endif
 
 // =================================================================================================

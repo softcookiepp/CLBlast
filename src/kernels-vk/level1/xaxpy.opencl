@@ -24,14 +24,14 @@ R"(
   __kernel __attribute__((reqd_work_group_size(WGS, 1, 1)))
 #endif
 void Xaxpy(const int n, const real_arg arg_alpha,
-           const __global real* restrict xgm, const int x_inc,
-           __global real* ygm, const int y_inc) {
+           const __global real* restrict xgm, const int x_offset, const int x_inc,
+           __global real* ygm, const int y_offset, const int y_inc) {
   const real alpha = GetRealArg(arg_alpha);
 
   // Loops over the work that needs to be done (allows for an arbitrary number of threads)
   for (int id = get_global_id(0); id < n; id += get_global_size(0)) {
-    real xvalue = xgm[id*x_inc];
-    MultiplyAdd(ygm[id*y_inc], alpha, xvalue);
+    real xvalue = xgm[id*x_inc + x_offset];
+    MultiplyAdd(ygm[id*y_inc + y_offset], alpha, xvalue);
   }
 }
 

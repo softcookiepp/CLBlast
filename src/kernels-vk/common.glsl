@@ -40,8 +40,8 @@
 	#define real float16_t
 	#define real2 f16vec2
 	#define real4 f16vec4
-	//#define half8 real8;
-	//#define half16 real16;
+	#define real8 f16mat2x4
+	#define real16 f16mat4x4
 	#define ZERO float16_t(0.0)
 	#define ONE float16_t(1.0)
 	#define SMALLEST -1.0e14
@@ -51,8 +51,8 @@
 	#define real float
 	#define real2 vec2
 	#define real4 vec4
-	//#define float8 real8;
-	//#define float16 real16;
+	#define real8 mat2x4
+	#define real16 mat4x4
 	#define ZERO real(0.0f)
 	#define ONE 1.0f
 	#define SMALLEST -1.0e37f
@@ -62,8 +62,8 @@
 	#define real double
 	#define real2 dvec2
 	#define real4 dvec4
-	//#define double8 real8;
-	//#define double16 real16;
+	#define real8 dmat2x4
+	#define real16 dmat4x4
 	#define ZERO 0.0
 	#define ONE 1.0
 	#define SMALLEST -1.0e37

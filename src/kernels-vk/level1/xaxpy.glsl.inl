@@ -21,7 +21,7 @@ R"(
 #endif
 
 #if USE_BDA == 0
-	layout(binding = 0, std430) readonly buffer xgm_buf { real xgm[]; };
+	layout(binding = 0, std430) buffer xgm_buf { real xgm[]; };
 	layout(binding = 1, std430) buffer ygm_buf { real ygm[]; };
 #endif
 
@@ -49,8 +49,13 @@ void main()
 	for (int id = get_global_id(0); id < args.n; id += get_global_size(0))
 	{
 		// probably won't be possible to have a VW of > 1 when x_inc > 1
+#if 1
 		real xvalue = xgm[id*args.x_inc + args.x_offset];
-		MultiplyAdd(ygm[id*args.y_inc + args.y_offset], alpha, xvalue);
+		real yvalue = ygm[id*args.y_inc + args.y_offset];
+		yvalue += alpha*xvalue;
+		//MultiplyAdd(yvalue, alpha, xvalue);
+		ygm[id*args.y_inc + args.y_offset] = yvalue;
+#endif
 	}
 }
 

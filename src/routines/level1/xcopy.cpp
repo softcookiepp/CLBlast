@@ -76,7 +76,6 @@ void Xcopy<T>::DoCopy(const size_t n, const Buffer<T>& x_buffer, const size_t x_
 
 	// Sets the kernel arguments
 	if (use_fast_kernel) {
-		std::cout << "using fast" << std::endl;
 #if VULKAN_API
 		if (!mIsGLSL)
 #endif
@@ -84,7 +83,6 @@ void Xcopy<T>::DoCopy(const size_t n, const Buffer<T>& x_buffer, const size_t x_
 		kernel.SetArgument(1, x_buffer());
 		kernel.SetArgument(2, y_buffer());
 	} else {
-		std::cout << "using regular" << std::endl;
 		kernel.SetArgument(0, static_cast<int>(n));
 		kernel.SetArgument(1, x_buffer());
 		kernel.SetArgument(2, static_cast<int>(x_offset));

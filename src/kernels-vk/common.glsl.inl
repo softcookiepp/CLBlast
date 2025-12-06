@@ -227,7 +227,7 @@ R"(
 	#if 0 //USE_CL_MAD == 1
 		#define MultiplyAdd(c,a,b) c = mad(a, b, c)
 	#else
-		#define MultiplyAdd(c,a,b) c += a * b
+		#define MultiplyAdd(c,a,b) c += (a * b)
 	#endif
 #endif
 
@@ -235,7 +235,7 @@ R"(
 #if PRECISION == 3232 || PRECISION == 6464
 	#define MultiplySubtract(c,a,b) c -= real(MulReal(a,b), MulImag(a,b))
 #else
-	#define MultiplySubtract(c,a,b) c -= a * b
+	#define MultiplySubtract(c,a,b) c -= (a * b)
 #endif
 
 // The scalar division function: full division

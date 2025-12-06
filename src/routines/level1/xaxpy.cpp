@@ -77,18 +77,11 @@ void Xaxpy<T>::DoAxpy(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 	// Retrieves the Xaxpy kernel from the compiled binary
 	auto kernel = Kernel(program_, kernel_name);
 	
-	if (use_faster_kernel)
-		std::cout << "using faster" << std::endl;
-	else if(use_fastest_kernel)
-		std::cout << "using fastest" << std::endl;
-	else
-		std::cout << "using regular kernel" << std::endl;
-
 	// Sets the kernel arguments
 	if (use_faster_kernel || use_fastest_kernel)
 	{
 #if VULKAN_API
-		if (!mIsGLSL || use_faster_kernel)
+		if (!mIsGLSL || !use_fastest_kernel)
 #endif
 			kernel.SetArgument(0, static_cast<int>(n));
 		kernel.SetArgument(1, GetRealArg(alpha));

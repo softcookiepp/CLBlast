@@ -33,7 +33,7 @@ Xcopy<T>::Xcopy(Queue& queue, EventPointer event, const std::string& name)
 	// (comment to prevent auto-re-ordering)
 	#include "../../kernels-vk/level1/xcopy.glsl.inl"
 	,
-	#include "../../kernels-vk/level1/level1.glsl.inl"
+	//#include "../../kernels-vk/level1/level1.glsl.inl"
 	// (comment to prevent auto-re-ordering)
 	#include "../../kernels-vk/level1/xcopy_fast.glsl.inl"
 #else
@@ -68,6 +68,11 @@ void Xcopy<T>::DoCopy(const size_t n, const Buffer<T>& x_buffer, const size_t x_
 	bool use_fast_kernel = (x_offset == 0) && (x_inc == 1) && (y_offset == 0) && (y_inc == 1) &&
 												 IsMultiple(n, db_["WGS"] * db_["WPT"] * db_["VW"]);
 
+#if VULKAN_API
+	// temporarily disable fast kernel because broken :c
+	if (mIsGLSL) use_fast_kernel = false;
+#endif
+
 	// If possible, run the fast-version of the kernel
 	auto kernel_name = (use_fast_kernel) ? "XcopyFast" : "Xcopy";
 
@@ -76,9 +81,6 @@ void Xcopy<T>::DoCopy(const size_t n, const Buffer<T>& x_buffer, const size_t x_
 
 	// Sets the kernel arguments
 	if (use_fast_kernel) {
-#if VULKAN_API
-		if (!mIsGLSL)
-#endif
 		kernel.SetArgument(0, static_cast<int>(n));
 		kernel.SetArgument(1, x_buffer());
 		kernel.SetArgument(2, y_buffer());

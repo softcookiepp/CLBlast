@@ -12,6 +12,8 @@
 # Technically the minimum is 2.8.11 but to be compatible with CMake 4 this is set to 3.10
 cmake_minimum_required(VERSION 3.10)
 
+add_custom_command(OUTPUT INLINE_GEN_OUT COMMAND "python3 scripts/inline_gen.py")
+
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)

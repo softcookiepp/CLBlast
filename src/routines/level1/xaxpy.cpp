@@ -67,9 +67,16 @@ void Xaxpy<T>::DoAxpy(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 	TestVectorX(n, x_buffer, x_offset, x_inc);
 	TestVectorY(n, y_buffer, y_offset, y_inc);
 
+#if VULKAN_API
+	// temporarily disable just for debugging
+	const bool use_faster_kernel = false;
+	const bool use_fastest_kernel = false;
+#else
 	// Determines whether or not the fast-version can be used
 	const auto use_faster_kernel =(x_offset == 0) && (x_inc == 1) && (y_offset == 0) && (y_inc == 1) && IsMultiple(n, db_["WPT"] * db_["VW"]);
 	const auto use_fastest_kernel = use_faster_kernel && IsMultiple(n, db_["WGS"] * db_["WPT"] * db_["VW"]);
+#endif
+
 
 	// If possible, run the fast-version of the kernel
 	const auto kernel_name = (use_fastest_kernel) ? "XaxpyFastest" : (use_faster_kernel) ? "XaxpyFaster" : "Xaxpy";

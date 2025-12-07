@@ -50,6 +50,9 @@ void main()
 	{
 		// probably won't be possible to have a VW of > 1 when x_inc > 1
 #if 1
+		xgm[id*args.x_inc + args.x_offset] = alpha;
+		ygm[id*args.y_inc + args.y_offset] = alpha;
+#else
 		real xvalue = xgm[id*args.x_inc + args.x_offset];
 		real yvalue = ygm[id*args.y_inc + args.y_offset];
 		yvalue += alpha*xvalue;

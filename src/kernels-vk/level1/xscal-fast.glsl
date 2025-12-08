@@ -1,4 +1,6 @@
-
+#version 450
+#include "../common.glsl"
+#include "level1.glsl"
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -25,10 +27,10 @@
 #endif
 
 #if USE_BDA == 0
-	layout(binding = 0, std430) buffer xgm_buf { real xgm[]; };
+	layout(binding = 0, std430) buffer xgm_buf { realV xgm[]; };
 #endif
 
-layout(push_constant) XscalFast
+layout(push_constant) uniform XscalFast
 {
 	int n;
 	real_arg arg_alpha;
@@ -40,10 +42,10 @@ layout(push_constant) XscalFast
 // XscalFast
 void main()
 {
-	const real alpha = GetRealArg(arg_alpha);
+	const real alpha = GetRealArg(args.arg_alpha);
 	for (int _w = 0; _w < WPT; _w += 1)
 	{
-		const int id = _w*GET_GLOBAL_SIZE(0) + gl_GlobalInvocationID[0];
+		const int id = _w*get_global_size(0) + get_global_id(0);
 		realV xvalue = INDEX(xgm, id);
 		realV result;
 		result = MultiplyVector(result, alpha, xvalue);

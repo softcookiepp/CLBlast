@@ -32,6 +32,10 @@ realV MultiplyVectorVector(realV cvec, const realV aval, const realV bvec) {
 		Multiply(cvec.z, aval.z, bvec.z);
 		Multiply(cvec.w, aval.w, bvec.w);
 	#elif VW == 8
+#if PRECISION == 16 || PRECISION  == 32 || PRECISION == 64
+		Multiply(cvec[0], aval[0], bvec[0]);
+		Multiply(cvec[1], aval[1], bvec[1]);
+#else
 		Multiply(cvec.s0, aval.s0, bvec.s0);
 		Multiply(cvec.s1, aval.s1, bvec.s1);
 		Multiply(cvec.s2, aval.s2, bvec.s2);
@@ -40,7 +44,14 @@ realV MultiplyVectorVector(realV cvec, const realV aval, const realV bvec) {
 		Multiply(cvec.s5, aval.s5, bvec.s5);
 		Multiply(cvec.s6, aval.s6, bvec.s6);
 		Multiply(cvec.s7, aval.s7, bvec.s7);
+#endif
 	#elif VW == 16
+#if PRECISION == 16 || PRECISION  == 32 || PRECISION == 64
+		Multiply(cvec[0], aval[0], bvec[0]);
+		Multiply(cvec[1], aval[1], bvec[1]);
+		Multiply(cvec[2], aval[2], bvec[2]);
+		Multiply(cvec[3], aval[3], bvec[3]);
+#else
 		Multiply(cvec.s0, aval.s0, bvec.s0);
 		Multiply(cvec.s1, aval.s1, bvec.s1);
 		Multiply(cvec.s2, aval.s2, bvec.s2);
@@ -57,6 +68,7 @@ realV MultiplyVectorVector(realV cvec, const realV aval, const realV bvec) {
 		Multiply(cvec.sD, aval.sD, bvec.sD);
 		Multiply(cvec.sE, aval.sE, bvec.sE);
 		Multiply(cvec.sF, aval.sF, bvec.sF);
+#endif
 	#endif
 	return cvec;
 }

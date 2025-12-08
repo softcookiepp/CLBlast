@@ -54,6 +54,10 @@ INLINE_FUNC realV MultiplyVector(realV cvec, const real aval, const realV bvec) 
 		Multiply(cvec.z, aval, bvec.z);
 		Multiply(cvec.w, aval, bvec.w);
 	#elif VW == 8
+#if PRECISION == 16 || PRECISION  == 32 || PRECISION == 64
+		Multiply(cvec[0], aval, bvec[0]);
+		Multiply(cvec[1], aval, bvec[1]);
+#else
 		Multiply(cvec.s0, aval, bvec.s0);
 		Multiply(cvec.s1, aval, bvec.s1);
 		Multiply(cvec.s2, aval, bvec.s2);
@@ -62,7 +66,14 @@ INLINE_FUNC realV MultiplyVector(realV cvec, const real aval, const realV bvec) 
 		Multiply(cvec.s5, aval, bvec.s5);
 		Multiply(cvec.s6, aval, bvec.s6);
 		Multiply(cvec.s7, aval, bvec.s7);
+#endif
 	#elif VW == 16
+#if PRECISION == 16 || PRECISION  == 32 || PRECISION == 64
+		Multiply(cvec[0], aval, bvec[0]);
+		Multiply(cvec[1], aval, bvec[1]);
+		Multiply(cvec[2], aval, bvec[2]);
+		Multiply(cvec[3], aval, bvec[3]);
+#else
 		Multiply(cvec.s0, aval, bvec.s0);
 		Multiply(cvec.s1, aval, bvec.s1);
 		Multiply(cvec.s2, aval, bvec.s2);
@@ -79,6 +90,7 @@ INLINE_FUNC realV MultiplyVector(realV cvec, const real aval, const realV bvec) 
 		Multiply(cvec.sD, aval, bvec.sD);
 		Multiply(cvec.sE, aval, bvec.sE);
 		Multiply(cvec.sF, aval, bvec.sF);
+#endif
 	#endif
 	return cvec;
 }
@@ -96,6 +108,10 @@ INLINE_FUNC realV MultiplyAddVector(realV cvec, const real aval, const realV bve
 		MultiplyAdd(cvec.z, aval, bvec.z);
 		MultiplyAdd(cvec.w, aval, bvec.w);
 	#elif VW == 8
+#if PRECISION == 16 || PRECISION  == 32 || PRECISION == 64
+		MultiplyAdd(cvec[0], aval, bvec[0]);
+		MultiplyAdd(cvec[1], aval, bvec[1]);
+#else
 		MultiplyAdd(cvec.s0, aval, bvec.s0);
 		MultiplyAdd(cvec.s1, aval, bvec.s1);
 		MultiplyAdd(cvec.s2, aval, bvec.s2);
@@ -104,7 +120,14 @@ INLINE_FUNC realV MultiplyAddVector(realV cvec, const real aval, const realV bve
 		MultiplyAdd(cvec.s5, aval, bvec.s5);
 		MultiplyAdd(cvec.s6, aval, bvec.s6);
 		MultiplyAdd(cvec.s7, aval, bvec.s7);
+#endif
 	#elif VW == 16
+#if PRECISION == 16 || PRECISION  == 32 || PRECISION == 64
+		MultiplyAdd(cvec[0], aval, bvec[0]);
+		MultiplyAdd(cvec[1], aval, bvec[1]);
+		MultiplyAdd(cvec[2], aval, bvec[2]);
+		MultiplyAdd(cvec[3], aval, bvec[3]);
+#else
 		MultiplyAdd(cvec.s0, aval, bvec.s0);
 		MultiplyAdd(cvec.s1, aval, bvec.s1);
 		MultiplyAdd(cvec.s2, aval, bvec.s2);
@@ -121,6 +144,7 @@ INLINE_FUNC realV MultiplyAddVector(realV cvec, const real aval, const realV bve
 		MultiplyAdd(cvec.sD, aval, bvec.sD);
 		MultiplyAdd(cvec.sE, aval, bvec.sE);
 		MultiplyAdd(cvec.sF, aval, bvec.sF);
+#endif
 	#endif
 	return cvec;
 }

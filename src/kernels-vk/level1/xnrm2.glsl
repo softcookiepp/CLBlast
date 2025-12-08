@@ -89,43 +89,6 @@ void main()
 		INDEX(outp, wgid) = lm[0];
 	}
 }
-#if 0
-// =================================================================================================
-
-// The epilogue reduction kernel, performing the final bit of the operation. This kernel has to
-// be launched with a single workgroup only.
-#if RELAX_WORKGROUP_SIZE == 1
-	__kernel
-#else
-	__kernel __attribute__((reqd_work_group_size(WGS2, 1, 1)))
-#endif
-void Xnrm2Epilogue(const __global real* restrict input,
-									 __global real* nrm2, const int nrm2_offset) {
-	__local real lm[WGS2];
-	const int lid = get_local_id(0);
-
-	// Performs the first step of the reduction while loading the data
-	Add(lm[lid], input[lid], input[lid + WGS2]);
-	barrier(CLK_LOCAL_MEM_FENCE);
-
-	// Performs reduction in local memory
-	for (int s=WGS2/2; s>0; s=s>>1) {
-		if (lid < s) {
-			Add(lm[lid], lm[lid], lm[lid + s]);
-		}
-		barrier(CLK_LOCAL_MEM_FENCE);
-	}
-
-	// Computes the square root and stores the final result
-	if (lid == 0) {
-		#if PRECISION == 3232 || PRECISION == 6464
-			nrm2[nrm2_offset].x = sqrt(lm[0].x); // the result is a non-complex number
-		#else
-			nrm2[nrm2_offset] = sqrt(lm[0]);
-		#endif
-	}
-}
-#endif
 
 // =================================================================================================
 

@@ -29,11 +29,17 @@ Xnrm2<T>::Xnrm2(Queue& queue, EventPointer event, const std::string& name)
     : Routine(queue, event, name, {"Xdot"}, PrecisionValue<T>(), {},
               {
 #if VULKAN_API
-	#include "../../kernels-vk/level1/xnrm2.opencl"
+	#include "../../kernels-vk/level1/xnrm2.glsl.inl"
+	,
+	#include "../../kernels-vk/level1/xnrm2-epilogue.glsl.inl"
 #else
 	#include "../../kernels/level1/xnrm2.opencl"
 #endif
-              }) {
+              }
+#if VULKAN_API
+	, true, {"Xnrm2", "Xnrm2Epilogue"}
+#endif
+	  ) {
 }
 
 // =================================================================================================

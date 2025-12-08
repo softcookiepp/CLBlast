@@ -29,17 +29,20 @@ Xher<T, U>::Xher(Queue& queue, EventPointer event, const std::string& name)
     : Routine(queue, event, name, {"Xger"}, PrecisionValue<T>(), {},
               {
 #if VULKAN_API
-	#include "../../kernels-vk/level2/level2.opencl"
+	#include "../../kernels-vk/level2/level2.glsl.inl"
 	// (comment to prevent auto-re-ordering)
-	#include "../../kernels-vk/level2/xher.opencl"
+	#include "../../kernels-vk/level2/xher.glsl.inl"
 #else
 	#include "../../kernels/level2/level2.opencl"
 	// (comment to prevent auto-re-ordering)
 	#include "../../kernels/level2/xher.opencl"
 #endif
-              }) {
+              }
+#if VULKAN_API
+	, true, {"Xher2"}
+#endif
+	  ) {
 }
-
 // =================================================================================================
 
 // Specializations to compute alpha of type 'T'

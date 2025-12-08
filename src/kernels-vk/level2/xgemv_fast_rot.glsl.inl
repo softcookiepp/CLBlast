@@ -136,31 +136,31 @@ void main()
 				tile[_kl*VW3 + 2][lid] = avec.z;
 				tile[_kl*VW3 + 3][lid] = avec.w;
 			#elif VW3 == 8
-				tile[_kl*VW3 + 0][lid] = avec.s0;
-				tile[_kl*VW3 + 1][lid] = avec.s1;
-				tile[_kl*VW3 + 2][lid] = avec.s2;
-				tile[_kl*VW3 + 3][lid] = avec.s3;
-				tile[_kl*VW3 + 4][lid] = avec.s4;
-				tile[_kl*VW3 + 5][lid] = avec.s5;
-				tile[_kl*VW3 + 6][lid] = avec.s6;
-				tile[_kl*VW3 + 7][lid] = avec.s7;
+				tile[_kl*VW3 + 0][lid] = avec[0][0];
+				tile[_kl*VW3 + 1][lid] = avec[0][1];
+				tile[_kl*VW3 + 2][lid] = avec[0][2];
+				tile[_kl*VW3 + 3][lid] = avec[0][3];
+				tile[_kl*VW3 + 4][lid] = avec[1][0];
+				tile[_kl*VW3 + 5][lid] = avec[1][1];
+				tile[_kl*VW3 + 6][lid] = avec[1][2];
+				tile[_kl*VW3 + 7][lid] = avec[1][3];
 			#elif VW3 == 16
-				tile[_kl*VW3 + 0][lid] = avec.s0;
-				tile[_kl*VW3 + 1][lid] = avec.s1;
-				tile[_kl*VW3 + 2][lid] = avec.s2;
-				tile[_kl*VW3 + 3][lid] = avec.s3;
-				tile[_kl*VW3 + 4][lid] = avec.s4;
-				tile[_kl*VW3 + 5][lid] = avec.s5;
-				tile[_kl*VW3 + 6][lid] = avec.s6;
-				tile[_kl*VW3 + 7][lid] = avec.s7;
-				tile[_kl*VW3 + 8][lid] = avec.s8;
-				tile[_kl*VW3 + 9][lid] = avec.s9;
-				tile[_kl*VW3 + 10][lid] = avec.sA;
-				tile[_kl*VW3 + 11][lid] = avec.sB;
-				tile[_kl*VW3 + 12][lid] = avec.sC;
-				tile[_kl*VW3 + 13][lid] = avec.sD;
-				tile[_kl*VW3 + 14][lid] = avec.sE;
-				tile[_kl*VW3 + 15][lid] = avec.sF;
+				tile[_kl*VW3 + 0][lid] = avec[0][0];
+				tile[_kl*VW3 + 1][lid] = avec[0][1];
+				tile[_kl*VW3 + 2][lid] = avec[0][2];
+				tile[_kl*VW3 + 3][lid] = avec[0][3];
+				tile[_kl*VW3 + 4][lid] = avec[1][0];
+				tile[_kl*VW3 + 5][lid] = avec[1][1];
+				tile[_kl*VW3 + 6][lid] = avec[1][2];
+				tile[_kl*VW3 + 7][lid] = avec[1][3];
+				tile[_kl*VW3 + 8][lid] = avec[2][0];
+				tile[_kl*VW3 + 9][lid] = avec[2][1];
+				tile[_kl*VW3 + 10][lid] = avec[2][2];
+				tile[_kl*VW3 + 11][lid] = avec[2][3];
+				tile[_kl*VW3 + 12][lid] = avec[3][0];
+				tile[_kl*VW3 + 13][lid] = avec[3][1];
+				tile[_kl*VW3 + 14][lid] = avec[3][2];
+				tile[_kl*VW3 + 15][lid] = avec[3][3];
 			#endif
 			barrier();
 		}

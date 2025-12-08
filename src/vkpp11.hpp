@@ -676,7 +676,7 @@ public:
 		if (size == 0)
 			buffer_ = nullptr;
 		else
-			buffer_ = context.pointer()->allocateBuffer(size*sizeof(T)*2);
+			buffer_ = context.pointer()->allocateBuffer(size*sizeof(T));
 	}
 
 	// As above, but now with read/write access as a default
@@ -690,7 +690,7 @@ public:
 		auto size = static_cast<size_t>(end - start);
 		auto pointer = &*start;
 		// may be unsafe, but literally the only option here :c
-		context.pointer()->allocateBuffer(pointer, size);
+		context.pointer()->allocateBuffer(pointer, size*sizeof(T));
 	}
 
 	// Copies from device to host: reading the device buffer a-synchronously
@@ -702,9 +702,8 @@ public:
 			throw LogicError("Buffer: reading from a write-only buffer");
 		}
 		
-		// we don't have offsets in tart yet, because I am dumb.
 		if (offset > 0) throw LogicError("not implemented");
-		buffer_->copyOut(host, size);
+		buffer_->copyOut(host, size*sizeof(T), offset*sizeof(T));
 	}
 	void ReadAsync(const Queue& queue, const size_t size, std::vector<T>& host, const size_t offset = 0) const
 	{
@@ -743,7 +742,7 @@ public:
 		if (offset > 0) throw LogicError("offsets greater than zero are not implemented :c");
 		const void* hostbufVoid = host;
 		void* hostptr = const_cast<void*>(hostbufVoid);
-		buffer_->copyIn(hostptr, size);
+		buffer_->copyIn(hostptr, size*sizeof(T), offset*sizeof(T));
 		//CheckError(clEnqueueWriteBuffer(queue(), *buffer_, CL_FALSE, offset * sizeof(T), size * sizeof(T), host, 0, nullptr,
 		//																nullptr));
 	}
@@ -770,7 +769,7 @@ public:
 	void CopyToAsync(const Queue& queue, const size_t size, const Buffer<T>& destination,
 									 EventPointer event = nullptr) const {
 		if (event != nullptr) throw LogicError("copying with events is not implemented yet");
-		buffer_->copyTo(destination(), 0, 0, size);
+		buffer_->copyTo(destination(), 0, 0, size*sizeof(T));
 		//CheckError(clEnqueueCopyBuffer(queue(), *buffer_, destination(), 0, 0, size * sizeof(T), 0, nullptr, event));
 	}
 	void CopyTo(const Queue& queue, const size_t size, const Buffer<T>& destination) const {

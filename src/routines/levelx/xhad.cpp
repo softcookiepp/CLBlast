@@ -75,11 +75,16 @@ void Xhad<T>::DoHad(const size_t n, const T alpha, const Buffer<T>& x_buffer, co
 	TestVectorY(n, y_buffer, y_offset, y_inc);
 	TestVectorZ(n, z_buffer, z_offset, z_inc);
 
+#if 1
+	// temporarily disable for testing purposes
+	const bool use_faster_kernel = false;
+	const bool use_fastest_kernel = false;
+#else
 	// Determines whether or not the fast-version can be used
 	const auto use_faster_kernel = (x_offset == 0) && (x_inc == 1) && (y_offset == 0) && (y_inc == 1) &&
 																 (z_offset == 0) && (z_inc == 1) && IsMultiple(n, db_["WPT"] * db_["VW"]);
 	const auto use_fastest_kernel = use_faster_kernel && IsMultiple(n, db_["WGS"] * db_["WPT"] * db_["VW"]);
-
+#endif
 	// If possible, run the fast-version of the kernel
 	const auto kernel_name = (use_fastest_kernel) ? "XhadFastest" : (use_faster_kernel) ? "XhadFaster" : "Xhad";
 

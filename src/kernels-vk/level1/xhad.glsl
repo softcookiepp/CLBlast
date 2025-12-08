@@ -93,9 +93,29 @@ layout(push_constant) uniform Xhad
 
 void main()
 {
+#if 0
 	const real alpha = GetRealArg(args.arg_alpha);
 	const real beta = GetRealArg(args.arg_beta);
-
+	
+	// Loops over the work that needs to be done (allows for an arbitrary number of threads)
+	for (int id = get_global_id(0); id < args.n; id += get_global_size(0)) {
+		real xvalue = xgm[id*args.x_inc + args.x_offset];
+		real yvalue = ygm[id*args.y_inc + args.y_offset];
+		real zvalue = zgm[id*args.z_inc + args.z_offset];
+		real result;
+		real alpha_times_x;
+		Multiply(alpha_times_x, alpha, xvalue);
+		Multiply(result, alpha_times_x, yvalue);
+		MultiplyAdd(result, beta, zvalue);
+		
+		xgm[id*args.x_inc + args.x_offset] = alpha;
+		ygm[id*args.y_inc + args.y_offset] = beta;
+		zgm[id*args.z_inc + args.z_offset] = alpha;
+	}
+#else
+	const real alpha = GetRealArg(args.arg_alpha);
+	const real beta = GetRealArg(args.arg_beta);
+	
 	// Loops over the work that needs to be done (allows for an arbitrary number of threads)
 	for (int id = get_global_id(0); id < args.n; id += get_global_size(0)) {
 		real xvalue = xgm[id*args.x_inc + args.x_offset];
@@ -108,6 +128,7 @@ void main()
 		MultiplyAdd(result, beta, zvalue);
 		zgm[id*args.z_inc + args.z_offset] = result;
 	}
+#endif
 }
 #if 0
 // Faster version of the kernel without offsets and strided accesses but with if-statement. Also

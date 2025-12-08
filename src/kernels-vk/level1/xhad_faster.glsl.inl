@@ -108,40 +108,6 @@ void main()
 	}
 }
 
-#if 0
-// Faster version of the kernel without offsets and strided accesses. Also assumes that 'n' is
-// dividable by 'VW', 'WGS' and 'WPT'.
-#if RELAX_WORKGROUP_SIZE == 1
-	__kernel
-#else
-	__kernel __attribute__((reqd_work_group_size(WGS, 1, 1)))
-#endif
-void XhadFastest(const int n, const real_arg arg_alpha, const real_arg arg_beta,
-								 const __global realV* restrict xgm, const __global realV* restrict ygm,
-								 __global realV* zgm) {
-#if __has_builtin(__builtin_assume)
-	__builtin_assume(n % VW == 0);
-	__builtin_assume(n % WPT == 0);
-	__builtin_assume(n % WGS == 0);
-#endif
-	const real alpha = GetRealArg(args.arg_alpha);
-	const real beta = GetRealArg(args.arg_beta);
-
-	//#pragma unroll
-	for (int _w = 0; _w < WPT; _w += 1) {
-		const int id = _w*get_global_size(0) + get_global_id(0);
-		realV xvalue = xgm[id];
-		realV yvalue = ygm[id];
-		realV zvalue = zgm[id];
-		realV result;
-		realV alpha_times_x;
-		alpha_times_x = MultiplyVector(alpha_times_x, alpha, xvalue);
-		result = MultiplyVectorVector(result, alpha_times_x, yvalue);
-		zgm[id] = MultiplyAddVector(result, beta, zvalue);
-	}
-}
-#endif
-
 // =================================================================================================
 
 // End of the C++11 raw string literal

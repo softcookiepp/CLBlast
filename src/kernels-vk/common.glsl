@@ -25,13 +25,13 @@
 
 // Enable support for half-precision
 #if PRECISION == 16
-	#extension GL_EXT_shader_16bit_storage : enable
-	#extension GL_EXT_shader_explicit_arithmetic_types_float16 : enable
+	#extension GL_EXT_shader_16bit_storage : require
+	#extension GL_EXT_shader_explicit_arithmetic_types_float16 : require
 #endif
 
 // Enable support for double-precision
 #if PRECISION == 64 || PRECISION == 6464
-	#extension GL_EXT_shader_explicit_arithmetic_types_float64 : enable
+	#extension GL_EXT_shader_explicit_arithmetic_types_float64 : require
 #endif
 
 

@@ -25,6 +25,11 @@ def create_inline(path):
 	
 	new_body = "\n".join(new_lines)
 	if os.path.exists(out_path):
+		# check to see if contents are identical.
+		# if they are, leave it alone so the file isn't flagged as changed
+		with open(out_path, "r") as f:
+			if f.read() == new_body:
+				return
 		os.remove(out_path)
 	with open(out_path, "w") as f:
 		f.write(new_body)

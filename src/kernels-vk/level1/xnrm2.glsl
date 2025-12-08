@@ -1,4 +1,6 @@
-
+#version 450
+#include "../common.glsl"
+#include "level1.glsl"
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -32,37 +34,37 @@
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) buffer xgm_buf { real xgm[]; };
-	layout(binding = 1, std430) buffer output_buf { real output[]; };
+	layout(binding = 1, std430) buffer outp_buf { real outp[]; };
 #endif
 
-layout(push_constant) Xnrm2
+layout(push_constant) uniform Xnrm2
 {
 	int n;
 #if USE_BDA
 	const __global real* restrict xgm;
 #endif
 	int x_offset;
-	int x_inc,
+	int x_inc;
 #if USE_BDA
-	__global real* output
+	__global real* outp
 #endif
-}args;
+} args;
 
 shared real lm[WGS1];
 
 // Xnrm2
 void main()
 {
-	const int lid = gl_LocalInvocationID[0];
-	const int wgid = gl_WorkGroupID[0];
-	const int num_groups = gl_NumWorkGroups[0];
+	const int lid = get_local_id(0);
+	const int wgid = get_group_id(0);
+	const int num_groups = get_global_size(0);
 
 	// Performs multiplication and the first steps of the reduction
 	real acc;
 	SetToZero(acc);
 	int id = wgid*WGS1 + lid;
-	while (id < n) {
-		real x1 = INDEX(xgm, id*x_inc + x_offset);
+	while (id < args.n) {
+		real x1 = INDEX(xgm, id*args.x_inc + args.x_offset);
 		real x2 = x1;
 		COMPLEX_CONJUGATE(x2);
 		MultiplyAdd(acc, x1, x2);
@@ -84,7 +86,7 @@ void main()
 	// Stores the per-workgroup result
 	if (lid == 0)
 	{
-		INDEX(output, wgid) = lm[0];
+		INDEX(outp, wgid) = lm[0];
 	}
 }
 #if 0

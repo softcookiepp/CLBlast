@@ -485,10 +485,17 @@ template <>
 typename RealArg<float>::Type GetRealArg(const float value) {
   return value;
 }
+#if 0
+template <>
+typename RealArg<double>::Type GetRealArg(const double value) {
+  return static_cast<float>(value);
+}
+#else
 template <>
 typename RealArg<double>::Type GetRealArg(const double value) {
   return value;
 }
+#endif
 template <>
 typename RealArg<float2>::Type GetRealArg(const float2 value) {
   return value;

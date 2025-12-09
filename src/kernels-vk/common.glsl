@@ -126,7 +126,10 @@
 	#define GetRealArg(x) real(x)
 #endif
 
-
+//#elif PRECISION == 64
+//	// lets see if this makes our life easier...
+//	#define real_arg float
+//	#define GetRealArg(x) double(x)
 
 // Pointers to local memory objects (using a define because CUDA doesn't need them)
 #ifndef LOCAL_PTR

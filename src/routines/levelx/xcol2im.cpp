@@ -28,11 +28,17 @@ Xcol2im<T>::Xcol2im(Queue& queue, EventPointer event, const std::string& name)
     : Routine(queue, event, name, {"Copy"}, PrecisionValue<T>(), {},
               {
 #if VULKAN_API
-	#include "../../kernels-vk/levelx/col2im.opencl"
+	#include "../../kernels-vk/levelx/col2im_kernel_normal.glsl.inl"
+	,
+	#include "../../kernels-vk/levelx/col2im_kernel_flip.glsl.inl"
 #else
 	#include "../../kernels/levelx/col2im.opencl"
 #endif
-              }) {
+              }
+#if VULKAN_API
+	, true, {"Xcol2imKernelNormal", "Xcol2imKernelFlip"}
+#endif
+	  ) {
 }
 
 // =================================================================================================

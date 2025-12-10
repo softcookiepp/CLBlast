@@ -11,10 +11,12 @@
 R"(
 
 // A common interface for subgroup functions
-
+// genuinely no idea how this maps to GLSL as of now; Vulkan probably has entirely different extensions
+// We will just have to disable it host-side until a solution is found...
 #if USE_SUBGROUP_SHUFFLING == 1
 
-INLINE_FUNC int clblast_get_sub_group_local_id() {
+int clblast_get_sub_group_local_id()
+{
 
 	// Intel extension 
 	#if SUBGROUP_SHUFFLING_INTEL == 1
@@ -28,7 +30,7 @@ INLINE_FUNC int clblast_get_sub_group_local_id() {
 	#endif 
 }
 
-INLINE_FUNC realN clblast_sub_group_shuffle(realN reg, int src) {
+realN clblast_sub_group_shuffle(realN reg, int src) {
 
 	// Intel extension 
 	#if SUBGROUP_SHUFFLING_INTEL == 1
@@ -48,10 +50,8 @@ INLINE_FUNC realN clblast_sub_group_shuffle(realN reg, int src) {
 }
 #endif
 
-void XgemmBodyImpl()
-
 // Main body of the matrix-multiplication algorithm. It calls various (inlined) functions.
-INLINE_FUNC void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
+void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
 	const __global realM* restrict agm, const __global realN* restrict bgm,
 	__global realM* cgm, const real alpha, const real beta
 	#if SA == 1 && SB == 1

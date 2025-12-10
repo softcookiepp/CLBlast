@@ -1,4 +1,3 @@
-
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -142,28 +141,28 @@ R"(
 
 // Data-widths in dimension M
 #if VWM == 1
-		typedef real realM;
+		#define realM real
 #elif VWM == 2
-		typedef real2 realM;
+		#define realM real2
 #elif VWM == 4
-		typedef real4 realM;
+		#define realM real4
 #elif VWM == 8
-		typedef real8 realM;
+		#define realM real8
 #elif VWM == 16
-		typedef real16 realM;
+		#define realM real16
 #endif
 
 // Data-widths in dimension N
 #if VWN == 1
-		typedef real realN;
+		#define realN real
 #elif VWN == 2
-		typedef real2 realN;
+		#define realN real2
 #elif VWN == 4
-		typedef real4 realN;
+		#define realN real4
 #elif VWN == 8
-		typedef real8 realN;
+		#define realN real8
 #elif VWN == 16
-		typedef real16 realN;
+		#define realN real16
 #endif
 
 // =================================================================================================
@@ -182,6 +181,7 @@ INLINE_FUNC realM InitAccRegisters() {
 		SetToZero(result.z);
 		SetToZero(result.w);
 	#elif VWM == 8
+		// TODO: implement expressions for this and VW == 16
 		SetToZero(result.s0);
 		SetToZero(result.s1);
 		SetToZero(result.s2);

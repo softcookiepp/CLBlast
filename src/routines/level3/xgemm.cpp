@@ -30,6 +30,121 @@ Xgemm<T>::Xgemm(Queue& queue, EventPointer event, const std::string& name)
 							PrecisionValue<T>(), {},
 							{
 #if VULKAN_API
+#if 0
+	// absolute torture :c
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	// 
+	#include "../../kernels-vk/level3/convert_hermitian_lower.glsl.inl"
+	,
+	
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	// 
+	#include "../../kernels-vk/level3/convert_hermitian_upper.glsl.inl"
+	,
+	
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	// 
+	#include "../../kernels-vk/level3/convert_symmetric_lower.glsl.inl"
+	,
+	
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	// 
+	#include "../../kernels-vk/level3/convert_symmetric_upper.glsl.inl"
+	,
+	
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	// 
+	#include "../../kernels-vk/level3/convert_triangular_lower.glsl.inl"
+	,
+	
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	// 
+	#include "../../kernels-vk/level3/convert_triangular_upper.glsl.inl"
+	,
+	
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	// 
+	#include "../../kernels-vk/level3/copy_fast.glsl.inl"
+	,
+	
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	// 
+	#include "../../kernels-vk/level3/copy_matrix_impl.glsl.inl"
+	#include "../../kernels-vk/level3/copy_matrix.glsl.inl"
+	,
+	
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	// 
+	#include "../../kernels-vk/level3/copy_matrix_impl.glsl.inl"
+	#include "../../kernels-vk/level3/copy_matrix_batched.glsl.inl"
+	,
+	
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	// 
+	#include "../../kernels-vk/level3/copy_matrix_impl.glsl.inl"
+	#include "../../kernels-vk/level3/copy_matrix_strided_batched.glsl.inl"
+	,
+	
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	// 
+	#include "../../kernels-vk/level3/copy_pad_matrix_impl.glsl.inl"
+	#include "../../kernels-vk/level3/copy_pad_matrix.glsl.inl"
+	,
+	
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	// 
+	#include "../../kernels-vk/level3/copy_pad_matrix_impl.glsl.inl"
+	#include "../../kernels-vk/level3/copy_pad_matrix_batched.glsl.inl"
+	,
+	
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	// 
+	#include "../../kernels-vk/level3/copy_pad_matrix_impl.glsl.inl"
+	#include "../../kernels-vk/level3/copy_pad_matrix_strided_batched.glsl.inl"
+	,
+	//ok...onto the next big thingy
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	// 
+	#include "../../kernels-vk/level3/transpose_fast.glsl.inl"
+	,
+	// wow this was a lot to translate, goodness...
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	// 
+	#include "../../kernels-vk/level3/transpose_matrix_impl.glsl.inl"
+	#include "../../kernels-vk/level3/transpose_matrix.glsl.inl"
+	,
+	
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	// 
+	#include "../../kernels-vk/level3/transpose_matrix_impl.glsl.inl"
+	#include "../../kernels-vk/level3/transpose_matrix_batched.glsl.inl"
+	,
+	
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	// 
+	#include "../../kernels-vk/level3/transpose_matrix_impl.glsl.inl"
+	#include "../../kernels-vk/level3/transpose_matrix_strided_batched.glsl.inl"
+	,
+	
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	// 
+	#include "../../kernels-vk/level3/transpose_pad_matrix_impl.glsl.inl"
+	#include "../../kernels-vk/level3/transpose_pad_matrix.glsl.inl"
+	,
+	
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	// 
+	#include "../../kernels-vk/level3/transpose_pad_matrix_impl.glsl.inl"
+	#include "../../kernels-vk/level3/transpose_pad_matrix_batched.glsl.inl"
+	,
+	
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	// 
+	#include "../../kernels-vk/level3/transpose_pad_matrix_impl.glsl.inl"
+	#include "../../kernels-vk/level3/transpose_pad_matrix_strided_batched.glsl.inl"
+	,
+	
+#else
 	#include "../../kernels-vk/level3/level3.opencl"
 	// (comment to prevent auto-re-ordering)
 	#include "../../kernels-vk/level3/convert_hermitian.opencl"
@@ -49,6 +164,7 @@ Xgemm<T>::Xgemm(Queue& queue, EventPointer event, const std::string& name)
 						,	// separated in multiple parts to prevent C1091 in MSVC 2013
 	#include "../../kernels-vk/level3/xgemm_part3.opencl"
 	#include "../../kernels-vk/level3/xgemm_part4.opencl"
+#endif
 #else
 	#include "../../kernels/level3/level3.opencl"
 	// (comment to prevent auto-re-ordering)
@@ -84,7 +200,7 @@ void Xgemm<T>::DoGemm(const Layout layout, const Transpose a_transpose, const Tr
 											const Buffer<T>& temp_buffer, const bool temp_buffer_provided) {	// optional arguments
 
 	// Two methods to choose from, select which one to run
-#if 0
+#if 1
 	const auto do_gemm_direct = true;
 #else
 	const auto do_gemm_direct = UseDirectKernel(m, n, k, db_["XGEMM_MIN_INDIRECT_SIZE"]);

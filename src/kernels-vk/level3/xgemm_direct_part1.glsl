@@ -90,48 +90,43 @@
 
 // Loads global off-chip memory into thread-private register files. This function is specific for
 // loading the A input matrix.
-INLINE_FUNC real GlobalToPrivateDirectA(const __global real* restrict agms, const int _mi,
-																				const int a_ld, const int a_offset, const int idm, const int idk,
-																				const int a_transpose, const int a_conjugate) {
-	const int a_index = (a_transpose) ? (idm + _mi)*a_ld + idk : idk*a_ld + (idm + _mi);
-	real result = agms[a_index + a_offset];
-	if (a_conjugate) { COMPLEX_CONJUGATE(result); }
-	return result;
-}
+#define GlobalToPrivateDirectA(result, agms, _mi, a_ld, a_offset, idm, idk, a_transpose, a_conjugate) \
+{ \
+	const int a_index = bool(a_transpose) ? (idm + _mi)*a_ld + idk : idk*a_ld + (idm + _mi); \
+	result = agms[a_index + a_offset]; \
+	if (bool(a_conjugate)) { COMPLEX_CONJUGATE(result); } \
+} \
 
 // Same as above, but now for the B input matrix
-#define GlobalToPrivateDirectB(result, bgms, _ni, b_ld, b_offset, idn, \
-	idk, b_transpose, b_conjugate) \
+#define GlobalToPrivateDirectB(result, bgms, _ni, b_ld, b_offset, idn, idk, b_transpose, b_conjugate) \
 { \
 	const int b_index = bool(b_transpose) ? (idn + _ni)*b_ld + idk : idk*b_ld + (idn + _ni); \
 	result = bgms[b_index + b_offset]; \
 	if (bool(b_conjugate)) { COMPLEX_CONJUGATE(result); } \
-} \
+}
 
 // Loads global off-chip memory into thread-private register files. This function is specific for
 // loading the A input matrix. This is the same as above but now includes a bounds check.
-#define GlobalToPrivateCheckedA(result, restrict agms, _mi, a_ld, a_offset, idm, idk, \
-	a_transpose, a_conjugate, kSizeM) \
+#define GlobalToPrivateCheckedA(result, agms, _mi, a_ld, a_offset, idm, idk, a_transpose, a_conjugate, kSizeM) \
 { \
 	if (idm + _mi < kSizeM) { \
 		const int a_index = bool(a_transpose) ? (idm + _mi)*a_ld + idk : idk*a_ld + (idm + _mi); \
 		result = agms[a_index + a_offset]; \
 		if (bool(a_conjugate)) { COMPLEX_CONJUGATE(result); } \
 	} \
-	else SetToZero(result); \
-} \
+	else { SetToZero(result); } \
+}
 
 // Same as above, but now for the B input matrix
-#define GlobalToPrivateCheckedB(result, restrict bgms, _ni, \
-	b_ld, b_offset, idn, idk, b_transpose, b_conjugate, kSizeN) \
+#define GlobalToPrivateCheckedB(result, bgms, _ni, b_ld, b_offset, idn, idk, b_transpose, b_conjugate, kSizeN) \
 { \
 	if (idn + _ni < kSizeN) { \
 		const int b_index = bool(b_transpose) ? (idn + _ni)*b_ld + idk : idk*b_ld + (idn + _ni); \
 		result = bgms[b_index + b_offset]; \
 		if (bool(b_conjugate)) { COMPLEX_CONJUGATE(result); } \
 	} \
-	else SetToZero(result); \
-} \
+	else { SetToZero(result); } \
+}
 
 // =================================================================================================
 
@@ -154,36 +149,9 @@ INLINE_FUNC real GlobalToPrivateDirectA(const __global real* restrict agms, cons
 } \
 
 // =================================================================================================
-#if 0
+
 // Merges the results in Cpm with the global array in Cgm. This also performs the multiplication
 // with the constants: Cgm = alpha*A*B + beta*Cgm = alpha*Cpm + beta*Cgm
-real StoreResultsDirectImpl(
-#if 0
-	__global real* cgm,
-#endif
-	const real c_value,
-	const int _mi, const int _ni, const int idm, const int idn,
-	const real alpha, const real beta,
-	const int c_ld, const int c_offset, const int c_transpose)
-{
-
-	// Determines the destination index
-	int c_index = (c_transpose) ? (idm + _mi)*c_ld + (idn + _ni) : (idn + _ni)*c_ld + (idm + _mi);
-
-	// The final multiplication with alpha (in case beta == 0)
-	real result;
-	if (IsZero(beta)) {
-		Multiply(result, alpha, c_value);
-	}
-	// The final multiplication with alpha and the addition with beta*C
-	else {
-		AXPBY(result, alpha, c_value, beta, cgm[c_index + c_offset]);
-	}
-	cgm[c_index + c_offset] = result;
-}
-#endif
-
-// macro for doing the actual store
 #define StoreResultsDirect(cgm, c_value, _mi, _ni, idm, idn, alpha, beta, c_ld, c_offset, c_transpose) \
 { \
 	int c_index = bool(c_transpose) ? (idm + _mi)*c_ld + (idn + _ni) : (idn + _ni)*c_ld + (idm + _mi); \
@@ -201,29 +169,20 @@ real StoreResultsDirectImpl(
 
 // Merges the results in Cpm with the global array in Cgm. This also performs the multiplication
 // with the constants: Cgm = alpha*A*B + beta*Cgm = alpha*Cpm + beta*Cgm
-void StoreResultsChecked(__global real* cgm, const real c_value,
-	const int _mi, const int _ni, const int idm, const int idn,
-	const int kSizeM, const int kSizeN,
-	const real alpha, const real beta,
-	const int c_ld, const int c_offset, const int c_transpose)
-{
-	if ((idm + _mi) < kSizeM && (idn + _ni) < kSizeN) {
-
-		// Deter_mines the destination index
-		int c_index = (c_transpose) ? (idm + _mi)*c_ld + (idn + _ni) : (idn + _ni)*c_ld + (idm + _mi);
-
-		// The final multiplication with alpha (in case beta == 0)
-		real result;
-		if (IsZero(beta)) {
-			Multiply(result, alpha, c_value);
-		}
-		// The final multiplication with alpha and the addition with beta*C
-		else {
-			AXPBY(result, alpha, c_value, beta, cgm[c_index + c_offset]);
-		}
-		cgm[c_index + c_offset] = result;
-	}
-}
+#define StoreResultsChecked(cgm, c_value, _mi, _ni, idm, idn, kSizeM, kSizeN, alpha, beta, c_ld, c_offset, c_transpose) \
+{ \
+	if ((idm + _mi) < kSizeM && (idn + _ni) < kSizeN) { \
+		int c_index = bool(c_transpose) ? (idm + _mi)*c_ld + (idn + _ni) : (idn + _ni)*c_ld + (idm + _mi); \
+		real result; \
+		if (IsZero(beta)) { \
+			Multiply(result, alpha, c_value); \
+		} \
+		else { \
+			AXPBY(result, alpha, c_value, beta, cgm[c_index + c_offset]); \
+		} \
+		cgm[c_index + c_offset] = result; \
+	} \
+} \
 
 // =================================================================================================
 

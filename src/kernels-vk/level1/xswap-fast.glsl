@@ -45,15 +45,10 @@ layout(push_constant) push_constants
 //void XswapFast()
 void main()
 {
-#if 0 //__has_builtin(__builtin_assume)
-	__builtin_assume(n % VW == 0);
-	__builtin_assume(n % WPT == 0);
-	__builtin_assume(n % WGS == 0);
-#endif
-	//#pragma unroll
+	if ( !(n % VW == 0 && n % WPT == 0 && n % WGS == 0) ) return;
 	for (int _w = 0; _w < WPT; _w += 1)
 	{
-		const int id = _w*GET_GLOBAL_SIZE(0) + gl_GlobalInvocationID[0];
+		const int id = _w*get_global_size(0) + get_global_id(0);
 		realV temp = INDEX(xgm, id);
 		INDEX(xgm, id) = INDEX(ygm, id);
 		INDEX(ygm, id) = temp;

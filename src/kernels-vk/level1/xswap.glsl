@@ -46,7 +46,7 @@ layout(push_constant) push_constants
 void main()
 {
 	// Loops over the work that needs to be done (allows for an arbitrary number of threads)
-	for (int id = gl_GlobalInvocationID.x; id<n; id += GET_GLOBAL_SIZE(0))
+	for (int id = get_global_id(0); id<n; id += get_global_size(0))
 	{
 		real temp = LOAD(xgm, id*x_inc + x_offset);
 		INDEX(xgm, id*x_inc + x_offset) = INDEX(ygm, id*y_inc + y_offset);
@@ -54,34 +54,6 @@ void main()
 	}
 }
 
-// =================================================================================================
-
-// Faster version of the kernel without offsets and strided accesses. Also assumes that 'n' is
-// dividable by 'VW', 'WGS' and 'WPT'.
-#if 0
-#if RELAX_WORKGROUP_SIZE == 1
-	__kernel
-#else
-	__kernel __attribute__((reqd_work_group_size(WGS, 1, 1)))
-#endif
-void XswapFast(const int n,
-							 __global realV* xgm,
-							 __global realV* ygm)
-{
-#if 0 //__has_builtin(__builtin_assume)
-	__builtin_assume(n % VW == 0);
-	__builtin_assume(n % WPT == 0);
-	__builtin_assume(n % WGS == 0);
-#endif
-	#pragma unroll
-	for (int _w = 0; _w < WPT; _w += 1) {
-		const int id = _w*get_global_size(0) + get_global_id(0);
-		realV temp = xgm[id];
-		xgm[id] = ygm[id];
-		ygm[id] = temp;
-	}
-}
-#endif
 // =================================================================================================
 
 // End of the C++11 raw string literal

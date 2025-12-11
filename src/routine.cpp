@@ -62,7 +62,7 @@ Routine::Routine(Queue& queue, EventPointer event, const std::string& name,
 	const std::vector<std::string>& kernel_names, const Precision precision,
 	const std::vector<database::DatabaseEntry>& userDatabase, std::initializer_list<const char*> source
 #if VULKAN_API
-	, bool isGLSL, std::vector<std::string> entryPointNames
+	, bool isGLSL, std::vector<std::string> entryPointNames, std::vector<std::string> defineKeys
 #endif
 	)
 		: precision_(precision),
@@ -74,7 +74,7 @@ Routine::Routine(Queue& queue, EventPointer event, const std::string& name,
 			device_(queue_.GetDevice()),
 			db_(kernel_names)
 #if VULKAN_API
-			, mIsGLSL(isGLSL), mEntryPointNames(entryPointNames)
+			, mIsGLSL(isGLSL), mEntryPointNames(entryPointNames), mDefineKeys(defineKeys)
 #endif
 {
 	InitDatabase(device_, kernel_names, precision, userDatabase, db_);
@@ -155,7 +155,14 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 		if (mEntryPointNames.size() == 0) kernelNames = kernel_names_;
 
 		std::vector<std::string> defines;
-		if (source.size() > kernel_names_.size() and kernel_names_.size() == 1)
+		if (mDefineKeys.size() > 0)
+		{
+			if (mDefineKeys.size() != mEntryPointNames.size())
+				throw std::runtime_error("define keys must be same size as entry points");
+			for (auto& key : mDefineKeys)
+				defines.push_back(db_(key).GetDefines());
+		}
+		else if (source.size() > kernel_names_.size() && kernel_names_.size() == 1)
 		{
 			// just duplicate the definitions, holy crap.
 			for (size_t i = 0; i < source.size(); i += 1)
@@ -170,7 +177,6 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 		else
 		{
 			// one define set per kernel name...
-			// just duplicate the definitions, holy crap.
 			for (size_t i = 0; i < source.size(); i += 1)
 			{
 				defines.push_back(db_(kernel_names_[i]).GetDefines());

@@ -68,11 +68,6 @@ void Xcopy<T>::DoCopy(const size_t n, const Buffer<T>& x_buffer, const size_t x_
 	bool use_fast_kernel = (x_offset == 0) && (x_inc == 1) && (y_offset == 0) && (y_inc == 1) &&
 												 IsMultiple(n, db_["WGS"] * db_["WPT"] * db_["VW"]);
 
-#if VULKAN_API
-	// temporarily disable fast kernel because broken :c
-	//if (mIsGLSL) use_fast_kernel = false;
-#endif
-
 	// If possible, run the fast-version of the kernel
 	auto kernel_name = (use_fast_kernel) ? "XcopyFast" : "Xcopy";
 
@@ -98,9 +93,6 @@ void Xcopy<T>::DoCopy(const size_t n, const Buffer<T>& x_buffer, const size_t x_
 	if (use_fast_kernel) {
 		auto global = std::vector<size_t>{CeilDiv(n, db_["WPT"] * db_["VW"])};
 		auto local = std::vector<size_t>{db_["WGS"]};
-#if VULKAN_API
-		//kernel.SetArgument(3, global[0]*local[0]);
-#endif
 		RunKernel(kernel, queue_, device_, global, local, event_);
 	} else {
 		auto n_ceiled = Ceil(n, db_["WGS"] * db_["WPT"]);

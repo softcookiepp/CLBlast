@@ -23,7 +23,7 @@
 //R"(
 
 // =================================================================================================
-#ifdef ROUTINE_GEMMBATCHED
+#if 1//def ROUTINE_GEMMBATCHED
 
 // Batched version of the above
 #if RELAX_WORKGROUP_SIZE == 0

@@ -19,7 +19,7 @@
 R"(
 
 // =================================================================================================
-#if defined(ROUTINE_GEMMSTRIDEDBATCHED)
+#if 1
 
 // Strided-batched version of the above
 #if RELAX_WORKGROUP_SIZE == 0

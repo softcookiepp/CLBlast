@@ -113,13 +113,6 @@ void Xgemv<T>::MatVec(const Layout layout, const Transpose a_transpose, const si
 										IsMultiple(m, db_["WGS3"] * db_["WPT3"]) && IsMultiple(n, db_["WGS3"]) &&
 										IsMultiple(a_ld, db_["VW3"]);
 
-#if VULKAN_API
-	// fast versions are broken, disable them for now :c
-	//fast_kernel = false;
-	//fast_kernel_rot = false;
-#endif
-
-
 	// If possible, run the fast-version (rotated or non-rotated) of the kernel
 	auto kernel_name = std::string{"Xgemv"};
 	const auto m_ceiled = Ceil(m_real, db_["WGS1"] * db_["WPT1"]);

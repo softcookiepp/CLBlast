@@ -18,7 +18,7 @@
 R"(
 
 // =================================================================================================
-#ifdef ROUTINE_GEMMBATCHED
+#if 1//def ROUTINE_GEMMBATCHED
 
 // Batched version of the above
 layout(push_constant) uniform TransposeMatrixBatched

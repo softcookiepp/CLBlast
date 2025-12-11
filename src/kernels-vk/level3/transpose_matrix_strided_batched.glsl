@@ -21,7 +21,7 @@
 //R"(
 
 // =================================================================================================
-#ifdef ROUTINE_GEMMSTRIDEDBATCHED
+#if 1
 
 // Strided-batched version of the above
 layout(push_constant) uniform TransposeMatrixStridedBatched

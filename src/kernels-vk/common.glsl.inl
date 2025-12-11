@@ -71,7 +71,7 @@ R"(
 #elif PRECISION == 3232
 	#define real vec2
 	struct cfloat2 {real x; real y;};
-	#define real2 cfloat2;
+	#define real2 cfloat2
 	struct cfloat4 {real x; real y; real z; real w;};
 	#define real4 cfloat4
 	struct cfloat8 {real s0; real s1; real s2; real s3;

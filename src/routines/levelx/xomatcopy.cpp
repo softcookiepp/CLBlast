@@ -1,7 +1,7 @@
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
-//   Cedric Nugteren <www.cedricnugteren.nl>
+//	 Cedric Nugteren <www.cedricnugteren.nl>
 //
 // This file implements the Xomatcopy class (see the header for information about the class).
 //
@@ -26,15 +26,85 @@ namespace clblast {
 // Constructor: forwards to base class constructor
 template <typename T>
 Xomatcopy<T>::Xomatcopy(Queue& queue, EventPointer event, const std::string& name)
-    : Routine(queue, event, name, {"Copy", "Pad", "Transpose", "Padtranspose"}, PrecisionValue<T>(), {},
-              {
+		: Routine(queue, event, name, {"Copy", "Pad", "Transpose", "Padtranspose"}, PrecisionValue<T>(), {},
+							{
 #if VULKAN_API
+#if 1
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	//
+	#include "../../kernels-vk/level3/copy_fast.glsl.inl"
+	,
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	//
+	#include "../../kernels-vk/level3/copy_pad_matrix_impl.glsl.inl"
+	#include "../../kernels-vk/level3/copy_pad_matrix.glsl.inl"
+	,
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	//
+	#include "../../kernels-vk/level3/copy_pad_matrix_batched_impl.glsl.inl"
+	#include "../../kernels-vk/level3/copy_pad_matrix_batched.glsl.inl"
+	,
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	//
+	#include "../../kernels-vk/level3/copy_pad_matrix_impl.glsl.inl"
+	#include "../../kernels-vk/level3/copy_pad_matrix_strided_batched.glsl.inl"
+	,
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	//
+	#include "../../kernels-vk/level3/copy_matrix_impl.glsl.inl"
+	#include "../../kernels-vk/level3/copy_matrix.glsl.inl"
+	,
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	//
+	#include "../../kernels-vk/level3/copy_matrix_batched_impl.glsl.inl"
+	#include "../../kernels-vk/level3/copy_matrix_batched.glsl.inl"
+	,
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	//
+	#include "../../kernels-vk/level3/copy_matrix_impl.glsl.inl"
+	#include "../../kernels-vk/level3/copy_matrix_strided_batched.glsl.inl"
+	,
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	//
+	#include "../../kernels-vk/level3/transpose_fast.glsl.inl"
+	,
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	//
+	#include "../../kernels-vk/level3/transpose_pad_matrix_impl.glsl.inl"
+	#include "../../kernels-vk/level3/transpose_pad_matrix.glsl.inl"
+	,
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	//
+	#include "../../kernels-vk/level3/transpose_pad_matrix_batched_impl.glsl.inl"
+	#include "../../kernels-vk/level3/transpose_pad_matrix_batched.glsl.inl"
+	,
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	//
+	#include "../../kernels-vk/level3/transpose_pad_matrix_impl.glsl.inl"
+	#include "../../kernels-vk/level3/transpose_pad_matrix_strided_batched.glsl.inl"
+	,
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	//
+	#include "../../kernels-vk/level3/transpose_matrix_impl.glsl.inl"
+	#include "../../kernels-vk/level3/transpose_matrix.glsl.inl"
+	,
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	//
+	#include "../../kernels-vk/level3/transpose_matrix_batched_impl.glsl.inl"
+	#include "../../kernels-vk/level3/transpose_matrix_batched.glsl.inl"
+	,
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	//
+	#include "../../kernels-vk/level3/transpose_matrix_impl.glsl.inl"
+	#include "../../kernels-vk/level3/transpose_matrix_strided_batched.glsl.inl"
+#else
 	#include "../../kernels-vk/level3/level3.opencl"
 	// (comment to prevent auto-re-ordering)
 	#include "../../kernels-vk/level3/copy_fast.opencl"
 	#include "../../kernels-vk/level3/copy_pad.opencl"
 	#include "../../kernels-vk/level3/transpose_fast.opencl"
 	#include "../../kernels-vk/level3/transpose_pad.opencl"
+#endif
 #else
 	#include "../../kernels/level3/level3.opencl"
 	// (comment to prevent auto-re-ordering)
@@ -43,7 +113,15 @@ Xomatcopy<T>::Xomatcopy(Queue& queue, EventPointer event, const std::string& nam
 	#include "../../kernels/level3/transpose_fast.opencl"
 	#include "../../kernels/level3/transpose_pad.opencl"
 #endif
-              }) {
+							}
+#if VULKAN_API
+	, true, {"CopyMatrixFast", "CopyPadMatrix", "CopyPadMatrixBatched", "CopyPadMatrixStridedBatched", "CopyMatrix", "CopyMatrixBatched", "CopyMatrixStridedBatched",
+			"TransposeMatrixFast", "TransposePadMatrix", "TransposePadMatrixBatched", "TransposePadMatrixStridedBatched", "TransposeMatrix", "TransposeMatrixBatched", "TransposeMatrixStridedBatched"},
+		
+			{"Copy", "Pad", "Pad", "Pad", "Pad", "Pad", "Pad",
+				"Transpose", "Padtranspose", "Padtranspose", "Padtranspose", "Padtranspose", "Padtranspose", "Padtranspose"}
+#endif
+	) {
 }
 
 // =================================================================================================
@@ -51,38 +129,38 @@ Xomatcopy<T>::Xomatcopy(Queue& queue, EventPointer event, const std::string& nam
 // The main routine
 template <typename T>
 void Xomatcopy<T>::DoOmatcopy(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n,
-                              const T alpha, const Buffer<T>& a_buffer, const size_t a_offset, const size_t a_ld,
-                              const Buffer<T>& b_buffer, const size_t b_offset, const size_t b_ld) {
-  // Makes sure all dimensions are larger than zero
-  if ((m == 0) || (n == 0)) {
-    throw BLASError(StatusCode::kInvalidDimension);
-  }
+															const T alpha, const Buffer<T>& a_buffer, const size_t a_offset, const size_t a_ld,
+															const Buffer<T>& b_buffer, const size_t b_offset, const size_t b_ld) {
+	// Makes sure all dimensions are larger than zero
+	if ((m == 0) || (n == 0)) {
+		throw BLASError(StatusCode::kInvalidDimension);
+	}
 
-  // Determines whether to transpose the matrix A
-  const auto transpose = (a_transpose != Transpose::kNo);
+	// Determines whether to transpose the matrix A
+	const auto transpose = (a_transpose != Transpose::kNo);
 
-  // In case of complex data-types, the transpose can also become a conjugate transpose
-  const auto conjugate = (a_transpose == Transpose::kConjugate);
+	// In case of complex data-types, the transpose can also become a conjugate transpose
+	const auto conjugate = (a_transpose == Transpose::kConjugate);
 
-  // Computes the dimensions of the two matrices
-  const auto rotated = (layout == Layout::kRowMajor);
-  const auto a_one = (rotated) ? n : m;
-  const auto a_two = (rotated) ? m : n;
-  const auto b_one = (transpose) ? a_two : a_one;
-  const auto b_two = (transpose) ? a_one : a_two;
+	// Computes the dimensions of the two matrices
+	const auto rotated = (layout == Layout::kRowMajor);
+	const auto a_one = (rotated) ? n : m;
+	const auto a_two = (rotated) ? m : n;
+	const auto b_one = (transpose) ? a_two : a_one;
+	const auto b_two = (transpose) ? a_one : a_two;
 
-  // Tests the matrices for validity, first from a perspective of the OpenCL buffers and their
-  // sizes, and then from a perspective of parameter values (e.g. m, n). Tests whether the OpenCL
-  // buffers are valid and non-zero and whether the OpenCL buffers have sufficient storage space.
-  // Also tests that the leading dimensions of:
-  //    matrix A cannot be less than N when rotated, or less than M when not-rotated
-  //    matrix B cannot be less than M when rotated, or less than N when not-rotated
-  TestMatrixA(a_one, a_two, a_buffer, a_offset, a_ld);
-  TestMatrixB(b_one, b_two, b_buffer, b_offset, b_ld);
+	// Tests the matrices for validity, first from a perspective of the OpenCL buffers and their
+	// sizes, and then from a perspective of parameter values (e.g. m, n). Tests whether the OpenCL
+	// buffers are valid and non-zero and whether the OpenCL buffers have sufficient storage space.
+	// Also tests that the leading dimensions of:
+	//		matrix A cannot be less than N when rotated, or less than M when not-rotated
+	//		matrix B cannot be less than M when rotated, or less than N when not-rotated
+	TestMatrixA(a_one, a_two, a_buffer, a_offset, a_ld);
+	TestMatrixB(b_one, b_two, b_buffer, b_offset, b_ld);
 
-  auto emptyEventList = std::vector<Event>();
-  PadCopyTransposeMatrix(queue_, device_, db_, event_, emptyEventList, a_one, a_two, a_ld, a_offset, a_buffer, b_one,
-                         b_two, b_ld, b_offset, b_buffer, alpha, program_, false, transpose, conjugate);
+	auto emptyEventList = std::vector<Event>();
+	PadCopyTransposeMatrix(queue_, device_, db_, event_, emptyEventList, a_one, a_two, a_ld, a_offset, a_buffer, b_one,
+												 b_two, b_ld, b_offset, b_buffer, alpha, program_, false, transpose, conjugate);
 }
 
 // =================================================================================================
@@ -95,4 +173,4 @@ template class Xomatcopy<float2>;
 template class Xomatcopy<double2>;
 
 // =================================================================================================
-}  // namespace clblast
+}	// namespace clblast

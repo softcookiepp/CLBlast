@@ -41,7 +41,7 @@
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) readonly buffer src_buf { realT src[]; };
-	layout(binding = 0, std430) writeonly buffer dest_buf { realT dest[]; };
+	layout(binding = 1, std430) writeonly buffer dest_buf { realT dest[]; };
 #endif
 
 layout(push_constant) uniform TransposeMatrixFast

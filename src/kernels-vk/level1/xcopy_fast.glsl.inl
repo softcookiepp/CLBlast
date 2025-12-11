@@ -22,8 +22,8 @@ R"(
 #endif
 
 #if USE_BDA == 0
-	layout(binding = 0, std430) buffer xgm_buf { real xgm[]; }; 
-	layout(binding = 1, std430) buffer ygm_buf { real ygm[]; }; 
+	layout(binding = 0, std430) buffer xgm_buf { realV xgm[]; }; 
+	layout(binding = 1, std430) buffer ygm_buf { realV ygm[]; }; 
 #endif
 
 #if 1
@@ -34,6 +34,7 @@ layout(push_constant) uniform XcopyFast
 	const __global realV* restrict xgm, 
 	__global realV* ygm
 #endif
+	//int global_size_0;
 } args;
 #endif
 
@@ -48,6 +49,7 @@ void main()
 		for (int _w = 0; _w < WPT; _w += 1)
 		{
 			const int id = _w*get_global_size(0) + get_global_id(0);
+			//const int id = _w*args.global_size_0 + get_global_id(0);
 			ygm[id] = xgm[id];
 		}
 	}

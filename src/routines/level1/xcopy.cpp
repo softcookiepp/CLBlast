@@ -33,7 +33,7 @@ Xcopy<T>::Xcopy(Queue& queue, EventPointer event, const std::string& name)
 	// (comment to prevent auto-re-ordering)
 	#include "../../kernels-vk/level1/xcopy.glsl.inl"
 	,
-	//#include "../../kernels-vk/level1/level1.glsl.inl"
+	#include "../../kernels-vk/level1/level1.glsl.inl"
 	// (comment to prevent auto-re-ordering)
 	#include "../../kernels-vk/level1/xcopy_fast.glsl.inl"
 #else
@@ -70,7 +70,7 @@ void Xcopy<T>::DoCopy(const size_t n, const Buffer<T>& x_buffer, const size_t x_
 
 #if VULKAN_API
 	// temporarily disable fast kernel because broken :c
-	if (mIsGLSL) use_fast_kernel = false;
+	//if (mIsGLSL) use_fast_kernel = false;
 #endif
 
 	// If possible, run the fast-version of the kernel
@@ -98,6 +98,9 @@ void Xcopy<T>::DoCopy(const size_t n, const Buffer<T>& x_buffer, const size_t x_
 	if (use_fast_kernel) {
 		auto global = std::vector<size_t>{CeilDiv(n, db_["WPT"] * db_["VW"])};
 		auto local = std::vector<size_t>{db_["WGS"]};
+#if VULKAN_API
+		//kernel.SetArgument(3, global[0]*local[0]);
+#endif
 		RunKernel(kernel, queue_, device_, global, local, event_);
 	} else {
 		auto n_ceiled = Ceil(n, db_["WGS"] * db_["WPT"]);

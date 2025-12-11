@@ -115,8 +115,8 @@ void Xgemv<T>::MatVec(const Layout layout, const Transpose a_transpose, const si
 
 #if VULKAN_API
 	// fast versions are broken, disable them for now :c
-	fast_kernel = false;
-	fast_kernel_rot = false;
+	//fast_kernel = false;
+	//fast_kernel_rot = false;
 #endif
 
 
@@ -144,7 +144,7 @@ void Xgemv<T>::MatVec(const Layout layout, const Transpose a_transpose, const si
 	{
 		// Sets the kernel arguments
 		// some are unused if fast_kernel or fast_kernel_rot is true
-		//kernel.SetArgument(0, static_cast<int>(m_real));
+		kernel.SetArgument(0, static_cast<int>(m_real));
 		kernel.SetArgument(1, static_cast<int>(n_real));
 		kernel.SetArgument(2, GetRealArg(alpha));
 		kernel.SetArgument(3, GetRealArg(beta));

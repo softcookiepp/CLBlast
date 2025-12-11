@@ -67,7 +67,7 @@
 
 layout(push_constant) uniform XgemvFastRot
 {
-	//const int m;
+	int m;
 	int n;
 	real_arg arg_alpha;
 	real_arg arg_beta;
@@ -98,6 +98,8 @@ shared real xlm[WPT3];
 
 void main()
 {
+	if ( !(args.m % WGS3 == 0 && args.n % WGS3 == 0 && args.a_ld % VW3 == 0) ) return;
+	
 	const real alpha = GetRealArg(args.arg_alpha);
 	const real beta = GetRealArg(args.arg_beta);
 

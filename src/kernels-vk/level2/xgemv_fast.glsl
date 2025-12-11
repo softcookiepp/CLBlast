@@ -66,7 +66,7 @@
 
 layout(push_constant) uniform XgemvFast
 {
-	//int m;
+	int m;
 	int n;
 	real_arg arg_alpha;
 	real_arg arg_beta;
@@ -96,7 +96,9 @@ shared real xlm[WGS2];
 
 void main()
 {
-
+	if (!(args.m % WGS2 == 0 && args.n % WGS2 == 0 && args.a_ld % VW2 == 0)) return;
+	
+	
 	const real alpha = GetRealArg(args.arg_alpha);
 	const real beta = GetRealArg(args.arg_beta);
 

@@ -21,7 +21,7 @@ R"(
 #endif
 
 #if USE_BDA == 0
-	layout(binding = 0, std430) buffer arg_alphas_buf { real_arg arg_alphas[]; };
+	layout(binding = 0, std430) buffer arg_alphas_buf { real arg_alphas[]; };
 	layout(binding = 1, std430) buffer xgm_buf { real xgm[]; };
 	layout(binding = 2, std430) buffer x_offsets_buf { int x_offsets[]; };
 	layout(binding = 3, std430) buffer ygm_buf { real ygm[]; };
@@ -45,7 +45,7 @@ layout(push_constant) uniform XaxpyBatched
 void main()
 {
 	const int batch = get_group_id(1);
-	const real alpha = GetRealArg(arg_alphas[batch]);
+	const real alpha = arg_alphas[batch];
 
 	// Loops over the work that needs to be done (allows for an arbitrary number of threads)
 	for (int id = get_global_id(0); id < args.n; id += get_global_size(0))

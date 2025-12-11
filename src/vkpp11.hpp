@@ -501,7 +501,7 @@ public:
 	
 	tart::device_ptr getDevice() { return mDevice.lock(); }
 	
-	tart::pipeline_ptr getPipeline(std::string& entryPoint, std::vector<uint32_t>& localSize, std::vector<uint8_t>& push)
+	tart::pipeline_ptr getPipeline(std::string& entryPoint, std::vector<uint32_t>& localSize, std::vector<uint8_t> push = {})
 	{
 		if (!mIsGLSL && mCLProgram)
 			return mCLProgram->getPipeline(entryPoint, localSize, push);
@@ -910,35 +910,37 @@ public:
 			adjusted_global[i] = global[i] / local[i];
 		}
 		
-		// parse push constants
-		// will optimize later, now it just needs to work
-		std::vector<uint8_t> push;
-		for (auto& kv : mNonBufferArgs)
-		{
-			for (uint8_t v : kv.second)
-			{
-				push.push_back(v);
-			}
-		}
-		
-		// parse buffer constants
-		std::vector<tart::buffer_ptr> bufs;
-		for (auto& kv : mBufferArgs)
-		{
-			bufs.push_back(kv.second);
-		}
-		
 		// convert local to uint32_t
 		std::vector<uint32_t> local32(local.size());
 		for (size_t i = 0; i < local.size(); i += 1)
 		{
 			local32[i] = local[i];
 		}
-#if 1
-		tart::pipeline_ptr pipeline = mProgramContainer->getPipeline(mEntryPoint, local32, push);
-#else
-		tart::pipeline_ptr pipeline = mCLProgram->getPipeline(mEntryPoint, local32, push);
-#endif
+		
+		tart::pipeline_ptr pipeline = mProgramContainer->getPipeline(mEntryPoint, local32);
+		
+		// parse push constants
+		std::vector<uint8_t> push;
+		size_t pushConstIdx = 0;
+		for (auto& kv : mNonBufferArgs)
+		{
+			// copy the push constant to the block at the correct offset
+			size_t offset = pipeline->getPushConstantOffset(pushConstIdx);
+			push.resize(offset + kv.second.size(), 0);
+			
+			for (size_t i = 0; i < kv.second.size(); i += 1)
+			{
+				push[i + offset] = kv.second[i];
+			}
+			pushConstIdx += 1;
+		}
+		
+		// add buffer args
+		std::vector<tart::buffer_ptr> bufs;
+		for (auto& kv : mBufferArgs)
+		{
+			bufs.push_back(kv.second);
+		}
 		
 		tart::command_sequence_ptr sequence = mDevice->createSequence();
 		sequence->recordPipeline(pipeline, adjusted_global, bufs, push);

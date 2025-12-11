@@ -28,7 +28,7 @@
 	layout(binding = 0, std430) buffer xgm_buf { real xgm[]; };
 #endif
 
-layout(push_constant) uniform Xscal
+layout(push_constant, std430) uniform Xscal
 {
 	int n;
 	real_arg arg_alpha;

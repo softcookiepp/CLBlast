@@ -1,0 +1,158 @@
+; SPIR-V
+; Version: 1.0
+; Generator: Google Shaderc over Glslang; 11
+; Bound: 94
+; Schema: 0
+               OpCapability Shader
+               OpCapability Float64
+          %1 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main" %gl_NumWorkGroups %gl_GlobalInvocationID
+               OpExecutionMode %main LocalSize 64 1 1
+               OpSource GLSL 450
+               OpSourceExtension "GL_EXT_shader_explicit_arithmetic_types_float64"
+               OpSourceExtension "GL_GOOGLE_cpp_style_line_directive"
+               OpSourceExtension "GL_GOOGLE_include_directive"
+               OpName %main "main"
+               OpName %MultiplyVector_vd2_d1_vd2_ "MultiplyVector(vd2;d1;vd2;"
+               OpName %cvec "cvec"
+               OpName %aval "aval"
+               OpName %bvec "bvec"
+               OpName %alpha "alpha"
+               OpName %XscalFast "XscalFast"
+               OpMemberName %XscalFast 0 "n"
+               OpMemberName %XscalFast 1 "arg_alpha"
+               OpMemberName %XscalFast 2 "beta"
+               OpName %args "args"
+               OpName %_w "_w"
+               OpName %id "id"
+               OpName %gl_NumWorkGroups "gl_NumWorkGroups"
+               OpName %gl_GlobalInvocationID "gl_GlobalInvocationID"
+               OpName %xvalue "xvalue"
+               OpName %xgm_buf "xgm_buf"
+               OpMemberName %xgm_buf 0 "xgm"
+               OpName %_ ""
+               OpName %result "result"
+               OpName %param "param"
+               OpDecorate %XscalFast Block
+               OpMemberDecorate %XscalFast 0 Offset 0
+               OpMemberDecorate %XscalFast 1 Offset 4
+               OpMemberDecorate %XscalFast 2 Offset 8
+               OpDecorate %gl_NumWorkGroups BuiltIn NumWorkgroups
+               OpDecorate %gl_GlobalInvocationID BuiltIn GlobalInvocationId
+               OpDecorate %_runtimearr_v2double ArrayStride 16
+               OpDecorate %xgm_buf BufferBlock
+               OpMemberDecorate %xgm_buf 0 Offset 0
+               OpDecorate %_ Binding 0
+               OpDecorate %_ DescriptorSet 0
+               OpDecorate %gl_WorkGroupSize BuiltIn WorkgroupSize
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
+     %double = OpTypeFloat 64
+   %v2double = OpTypeVector %double 2
+%_ptr_Function_v2double = OpTypePointer Function %v2double
+          %9 = OpTypeFunction %v2double %_ptr_Function_v2double %double %v2double
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+%_ptr_Function_double = OpTypePointer Function %double
+     %uint_1 = OpConstant %uint 1
+        %int = OpTypeInt 32 1
+      %float = OpTypeFloat 32
+  %XscalFast = OpTypeStruct %int %float %float
+%_ptr_PushConstant_XscalFast = OpTypePointer PushConstant %XscalFast
+       %args = OpVariable %_ptr_PushConstant_XscalFast PushConstant
+      %int_1 = OpConstant %int 1
+%_ptr_PushConstant_float = OpTypePointer PushConstant %float
+%_ptr_Function_int = OpTypePointer Function %int
+      %int_0 = OpConstant %int 0
+      %int_2 = OpConstant %int 2
+       %bool = OpTypeBool
+     %v3uint = OpTypeVector %uint 3
+%_ptr_Input_v3uint = OpTypePointer Input %v3uint
+%gl_NumWorkGroups = OpVariable %_ptr_Input_v3uint Input
+%_ptr_Input_uint = OpTypePointer Input %uint
+    %uint_64 = OpConstant %uint 64
+%gl_GlobalInvocationID = OpVariable %_ptr_Input_v3uint Input
+%_runtimearr_v2double = OpTypeRuntimeArray %v2double
+    %xgm_buf = OpTypeStruct %_runtimearr_v2double
+%_ptr_Uniform_xgm_buf = OpTypePointer Uniform %xgm_buf
+          %_ = OpVariable %_ptr_Uniform_xgm_buf Uniform
+%_ptr_Uniform_v2double = OpTypePointer Uniform %v2double
+%gl_WorkGroupSize = OpConstantComposite %v3uint %uint_64 %uint_1 %uint_1
+       %main = OpFunction %void None %3
+          %5 = OpLabel
+      %alpha = OpVariable %_ptr_Function_double Function
+         %_w = OpVariable %_ptr_Function_int Function
+         %id = OpVariable %_ptr_Function_int Function
+     %xvalue = OpVariable %_ptr_Function_v2double Function
+     %result = OpVariable %_ptr_Function_v2double Function
+      %param = OpVariable %_ptr_Function_v2double Function
+         %36 = OpAccessChain %_ptr_PushConstant_float %args %int_1
+         %37 = OpLoad %float %36
+         %38 = OpFConvert %double %37
+               OpStore %alpha %38
+               OpStore %_w %int_0
+               OpBranch %42
+         %42 = OpLabel
+               OpLoopMerge %44 %45 None
+               OpBranch %46
+         %46 = OpLabel
+         %47 = OpLoad %int %_w
+         %50 = OpSLessThan %bool %47 %int_2
+               OpBranchConditional %50 %43 %44
+         %43 = OpLabel
+         %52 = OpLoad %int %_w
+         %57 = OpAccessChain %_ptr_Input_uint %gl_NumWorkGroups %uint_0
+         %58 = OpLoad %uint %57
+         %60 = OpIMul %uint %58 %uint_64
+         %61 = OpBitcast %int %60
+         %62 = OpIMul %int %52 %61
+         %64 = OpAccessChain %_ptr_Input_uint %gl_GlobalInvocationID %uint_0
+         %65 = OpLoad %uint %64
+         %66 = OpBitcast %int %65
+         %67 = OpIAdd %int %62 %66
+               OpStore %id %67
+         %73 = OpLoad %int %id
+         %75 = OpAccessChain %_ptr_Uniform_v2double %_ %int_0 %73
+         %76 = OpLoad %v2double %75
+               OpStore %xvalue %76
+         %78 = OpLoad %double %alpha
+         %79 = OpLoad %v2double %xvalue
+         %81 = OpLoad %v2double %result
+               OpStore %param %81
+         %82 = OpFunctionCall %v2double %MultiplyVector_vd2_d1_vd2_ %param %78 %79
+               OpStore %result %82
+         %83 = OpLoad %int %id
+         %84 = OpLoad %v2double %result
+         %85 = OpAccessChain %_ptr_PushConstant_float %args %int_2
+         %86 = OpLoad %float %85
+         %87 = OpFConvert %double %86
+         %88 = OpCompositeConstruct %v2double %87 %87
+         %89 = OpFAdd %v2double %84 %88
+         %90 = OpAccessChain %_ptr_Uniform_v2double %_ %int_0 %83
+               OpStore %90 %89
+               OpBranch %45
+         %45 = OpLabel
+         %91 = OpLoad %int %_w
+         %92 = OpIAdd %int %91 %int_1
+               OpStore %_w %92
+               OpBranch %42
+         %44 = OpLabel
+               OpReturn
+               OpFunctionEnd
+%MultiplyVector_vd2_d1_vd2_ = OpFunction %v2double None %9
+       %cvec = OpFunctionParameter %_ptr_Function_v2double
+       %aval = OpFunctionParameter %double
+       %bvec = OpFunctionParameter %v2double
+         %14 = OpLabel
+         %17 = OpCompositeExtract %double %bvec 0
+         %18 = OpFMul %double %aval %17
+         %20 = OpAccessChain %_ptr_Function_double %cvec %uint_0
+               OpStore %20 %18
+         %22 = OpCompositeExtract %double %bvec 1
+         %23 = OpFMul %double %aval %22
+         %24 = OpAccessChain %_ptr_Function_double %cvec %uint_1
+               OpStore %24 %23
+         %25 = OpLoad %v2double %cvec
+               OpReturnValue %25
+               OpFunctionEnd

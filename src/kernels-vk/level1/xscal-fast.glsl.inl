@@ -26,7 +26,7 @@ R"(
 	layout(binding = 0, std430) buffer xgm_buf { realV xgm[]; };
 #endif
 
-layout(push_constant) uniform XscalFast
+layout(push_constant, std430) uniform XscalFast
 {
 	int n;
 	real_arg arg_alpha;

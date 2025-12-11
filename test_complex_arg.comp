@@ -1,0 +1,519 @@
+#version 450
+
+#define PRECISION 3232
+#define ROUTINE_SCAL
+
+// =================================================================================================
+
+#define USE_BDA 0
+
+// Parameters set by the tuner or by the database. Here they are given a basic default value in case
+// this file is used outside of the CLBlast library.
+#ifndef PRECISION
+	#define PRECISION 32			// Data-types: half, single or double precision, complex or regular
+#endif
+
+// =================================================================================================
+	
+
+// Enable support for half-precision
+#if PRECISION == 16
+	#extension GL_EXT_shader_16bit_storage : require
+	#extension GL_EXT_shader_explicit_arithmetic_types_float16 : require
+#endif
+
+// Enable support for double-precision
+#if PRECISION == 64 || PRECISION == 6464
+	#extension GL_EXT_shader_explicit_arithmetic_types_float64 : require
+#endif
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_float64 : require
+#extension GL_EXT_buffer_reference : require
+#extension GL_EXT_shader_explicit_arithmetic_types: require
+
+// Half-precision
+#if PRECISION == 16
+	#define real float16_t
+	#define real2 f16vec2
+	#define real4 f16vec4
+	#define real8 f16mat2x4
+	#define real16 f16mat4x4
+	#define ZERO float16_t(0.0)
+	#define ONE float16_t(1.0)
+	#define SMALLEST -1.0e14
+
+// Single-precision
+#elif PRECISION == 32
+	#define real float
+	#define real2 vec2
+	#define real4 vec4
+	#define real8 mat2x4
+	#define real16 mat4x4
+	#define ZERO real(0.0f)
+	#define ONE 1.0f
+	#define SMALLEST -1.0e37f
+
+// Double-precision 
+#elif PRECISION == 64
+	#define real double
+	#define real2 dvec2
+	#define real4 dvec4
+	#define real8 dmat2x4
+	#define real16 dmat4x4
+	#define ZERO 0.0
+	#define ONE 1.0
+	#define SMALLEST -1.0e37
+
+// Complex single-precision
+#elif PRECISION == 3232
+	#define real vec2
+	struct cfloat2 {real x; real y;};
+	#define real2 cfloat2;
+	struct cfloat4 {real x; real y; real z; real w;};
+	#define real4 cfloat4
+	struct cfloat8 {real s0; real s1; real s2; real s3;
+		real s4; real s5; real s6; real s7;};
+	#define real8 cfloat8
+	struct cfloat16 {real s0; real s1; real s2; real s3;
+													 real s4; real s5; real s6; real s7;
+													 real s8; real s9; real sA; real sB;
+													 real sC; real sD; real sE; real sF;};
+	#define real16 cfloat16
+	#define ZERO 0.0f
+	#define ONE 1.0f
+	#define SMALLEST -1.0e37f
+
+// Complex double-precision
+#elif PRECISION == 6464
+	#define real dvec2
+	struct cdouble2 {real x; real y;};
+	#define real2 cdouble2
+	struct cdouble4 {real x; real y; real z; real w;};
+	#define real4 cdouble4
+	struct cdouble8 {real s0; real s1; real s2; real s3;
+													 real s4; real s5; real s6; real s7;};
+	#define real8 cdouble8
+	struct cdouble16 {real s0; real s1; real s2; real s3;
+														real s4; real s5; real s6; real s7;
+														real s8; real s9; real sA; real sB;
+														real sC; real sD; real sE; real sF;};
+	#define real16 cdouble16
+	#define ZERO 0.0
+	#define ONE 1.0
+	#define SMALLEST -1.0e37
+#endif
+
+// Single-element version of a complex number
+#if PRECISION == 3232
+	#define singlereal float 
+#elif PRECISION == 6464
+	#define singlereal double 
+#else
+	#define singlereal real 
+#endif
+
+// Converts a 'real argument' value to a 'real' value as passed to the kernel. Normally there is no
+// conversion, but half-precision is not supported as kernel argument so it is converted from float.
+#if PRECISION == 16
+	#define real_arg float 
+	#define GetRealArg(x) float16_t(x)
+#elif PRECISION == 64
+	// lets see if this makes our life easier...
+	#define real_arg float
+	#define GetRealArg(x) double(x)
+#elif PRECISION == 6464
+	// pull it down to 32-bit float args c:
+	#define real_arg vec2
+	#define GetRealArg(x) dvec2(x[0], x[1])
+#else
+	#define real_arg real 
+	#define GetRealArg(x) x
+#endif
+
+
+
+// Pointers to local memory objects (using a define because CUDA doesn't need them)
+#ifndef LOCAL_PTR
+	#define LOCAL_PTR shared
+#endif
+
+// =================================================================================================
+
+// Don't use the non-IEEE754 compliant OpenCL built-in mad() instruction per default. For specific
+// devices, this is enabled (see src/routine.cpp).
+#ifndef USE_CL_MAD
+	#define USE_CL_MAD 0
+#endif
+
+// By default the workgroup size requirement is enabled. For Qualcomm devices the workgroup size 
+// requirement results in worse performance and is disabled (src/utilities/compile.cpp)
+#ifndef RELAX_WORKGROUP_SIZE
+	#define RELAX_WORKGROUP_SIZE 0
+#endif
+
+// ensure all spec constants related to workgroup size are here and ready
+#if RELAX_WORKGROUP_SIZE
+	layout(local_size_x_id = 0, local_size_y_id = 1, local_size_z_id = 2) in;
+#endif
+
+// Sets a variable to zero
+#if PRECISION == 3232 || PRECISION == 6464
+	#define SetToZero(a) a = real(ZERO, ZERO)
+#else
+	#define SetToZero(a) a = ZERO
+#endif
+
+// Sets a variable to zero (only the imaginary part)
+#if PRECISION == 3232 || PRECISION == 6464
+	#define ImagToZero(a) a.y = ZERO
+#else
+	#define ImagToZero(a) 
+#endif
+
+// Sets a variable to one
+#if PRECISION == 3232 || PRECISION == 6464
+	#define SetToOne(a) a = real(ONE, ZERO)
+#else
+	#define SetToOne(a) a = ONE
+#endif
+
+// Determines whether a variable is zero
+#if PRECISION == 3232 || PRECISION == 6464
+	#define IsZero(a) ((a.x == ZERO) && (a.y == ZERO))
+#else
+	#define IsZero(a) (a == ZERO)
+#endif
+
+// The absolute value (component-wise)
+#if 0 //PRECISION == 3232 || PRECISION == 6464
+	#define AbsoluteValue(value) value.x = abs(value.x); value.y = abs(value.y)
+#else
+	#define AbsoluteValue(value) value = abs(value)
+#endif
+
+// Negation (component-wise)
+#if 0 //PRECISION == 3232 || PRECISION == 6464
+	#define Negate(value) value.x = (-1.0(value.x)); value.y = (-1.0*(value.y))
+#else
+	#define Negate(value) value = (-1.0*(value))
+#endif
+
+// Adds two complex variables
+#if PRECISION == 3232 || PRECISION == 6464
+	#define Add(c,a,b) c = real(a.x + b.x, a.y + b.y)
+#else
+	#define Add(c,a,b) c = a + b
+#endif
+
+// Subtracts two complex variables
+#if PRECISION == 3232 || PRECISION == 6464
+	#define Subtract(c,a,b) c = real(a.x - b.x, a.y - b.y)
+#else
+	#define Subtract(c,a,b) c = a - b
+#endif
+
+// Multiply two complex variables (used in the defines below)
+#if PRECISION == 3232 || PRECISION == 6464
+	#define MulReal(a,b) a.x*b.x - a.y*b.y
+	#define MulImag(a,b) a.x*b.y + a.y*b.x
+#endif
+
+// The scalar multiply function
+#if PRECISION == 3232 || PRECISION == 6464
+	#define Multiply(c,a,b) c = real(MulReal(a,b), MulImag(a,b))
+#else
+	#define Multiply(c,a,b) c = a * b
+#endif
+
+// The scalar multiply-add function
+#if PRECISION == 3232 || PRECISION == 6464
+	#define MultiplyAdd(c,a,b) c += real(MulReal(a,b), MulImag(a,b))
+#else
+	#if 0 //USE_CL_MAD == 1
+		#define MultiplyAdd(c,a,b) c = mad(a, b, c)
+	#else
+		#define MultiplyAdd(c,a,b) c += (a * b)
+	#endif
+#endif
+
+// The scalar multiply-subtract function
+#if PRECISION == 3232 || PRECISION == 6464
+	#define MultiplySubtract(c,a,b) c -= real(MulReal(a,b), MulImag(a,b))
+#else
+	#define MultiplySubtract(c,a,b) c -= (a * b)
+#endif
+
+// The scalar division function: full division
+#if PRECISION == 3232 || PRECISION == 6464
+	#define DivideFull(c,a,b) singlereal num_x = (a.x * b.x) + (a.y * b.y); singlereal num_y = (a.y * b.x) - (a.x * b.y); singlereal denom = (b.x * b.x) + (b.y * b.y); c = real(num_x / denom, num_y / denom)
+#else
+	#define DivideFull(c,a,b) c = a / b
+#endif
+
+// The scalar AXPBY function
+#if PRECISION == 3232 || PRECISION == 6464
+	//#define AXPBY(e,a,b,c,d) e.x = MulReal(a,b) + MulReal(c,d); e.y = MulImag(a,b) + MulImag(c,d)
+	#define AXPBY(e,a,b,c,d) e = real(MulReal(a,b) + MulReal(c,d), MulImag(a,b) + MulImag(c,d))
+#else
+	#define AXPBY(e,a,b,c,d) e = a*b + c*d
+#endif
+
+// The complex conjugate operation for complex transforms
+#if PRECISION == 3232 || PRECISION == 6464
+	#define COMPLEX_CONJUGATE(value) value = real(value.x, (-1.0*value.y))
+#else
+	#define COMPLEX_CONJUGATE(value) 
+#endif
+
+// =================================================================================================
+
+// GLSL has no inlining; compiler handles that automatically
+#define INLINE_FUNC
+
+// =================================================================================================
+
+// Macro for storing and loading, to accomodate BDA
+#if USE_BDA
+	// this needs to be changed, but I forget how it works
+	#define INDEX(buf, idx) buf[idx]
+#else
+	#define INDEX(buf, idx) buf[idx]
+#endif
+
+// =================================================================================================
+
+// vector load methods
+#define vload2_single_alignment(index, buf) real2(INDEX(buf, index), INDEX(buf, index+1))
+#define vload4_signle_alignment(index, buf) real4(INDEX(buf, index), INDEX(buf, index+1), INDEX(buf, index+2), INDEX(buf, index+3))
+
+// =================================================================================================
+
+// Shuffled workgroup indices to avoid partition camping, see below. For specific devices, this is
+// enabled (see src/routine.cc).
+#ifndef USE_STAGGERED_INDICES
+	#define USE_STAGGERED_INDICES 0
+#endif
+
+// because I am extremely lazy hehe
+#define get_global_id(dim) int(gl_GlobalInvocationID[dim])
+#define get_local_id(dim) int(gl_LocalInvocationID[dim])
+#define get_group_id(dim) int(gl_WorkGroupID[dim])
+#define get_global_size(idx) int(gl_NumWorkGroups[idx] * gl_WorkGroupSize[idx])
+#define get_num_groups(dim) int(gl_NumWorkGroups[dim])
+
+// Staggered/shuffled group indices to avoid partition camping (AMD GPUs). Formula's are taken from:
+// http://docs.nvidia.com/cuda/samples/6_Advanced/transpose/doc/MatrixTranspose.pdf
+// More details: https://github.com/CNugteren/CLBlast/issues/53
+#if USE_STAGGERED_INDICES == 1 && GEMMK == 0
+	int GetGroupIDFlat() {
+		return get_group_id(0) + get_num_groups(0) * get_group_id(1);
+		//return gl_WorkGroupID.x + gl_NumWorkGroups.x * gl_WorkGroupID.y;
+	}
+	int GetGroupID1() {
+		return (GetGroupIDFlat()) % get_num_groups(1);
+		//return int((GetGroupIDFlat()) % gl_NumWorkGroups.y);
+	}
+	int GetGroupID0() {
+		return ((GetGroupIDFlat() / get_num_groups(1)) + GetGroupID1()) % get_num_groups(0);
+		//return int(((GetGroupIDFlat() / gl_NumWorkGroups.y) + GetGroupID1()) % gl_WorkGroupSize.x);
+	}
+#else
+	int GetGroupID1() { return get_group_id(1); }
+	//int GetGroupID1() { return int(gl_WorkGroupID.y); }
+	int GetGroupID0() { return get_group_id(0); }
+	//int GetGroupID0() { return int(gl_WorkGroupID.x); }
+#endif
+
+// =================================================================================================
+
+// End of the C++11 raw string literal
+
+#define VW 1
+#define WGS 128
+#define WPT 1
+
+
+// =================================================================================================
+
+// Parameters set by the tuner or by the database. Here they are given a basic default value in case
+// this kernel file is used outside of the CLBlast library.
+#ifndef WGS
+	#define WGS 64		 // The local work-group size
+#endif
+#ifndef WPT
+	#define WPT 1			// The amount of work-per-thread
+#endif
+#ifndef VW
+	#define VW 1			 // Vector width of vectors X and Y
+#endif
+
+// =================================================================================================
+
+// Data-widths
+#if VW == 1
+	#define realV real
+#elif VW == 2
+	#define realV real2
+#elif VW == 4
+	#define realV real4
+#elif VW == 8
+	#define realV real8
+#elif VW == 16
+	#define realV real16
+#endif
+
+// =================================================================================================
+
+// The vectorized multiply function
+INLINE_FUNC realV MultiplyVector(realV cvec, const real aval, const realV bvec) {
+	#if VW == 1
+		Multiply(cvec, aval, bvec);
+	#elif VW == 2
+		Multiply(cvec.x, aval, bvec.x);
+		Multiply(cvec.y, aval, bvec.y);
+	#elif VW == 4
+		Multiply(cvec.x, aval, bvec.x);
+		Multiply(cvec.y, aval, bvec.y);
+		Multiply(cvec.z, aval, bvec.z);
+		Multiply(cvec.w, aval, bvec.w);
+	#elif VW == 8
+#if PRECISION == 16 || PRECISION  == 32 || PRECISION == 64
+		Multiply(cvec[0], aval, bvec[0]);
+		Multiply(cvec[1], aval, bvec[1]);
+#else
+		Multiply(cvec.s0, aval, bvec.s0);
+		Multiply(cvec.s1, aval, bvec.s1);
+		Multiply(cvec.s2, aval, bvec.s2);
+		Multiply(cvec.s3, aval, bvec.s3);
+		Multiply(cvec.s4, aval, bvec.s4);
+		Multiply(cvec.s5, aval, bvec.s5);
+		Multiply(cvec.s6, aval, bvec.s6);
+		Multiply(cvec.s7, aval, bvec.s7);
+#endif
+	#elif VW == 16
+#if PRECISION == 16 || PRECISION  == 32 || PRECISION == 64
+		Multiply(cvec[0], aval, bvec[0]);
+		Multiply(cvec[1], aval, bvec[1]);
+		Multiply(cvec[2], aval, bvec[2]);
+		Multiply(cvec[3], aval, bvec[3]);
+#else
+		Multiply(cvec.s0, aval, bvec.s0);
+		Multiply(cvec.s1, aval, bvec.s1);
+		Multiply(cvec.s2, aval, bvec.s2);
+		Multiply(cvec.s3, aval, bvec.s3);
+		Multiply(cvec.s4, aval, bvec.s4);
+		Multiply(cvec.s5, aval, bvec.s5);
+		Multiply(cvec.s6, aval, bvec.s6);
+		Multiply(cvec.s7, aval, bvec.s7);
+		Multiply(cvec.s8, aval, bvec.s8);
+		Multiply(cvec.s9, aval, bvec.s9);
+		Multiply(cvec.sA, aval, bvec.sA);
+		Multiply(cvec.sB, aval, bvec.sB);
+		Multiply(cvec.sC, aval, bvec.sC);
+		Multiply(cvec.sD, aval, bvec.sD);
+		Multiply(cvec.sE, aval, bvec.sE);
+		Multiply(cvec.sF, aval, bvec.sF);
+#endif
+	#endif
+	return cvec;
+}
+
+// The vectorized multiply-add function
+INLINE_FUNC realV MultiplyAddVector(realV cvec, const real aval, const realV bvec) {
+	#if VW == 1
+		MultiplyAdd(cvec, aval, bvec);
+	#elif VW == 2
+		MultiplyAdd(cvec.x, aval, bvec.x);
+		MultiplyAdd(cvec.y, aval, bvec.y);
+	#elif VW == 4
+		MultiplyAdd(cvec.x, aval, bvec.x);
+		MultiplyAdd(cvec.y, aval, bvec.y);
+		MultiplyAdd(cvec.z, aval, bvec.z);
+		MultiplyAdd(cvec.w, aval, bvec.w);
+	#elif VW == 8
+#if PRECISION == 16 || PRECISION  == 32 || PRECISION == 64
+		MultiplyAdd(cvec[0], aval, bvec[0]);
+		MultiplyAdd(cvec[1], aval, bvec[1]);
+#else
+		MultiplyAdd(cvec.s0, aval, bvec.s0);
+		MultiplyAdd(cvec.s1, aval, bvec.s1);
+		MultiplyAdd(cvec.s2, aval, bvec.s2);
+		MultiplyAdd(cvec.s3, aval, bvec.s3);
+		MultiplyAdd(cvec.s4, aval, bvec.s4);
+		MultiplyAdd(cvec.s5, aval, bvec.s5);
+		MultiplyAdd(cvec.s6, aval, bvec.s6);
+		MultiplyAdd(cvec.s7, aval, bvec.s7);
+#endif
+	#elif VW == 16
+#if PRECISION == 16 || PRECISION  == 32 || PRECISION == 64
+		MultiplyAdd(cvec[0], aval, bvec[0]);
+		MultiplyAdd(cvec[1], aval, bvec[1]);
+		MultiplyAdd(cvec[2], aval, bvec[2]);
+		MultiplyAdd(cvec[3], aval, bvec[3]);
+#else
+		MultiplyAdd(cvec.s0, aval, bvec.s0);
+		MultiplyAdd(cvec.s1, aval, bvec.s1);
+		MultiplyAdd(cvec.s2, aval, bvec.s2);
+		MultiplyAdd(cvec.s3, aval, bvec.s3);
+		MultiplyAdd(cvec.s4, aval, bvec.s4);
+		MultiplyAdd(cvec.s5, aval, bvec.s5);
+		MultiplyAdd(cvec.s6, aval, bvec.s6);
+		MultiplyAdd(cvec.s7, aval, bvec.s7);
+		MultiplyAdd(cvec.s8, aval, bvec.s8);
+		MultiplyAdd(cvec.s9, aval, bvec.s9);
+		MultiplyAdd(cvec.sA, aval, bvec.sA);
+		MultiplyAdd(cvec.sB, aval, bvec.sB);
+		MultiplyAdd(cvec.sC, aval, bvec.sC);
+		MultiplyAdd(cvec.sD, aval, bvec.sD);
+		MultiplyAdd(cvec.sE, aval, bvec.sE);
+		MultiplyAdd(cvec.sF, aval, bvec.sF);
+#endif
+	#endif
+	return cvec;
+}
+
+// =================================================================================================
+
+// End of the C++11 raw string literal
+
+
+// =================================================================================================
+
+// Full version of the kernel with offsets and strided accesses
+#if RELAX_WORKGROUP_SIZE == 0
+	layout(local_size_x = WGS, local_size_y = 1, local_size_z = 1) in;
+#endif
+
+#if USE_BDA == 0
+	layout(binding = 0, std430) buffer xgm_buf { real xgm[]; };
+#endif
+
+layout(push_constant, std430) uniform Xscal
+{
+	int n;
+	vec2 arg_alpha;
+#if USE_BDA
+	__global real* xgm;
+#endif
+	int x_offset;
+	int x_inc;
+};
+
+// Xscal
+void main()
+{
+	const real alpha = arg_alpha;
+
+	// Loops over the work that needs to be done (allows for an arbitrary number of threads)
+	for (int id = get_global_id(0); id<n; id += get_global_size(0))
+	{
+		real xvalue = INDEX(xgm, id*x_inc + x_offset);
+		real result;
+		Multiply(result, alpha, xvalue);
+		INDEX(xgm, id*x_inc + x_offset) = result;
+	}
+}
+
+// =================================================================================================
+
+// End of the C++11 raw string literal

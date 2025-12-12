@@ -28,29 +28,29 @@ R"(
 #endif
 
 #if USE_BDA == 0
-	layout(binding = 0, std430) buffer xgm_buf { real xgm[]; };
-	layout(binding = 1, std430) buffer ygm_buf { real ygm[]; };
+	layout(binding = 0, std430) buffer xgm_buf { realV xgm[]; };
+	layout(binding = 1, std430) buffer ygm_buf { realV ygm[]; };
 #endif
 
-layout(push_constant) push_constants
+layout(push_constant) uniform XswapFast
 {
 	int n;
 #if USE_BDA
-	__global real* xgm;
-	__global real* ygm;
+	__global realV* xgm;
+	__global realV* ygm;
 #endif
 } args;
 
 //void XswapFast()
 void main()
 {
-	if ( !(n % VW == 0 && n % WPT == 0 && n % WGS == 0) ) return;
+	if ( !(args.n % VW == 0 && args.n % WPT == 0 && args.n % WGS == 0) ) return;
 	for (int _w = 0; _w < WPT; _w += 1)
 	{
 		const int id = _w*get_global_size(0) + get_global_id(0);
-		realV temp = INDEX(xgm, id);
-		INDEX(xgm, id) = INDEX(ygm, id);
-		INDEX(ygm, id) = temp;
+		realV temp = xgm[id];
+		xgm[id] = ygm[id];
+		ygm[id] = temp;
 	}
 }
 // =================================================================================================

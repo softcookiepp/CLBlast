@@ -29,15 +29,29 @@ Xswap<T>::Xswap(Queue& queue, EventPointer event, const std::string& name)
     : Routine(queue, event, name, {"Xaxpy"}, PrecisionValue<T>(), {},
               {
 #if VULKAN_API
+#if 1
+	#include "../../kernels-vk/level1/level1.glsl.inl"
+	//
+	#include "../../kernels-vk/level1/xswap.glsl.inl"
+	,
+	#include "../../kernels-vk/level1/level1.glsl.inl"
+	//
+	#include "../../kernels-vk/level1/xswap-fast.glsl.inl"
+#else
 	#include "../../kernels-vk/level1/level1.opencl"
 	// (comment to prevent auto-re-ordering)
 	#include "../../kernels-vk/level1/xswap.opencl"
+#endif
 #else
 	#include "../../kernels/level1/level1.opencl"
 	// (comment to prevent auto-re-ordering)
 	#include "../../kernels/level1/xswap.opencl"
 #endif
-              }) {
+              }
+#if VULKAN_API
+		, true, {"Xswap", "XswapFast"}
+#endif
+              ) {
 }
 
 // =================================================================================================

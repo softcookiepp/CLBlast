@@ -43,7 +43,7 @@
 // =================================================================================================
 
 // The vectorized multiply function
-INLINE_FUNC realV MultiplyVector(realV cvec, const real aval, const realV bvec) {
+realV MultiplyVector(realV cvec, const real aval, const realV bvec) {
 	#if VW == 1
 		Multiply(cvec, aval, bvec);
 	#elif VW == 2

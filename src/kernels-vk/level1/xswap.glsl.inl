@@ -1,4 +1,3 @@
-
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -26,7 +25,7 @@ R"(
 	layout(binding = 1, std430) buffer ygm_buf { real ygm[]; };
 #endif
 
-layout(push_constant) push_constants
+layout(push_constant, std430) uniform Xswap
 {
 	int n;
 #if USE_BDA
@@ -45,11 +44,11 @@ layout(push_constant) push_constants
 void main()
 {
 	// Loops over the work that needs to be done (allows for an arbitrary number of threads)
-	for (int id = get_global_id(0); id<n; id += get_global_size(0))
+	for (int id = get_global_id(0); id<args.n; id += get_global_size(0))
 	{
-		real temp = LOAD(xgm, id*x_inc + x_offset);
-		INDEX(xgm, id*x_inc + x_offset) = INDEX(ygm, id*y_inc + y_offset);
-		INDEX(ygm, id*y_inc + y_offset) = temp;
+		real temp = xgm[id*args.x_inc + args.x_offset];
+		xgm[id*args.x_inc + args.x_offset] = ygm[id*args.y_inc + args.y_offset];
+		ygm[id*args.y_inc + args.y_offset] = temp;
 	}
 }
 

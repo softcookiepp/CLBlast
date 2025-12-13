@@ -26,9 +26,9 @@
 
 // buffers
 #if USE_BDA == 0
-	layout(binding = 0, std430) buffer A_buf { real A[]; };
-	layout(binding = 1, std430) buffer b_buf { real b[]; };
-	layout(binding = 2, std430) buffer x_buf { real x[]; };
+	layout(binding = 0, std430) buffer A_buf { precise real A[]; };
+	layout(binding = 1, std430) buffer b_buf { precise real b[]; };
+	layout(binding = 2, std430) buffer x_buf { precise real x[]; };
 #endif
 
 // =================================================================================================
@@ -60,8 +60,8 @@ layout(push_constant) uniform trsv_forward
 	int do_conjugate;
 } args;
 
-shared real alm[TRSV_BLOCK_SIZE][TRSV_BLOCK_SIZE];
-shared real xlm[TRSV_BLOCK_SIZE];
+precise shared real alm[TRSV_BLOCK_SIZE][TRSV_BLOCK_SIZE];
+precise shared real xlm[TRSV_BLOCK_SIZE];
 
 void main()
 {

@@ -35,7 +35,11 @@ Xgemv<T>::Xgemv(Queue& queue, EventPointer event, const std::string& name)
 	,
 	#include "../../kernels-vk/level2/xgemv_fast_rot.glsl.inl"
 	,
-	#include "../../kernels-vk/level2/xtrsv-forward.glsl.inl" // no idea if this is the right one or not
+	#include "../../kernels-vk/level2/xtrsv-forward.glsl.inl"
+	,
+	#include "../../kernels-vk/level2/xtrsv-backward.glsl.inl"
+	,
+	#include "../../kernels-vk/level2/xtrsv-fill-vector.glsl.inl"
 #else
 	#include "../../kernels/level2/xgemv.opencl"
 	#include "../../kernels/level2/xgemv_fast.opencl"
@@ -43,7 +47,21 @@ Xgemv<T>::Xgemv(Queue& queue, EventPointer event, const std::string& name)
 #endif
 							}
 #if VULKAN_API
-	, true
+	, true,
+	{
+		"Xgemv",
+		"XgemvFast",
+		"XgemvFastRot",
+		"trsv_forward",
+		"trsv_backward",
+		"FillVector"
+	},
+	{
+		"Xgemv", "XgemvFast", "XgemvFastRot",
+		"TrsvRoutine",
+		"TrsvRoutine",
+		"TrsvRoutine"
+	}
 #endif
 	)
 {

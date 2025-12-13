@@ -11,8 +11,10 @@
 R"(
 
 // =================================================================================================
-#define ROUTINE_TRSV
-#if defined(ROUTINE_TRSV)
+
+#if RELAX_WORKGROUP_SIZE == 0
+	layout(local_size_x = 16, local_size_y = 1, local_size_z = 1) in;
+#endif
 
 #if USE_BDA
 #else
@@ -39,7 +41,6 @@ void main()
 	}
 }
 
-#endif
 // =================================================================================================
 
 // End of the C++11 raw string literal

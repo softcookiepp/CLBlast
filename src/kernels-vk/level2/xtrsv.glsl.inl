@@ -1,4 +1,4 @@
-#define ROUTINE_TRSV 1
+
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -13,6 +13,18 @@ R"(
 // =================================================================================================
 #if defined(ROUTINE_TRSV)
 
+__kernel
+void FillVector(const int n, const int inc, const int offset,
+								__global real* restrict dest, const real_arg arg_value) {
+	const real value = GetRealArg(arg_value);
+	const int tid = get_global_id(0);
+	if (tid < n) {
+		dest[tid*inc + offset] = value;
+	}
+}
+
+// =================================================================================================
+
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library.
 
@@ -20,19 +32,13 @@ R"(
 	#define TRSV_BLOCK_SIZE 32		// The block size for forward or backward substition
 #endif
 
-// buffers
-#if USE_BDA == 0
-	layout(binding = 0, std430) buffer A_buf { real A[]; };
-	layout(binding = 1, std430) buffer b_buf { real b[]; };
-	layout(binding = 2, std430) buffer x_buf { real x[]; };
-#endif
-
 // =================================================================================================
 
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = TRSV_BLOCK_SIZE, local_size_y = 1, local_size_z = 1) in;
+#if RELAX_WORKGROUP_SIZE == 1
+	__kernel
+#else
+	__kernel __attribute__((reqd_work_group_size(TRSV_BLOCK_SIZE, 1, 1)))
 #endif
-
 void trsv_forward(int n,
 									const __global real *A, const int a_offset, int a_ld,
 									__global real *b, const int b_offset, int b_inc,
@@ -80,7 +86,11 @@ void trsv_forward(int n,
 	}
 }
 
-
+#if RELAX_WORKGROUP_SIZE == 1
+	__kernel
+#else
+	__kernel __attribute__((reqd_work_group_size(TRSV_BLOCK_SIZE, 1, 1)))
+#endif
 void trsv_backward(int n,
 									 const __global real *A, const int a_offset, int a_ld,
 									 __global real *b, const int b_offset, int b_inc,

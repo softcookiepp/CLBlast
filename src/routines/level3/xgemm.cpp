@@ -304,13 +304,23 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 
 	// Creates the buffer for the (optional) temporary matrices. Note that we use 'a_buffer' in case
 	// when no temporary buffer is needed, but that's just to make it compile: it is never used.
-	const auto temp_buffer_all =
+#if VULKAN_API
+#else
+	const
+#endif
+	auto temp_buffer_all =
 			(temp_buffer_provided) ? temp_buffer : ((temp_size > 0) ? Buffer<T>(context_, temp_size) : a_buffer);
 	// Verifies if the provided temporary buffer is large enough
 	if (temp_buffer_provided) {
 		const auto required_size = temp_size * sizeof(T);
 		if (temp_buffer_all.GetSize() < required_size) {
+#if VULKAN_API
+			// temporary hack due to indirect kernel being forced on under certain circumstances
+			if (temp_size == 0) throw std::runtime_error("this probably shouldn't happen");
+			temp_buffer_all = Buffer<T>(context_, temp_size);
+#else
 			throw BLASError(StatusCode::kInsufficientMemoryTemp);
+#endif
 		}
 	}
 

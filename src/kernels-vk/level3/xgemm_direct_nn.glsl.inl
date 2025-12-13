@@ -1,4 +1,3 @@
-#extension GL_GOOGLE_include_directive : require
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>

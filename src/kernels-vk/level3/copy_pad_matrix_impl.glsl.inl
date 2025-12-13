@@ -16,7 +16,7 @@ R"(
 // =================================================================================================
 
 #if USE_BDA == 0
-	#if defined(ROUTINE_GEMMBATCHED)
+	#if 0
 		layout(binding = 0, std430) buffer src_offsets_buf { int src_offsets[]; };
 		layout(binding = 1, std430) buffer src_buf { real src[]; };
 		layout(binding = 2, std430) buffer dest_offsets_buf { int dest_offsets[]; };

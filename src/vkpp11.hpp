@@ -122,13 +122,13 @@ public:
 	// Waits for completion of this event
 	void WaitForCompletion() const
 	{
+#if 1
+		// not going to bother with this now
+		//sequence->getDevice()->sync();
+#else
 		if (mEvent == nullptr)
 			throw LogicError("Sequence cannot be null!");
 		auto sequence = mEvent->getSequence();
-#if 1
-		// not going to bother with this now
-		sequence->getDevice()->sync();
-#else
 		sequence->getDevice()->sync({sequence});
 #endif
 	}
@@ -505,7 +505,8 @@ public:
 	{
 		if (!mIsGLSL && mCLProgram)
 			return mCLProgram->getPipeline(entryPoint, localSize, push);
-
+		
+		localSize.resize(3, 1);
 		std::vector<uint8_t> spec;
 		if (mShaderModules[entryPoint]->getEntryPointData("main").specConstEntries.size() > 0)
 		{

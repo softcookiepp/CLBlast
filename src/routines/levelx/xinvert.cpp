@@ -34,11 +34,75 @@ Xinvert<T>::Xinvert(Queue& queue, EventPointer event, const std::string& name)
     : Routine(queue, event, name, {"Invert"}, PrecisionValue<T>(), {},
               {
 #if VULKAN_API
+#if 1
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3/level3_fill_matrix.glsl.inl"
+	,
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3//invert_diagonal_blocks_part1_invert_diagonal_block.glsl.inl"
+	,
+	// 16 lower
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3//invert_diagonal_blocks_part1_triple_matmul.glsl.inl"
+	#include "../../kernels-vk/level3/invert_diagonal_blocks_part2_16_part1_lower.glsl.inl"
+	,
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3//invert_diagonal_blocks_part1_triple_matmul.glsl.inl"
+	#include "../../kernels-vk/level3/invert_diagonal_blocks_part2_16_part2_lower.glsl.inl"
+	,
+	// 32 lower
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3//invert_diagonal_blocks_part1_triple_matmul.glsl.inl"
+	#include "../../kernels-vk/level3/invert_diagonal_blocks_part2_32_part1_lower.glsl.inl"
+	,
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3//invert_diagonal_blocks_part1_triple_matmul.glsl.inl"
+	#include "../../kernels-vk/level3/invert_diagonal_blocks_part2_32_part2_lower.glsl.inl"
+	,
+	// 64 lower
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3//invert_diagonal_blocks_part1_triple_matmul.glsl.inl"
+	#include "../../kernels-vk/level3/invert_diagonal_blocks_part2_64_part1_lower.glsl.inl"
+	,
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3//invert_diagonal_blocks_part1_triple_matmul.glsl.inl"
+	#include "../../kernels-vk/level3/invert_diagonal_blocks_part2_64_part2_lower.glsl.inl"
+	,
+	// 16 upper
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3//invert_diagonal_blocks_part1_triple_matmul.glsl.inl"
+	#include "../../kernels-vk/level3/invert_diagonal_blocks_part2_16_part1_upper.glsl.inl"
+	,
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3//invert_diagonal_blocks_part1_triple_matmul.glsl.inl"
+	#include "../../kernels-vk/level3/invert_diagonal_blocks_part2_16_part2_upper.glsl.inl"
+	,
+	// 32 upper
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3//invert_diagonal_blocks_part1_triple_matmul.glsl.inl"
+	#include "../../kernels-vk/level3/invert_diagonal_blocks_part2_32_part1_upper.glsl.inl"
+	,
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3//invert_diagonal_blocks_part1_triple_matmul.glsl.inl"
+	#include "../../kernels-vk/level3/invert_diagonal_blocks_part2_32_part2_upper.glsl.inl"
+	,
+	// 64 upper
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3//invert_diagonal_blocks_part1_triple_matmul.glsl.inl"
+	#include "../../kernels-vk/level3/invert_diagonal_blocks_part2_64_part1_upper.glsl.inl"
+	,
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3//invert_diagonal_blocks_part1_triple_matmul.glsl.inl"
+	#include "../../kernels-vk/level3/invert_diagonal_blocks_part2_64_part2_upper.glsl.inl"
+	,
+	
+#else
 	#include "../../kernels-vk/level3/level3.opencl"
 					  ,  // separated in multiple parts to prevent C1091 in MSVC 2013
 	#include "../../kernels-vk/level3/invert_diagonal_blocks_part1.opencl"
 					  ,  // separated in multiple parts to prevent C1091 in MSVC 2013
 	#include "../../kernels-vk/level3/invert_diagonal_blocks_part2.opencl"
+#endif
 #else
 	#include "../../kernels/level3/level3.opencl"
 					  ,  // separated in multiple parts to prevent C1091 in MSVC 2013
@@ -46,7 +110,28 @@ Xinvert<T>::Xinvert(Queue& queue, EventPointer event, const std::string& name)
 					  ,  // separated in multiple parts to prevent C1091 in MSVC 2013
 	#include "../../kernels/level3/invert_diagonal_blocks_part2.opencl"
 #endif
-              }) {
+              }
+#if VULKAN_API
+		, true,
+		{
+			"FillMatrix",
+			"InvertDiagonalBlock",
+			"TripleMatMul16Part1Lower",
+			"TripleMatMul16Part2Lower",
+			"TripleMatMul32Part1Lower",
+			"TripleMatMul32Part2Lower",
+			"TripleMatMul64Part1Lower",
+			"TripleMatMul64Part2Lower",
+			
+			"TripleMatMul16Part1Upper",
+			"TripleMatMul16Part2Upper",
+			"TripleMatMul32Part1Upper",
+			"TripleMatMul32Part2Upper",
+			"TripleMatMul64Part1Upper",
+			"TripleMatMul64Part2Upper"
+		}
+#endif
+		  ) {
 }
 
 // =================================================================================================
@@ -133,6 +218,7 @@ void Xinvert<T>::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle 
 
     // Part 1
     auto kernel1 = Kernel(program_, "TripleMatMul" + ToString(current_size) + "Part1" + name_postfix);
+    std::cout << "KERNEL 1: " << "TripleMatMul" + ToString(current_size) + "Part1" + name_postfix << std::endl;
     kernel1.SetArgument(0, static_cast<int>(n));
     kernel1.SetArgument(1, src());
     kernel1.SetArgument(2, static_cast<int>(offset));
@@ -148,6 +234,7 @@ void Xinvert<T>::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle 
     // Part 2
     const bool is_last_kernel = (current_size * 2 >= block_size);
     auto kernel2 = Kernel(program_, "TripleMatMul" + ToString(current_size) + "Part2" + name_postfix);
+    std::cout << "KERNEL 2: " << "TripleMatMul" + ToString(current_size) + "Part2" + name_postfix << std::endl;
     kernel2.SetArgument(0, static_cast<int>(n));
     kernel2.SetArgument(1, dest());
     kernel2.SetArgument(2, static_cast<int>(current_size));

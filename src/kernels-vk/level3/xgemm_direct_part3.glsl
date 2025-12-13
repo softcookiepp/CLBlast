@@ -1,6 +1,3 @@
-#include "../common.glsl"
-#include "level3.glsl"
-#include "xgemm_direct_part1.glsl"
 #include "xgemm_direct_part2.glsl"
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):

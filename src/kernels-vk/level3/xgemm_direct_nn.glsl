@@ -1,5 +1,4 @@
 #version 450
-#extension GL_GOOGLE_include_directive : require
 #include "xgemm_direct_part3.glsl"
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):

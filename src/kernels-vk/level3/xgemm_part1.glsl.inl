@@ -1,12 +1,12 @@
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
-//	 Cedric Nugteren <www.cedricnugteren.nl>
+//   Cedric Nugteren <www.cedricnugteren.nl>
 //
 // This file contains two optimized matrix-multiplication kernels:
 // - Kernel 0: inspired by the paper by Matsumoto et al. and the tutorial on
-//	 http://www.cedricnugteren.nl/tutorial.php
+//   http://www.cedricnugteren.nl/tutorial.php
 // - Kernel 1: inspired by a Qualcomm optimized GPU kernel with 2D register tiling
-//	 https://developer.qualcomm.com/blog/matrix-multiply-adreno-gpus-part-2-host-code-and-kernel
+//   https://developer.qualcomm.com/blog/matrix-multiply-adreno-gpus-part-2-host-code-and-kernel
 // Both are fully configurable (and tunable!) using many parameters. Both kernels support
 // different data-types (SGEMM/DGEMM/CGEMM/ZGEMM/HGEMM) through a pre-processor define.
 //
@@ -17,18 +17,18 @@
 // For kernel 1, both A and C are transposed w.r.t. the above
 //
 // Or as an image (assuming column-major)
-//			 K											
-//		o-------o								 
-//		|			 |								 
-//	N | [B^T] |								 
-//		|			 |								 
-//		o-------o								 
-//				K							 N		 
-//		o-------o				o-----o	
-//	M |	[A]	|			M | [C] |	
-//		|			 |				|		 |	
-//		o-------o				o-----o	
-//															
+//       K                      
+//    o-------o                 
+//    |       |                 
+//  N | [B^T] |                 
+//    |       |                 
+//    o-------o                 
+//        K               N     
+//    o-------o        o-----o  
+//  M |  [A]  |      M | [C] |  
+//    |       |        |     |  
+//    o-------o        o-----o  
+//                              
 //
 // This kernel is separated into multiple files. This is part 1 out of 4.
 //
@@ -213,11 +213,37 @@ INLINE_FUNC realM InitAccRegisters() {
 
 // =================================================================================================
 
+// buffer definitions (to avoid having to use macros everywhere like usual)
+#if USE_BDA == 0
+	layout(binding = 0, std430) buffer agm_buf { realM agm[]; };
+	layout(binding = 1, std430) buffer bgm_buf { realN bgm[]; };
+	layout(binding = 2, std430) buffer cgm_buf { realM cgm[]; };
+	#if GEMMK == 1
+		layout(binding = 3, std430) buffer agms_buf { real a_ptr[]; };
+		layout(binding = 4, std430) buffer bgms_buf { real b_ptr[]; };
+	#endif
+#endif
+
+// Allocates workgroup-private memory (local memory)
+#if SA == 1
+	shared realM alm[KWG * MWG/VWM];
+#endif
+#if SB == 1
+	shared realN blm[KWG * NWG/VWN];
+#endif
+
+// =================================================================================================
+
 // Caches global off-chip memory into local (shared) memory on-chip. This function is specific for
 // caching the A input matrix.
 #if SA == 1
-INLINE_FUNC void GlobalToLocalA(const __global realM* restrict agm, LOCAL_PTR realM* alm,
-																const int kSizeM, const int tid, const int kwg) {
+void GlobalToLocalA(
+#if USE_BDA
+	const __global realM* restrict agm,
+#endif
+	//LOCAL_PTR realM* alm,
+	const int kSizeM, const int tid, const int kwg)
+{
 	const int la0 = tid % MDIMA;
 	const int la1 = tid / MDIMA;
 	
@@ -246,8 +272,15 @@ INLINE_FUNC void GlobalToLocalA(const __global realM* restrict agm, LOCAL_PTR re
 
 // Same as above, but now for the B input matrix
 #if SB == 1
-INLINE_FUNC void GlobalToLocalB(const __global realN* restrict bgm, LOCAL_PTR realN* blm,
-																const int kSizeN, const int tid, const int kwg) {
+void GlobalToLocalB(
+#if USE_BDA
+	const __global realN* restrict bgm,
+#else
+	int b_offset,
+#endif
+	// LOCAL_PTR realN* blm,
+	const int kSizeN, const int tid, const int kwg)
+{
 	const int lb0 = tid % NDIMB;
 	const int lb1 = tid / NDIMB;
 	
@@ -268,7 +301,7 @@ INLINE_FUNC void GlobalToLocalB(const __global realN* restrict bgm, LOCAL_PTR re
 			int idk = kg + kwg;
 
 			// Loads the data from global memory (transposed) into the local memory
-			blm[kg*(NWG/VWN) + ng] = bgm[idk*(kSizeN/VWN) + idn];
+			blm[kg*(NWG/VWN) + ng] = bgm[idk*(kSizeN/VWN) + idn + b_offset];
 		}
 	}
 }
@@ -279,15 +312,17 @@ INLINE_FUNC void GlobalToLocalB(const __global realN* restrict bgm, LOCAL_PTR re
 // Caches global off-chip memory directly into per-thread private memory (registers). This function
 // is specific for caching the A input matrix.
 #if SA == 0 && GEMMK == 0
-INLINE_FUNC realM GlobalToPrivateA(const __global realM* restrict agm, const int _mi,
-																	 const int kSizeM, const int idk, const int kwg) {
+realM GlobalToPrivateA(
+#if USE_BDA
+	const __global realM* restrict agm,
+#endif
+	const int _mi, const int kSizeM, const int idk, const int kwg)
+{
 	// Computes the indices based on strided/non-strided access
 	#if STRM == 0
-		//int mg = _mi + get_local_id(0)*(MWI/VWM);
-		int mg = _mi + gl_LocalInvocationID[0]*(MWI/VWM);
+		int mg = _mi + get_local_id(0)*(MWI/VWM);
 	#elif STRM == 1
-		//int mg = get_local_id(0) + _mi*MDIMC;
-		int mg = gl_LocalInvocationID[0] + _mi*MDIMC;
+		int mg = get_local_id(0) + _mi*MDIMC;
 	#endif
 
 	// Computes the indices for the global memory
@@ -300,21 +335,26 @@ INLINE_FUNC realM GlobalToPrivateA(const __global realM* restrict agm, const int
 
 // Same as above, but now for the B input matrix
 #if SB == 0 && GEMMK == 0
-INLINE_FUNC realN GlobalToPrivateB(const __global realN* restrict bgm, const int _ni,
-																	 const int kSizeN, const int idk) {
+realN GlobalToPrivateB(
+#if USE_BDA
+	const __global realN* restrict bgm,
+#else
+	int b_offset,
+#endif
+	const int _ni, const int kSizeN, const int idk)
+{
 	// Computes the indices based on strided/non-strided access
 	#if STRN == 0
-		//int ng = _ni + get_local_id(1)*(NWI/VWN);
-		int ng = _ni + gl_LocalInvocationID[1]*(NWI/VWN);
+		int ng = _ni + get_local_id(1)*(NWI/VWN);
 	#elif STRN == 1
-		int ng = gl_LocalInvocationID[1] + _ni*NDIMC;
+		int ng = get_local_id(1) + _ni*NDIMC;
 	#endif
 
 	// Computes the indices for the global memory
 	int idn = ng + GetGroupID1() * (NWG/VWN);
 
 	// Loads the data from global memory (transposed) and stores into registers
-	return bgm[idk*(kSizeN/VWN) + idn];
+	return bgm[idk*(kSizeN/VWN) + idn + b_offset];
 }
 #endif
 
@@ -323,47 +363,157 @@ INLINE_FUNC realN GlobalToPrivateB(const __global realN* restrict bgm, const int
 
 // Caches global off-chip memory directly into per-thread private memory (registers). This function
 // is specific for caching the A input matrix for kernel 1.
-INLINE_FUNC realN GlobalToPrivateA2D(const __global real* restrict a_ptr, const int tid_y, const int _ni,
-																		 const int kSizeK, const int idk, const int _ki) {
+realN GlobalToPrivateA2D(
+#if USE_BDA
+	const __global real* restrict a_ptr,
+#endif
+	const int tid_y, const int _ni, const int kSizeK, const int idk, const int _ki)
+{
 	#if PRECISION == 3232 || PRECISION == 6464
 		const int a_index = (tid_y * NWI + _ni) * (kSizeK / VWN) + idk / VWN + _ki;
+#if USE_BDA
 		const __global realN* restrict agm = (const __global realN* restrict) a_ptr;
+#endif
+		// ok yeah, this is probably not going to work quite the way I thought it would...
 		return agm[a_index];
 	#else
 		const int a_index = (tid_y * NWI + _ni) * kSizeK + idk + _ki * VWN;
 		#if VWN == 1
 			return a_ptr[a_index];
 		#elif VWN == 2
-			return vload2(0, a_ptr + a_index);
+			//return vload2(0, a_ptr + a_index);
+			return real2(a_ptr[a_index], a_ptr[a_index + 1]);
 		#elif VWN == 4
-			return vload4(0, a_ptr + a_index);
+			//return vload4(0, a_ptr + a_index);
+			return real4(
+				a_ptr[a_index],
+				a_ptr[a_index + 1]
+				a_ptr[a_index + 2]
+				a_ptr[a_index + 3]
+			);
 		#elif VWN == 8
-			return vload8(0, a_ptr + a_index);
+			//return vload8(0, a_ptr + a_index);
+			return real8(
+				real4(
+					a_ptr[a_index],
+					a_ptr[a_index + 1]
+					a_ptr[a_index + 2]
+					a_ptr[a_index + 3]
+				),
+				real4(
+					a_ptr[a_index + 4],
+					a_ptr[a_index + 5]
+					a_ptr[a_index + 6]
+					a_ptr[a_index + 7]
+				)
+			);
 		#elif VWN == 16
-			return vload16(0, a_ptr + a_index);
+			//return vload16(0, a_ptr + a_index);
+			return real16(
+				real4(
+					a_ptr[a_index],
+					a_ptr[a_index + 1]
+					a_ptr[a_index + 2]
+					a_ptr[a_index + 3]
+				),
+				real4(
+					a_ptr[a_index + 4],
+					a_ptr[a_index + 5]
+					a_ptr[a_index + 6]
+					a_ptr[a_index + 7]
+				),
+				real4(
+					a_ptr[a_index + 8],
+					a_ptr[a_index + 9]
+					a_ptr[a_index + 10]
+					a_ptr[a_index + 11]
+				),
+				real4(
+					a_ptr[a_index + 12],
+					a_ptr[a_index + 13]
+					a_ptr[a_index + 14]
+					a_ptr[a_index + 15]
+				)
+			);
 		#endif
 	#endif
 }
 
 // Same as above, but now for the B input matrix
-INLINE_FUNC realM GlobalToPrivateB2D(const __global real* restrict b_ptr, const int tid_x, const int _mi,
-																		 const int kSizeN, const int idk, const int _ki) {
+realM GlobalToPrivateB2D(
+#if USE_BDA
+	const __global real* restrict b_ptr,
+#else
+	int b_ptr_offset,
+#endif
+	const int tid_x, const int _mi, const int kSizeN, const int idk, const int _ki)
+{
 	#if PRECISION == 3232 || PRECISION == 6464
 		const int b_index = (idk + _ki) * (kSizeN / VWM) + tid_x * (MWI / VWM) + _mi;
+#if USE_BDA
 		const __global realM* restrict bgm = (const __global realM* restrict) b_ptr;
-		return bgm[b_index];
+#endif
+		// ok yeah, this is probably not going to work quite the way I thought it would...
+		return bgm[b_index + b_ptr_offset/VWM];
 	#else
-		const int b_index = (idk + _ki) * kSizeN + tid_x * MWI + _mi * VWM;
+		const int b_index = (idk + _ki) * kSizeN + tid_x * MWI + _mi * VWM + b_ptr_offset;
 		#if VWM == 1
 			return b_ptr[b_index];
 		#elif VWM == 2
-			return vload2(0, b_ptr + b_index);
+			//return vload2(0, b_ptr + b_index);
+			return real2(b_ptr[b_index], b_ptr[b_index + 1]);
 		#elif VWM == 4
-			return vload4(0, b_ptr + b_index);
+			//return vload4(0, b_ptr + b_index);
+			return real4(
+				b_ptr[b_index],
+				b_ptr[b_index + 1]
+				b_ptr[b_index + 2]
+				b_ptr[b_index + 3]
+			);
 		#elif VWM == 8
-			return vload8(0, b_ptr + b_index);
+			//return vload8(0, b_ptr + b_index);
+			return real8(
+				real4(
+					b_ptr[b_index],
+					b_ptr[b_index + 1]
+					b_ptr[b_index + 2]
+					b_ptr[b_index + 3]
+				),
+				real4(
+					b_ptr[b_index + 4],
+					b_ptr[b_index + 5]
+					b_ptr[b_index + 6]
+					b_ptr[b_index + 7]
+				)
+			);
 		#elif VWM == 16
-			return vload16(0, b_ptr + b_index);
+			//return vload16(0, b_ptr + b_index);
+			return real16(
+				real4(
+					b_ptr[b_index],
+					b_ptr[b_index + 1]
+					b_ptr[b_index + 2]
+					b_ptr[b_index + 3]
+				),
+				real4(
+					b_ptr[b_index + 4],
+					b_ptr[b_index + 5]
+					b_ptr[b_index + 6]
+					b_ptr[b_index + 7]
+				),
+				real4(
+					b_ptr[b_index + 8],
+					b_ptr[b_index + 9]
+					b_ptr[b_index + 10]
+					b_ptr[b_index + 11]
+				),
+				real4(
+					b_ptr[b_index + 12],
+					b_ptr[b_index + 13]
+					b_ptr[b_index + 14]
+					b_ptr[b_index + 15]
+				)
+			);
 		#endif
 	#endif
 }
@@ -374,7 +524,10 @@ INLINE_FUNC realM GlobalToPrivateB2D(const __global real* restrict b_ptr, const 
 // Caches on-chip local memory into per-thread private memory (registers). This function is specific
 // for caching the A input matrix.
 #if SA == 1
-INLINE_FUNC realM LocalToPrivateA(LOCAL_PTR realM* alm, const int _mi, const int kg) {
+realM LocalToPrivateA(
+	//LOCAL_PTR realM* alm,
+	const int _mi, const int kg)
+{
 	#if STRM == 0
 		int mg = _mi + get_local_id(0)*(MWI/VWM);
 	#elif STRM == 1
@@ -386,7 +539,10 @@ INLINE_FUNC realM LocalToPrivateA(LOCAL_PTR realM* alm, const int _mi, const int
 
 // Same as above, but now for the B input matrix
 #if SB == 1
-INLINE_FUNC realN LocalToPrivateB(LOCAL_PTR realN* blm, const int _ni, const int kg) {
+realN LocalToPrivateB(
+	//LOCAL_PTR realN* blm,
+	const int _ni, const int kg)
+{
 	#if STRN == 0
 		int ng = _ni + get_local_id(1)*(NWI/VWN);
 	#elif STRN == 1
@@ -396,7 +552,6 @@ INLINE_FUNC realN LocalToPrivateB(LOCAL_PTR realN* blm, const int _ni, const int
 }
 #endif
 
-)"
 // End of the C++11 raw string literal
-
+)"
 // =================================================================================================

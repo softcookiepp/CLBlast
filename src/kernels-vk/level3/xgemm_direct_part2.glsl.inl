@@ -1,4 +1,3 @@
-
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -46,13 +45,13 @@ ivec2 getIndexForGlobalToLocalN()
 #elif VWMD == 2 || VWMD == 4
 	#if PRECISION == 3232 || PRECISION == 6464
 		#if VWMD == 2
-			#define StoreMDInLocal(lm, lm_idx, value)
+			#define StoreMDInLocal(lm, lm_idx, value) \
 			{ \
 				lm[lm_idx + 0] = value.x; \
 				lm[lm_idx + 1] = value.y; \
 			}
 		#elif VWMD == 4
-			#define StoreMDInLocal(lm, lm_idx, value)
+			#define StoreMDInLocal(lm, lm_idx, value) \
 			{ \
 				lm[lm_idx + 0] = value.x; \
 				lm[lm_idx + 1] = value.y; \
@@ -61,7 +60,7 @@ ivec2 getIndexForGlobalToLocalN()
 			}
 		#endif
 	#else
-		#define StoreMDInLocal(lm, lm_idx, value)
+		#define StoreMDInLocal(lm, lm_idx, value) \
 		{ \
 			for (uint i = 0; i < VWMD; i += 1) \
 			{ \
@@ -73,7 +72,7 @@ ivec2 getIndexForGlobalToLocalN()
 	// 8 or 16
 	#if PRECISION == 3232 || PRECISION == 6464
 		#if VWMD == 8
-			#define StoreMDInLocal(lm, lm_idx, value)
+			#define StoreMDInLocal(lm, lm_idx, value) \
 			{ \
 				lm[lm_idx + 0] = value.s0; \
 				lm[lm_idx + 1] = value.s1; \
@@ -85,7 +84,7 @@ ivec2 getIndexForGlobalToLocalN()
 				lm[lm_idx + 7] = value.s7; \
 			}
 		#elif VWMD == 16
-			#define StoreMDInLocal(lm, lm_idx, value)
+			#define StoreMDInLocal(lm, lm_idx, value) \
 			{ \
 				lm[lm_idx + 0] = value.s0; \
 				lm[lm_idx + 1] = value.s1; \
@@ -107,7 +106,7 @@ ivec2 getIndexForGlobalToLocalN()
 		#endif
 	// with non-complex precisions,  matrices are used as a workaround for GLSL's lack of large vector support, so that SIMD can still be used to some degree
 	#else
-		#define StoreMDInLocal(lm, lm_idx, value)
+		#define StoreMDInLocal(lm, lm_idx, value) \
 		{ \
 			for (uint i = 0; i < VWMD/4; i += 1) \
 			{ \
@@ -126,13 +125,13 @@ ivec2 getIndexForGlobalToLocalN()
 #elif VWND == 2 || VWND == 4
 	#if PRECISION == 3232 || PRECISION == 6464
 		#if VWND == 2
-			#define StoreNDInLocal(lm, lm_idx, value)
+			#define StoreNDInLocal(lm, lm_idx, value) \
 			{ \
 				lm[lm_idx + 0] = value.x; \
 				lm[lm_idx + 1] = value.y; \
 			}
 		#elif VWND == 4
-			#define StoreNDInLocal(lm, lm_idx, value)
+			#define StoreNDInLocal(lm, lm_idx, value) \
 			{ \
 				lm[lm_idx + 0] = value.x; \
 				lm[lm_idx + 1] = value.y; \
@@ -141,7 +140,7 @@ ivec2 getIndexForGlobalToLocalN()
 			}
 		#endif
 	#else
-		#define StoreNDInLocal(lm, lm_idx, value)
+		#define StoreNDInLocal(lm, lm_idx, value) \
 		{ \
 			for (uint i = 0; i < VWND; i += 1) \
 			{ \
@@ -153,7 +152,7 @@ ivec2 getIndexForGlobalToLocalN()
 	// 8 or 16
 	#if PRECISION == 3232 || PRECISION == 6464
 		#if VWND == 8
-			#define StoreNDInLocal(lm, lm_idx, value)
+			#define StoreNDInLocal(lm, lm_idx, value) \
 			{ \
 				lm[lm_idx + 0] = value.s0; \
 				lm[lm_idx + 1] = value.s1; \
@@ -165,7 +164,7 @@ ivec2 getIndexForGlobalToLocalN()
 				lm[lm_idx + 7] = value.s7; \
 			}
 		#elif VWND == 16
-			#define StoreNDInLocal(lm, lm_idx, value)
+			#define StoreNDInLocal(lm, lm_idx, value) \
 			{ \
 				lm[lm_idx + 0] = value.s0; \
 				lm[lm_idx + 1] = value.s1; \
@@ -187,7 +186,7 @@ ivec2 getIndexForGlobalToLocalN()
 		#endif
 	// with non-complex precisions,  matrices are used as a workaround for GLSL's lack of large vector support, so that SIMD can still be used to some degree
 	#else
-		#define StoreNDInLocal(lm, lm_idx, value)
+		#define StoreNDInLocal(lm, lm_idx, value) \
 		{ \
 			for (uint i = 0; i < VWND/4; i += 1) \
 			{ \

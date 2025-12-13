@@ -1,4 +1,4 @@
-
+#include "xgemm_part1.glsl"
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -12,7 +12,7 @@
 //R"(
 
 // The vectorised multiply-add function
-INLINE_FUNC realM MultiplyAddVector(realM cvec, const realM avec, const real bval) {
+realM MultiplyAddVector(realM cvec, const realM avec, const real bval) {
 	#if USE_VECTOR_MAD == 1
 		cvec += avec * bval;
 	#else
@@ -41,14 +41,8 @@ INLINE_FUNC realM MultiplyAddVector(realM cvec, const realM avec, const real bva
 
 // =================================================================================================
 
-// Merges the results in Cpm with the global array in Cgm. This also performs the multiplication
-// with the constants: Cgm = alpha*A*B + beta*Cgm = alpha*Cpm + beta*Cgm
-void StoreResults(
-#if USE_BDA
-		__global realM* cgm,
-#endif
-		realM c_value, const int _mi, const int _ni,
-		const int kSizeM, const real alpha, const real beta)
+// helper function since macro expressions don't like preprocessor conditions
+ivec2 get_mg_ng_for_store(const int _mi, const int _ni)
 {
 	#if STRM == 0
 		int mg = _mi + get_local_id(0)*(MWI/VWM);
@@ -60,6 +54,23 @@ void StoreResults(
 	#elif STRN == 1
 		int ng = _ni%VWN + get_local_id(1)*VWN + (_ni/VWN)*VWN*NDIMC;
 	#endif
+	return ivec2(mg, ng);
+}
+
+// Merges the results in Cpm with the global array in Cgm. This also performs the multiplication
+// with the constants: Cgm = alpha*A*B + beta*Cgm = alpha*Cpm + beta*Cgm
+void StoreResults(
+#if USE_BDA
+		__global realM* cgm,
+#else
+		int c_offset,
+#endif
+		realM c_value, const int _mi, const int _ni,
+		const int kSizeM, const real alpha, const real beta)
+{
+	ivec2 mgng = get_mg_ng_for_store(_mi, _ni);
+	int mg = mgng[0];
+	int ng = mgng[1];
 	int idm = mg + GetGroupID0() * (MWG/VWM);
 	int idn = ng + GetGroupID1() * NWG;
 	int index = idn*(kSizeM/VWM) + idm;
@@ -92,7 +103,7 @@ void StoreResults(
 
 	// The final multiplication with alpha and the addition with beta*C
 	else {
-		realM yval = cgm[index];
+		realM yval = cgm[index + c_offset];
 		#if VWM == 1
 			AXPBY(result, alpha, xval, beta, yval);
 		#elif VWM == 2
@@ -113,7 +124,7 @@ void StoreResults(
 			AXPBY(result[3], alpha, xval[3], beta, yval[3]);
 		#endif
 	}
-	cgm[index] = result;
+	cgm[index + c_offset] = result;
 }
 
 //)"

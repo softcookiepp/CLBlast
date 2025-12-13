@@ -297,6 +297,7 @@ R"(
 #define get_local_id(dim) int(gl_LocalInvocationID[dim])
 #define get_group_id(dim) int(gl_WorkGroupID[dim])
 #define get_global_size(idx) int(gl_NumWorkGroups[idx] * gl_WorkGroupSize[idx])
+#define get_local_size(idx) int(gl_WorkGroupSize[idx])
 #define get_num_groups(dim) int(gl_NumWorkGroups[dim])
 
 // Staggered/shuffled group indices to avoid partition camping (AMD GPUs). Formula's are taken from:

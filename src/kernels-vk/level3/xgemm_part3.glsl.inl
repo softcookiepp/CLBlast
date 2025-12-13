@@ -1,4 +1,3 @@
-
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -52,54 +51,56 @@ realN clblast_sub_group_shuffle(realN reg, int src) {
 
 // Main body of the matrix-multiplication algorithm. It calls various (inlined) functions.
 void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
+#if USE_BDA
 	const __global realM* restrict agm, const __global realN* restrict bgm,
-	__global realM* cgm, const real alpha, const real beta
-	#if SA == 1 && SB == 1
-	 , LOCAL_PTR realM* alm, LOCAL_PTR realN* blm
-	#elif SA == 1
-	 , LOCAL_PTR realM* alm
-	#elif SB == 1
-	 , LOCAL_PTR realN* blm
-	#endif
-	)
+	__global realM* cgm,
+#else
+	int b_offset, int c_offset,
+#endif
+	const real alpha, const real beta)
 {
 
 	// Allocates workitem-private memory (registers)
 	#if GEMMK == 0
-		#pragma promote_to_registers
+		
 		realM apm[MWI/VWM]; // MWI * 1
-		#pragma promote_to_registers
+		
 		realN bpm[NWI/VWN]; // 1 * NWI
 	#elif GEMMK == 1
 		#if USE_SUBGROUP_SHUFFLING == 1
-			#pragma promote_to_registers
+			
 			realN apm[KREG/VWN]; // KREG (subgroup shuffling in NWI dimension)
 		#else
-			#pragma promote_to_registers
+			
 			realN apm[NWI*(KREG/VWN)]; // NWI * KREG
 		#endif
-		#pragma promote_to_registers
+		
 		realM bpm[KREG*(MWI/VWM)]; // KREG * MWI
 	#endif
-	#pragma promote_to_registers
+	
 	realM cpm[NWI*(MWI/VWM)]; // NWI * MWI
 
 	#if GEMMK == 1
+#if USE_BDA
 		const __global real* restrict a_ptr = (const __global real* restrict) &agm[0];
 		const __global real* restrict b_ptr = (const __global real* restrict) &bgm[0];
+#else
+		// use for scalar bgms
+		int b_ptr_offset = b_offset*VWN;
+#endif
 		const int tid_x = get_local_id(0) + MDIMC * GetGroupID0();
 		const int tid_y = get_local_id(1) + NDIMC * GetGroupID1();
 	#endif
 
-	// Combined thread identifier (volatile to disable caching)
+	// Combined thread identifier (to disable caching)
 	#if SA == 1 || SB == 1
-		volatile int tid = get_local_id(0) + MDIMC*get_local_id(1);
+		int tid = get_local_id(0) + MDIMC*get_local_id(1);
 	#endif
 
 	// Initializes the accumulation registers
-	#pragma unroll
+	
 	for (int _mi = 0; _mi < MWI/VWM; _mi += 1) {
-		#pragma unroll
+		
 		for (int _ni = 0; _ni < NWI; _ni += 1) {
 			cpm[_ni * (MWI/VWM) + _mi] = InitAccRegisters();
 		}
@@ -110,19 +111,31 @@ void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
 
 		// Loads data: off-chip --> local (matrix A)
 		#if SA == 1
-			GlobalToLocalA(agm, alm, kSizeM, tid, kwg);
+			GlobalToLocalA(
+#if USE_BDA
+				agm,
+#endif
+				//alm,
+				kSizeM, tid, kwg);
 		#endif
 		// Loads data: off-chip --> local (matrix B)
 		#if SB == 1
-			GlobalToLocalB(bgm, blm, kSizeN, tid, kwg);
+			GlobalToLocalB(
+#if USE_BDA
+				bgm,
+#else
+				b_offset,
+#endif
+				//blm,
+				kSizeN, tid, kwg);
 		#endif
 		#if SA == 1 || SB == 1
-			barrier(CLK_LOCAL_MEM_FENCE);
+			barrier();
 		#endif
 
 		// Loops over all workitem tiles, unrolled by a factor KWI
 		for (int pwi = 0; pwi < KWG * KREG; pwi += KWI * KREG) {
-			#pragma unroll
+			
 			for (int _pit = 0; _pit < KWI*KREG; _pit += KREG) {
 				#if SA == 0 || SB == 0
 					int idk = kwg + pwi + _pit;
@@ -132,50 +145,76 @@ void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
 				#endif
 
 				// Loads matrix A (kernel 0) or matrix B (kernel 1)
-				#pragma unroll
+				
 				for (int _mi = 0; _mi < MWI/VWM; _mi += 1) {
 					// Loads data: local --> private (matrix A)
 					#if GEMMK == 0 && SA == 1
-						apm[_mi] = LocalToPrivateA(alm, _mi, kg);
+						apm[_mi] = LocalToPrivateA(//alm,
+							_mi, kg);
 					// Loads data: off-chip --> private (matrix A)
 					#elif GEMMK == 0 && SA == 0
-						apm[_mi] = GlobalToPrivateA(agm, _mi, kSizeM, idk, kwg);
+						apm[_mi] = GlobalToPrivateA(
+#if USE_BDA
+							agm,
+#endif
+							_mi, kSizeM, idk, kwg);
 					// Loads data: 2D global --> 2D private (matrix B)
 					#elif GEMMK == 1
-						#pragma unroll
+						
 						for (int _ki = 0; _ki < KREG; _ki += 1) {
-							bpm[_ki * (MWI/VWM) + _mi] = GlobalToPrivateB2D(b_ptr, tid_x, _mi, kSizeN, idk, _ki);
+							bpm[_ki * (MWI/VWM) + _mi] = GlobalToPrivateB2D(
+#if USE_BDA
+								b_ptr,
+#else
+								b_ptr_offset,
+#endif
+								tid_x, _mi, kSizeN, idk, _ki);
 						}
 					#endif
 				}
 
 				// Loads matrix B (kernel 0) or matrix A (kernel 1)
 				#if GEMMK == 0
-					#pragma unroll
+					
 					for (int _ni = 0; _ni < NWI/VWN; _ni += 1) {
 						// Loads data: local --> private (matrix B)
 						#if SB == 1
-							bpm[_ni] = LocalToPrivateB(blm, _ni, kg);
+							bpm[_ni] = LocalToPrivateB(//blm,
+								_ni, kg);
 						// Loads data: off-chip --> private (matrix B)
 						#else
-							bpm[_ni] = GlobalToPrivateB(bgm, _ni, kSizeN, idk);
+							bpm[_ni] = GlobalToPrivateB(
+#if USE_BDA
+								bgm,
+#else
+								b_offset,
+#endif
+								_ni, kSizeN, idk);
 						#endif
 					}
 				#elif GEMMK == 1
 					// Loads data: 2D global --> 2D private (matrix A). Partly, shuffled later among subgroups
 					#if USE_SUBGROUP_SHUFFLING == 1
 						const int _ni = clblast_get_sub_group_local_id();
-						#pragma unroll
+						
 						for (int _ki = 0; _ki < KREG/VWN; _ki += 1) {
-							apm[_ki] = GlobalToPrivateA2D(a_ptr, tid_y, _ni, kSizeK, idk, _ki);
+							apm[_ki] = GlobalToPrivateA2D(
+#if USE_BDA
+								a_ptr,
+#endif
+								tid_y, _ni, kSizeK, idk, _ki);
 						}
 					// Loads data: 2D global --> 2D private (matrix A)
 					#else
-						#pragma unroll
+						
 						for (int _ni = 0; _ni < NWI; _ni += 1) {
-							#pragma unroll
+							
 							for (int _ki = 0; _ki < KREG/VWN; _ki += 1) {
-								apm[_ni * (KREG/VWN) + _ki] = GlobalToPrivateA2D(a_ptr, tid_y, _ni, kSizeK, idk, _ki);
+								apm[_ni * (KREG/VWN) + _ki] = GlobalToPrivateA2D(
+#if USE_BDA
+									a_ptr,
+#endif
+									tid_y, _ni, kSizeK, idk, _ki);
 							}
 						}
 					#endif
@@ -183,9 +222,9 @@ void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
 
 				// Performs the accumulation (Cpm += Apm * Bpm)
 				#if GEMMK == 0
-					#pragma unroll
+					
 					for (int _ni = 0; _ni < NWI/VWN; _ni += 1) {
-						#pragma unroll
+						
 						for (int _mi = 0; _mi < MWI/VWM; _mi += 1) {
 							const realM aval = apm[_mi];
 							#if VWN == 1
@@ -228,11 +267,11 @@ void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
 						}
 					}
 				#elif GEMMK == 1
-					#pragma unroll
+					
 					for (int _ni = 0; _ni < NWI; _ni += 1) {
-						#pragma unroll
+						
 						for (int _mi = 0; _mi < MWI/VWM; _mi += 1) {
-							#pragma unroll
+							
 							for (int _ki = 0; _ki < KREG/VWN; _ki += 1) {
 								#if USE_SUBGROUP_SHUFFLING == 1
 									const realN aval = clblast_sub_group_shuffle(apm[_ki], _ni);
@@ -284,11 +323,11 @@ void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
 			}
 		}
 		#if SA == 1 || SB == 1
-			barrier(CLK_LOCAL_MEM_FENCE);
+			barrier();
 		#endif
 	}
 	#if GLOBAL_MEM_FENCE == 1
-		barrier(CLK_GLOBAL_MEM_FENCE);
+		memoryBarrier(); barrier();
 	#endif
 
 	// Stores an MWG * NWG tile of results and performs the multiplication with alpha and beta
@@ -297,11 +336,17 @@ void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
 	#elif GEMMK == 1
 		const int cld = kSizeN;
 	#endif
-	#pragma unroll
+	
 	for (int _ni = 0; _ni < NWI; _ni += 1) {
-		#pragma unroll
+		
 		for (int _mi = 0; _mi < MWI/VWM; _mi += 1) {
-			StoreResults(cgm, cpm[_ni * (MWI/VWM) + _mi], _mi, _ni, cld, alpha, beta);
+			StoreResults(
+#if USE_BDA
+				cgm,
+#else
+				c_offset,
+#endif
+				cpm[_ni * (MWI/VWM) + _mi], _mi, _ni, cld, alpha, beta);
 		}
 	}
 }

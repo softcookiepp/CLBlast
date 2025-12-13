@@ -1,4 +1,5 @@
-
+#include "../common.glsl"
+#include "level3.glsl"
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>

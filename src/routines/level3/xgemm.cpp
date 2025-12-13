@@ -30,141 +30,123 @@ Xgemm<T>::Xgemm(Queue& queue, EventPointer event, const std::string& name)
 							PrecisionValue<T>(), {},
 							{
 #if VULKAN_API
-#if 0
-	// absolute torture :c
 	#include "../../kernels-vk/level3/level3.glsl.inl"
 	// 
-	#include "../../kernels-vk/level3/convert_hermitian_lower.glsl.inl"
-	,
-	
-	#include "../../kernels-vk/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk/level3/convert_hermitian_upper.glsl.inl"
-	,
-	
-	#include "../../kernels-vk/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk/level3/convert_symmetric_lower.glsl.inl"
-	,
-	
-	#include "../../kernels-vk/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk/level3/convert_symmetric_upper.glsl.inl"
-	,
-	
-	#include "../../kernels-vk/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk/level3/convert_triangular_lower.glsl.inl"
-	,
-	
-	#include "../../kernels-vk/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk/level3/convert_triangular_upper.glsl.inl"
-	,
-	
-	#include "../../kernels-vk/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk/level3/copy_fast.glsl.inl"
+		#include "../../kernels-vk/level3/copy_fast.glsl.inl"
 	,
 	
 	#include "../../kernels-vk/level3/level3.glsl.inl"
 	// 
 	#include "../../kernels-vk/level3/copy_matrix_impl.glsl.inl"
-	#include "../../kernels-vk/level3/copy_matrix.glsl.inl"
+		#include "../../kernels-vk/level3/copy_matrix.glsl.inl"
 	,
 	
-	#include "../../kernels-vk/level3/level3.glsl.inl"
+	//#include "../../kernels-vk/level3/level3.glsl.inl"
 	// 
-	#include "../../kernels-vk/level3/copy_matrix_impl.glsl.inl"
-	#include "../../kernels-vk/level3/copy_matrix_batched.glsl.inl"
-	,
+	//#include "../../kernels-vk/level3/copy_matrix_impl.glsl.inl"
+	//	#include "../../kernels-vk/level3/copy_matrix_batched.glsl.inl"
+	//,
 	
-	#include "../../kernels-vk/level3/level3.glsl.inl"
+	//#include "../../kernels-vk/level3/level3.glsl.inl"
 	// 
-	#include "../../kernels-vk/level3/copy_matrix_impl.glsl.inl"
-	#include "../../kernels-vk/level3/copy_matrix_strided_batched.glsl.inl"
-	,
-	
-	#include "../../kernels-vk/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk/level3/copy_pad_matrix_impl.glsl.inl"
-	#include "../../kernels-vk/level3/copy_pad_matrix.glsl.inl"
-	,
+	//#include "../../kernels-vk/level3/copy_matrix_impl.glsl.inl"
+	//	#include "../../kernels-vk/level3/copy_matrix_strided_batched.glsl.inl"
+	//,
 	
 	#include "../../kernels-vk/level3/level3.glsl.inl"
 	// 
 	#include "../../kernels-vk/level3/copy_pad_matrix_impl.glsl.inl"
-	#include "../../kernels-vk/level3/copy_pad_matrix_batched.glsl.inl"
+		#include "../../kernels-vk/level3/copy_pad_matrix.glsl.inl"
 	,
 	
-	#include "../../kernels-vk/level3/level3.glsl.inl"
+	//#include "../../kernels-vk/level3/level3.glsl.inl"
 	// 
-	#include "../../kernels-vk/level3/copy_pad_matrix_impl.glsl.inl"
-	#include "../../kernels-vk/level3/copy_pad_matrix_strided_batched.glsl.inl"
-	,
+	//#include "../../kernels-vk/level3/copy_pad_matrix_impl.glsl.inl"
+	//	#include "../../kernels-vk/level3/copy_pad_matrix_batched.glsl.inl"
+	//,
+	
+	//#include "../../kernels-vk/level3/level3.glsl.inl"
+	// 
+	//#include "../../kernels-vk/level3/copy_pad_matrix_impl.glsl.inl"
+	//	#include "../../kernels-vk/level3/copy_pad_matrix_strided_batched.glsl.inl"
+	//,
 	//ok...onto the next big thingy
 	#include "../../kernels-vk/level3/level3.glsl.inl"
 	// 
-	#include "../../kernels-vk/level3/transpose_fast.glsl.inl"
+		#include "../../kernels-vk/level3/transpose_fast.glsl.inl"
 	,
 	// wow this was a lot to translate, goodness...
 	#include "../../kernels-vk/level3/level3.glsl.inl"
 	// 
 	#include "../../kernels-vk/level3/transpose_matrix_impl.glsl.inl"
-	#include "../../kernels-vk/level3/transpose_matrix.glsl.inl"
+		#include "../../kernels-vk/level3/transpose_matrix.glsl.inl"
 	,
 	
-	#include "../../kernels-vk/level3/level3.glsl.inl"
+	//#include "../../kernels-vk/level3/level3.glsl.inl"
 	// 
-	#include "../../kernels-vk/level3/transpose_matrix_impl.glsl.inl"
-	#include "../../kernels-vk/level3/transpose_matrix_batched.glsl.inl"
-	,
+	//#include "../../kernels-vk/level3/transpose_matrix_impl.glsl.inl"
+	//	#include "../../kernels-vk/level3/transpose_matrix_batched.glsl.inl"
+	//,
 	
-	#include "../../kernels-vk/level3/level3.glsl.inl"
+	//#include "../../kernels-vk/level3/level3.glsl.inl"
 	// 
-	#include "../../kernels-vk/level3/transpose_matrix_impl.glsl.inl"
-	#include "../../kernels-vk/level3/transpose_matrix_strided_batched.glsl.inl"
-	,
-	
-	#include "../../kernels-vk/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk/level3/transpose_pad_matrix_impl.glsl.inl"
-	#include "../../kernels-vk/level3/transpose_pad_matrix.glsl.inl"
-	,
+	//#include "../../kernels-vk/level3/transpose_matrix_impl.glsl.inl"
+	//	#include "../../kernels-vk/level3/transpose_matrix_strided_batched.glsl.inl"
+	//,
 	
 	#include "../../kernels-vk/level3/level3.glsl.inl"
 	// 
 	#include "../../kernels-vk/level3/transpose_pad_matrix_impl.glsl.inl"
-	#include "../../kernels-vk/level3/transpose_pad_matrix_batched.glsl.inl"
+		#include "../../kernels-vk/level3/transpose_pad_matrix.glsl.inl"
 	,
 	
-	#include "../../kernels-vk/level3/level3.glsl.inl"
+	//#include "../../kernels-vk/level3/level3.glsl.inl"
 	// 
-	#include "../../kernels-vk/level3/transpose_pad_matrix_impl.glsl.inl"
-	#include "../../kernels-vk/level3/transpose_pad_matrix_strided_batched.glsl.inl"
-	,
+	//#include "../../kernels-vk/level3/transpose_pad_matrix_impl.glsl.inl"
+	//	#include "../../kernels-vk/level3/transpose_pad_matrix_batched.glsl.inl"
+	//,
 	
-#else
-	#include "../../kernels-vk/level3/level3.opencl"
-	// (comment to prevent auto-re-ordering)
-	#include "../../kernels-vk/level3/convert_hermitian.opencl"
-	#include "../../kernels-vk/level3/convert_symmetric.opencl"
-	#include "../../kernels-vk/level3/convert_triangular.opencl"
-	#include "../../kernels-vk/level3/copy_fast.opencl"
-	#include "../../kernels-vk/level3/copy_pad.opencl"
-	#include "../../kernels-vk/level3/transpose_fast.opencl"
-	#include "../../kernels-vk/level3/transpose_pad.opencl"
-						,	// separated in multiple parts to prevent C1091 in MSVC 2013
-	#include "../../kernels-vk/level3/xgemm_direct_part1.opencl"
-	#include "../../kernels-vk/level3/xgemm_direct_part2.opencl"
-	#include "../../kernels-vk/level3/xgemm_direct_part3.opencl"
-						,	// separated in multiple parts to prevent C1091 in MSVC 2013
-	#include "../../kernels-vk/level3/xgemm_part1.opencl"
-	#include "../../kernels-vk/level3/xgemm_part2.opencl"
-						,	// separated in multiple parts to prevent C1091 in MSVC 2013
-	#include "../../kernels-vk/level3/xgemm_part3.opencl"
-	#include "../../kernels-vk/level3/xgemm_part4.opencl"
-#endif
+	//#include "../../kernels-vk/level3/level3.glsl.inl"
+	// 
+	//#include "../../kernels-vk/level3/transpose_pad_matrix_impl.glsl.inl"
+	//	#include "../../kernels-vk/level3/transpose_pad_matrix_strided_batched.glsl.inl"
+	//,
+
+	// direct nn
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3/xgemm_direct_part1.glsl.inl"
+	#include "../../kernels-vk/level3/xgemm_direct_part2.glsl.inl"
+	#include "../../kernels-vk/level3/xgemm_direct_part3.glsl.inl"
+	#include "../../kernels-vk/level3/xgemm_direct_nn.glsl.inl"
+	,
+	// direct nt
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3/xgemm_direct_part1.glsl.inl"
+	#include "../../kernels-vk/level3/xgemm_direct_part2.glsl.inl"
+	#include "../../kernels-vk/level3/xgemm_direct_part3.glsl.inl"
+	#include "../../kernels-vk/level3/xgemm_direct_nt.glsl.inl"
+	,
+	// direct tn
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3/xgemm_direct_part1.glsl.inl"
+	#include "../../kernels-vk/level3/xgemm_direct_part2.glsl.inl"
+	#include "../../kernels-vk/level3/xgemm_direct_part3.glsl.inl"
+	#include "../../kernels-vk/level3/xgemm_direct_tn.glsl.inl"
+	,
+	// direct tt
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3/xgemm_direct_part1.glsl.inl"
+	#include "../../kernels-vk/level3/xgemm_direct_part2.glsl.inl"
+	#include "../../kernels-vk/level3/xgemm_direct_part3.glsl.inl"
+	#include "../../kernels-vk/level3/xgemm_direct_tt.glsl.inl"
+	,
+	// the final boss
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+
+	#include "../../kernels-vk/level3/xgemm_part1.glsl.inl"
+	#include "../../kernels-vk/level3/xgemm_part2.glsl.inl"
+	#include "../../kernels-vk/level3/xgemm_part3.glsl.inl"
+	#include "../../kernels-vk/level3/xgemm_part4_xgemm.glsl.inl"
 #else
 	#include "../../kernels/level3/level3.opencl"
 	// (comment to prevent auto-re-ordering)
@@ -186,7 +168,48 @@ Xgemm<T>::Xgemm(Queue& queue, EventPointer event, const std::string& name)
 	#include "../../kernels/level3/xgemm_part3.opencl"
 	#include "../../kernels/level3/xgemm_part4.opencl"
 #endif
-							}) {
+							}
+#if VULKAN_API
+	, true,
+	{	
+		"CopyMatrixFast",
+		"CopyMatrix",
+		//"CopyMatrixBatched",
+		//"CopyMatrixStridedBatched",
+		"CopyPadMatrix",
+		//"CopyPadMatrixBatched",
+		//"CopyPadMatrixStridedBatched",
+		
+		"TransposeMatrixFast",
+		"TransposeMatrix",
+		//"TransposeMatrixBatched",
+		//"TransposeMatrixStridedBatched",
+		"TransposePadMatrix",
+		//"TransposePadMatrixBatched",
+		//"TransposePadMatrixStridedBatched",
+		
+		"XgemmDirectNN",
+		"XgemmDirectNT",
+		"XgemmDirectTN",
+		"XgemmDirectTT",
+		
+		"Xgemm"
+	},
+	{
+		
+		
+		"Copy", "Pad", "Pad",
+		"Transpose", "Padtranspose", "Padtranspose",
+		
+		"XgemmDirect",
+		"XgemmDirect",
+		"XgemmDirect",
+		"XgemmDirect",
+		
+		"Xgemm"
+	}
+#endif
+				) {
 }
 
 // =================================================================================================
@@ -201,7 +224,7 @@ void Xgemm<T>::DoGemm(const Layout layout, const Transpose a_transpose, const Tr
 
 	// Two methods to choose from, select which one to run
 #if 1
-	const auto do_gemm_direct = true;
+	const auto do_gemm_direct = false;
 #else
 	const auto do_gemm_direct = UseDirectKernel(m, n, k, db_["XGEMM_MIN_INDIRECT_SIZE"]);
 #endif
@@ -283,8 +306,6 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	// when no temporary buffer is needed, but that's just to make it compile: it is never used.
 	const auto temp_buffer_all =
 			(temp_buffer_provided) ? temp_buffer : ((temp_size > 0) ? Buffer<T>(context_, temp_size) : a_buffer);
-	std::cout << "temp buffer provided: " << temp_buffer_provided
-		<< "\ntemp size: " << temp_size << std::endl;
 	// Verifies if the provided temporary buffer is large enough
 	if (temp_buffer_provided) {
 		const auto required_size = temp_size * sizeof(T);
@@ -307,7 +328,6 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	// case nothing has to be done, these kernels can be skipped.
 	if (!a_no_temp)
 	{
-		std::cout << "!a_no_temp is true" << std::endl;
 		auto eventProcessA = Event();
 		PadCopyTransposeMatrix(queue_, device_, db_, eventProcessA.pointer(), emptyEventList, a_one, a_two, a_ld, a_offset,
 													 a_buffer, a_one_i, a_two_i, a_one_i, 0, a_temp, ConstantOne<T>(), program_, true,
@@ -318,7 +338,6 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	// As above, but now for matrix B
 	if (!b_no_temp)
 	{
-		std::cout << "!b_no_temp is true" << std::endl;
 		auto eventProcessB = Event();
 		PadCopyTransposeMatrix(queue_, device_, db_, eventProcessB.pointer(), emptyEventList, b_one, b_two, b_ld, b_offset,
 													 b_buffer, b_one_i, b_two_i, b_one_i, b_temp_offset, b_temp, ConstantOne<T>(), program_, true,
@@ -329,7 +348,6 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	// As above, but now for matrix C. This is only necessary if C is used both as input and output.
 	if (!c_no_temp && beta != static_cast<T>(0))
 	{
-		std::cout << "c is i/o" << std::endl;
 		auto eventProcessC = Event();
 		PadCopyTransposeMatrix(queue_, device_, db_, eventProcessC.pointer(), emptyEventList, c_one, c_two, c_ld, c_offset,
 													 c_buffer, c_one_i, c_two_i, c_one_i, c_temp_offset, c_temp, ConstantOne<T>(), program_, true,
@@ -363,7 +381,6 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 
 	// Runs the post-processing kernel if needed
 	if (!c_no_temp) {
-		std::cout << "!c_no_temp is true" << std::endl;
 		eventWaitList.push_back(eventKernel);
 		PadCopyTransposeMatrix(queue_, device_, db_, event_, eventWaitList, c_one_i, c_two_i, c_one_i, c_temp_offset,
 													 c_temp, c_one, c_two, c_ld, c_offset, c_buffer, ConstantOne<T>(), program_, false,
@@ -403,6 +420,12 @@ void Xgemm<T>::GemmDirect(const size_t m, const size_t n, const size_t k, const 
 	kernel.SetArgument(14, static_cast<int>(c_do_transpose));
 	kernel.SetArgument(15, static_cast<int>(a_conjugate));
 	kernel.SetArgument(16, static_cast<int>(b_conjugate));
+	
+#if VULKAN_API
+	// provide the same buffers twice to get around GLSL's lack of pointer casting
+	kernel.SetArgument(17, a_buffer());
+	kernel.SetArgument(18, b_buffer());
+#endif
 
 	// Computes the global and local thread sizes
 	const auto m_ceiled = Ceil(m, db_["WGD"]);

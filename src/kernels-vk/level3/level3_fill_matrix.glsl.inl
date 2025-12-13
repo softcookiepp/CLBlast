@@ -1,4 +1,3 @@
-
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -69,7 +68,6 @@ R"(
 #endif
 
 // =================================================================================================
-#if defined(ROUTINE_INVERT) || defined(ROUTINE_TRSM)
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) writeonly buffer dest_buf { real dest[]; };
@@ -95,7 +93,6 @@ void main()
 	}
 }
 
-#endif
 
 // =================================================================================================
 

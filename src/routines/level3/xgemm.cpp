@@ -41,17 +41,17 @@ Xgemm<T>::Xgemm(Queue& queue, EventPointer event, const std::string& name)
 		#include "../../kernels-vk/level3/copy_matrix.glsl.inl"
 	,
 	
-	//#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3/level3.glsl.inl"
 	// 
-	//#include "../../kernels-vk/level3/copy_matrix_impl.glsl.inl"
-	//	#include "../../kernels-vk/level3/copy_matrix_batched.glsl.inl"
-	//,
+	#include "../../kernels-vk/level3/copy_matrix_batched_impl.glsl.inl"
+	#include "../../kernels-vk/level3/copy_matrix_batched.glsl.inl"
+	,
 	
-	//#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3/level3.glsl.inl"
 	// 
-	//#include "../../kernels-vk/level3/copy_matrix_impl.glsl.inl"
-	//	#include "../../kernels-vk/level3/copy_matrix_strided_batched.glsl.inl"
-	//,
+	#include "../../kernels-vk/level3/copy_matrix_impl.glsl.inl"
+	#include "../../kernels-vk/level3/copy_matrix_strided_batched.glsl.inl"
+	,
 	
 	#include "../../kernels-vk/level3/level3.glsl.inl"
 	// 
@@ -59,17 +59,17 @@ Xgemm<T>::Xgemm(Queue& queue, EventPointer event, const std::string& name)
 		#include "../../kernels-vk/level3/copy_pad_matrix.glsl.inl"
 	,
 	
-	//#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3/level3.glsl.inl"
 	// 
-	//#include "../../kernels-vk/level3/copy_pad_matrix_impl.glsl.inl"
-	//	#include "../../kernels-vk/level3/copy_pad_matrix_batched.glsl.inl"
-	//,
+	#include "../../kernels-vk/level3/copy_pad_matrix_batched_impl.glsl.inl"
+	#include "../../kernels-vk/level3/copy_pad_matrix_batched.glsl.inl"
+	,
 	
-	//#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3/level3.glsl.inl"
 	// 
-	//#include "../../kernels-vk/level3/copy_pad_matrix_impl.glsl.inl"
-	//	#include "../../kernels-vk/level3/copy_pad_matrix_strided_batched.glsl.inl"
-	//,
+	#include "../../kernels-vk/level3/copy_pad_matrix_impl.glsl.inl"
+	#include "../../kernels-vk/level3/copy_pad_matrix_strided_batched.glsl.inl"
+	,
 	//ok...onto the next big thingy
 	#include "../../kernels-vk/level3/level3.glsl.inl"
 	// 
@@ -82,17 +82,17 @@ Xgemm<T>::Xgemm(Queue& queue, EventPointer event, const std::string& name)
 		#include "../../kernels-vk/level3/transpose_matrix.glsl.inl"
 	,
 	
-	//#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3/level3.glsl.inl"
 	// 
-	//#include "../../kernels-vk/level3/transpose_matrix_impl.glsl.inl"
-	//	#include "../../kernels-vk/level3/transpose_matrix_batched.glsl.inl"
-	//,
+	#include "../../kernels-vk/level3/transpose_matrix_batched_impl.glsl.inl"
+	#include "../../kernels-vk/level3/transpose_matrix_batched.glsl.inl"
+	,
 	
-	//#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3/level3.glsl.inl"
 	// 
-	//#include "../../kernels-vk/level3/transpose_matrix_impl.glsl.inl"
-	//	#include "../../kernels-vk/level3/transpose_matrix_strided_batched.glsl.inl"
-	//,
+	#include "../../kernels-vk/level3/transpose_matrix_impl.glsl.inl"
+	#include "../../kernels-vk/level3/transpose_matrix_strided_batched.glsl.inl"
+	,
 	
 	#include "../../kernels-vk/level3/level3.glsl.inl"
 	// 
@@ -100,17 +100,17 @@ Xgemm<T>::Xgemm(Queue& queue, EventPointer event, const std::string& name)
 		#include "../../kernels-vk/level3/transpose_pad_matrix.glsl.inl"
 	,
 	
-	//#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3/level3.glsl.inl"
 	// 
-	//#include "../../kernels-vk/level3/transpose_pad_matrix_impl.glsl.inl"
-	//	#include "../../kernels-vk/level3/transpose_pad_matrix_batched.glsl.inl"
-	//,
+	#include "../../kernels-vk/level3/transpose_pad_matrix_batched_impl.glsl.inl"
+	#include "../../kernels-vk/level3/transpose_pad_matrix_batched.glsl.inl"
+	,
 	
-	//#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3/level3.glsl.inl"
 	// 
-	//#include "../../kernels-vk/level3/transpose_pad_matrix_impl.glsl.inl"
-	//	#include "../../kernels-vk/level3/transpose_pad_matrix_strided_batched.glsl.inl"
-	//,
+	#include "../../kernels-vk/level3/transpose_pad_matrix_impl.glsl.inl"
+	#include "../../kernels-vk/level3/transpose_pad_matrix_strided_batched.glsl.inl"
+	,
 
 	// direct nn
 	#include "../../kernels-vk/level3/level3.glsl.inl"
@@ -142,11 +142,31 @@ Xgemm<T>::Xgemm(Queue& queue, EventPointer event, const std::string& name)
 	,
 	// the final boss
 	#include "../../kernels-vk/level3/level3.glsl.inl"
-
 	#include "../../kernels-vk/level3/xgemm_part1.glsl.inl"
 	#include "../../kernels-vk/level3/xgemm_part2.glsl.inl"
 	#include "../../kernels-vk/level3/xgemm_part3.glsl.inl"
 	#include "../../kernels-vk/level3/xgemm_part4_xgemm.glsl.inl"
+	,
+	// oh yeah, forgot to add these too
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3/convert_hermitian_lower.glsl.inl"
+	,
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3/convert_hermitian_upper.glsl.inl"
+	,
+	// and these
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3/convert_symmetric_lower.glsl.inl"
+	,
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3/convert_symmetric_upper.glsl.inl"
+	,
+	// and these
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3/convert_triangular_lower.glsl.inl"
+	,
+	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk/level3/convert_triangular_upper.glsl.inl"
 #else
 	#include "../../kernels/level3/level3.opencl"
 	// (comment to prevent auto-re-ordering)
@@ -174,39 +194,57 @@ Xgemm<T>::Xgemm(Queue& queue, EventPointer event, const std::string& name)
 	{	
 		"CopyMatrixFast",
 		"CopyMatrix",
-		//"CopyMatrixBatched",
-		//"CopyMatrixStridedBatched",
+		"CopyMatrixBatched",
+		"CopyMatrixStridedBatched",
 		"CopyPadMatrix",
-		//"CopyPadMatrixBatched",
-		//"CopyPadMatrixStridedBatched",
+		"CopyPadMatrixBatched",
+		"CopyPadMatrixStridedBatched",
 		
 		"TransposeMatrixFast",
 		"TransposeMatrix",
-		//"TransposeMatrixBatched",
-		//"TransposeMatrixStridedBatched",
+		"TransposeMatrixBatched",
+		"TransposeMatrixStridedBatched",
 		"TransposePadMatrix",
-		//"TransposePadMatrixBatched",
-		//"TransposePadMatrixStridedBatched",
+		"TransposePadMatrixBatched",
+		"TransposePadMatrixStridedBatched",
 		
 		"XgemmDirectNN",
 		"XgemmDirectNT",
 		"XgemmDirectTN",
 		"XgemmDirectTT",
 		
-		"Xgemm"
+		"Xgemm",
+		
+		"HermLowerToSquared",
+		"HermUpperToSquared",
+		
+		"SymmLowerToSquared",
+		"SymmUpperToSquared",
+		
+		"TriaLowerToSquared",
+		"TriaUpperToSquared"
 	},
 	{
 		
 		
-		"Copy", "Pad", "Pad",
-		"Transpose", "Padtranspose", "Padtranspose",
+		"Copy", "Pad", "Pad", "Pad", "Pad", "Pad", "Pad",
+		"Transpose", "Padtranspose", "Padtranspose","Padtranspose", "Padtranspose","Padtranspose", "Padtranspose",
 		
 		"XgemmDirect",
 		"XgemmDirect",
 		"XgemmDirect",
 		"XgemmDirect",
 		
-		"Xgemm"
+		"Xgemm",
+		
+		"GemmRoutine",
+		"GemmRoutine",
+		
+		"GemmRoutine",
+		"GemmRoutine",
+		
+		"GemmRoutine",
+		"GemmRoutine"
 	}
 #endif
 				) {

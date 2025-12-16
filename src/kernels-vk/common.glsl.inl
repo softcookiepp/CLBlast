@@ -258,7 +258,7 @@ R"(
 
 // The complex conjugate operation for complex transforms
 #if PRECISION == 3232 || PRECISION == 6464
-	#define COMPLEX_CONJUGATE(value) value = real(value.x, (-1.0*value.y))
+	#define COMPLEX_CONJUGATE(value) value.x = value.x; value.y = -value.y
 #else
 	#define COMPLEX_CONJUGATE(value) 
 #endif

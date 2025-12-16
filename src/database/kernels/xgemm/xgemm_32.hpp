@@ -12,7 +12,6 @@ namespace database {
 
 const DatabaseEntry XgemmSingle = {
   "Xgemm", Precision::kSingle, {"GEMMK", "KREG", "KWG", "KWI", "MDIMA", "MDIMC", "MWG", "NDIMB", "NDIMC", "NWG", "SA", "SB", "STRM", "STRN", "VWM", "VWN"}, {
-#if 0
     { // AMD GPUs
       kDeviceTypeGPU, "AMD", {
         { "Ellesmere", {
@@ -355,7 +354,6 @@ const DatabaseEntry XgemmSingle = {
         } },
       }
     },
-#endif
     { // Default
       kDeviceTypeAll, "default", {
         { "default", {

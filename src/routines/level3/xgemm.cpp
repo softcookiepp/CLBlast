@@ -237,14 +237,14 @@ Xgemm<T>::Xgemm(Queue& queue, EventPointer event, const std::string& name)
 		
 		"Xgemm",
 		
-		"GemmRoutine",
-		"GemmRoutine",
+		"Pad",
+		"Pad",
 		
-		"GemmRoutine",
-		"GemmRoutine",
+		"Pad",
+		"Pad",
 		
-		"GemmRoutine",
-		"GemmRoutine"
+		"Pad",
+		"Pad"
 	}
 #endif
 				) {

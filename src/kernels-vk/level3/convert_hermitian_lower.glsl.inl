@@ -13,11 +13,8 @@
 R"(
 
 // =================================================================================================
-#ifndef ROUTINE_HEMM
-	#define ROUTINE_HEMM
-#endif
-#if defined(ROUTINE_HEMM)
-#if PRECISION == 3232 || PRECISION == 6464
+
+#if 1
 
 // Kernel to populate a squared hermitian matrix, given that the triangle which holds the data is
 // stored as the lower-triangle of the input matrix. This uses the padding kernel's parameters.
@@ -46,6 +43,7 @@ layout(push_constant) uniform HermLowerToSquared
 
 void main()
 {
+#if PRECISION == 3232 || PRECISION == 6464
 	// Loops over the work per thread in both dimensions
 	//#pragma unroll
 	for (int _w_one = 0; _w_one < PAD_WPTX; _w_one += 1) {
@@ -74,9 +72,8 @@ void main()
 			}
 		}
 	}
-}
-
 #endif
+}
 #endif
 // =================================================================================================
 

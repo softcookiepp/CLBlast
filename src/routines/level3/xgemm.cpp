@@ -223,11 +223,7 @@ void Xgemm<T>::DoGemm(const Layout layout, const Transpose a_transpose, const Tr
 											const Buffer<T>& temp_buffer, const bool temp_buffer_provided) {	// optional arguments
 
 	// Two methods to choose from, select which one to run
-#if 1
-	const auto do_gemm_direct = false;
-#else
 	const auto do_gemm_direct = UseDirectKernel(m, n, k, db_["XGEMM_MIN_INDIRECT_SIZE"]);
-#endif
 	const auto gemm_kernel_id = (do_gemm_direct) ? 0 : db_["GEMMK"];
 
 	// Computes the transpose/conjugate options and sets the a/b/c sizes based on that

@@ -14,10 +14,11 @@ R"(
 // global and shared memory declarations go here, since they are shared across all kernels c:
 // *gm and *gms both bind to the same underlying memory
 layout(binding = 0) buffer agm_buf { realMD agm[]; };
-layout(binding = 1) buffer agms_buf { real agms[]; };
-layout(binding = 2) buffer bgm_buf { realND bgm[]; };
-layout(binding = 3) buffer bgms_buf { real bgms[]; };
-layout(binding = 4) buffer cgm_buf { real cgm[]; };
+layout(binding = 1) buffer bgm_buf { realND bgm[]; };
+layout(binding = 2) buffer cgm_buf { real cgm[]; };
+
+layout(binding = 3) buffer agms_buf { real agms[]; };
+layout(binding = 4) buffer bgms_buf { real bgms[]; };
 
 shared real alm[WGD * (WGD + PADA)];
 shared real blm[WGD * (WGD + PADB)];

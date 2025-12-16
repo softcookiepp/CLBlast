@@ -111,7 +111,7 @@ Xgemm<T>::Xgemm(Queue& queue, EventPointer event, const std::string& name)
 	#include "../../kernels-vk/level3/transpose_pad_matrix_impl.glsl.inl"
 	#include "../../kernels-vk/level3/transpose_pad_matrix_strided_batched.glsl.inl"
 	,
-
+	// END OF THE COPY PAD TRANSPOSE ROUTINES
 	// direct nn
 	#include "../../kernels-vk/level3/level3.glsl.inl"
 	#include "../../kernels-vk/level3/xgemm_direct_part1.glsl.inl"

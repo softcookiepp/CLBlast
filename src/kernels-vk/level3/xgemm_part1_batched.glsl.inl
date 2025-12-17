@@ -1,5 +1,3 @@
-#include "../common.glsl"
-#include "level3.glsl"
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //   Cedric Nugteren <www.cedricnugteren.nl>
@@ -36,9 +34,8 @@
 //
 // =================================================================================================
 
-// Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
-//R"(
+R"(
 
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library.
@@ -218,12 +215,15 @@ INLINE_FUNC realM InitAccRegisters() {
 
 // buffer definitions (to avoid having to use macros everywhere like usual)
 #if USE_BDA == 0
-	layout(binding = 0, std430) buffer agm_buf { realM agm[]; };
-	layout(binding = 1, std430) buffer bgm_buf { realN bgm[]; };
-	layout(binding = 2, std430) buffer cgm_buf { realM cgm[]; };
+	layout(binding = 0, std430) buffer arg_alphas_buf { real_arg arg_alphas[]; };
+	layout(binding = 1, std430) buffer arg_betas_buf { real_arg arg_betas[]; };
+	layout(binding = 2, std430) buffer agm_buf { realM agm[]; };
+	layout(binding = 3, std430) buffer bgm_buf { realN bgm[]; };
+	layout(binding = 4, std430) buffer cgm_buf { realM cgm[]; };
+	
 	#if GEMMK == 1
-		layout(binding = 3, std430) buffer agms_buf { real a_ptr[]; };
-		layout(binding = 4, std430) buffer bgms_buf { real b_ptr[]; };
+		layout(binding = 5, std430) buffer agms_buf { real a_ptr[]; };
+		layout(binding = 6, std430) buffer bgms_buf { real b_ptr[]; };
 	#endif
 #endif
 
@@ -562,5 +562,5 @@ realN LocalToPrivateB(
 #endif
 
 // End of the C++11 raw string literal
-//)"
+)"
 // =================================================================================================

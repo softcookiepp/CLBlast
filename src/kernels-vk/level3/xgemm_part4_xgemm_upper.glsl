@@ -46,7 +46,7 @@ void main()
 #if USE_BDA
 		agm, bgm, cgm,
 #else
-		0, 0,
+		0, 0, 0,
 #endif
 		alpha, beta);
 }

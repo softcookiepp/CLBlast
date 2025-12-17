@@ -1,4 +1,4 @@
-#include "xgemm_part2.glsl"
+
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -57,7 +57,7 @@ void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
 	const __global realM* restrict agm, const __global realN* restrict bgm,
 	__global realM* cgm,
 #else
-	int b_offset, int c_offset,
+	int a_offset, int b_offset, int c_offset,
 #endif
 	const real alpha, const real beta)
 {
@@ -88,6 +88,7 @@ void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
 		const __global real* restrict b_ptr = (const __global real* restrict) &bgm[0];
 #else
 		// use for scalar bgms
+		int a_ptr_offset = a_offset*VWM;
 		int b_ptr_offset = b_offset*VWN;
 #endif
 		const int tid_x = get_local_id(0) + MDIMC * GetGroupID0();
@@ -116,6 +117,8 @@ void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
 			GlobalToLocalA(
 #if USE_BDA
 				agm,
+#else
+				a_offset,
 #endif
 				//alm,
 				kSizeM, tid, kwg);
@@ -158,6 +161,8 @@ void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
 						apm[_mi] = GlobalToPrivateA(
 #if USE_BDA
 							agm,
+#else
+							a_offset,
 #endif
 							_mi, kSizeM, idk, kwg);
 					// Loads data: 2D global --> 2D private (matrix B)
@@ -203,6 +208,8 @@ void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
 							apm[_ki] = GlobalToPrivateA2D(
 #if USE_BDA
 								a_ptr,
+#else
+								a_ptr_offset,
 #endif
 								tid_y, _ni, kSizeK, idk, _ki);
 						}
@@ -215,6 +222,8 @@ void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
 								apm[_ni * (KREG/VWN) + _ki] = GlobalToPrivateA2D(
 #if USE_BDA
 									a_ptr,
+#else
+									a_ptr_offset,
 #endif
 									tid_y, _ni, kSizeK, idk, _ki);
 							}

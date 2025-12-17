@@ -240,6 +240,8 @@ INLINE_FUNC realM InitAccRegisters() {
 void GlobalToLocalA(
 #if USE_BDA
 	const __global realM* restrict agm,
+#else
+	int a_offset,
 #endif
 	//LOCAL_PTR realM* alm,
 	const int kSizeM, const int tid, const int kwg)
@@ -264,7 +266,7 @@ void GlobalToLocalA(
 			int idk = kg + kwg;
 
 			// Loads the data from global memory (not transposed) into the local memory
-			alm[kg*(MWG/VWM) + mg] = agm[idk*(kSizeM/VWM) + idm];
+			alm[kg*(MWG/VWM) + mg] = agm[idk*(kSizeM/VWM) + idm + a_offset];
 		}
 	}
 }
@@ -315,6 +317,8 @@ void GlobalToLocalB(
 realM GlobalToPrivateA(
 #if USE_BDA
 	const __global realM* restrict agm,
+#else
+	int a_offset,
 #endif
 	const int _mi, const int kSizeM, const int idk, const int kwg)
 {
@@ -329,7 +333,7 @@ realM GlobalToPrivateA(
 	int idm = mg + GetGroupID0() * (MWG/VWM);
 
 	// Loads the data from global memory (not transposed) and stores into registers
-	return agm[idk*(kSizeM/VWM) + idm];
+	return agm[idk*(kSizeM/VWM) + idm + a_offset];
 }
 #endif
 
@@ -366,6 +370,8 @@ realN GlobalToPrivateB(
 realN GlobalToPrivateA2D(
 #if USE_BDA
 	const __global real* restrict a_ptr,
+#else
+	int a_ptr_offset,
 #endif
 	const int tid_y, const int _ni, const int kSizeK, const int idk, const int _ki)
 {
@@ -377,7 +383,7 @@ realN GlobalToPrivateA2D(
 		// ok yeah, this is probably not going to work quite the way I thought it would...
 		return agm[a_index];
 	#else
-		const int a_index = (tid_y * NWI + _ni) * kSizeK + idk + _ki * VWN;
+		const int a_index = (tid_y * NWI + _ni) * kSizeK + idk + _ki * VWN + a_ptr_offset;
 		#if VWN == 1
 			return a_ptr[a_index];
 		#elif VWN == 2

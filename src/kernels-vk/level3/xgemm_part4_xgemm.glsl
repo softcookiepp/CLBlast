@@ -49,7 +49,7 @@ void main()
 #if USE_BDA
 		agm, bgm, cgm,
 #else
-		args.b_offset, args.c_offset,
+		0, args.b_offset, args.c_offset,
 #endif
 		alpha, beta
 	);

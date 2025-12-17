@@ -500,11 +500,6 @@ void XgemmBatched<T>::BatchedGemmIndirect(
 	kernel.SetArgument(11, c_temp());
 	kernel.SetArgument(12, static_cast<int>(c_one_i));
 	kernel.SetArgument(13, static_cast<int>(c_two_i));
-	
-#if VULKAN_API
-	//kernel.SetArgument(14, a_temp());
-	//kernel.SetArgument(15, b_temp());
-#endif
 
 	// Computes the global and local thread sizes
 	const auto global =
@@ -573,7 +568,7 @@ void XgemmBatched<T>::BatchedGemmDirect(const size_t m, const size_t n, const si
 	kernel.SetArgument(17, a_buffer());
 	kernel.SetArgument(18, b_buffer());
 #endif
-	std::cout << "\nKernel: " << name << "\n\n";
+
 	// Computes the global and local thread sizes
 	const auto m_ceiled = Ceil(m, db_["WGD"]);
 	const auto n_ceiled = Ceil(n, db_["WGD"]);

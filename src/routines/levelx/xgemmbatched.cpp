@@ -31,7 +31,6 @@ XgemmBatched<T>::XgemmBatched(Queue& queue, EventPointer event, const std::strin
 							PrecisionValue<T>(), {},
 							{
 #if VULKAN_API
-#if 1
 	#include "../../kernels-vk/level3/level3.glsl.inl"
 	// 
 		#include "../../kernels-vk/level3/copy_fast.glsl.inl"
@@ -218,28 +217,6 @@ XgemmBatched<T>::XgemmBatched(Queue& queue, EventPointer event, const std::strin
 	#include "../../kernels-vk/level3/xgemm_direct_part2.glsl.inl"
 	#include "../../kernels-vk/level3/xgemm_direct_part3_strided_batched.glsl.inl"
 	#include "../../kernels-vk/level3/xgemm_direct_strided_batched_tt.glsl.inl"
-	
-#else
-	#include "../../kernels-vk/level3/level3.opencl"
-	// (comment to prevent auto-re-ordering)
-	#include "../../kernels-vk/level3/copy_fast.opencl"
-	#include "../../kernels-vk/level3/copy_pad.opencl"
-	#include "../../kernels-vk/level3/transpose_fast.opencl"
-	#include "../../kernels-vk/level3/transpose_pad.opencl"
-						,	// separated in multiple parts to prevent C1091 in MSVC 2013
-	#include "../../kernels-vk/level3/xgemm_direct_part1.opencl"
-	#include "../../kernels-vk/level3/xgemm_direct_part2.opencl"
-	#include "../../kernels-vk/level3/xgemm_direct_part3.opencl"
-						,	// separated in multiple parts to prevent C1091 in MSVC 2013
-	#include "../../kernels-vk/level3/xgemm_part1.opencl"
-	#include "../../kernels-vk/level3/xgemm_part2.opencl"
-						,	// separated in multiple parts to prevent C1091 in MSVC 2013
-	#include "../../kernels-vk/level3/xgemm_part3.opencl"
-	#include "../../kernels-vk/level3/xgemm_part4.opencl"
-						,	// separated in multiple parts to prevent C1091 in MSVC 2013
-	#include "../../kernels-vk/level3/xgemm_batched.opencl"
-	#include "../../kernels-vk/level3/xgemm_direct_batched.opencl"
-#endif
 #else
 	#include "../../kernels/level3/level3.opencl"
 	// (comment to prevent auto-re-ordering)
@@ -299,30 +276,6 @@ XgemmBatched<T>::XgemmBatched(Queue& queue, EventPointer event, const std::strin
 		"XgemmDirectStridedBatchedNT",
 		"XgemmDirectStridedBatchedTN",
 		"XgemmDirectStridedBatchedTT"
-	},
-	{
-		"Copy", "Pad", "Pad", "Pad", "Pad", "Pad", "Pad",
-		"Transpose", "Padtranspose", "Padtranspose","Padtranspose", "Padtranspose","Padtranspose", "Padtranspose",
-		
-		"XgemmDirect",
-		"XgemmDirect",
-		"XgemmDirect",
-		"XgemmDirect",
-		
-		"Xgemm",
-		
-		"Xgemm",
-		"Xgemm",
-		
-		"XgemmDirect",
-		"XgemmDirect",
-		"XgemmDirect",
-		"XgemmDirect",
-		"XgemmDirect",
-		"XgemmDirect",
-		"XgemmDirect",
-		"XgemmDirect"
-		
 	}
 #endif
 							) {

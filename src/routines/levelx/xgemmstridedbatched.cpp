@@ -299,30 +299,6 @@ XgemmStridedBatched<T>::XgemmStridedBatched(Queue& queue, EventPointer event, co
 		"XgemmDirectStridedBatchedNT",
 		"XgemmDirectStridedBatchedTN",
 		"XgemmDirectStridedBatchedTT"
-	},
-	{
-		"Copy", "Pad", "Pad", "Pad", "Pad", "Pad", "Pad",
-		"Transpose", "Padtranspose", "Padtranspose","Padtranspose", "Padtranspose","Padtranspose", "Padtranspose",
-		
-		"XgemmDirect",
-		"XgemmDirect",
-		"XgemmDirect",
-		"XgemmDirect",
-		
-		"Xgemm",
-		
-		"Xgemm",
-		"Xgemm",
-		
-		"XgemmDirect",
-		"XgemmDirect",
-		"XgemmDirect",
-		"XgemmDirect",
-		"XgemmDirect",
-		"XgemmDirect",
-		"XgemmDirect",
-		"XgemmDirect"
-		
 	}
 #endif
 		

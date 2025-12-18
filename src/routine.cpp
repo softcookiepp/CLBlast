@@ -74,7 +74,7 @@ Routine::Routine(Queue& queue, EventPointer event, const std::string& name,
 			device_(queue_.GetDevice()),
 			db_(kernel_names)
 #if VULKAN_API
-			, mIsGLSL(isGLSL), mEntryPointNames(entryPointNames), mDefineKeys(defineKeys)
+			, mIsGLSL(isGLSL), mEntryPointNames(entryPointNames)//, mDefineKeys(defineKeys)
 #endif
 {
 	InitDatabase(device_, kernel_names, precision, userDatabase, db_);
@@ -155,6 +155,7 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 		if (mEntryPointNames.size() == 0) kernelNames = kernel_names_;
 
 		std::vector<std::string> defines;
+#if 0
 		if (mDefineKeys.size() > 0)
 		{
 			if (mDefineKeys.size() != mEntryPointNames.size())
@@ -175,21 +176,36 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 			throw std::invalid_argument("length of kernel name list must be same size as source list!");
 		}
 		else
+#endif
 		{
+#if 1
+			// one define set per kernel name...
+			for (auto& kn : kernel_names_)
+			{
+				defines.push_back(db_(kn).GetDefines());
+			}
+#else
 			// one define set per kernel name...
 			for (size_t i = 0; i < source.size(); i += 1)
 			{
 				defines.push_back(db_(kernel_names_[i]).GetDefines());
 			}
+#endif
 		}
 
 		// create a map of kernel names and sources
 		std::map<std::string, std::string> kernelSources;
 		std::vector<std::string> preSources;
 		for (auto& str : source) preSources.push_back(str);
+		std::string allDefines;
+		for (auto& str : defines) allDefines += (str + "\n");
 		for (size_t i = 0; i < source.size(); i += 1)
 		{
+#if 1
+			kernelSources.emplace(kernelNames[i], allDefines+preSources[i]);
+#else
 			kernelSources.emplace(kernelNames[i], defines[i]+preSources[i]);
+#endif
 		}
 		std::string dummy("");
 

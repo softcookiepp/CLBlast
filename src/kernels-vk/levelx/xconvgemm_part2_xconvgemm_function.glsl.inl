@@ -1,4 +1,3 @@
-
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -10,12 +9,29 @@
 //
 // =================================================================================================
 
-// Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
-//R"(
+R"(
 
 // =================================================================================================
-#if defined(ROUTINE_CONVGEMM)
+
+// buffer and local memory delcarations; they are the same for both flipped and normal
+#if USE_BDA == 0
+	layout(binding = 0, std430) buffer kernelgm_buffer { realND kernelgm[]; };
+	layout(binding = 1, std430) buffer resultgm_buffer { real resultgm[]; };
+	//layout(binding = 2, std430) buffer imagegm_buffer { realMD imagegm[]; };
+	layout(binding = 2, std430) buffer imagegms_buffer { real imagegms[]; };
+	// workaround for no pointer casting
+	layout(binding = 3, std430) buffer kernelgms_buffer { real kernelgms[]; };
+	
+#endif
+
+shared real alm[WGD * (WGD + PADA)];
+shared real blm[WGD * (WGD + PADB)];
+
+// also workgroup is the same
+#if RELAX_WORKGROUP_SIZE == 0
+	layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
+#endif
 
 // ConvGEMM
 void Xconvgemm(const int num_patches, const int num_kernels, const int patch_size,
@@ -240,7 +256,7 @@ void Xconvgemm(const int num_patches, const int num_kernels, const int patch_siz
 	}
 }
 
-#if !defined(CONVGEMM_WITH_IM2COL)
+#if 0
 #if RELAX_WORKGROUP_SIZE == 1
 	__kernel
 #else
@@ -291,13 +307,12 @@ void XconvgemmNormal(const int num_patches, const int num_kernels, const int pat
 						output_h, output_w, alm, blm, kernel_flip);
 }
 
-#endif	// !defined(CONVGEMM_WITH_IM2COL)
+#endif
 
-#endif	// defined(ROUTINE_CONVGEMM)
 
 // =================================================================================================
 
 // End of the C++11 raw string literal
-//)"
+)"
 
 // =================================================================================================

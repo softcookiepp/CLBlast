@@ -10,55 +10,71 @@
 //
 // =================================================================================================
 
-// Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
-//R"(
+R"(
 
 // =================================================================================================
 #if defined(ROUTINE_CONVGEMM)
 
-// ConvGEMM
+// ConvGEMM kernel
+#if defined(CONVGEMM_WITH_IM2COL)
+#if RELAX_WORKGROUP_SIZE == 0
+	layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
+#endif
+void Xconvgemm(const int num_patches, const int num_kernels, const int patch_size,
+							 const __global realND* restrict kernelgm, const int kernel_offset,
+							 __global real* resultgm, const int result_offset, const int result_stride,
+							 const __global realMD* restrict colgm, const int col_offset, const int col_stride)
+#else
 void Xconvgemm(const int num_patches, const int num_kernels, const int patch_size,
 #if USE_BDA
 	const __global realND* restrict kernelgm,
 #endif
 	const int kernel_offset,
-#if USE_BDA
-	__global real* resultgm,
-#endif
-	const int result_offset, const int result_stride,
-#if USE_BDA
-	const __global realMD* restrict imagegm,
-#endif
-	const int image_offset,
+	__global real* resultgm, const int result_offset, const int result_stride,
+	const __global realMD* restrict imagegm, const int image_offset,
 	const int input_h, const int input_w, const int channels,
 	const int kernel_h, const int kernel_w,
 	const int pad_h, const int pad_w,
 	const int stride_h, const int stride_w,
 	const int dilation_h, const int dilation_w,
 	const int output_h, const int output_w,
-	//LOCAL_PTR real* alm, LOCAL_PTR real* blm,
+	LOCAL_PTR real* alm, LOCAL_PTR real* blm,
 	const bool kernel_flip)
+#endif
 {
-
 	// Batch offsets
 	const int batch = get_group_id(2);
-	const int image_offset_batch = image_offset + channels * input_h * input_w * batch;
+	#if defined(CONVGEMM_WITH_IM2COL)
+		const int col_offset_batch = col_offset + col_stride * batch;
+	#else
+		const int image_offset_batch = image_offset + channels * input_h * input_w * batch;
+	#endif
 	const int result_offset_batch = result_offset + result_stride * batch;
 
-
-	// Extra pointers to scalar versions of global memory
-#if USE_BDA
-	const __global real* restrict imagegms = (const __global real* restrict) imagegm;
-	const __global real* restrict kernelgms = (const __global real* restrict) kernelgm;
+#if defined(CONVGEMM_WITH_IM2COL)
+	__local real alm[WGD * (WGD + PADA)];
+	__local real blm[WGD * (WGD + PADB)];
 #endif
 
+	// Extra pointers to scalar versions of global memory
+	#if defined(CONVGEMM_WITH_IM2COL)
+		const __global real* restrict colgms = (const __global real* restrict) colgm;
+	#else
+		const __global real* restrict imagegms = (const __global real* restrict) imagegm;
+	#endif
+	const __global real* restrict kernelgms = (const __global real* restrict) kernelgm;
+
 	// Allocates workitem-private memory (registers)
+	
 	real apd[MWID];
+	
 	real bpd[NWID];
+	
 	real cpd[NWID * MWID];
 
 	// Initializes the accumulation registers
+	
 	for (int _mi = 0; _mi < MWID; _mi += 1) {
 		
 		for (int _ni = 0; _ni < NWID; _ni += 1) {
@@ -69,8 +85,10 @@ void Xconvgemm(const int num_patches, const int num_kernels, const int patch_siz
 	// Global m/n indices
 	const int idm = get_local_id(0) * MWID + GetGroupID0() * WGD;
 	const int idn = get_local_id(1) * NWID + GetGroupID1() * WGD;
-	const int w_id = idm % output_w;
-	const int h_id = idm / output_w;
+	#if !defined(CONVGEMM_WITH_IM2COL)
+		const int w_id = idm % output_w;
+		const int h_id = idm / output_w;
+	#endif
 
 	// The faster version of GEMM is not allowed on the (incomplete) borders. Therefore, this section
 	// processes only the main parts: output blocks of WGD by WGD.
@@ -81,10 +99,19 @@ void Xconvgemm(const int num_patches, const int num_kernels, const int patch_siz
 		for (; kwg < (patch_size/WGD) * WGD; kwg += WGD) {
 
 			// Loads data: off-chip --> local (matrix A and B)
-			GlobalToLocalCheckedImage(imagegms, alm, image_offset_batch, output_w, kwg,
-																input_h, input_w, channels, kernel_h, kernel_w,
-																pad_h, pad_w, stride_h, stride_w,
-																dilation_h, dilation_w, kernel_flip);
+			#if defined(CONVGEMM_WITH_IM2COL)
+				if (num_patches % VWMD == 0 && col_offset_batch % VWMD == 0) {
+					GlobalToLocalDirectA(colgm, alm, num_patches, col_offset_batch, kwg, false, false);
+				}
+				else {
+					GlobalToLocalScalarA(colgms, alm, num_patches, col_offset_batch, kwg, false, false);
+				}
+			#else
+				GlobalToLocalCheckedImage(imagegms, alm, image_offset_batch, output_w, kwg,
+																	input_h, input_w, channels, kernel_h, kernel_w,
+																	pad_h, pad_w, stride_h, stride_w,
+																	dilation_h, dilation_w, kernel_flip);
+			#endif
 			if (patch_size % VWND == 0 && kernel_offset % VWND == 0) {
 				GlobalToLocalDirectB(kernelgm, blm, patch_size, kernel_offset, kwg, true, false);
 			}
@@ -102,11 +129,11 @@ void Xconvgemm(const int num_patches, const int num_kernels, const int patch_siz
 					// Loads data: local --> private (matrix A and B)
 					
 					for (int _mi = 0; _mi < MWID; _mi += 1) {
-						LocalToPrivateDirectA(apd[_mi], alm, _mi, kg, false);
+						apd[_mi] = LocalToPrivateDirectA(alm, _mi, kg, false);
 					}
 					
 					for (int _ni = 0; _ni < NWID; _ni += 1) {
-						LocalToPrivateDirectB(bpd[_ni], blm, _ni, kg, true);
+						bpd[_ni] = LocalToPrivateDirectB(blm, _ni, kg, true);
 					}
 
 					// Performs the accumulation (Cpmd += Apmd * Bpmd)
@@ -128,16 +155,20 @@ void Xconvgemm(const int num_patches, const int num_kernels, const int patch_siz
 			// Loads data: off-chip --> private (matrix A and B)
 			
 			for (int _mi = 0; _mi < MWID; _mi += 1) {
-				const int w_id = (idm + _mi) % output_w;
-				const int h_id = (idm + _mi) / output_w;
-				GlobalToPrivateCheckedImage(apd[_mi], imagegms, image_offset_batch, h_id, w_id, kwg,
-					input_h, input_w, channels, kernel_h, kernel_w,
-					pad_h, pad_w, stride_h, stride_w,
-					dilation_h, dilation_w, kernel_flip);
+				#if defined(CONVGEMM_WITH_IM2COL)
+					apd[_mi] = GlobalToPrivateDirectA(colgms, _mi, num_patches, col_offset_batch, idm, kwg, false, false);
+				#else
+					const int w_id = (idm + _mi) % output_w;
+					const int h_id = (idm + _mi) / output_w;
+					apd[_mi] = GlobalToPrivateCheckedImage(imagegms, image_offset_batch, h_id, w_id, kwg,
+																								 input_h, input_w, channels, kernel_h, kernel_w,
+																								 pad_h, pad_w, stride_h, stride_w,
+																								 dilation_h, dilation_w, kernel_flip);
+				#endif
 			}
 			
 			for (int _ni = 0; _ni < NWID; _ni += 1) {
-				GlobalToPrivateDirectB(bpd[_ni], kernelgms, _ni, patch_size, kernel_offset, idn, kwg, true, false);
+				bpd[_ni] = GlobalToPrivateDirectB(kernelgms, _ni, patch_size, kernel_offset, idn, kwg, true, false);
 			}
 
 			// Performs the accumulation (Cpmd += Apmd * Bpmd)
@@ -168,10 +199,14 @@ void Xconvgemm(const int num_patches, const int num_kernels, const int patch_siz
 		for (; kwg < (patch_size/WGD) * WGD; kwg+=WGD) {
 
 			// Loads data: off-chip --> local
-			GlobalToLocalCheckedImage(imagegms, alm, image_offset_batch, output_w, kwg,
-																input_h, input_w, channels, kernel_h, kernel_w,
-																pad_h, pad_w, stride_h, stride_w,
-																dilation_h, dilation_w, kernel_flip);
+			#if defined(CONVGEMM_WITH_IM2COL)
+				GlobalToLocalCheckedA(colgms, alm, num_patches, col_offset_batch, kwg, false, false, num_patches, patch_size);
+			#else
+				GlobalToLocalCheckedImage(imagegms, alm, image_offset_batch, output_w, kwg,
+																	input_h, input_w, channels, kernel_h, kernel_w,
+																	pad_h, pad_w, stride_h, stride_w,
+																	dilation_h, dilation_w, kernel_flip);
+			#endif
 			GlobalToLocalCheckedB(kernelgms, blm, patch_size, kernel_offset, kwg, true, false, num_kernels, patch_size);
 			barrier();
 
@@ -184,15 +219,17 @@ void Xconvgemm(const int num_patches, const int num_kernels, const int patch_siz
 					// Loads data: local --> private
 					
 					for (int _mi = 0; _mi < MWID; _mi += 1) {
-						LocalToPrivateDirectA(apd[_mi], alm, _mi, kg, false);
+						apd[_mi] = LocalToPrivateDirectA(alm, _mi, kg, false);
 					}
 					
 					for (int _ni = 0; _ni < NWID; _ni += 1) {
-						LocalToPrivateDirectB(bpd[_ni], blm, _ni, kg, true);
+						bpd[_ni] = LocalToPrivateDirectB(blm, _ni, kg, true);
 					}
 
 					// Performs the accumulation (C += A * B)
+					
 					for (int _ni = 0; _ni < NWID; _ni += 1) {
+						
 						for (int _mi = 0; _mi < MWID; _mi += 1) {
 							MultiplyAdd(cpd[_ni * MWID + _mi], apd[_mi], bpd[_ni]);
 						}
@@ -208,19 +245,24 @@ void Xconvgemm(const int num_patches, const int num_kernels, const int patch_siz
 			// Loads data: off-chip --> private
 			
 			for (int _mi = 0; _mi < MWID; _mi += 1) {
+			#if defined(CONVGEMM_WITH_IM2COL)
+				apd[_mi] = GlobalToPrivateCheckedA(colgms, _mi, num_patches, col_offset_batch, idm, kwg, false, false, num_patches);
+			#else
 				const int w_id = (idm + _mi) % output_w;
 				const int h_id = (idm + _mi) / output_w;
-				GlobalToPrivateCheckedImage(apd[_mi], imagegms, image_offset_batch, h_id, w_id, kwg,
+				apd[_mi] = GlobalToPrivateCheckedImage(imagegms, image_offset_batch, h_id, w_id, kwg,
 																							 input_h, input_w, channels, kernel_h, kernel_w,
 																							 pad_h, pad_w, stride_h, stride_w,
 																							 dilation_h, dilation_w, kernel_flip);
+			#endif
 			}
 			
 			for (int _ni = 0; _ni < NWID; _ni += 1) {
-				GlobalToPrivateCheckedB(bpd[_ni], kernelgms, _ni, patch_size, kernel_offset, idn, kwg, true, false, num_kernels);
+				bpd[_ni] = GlobalToPrivateCheckedB(kernelgms, _ni, patch_size, kernel_offset, idn, kwg, true, false, num_kernels);
 			}
 
 			// Performs the accumulation (C += A * B)
+			
 			for (int _ni = 0; _ni < NWID; _ni += 1) {
 				
 				for (int _mi = 0; _mi < MWID; _mi += 1) {
@@ -230,6 +272,7 @@ void Xconvgemm(const int num_patches, const int num_kernels, const int patch_siz
 		}
 
 		// Stores a tile of results
+		
 		for (int _ni = 0; _ni < NWID; _ni += 1) {
 			
 			for (int _mi = 0; _mi < MWID; _mi += 1) {
@@ -298,6 +341,6 @@ void XconvgemmNormal(const int num_patches, const int num_kernels, const int pat
 // =================================================================================================
 
 // End of the C++11 raw string literal
-//)"
+)"
 
 // =================================================================================================

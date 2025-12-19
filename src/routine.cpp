@@ -148,8 +148,6 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 #if VULKAN_API
 	if (mIsGLSL)
 	{
-		std::cout << routine_info << std::endl;
-		
 		// the kernel names *must* have the same order as the underlying compute shaders they represent
 		std::vector<std::string>& kernelNames = mEntryPointNames;
 		if (mEntryPointNames.size() == 0) kernelNames = kernel_names_;
@@ -202,6 +200,8 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 		for (size_t i = 0; i < source.size(); i += 1)
 		{
 #if 1
+			if (kernelNames.size() == i) throw std::runtime_error("not enough kernel names!");
+			if (preSources.size() == i) throw std::runtime_error("not enough presources!");
 			kernelSources.emplace(kernelNames[i], allDefines+preSources[i]);
 #else
 			kernelSources.emplace(kernelNames[i], defines[i]+preSources[i]);

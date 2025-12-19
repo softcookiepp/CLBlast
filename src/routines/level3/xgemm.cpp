@@ -223,28 +223,6 @@ Xgemm<T>::Xgemm(Queue& queue, EventPointer event, const std::string& name)
 		
 		"TriaLowerToSquared",
 		"TriaUpperToSquared"
-	},
-	{
-		
-		
-		"Copy", "Pad", "Pad", "Pad", "Pad", "Pad", "Pad",
-		"Transpose", "Padtranspose", "Padtranspose","Padtranspose", "Padtranspose","Padtranspose", "Padtranspose",
-		
-		"XgemmDirect",
-		"XgemmDirect",
-		"XgemmDirect",
-		"XgemmDirect",
-		
-		"Xgemm",
-		
-		"Pad",
-		"Pad",
-		
-		"Pad",
-		"Pad",
-		
-		"Pad",
-		"Pad"
 	}
 #endif
 				) {

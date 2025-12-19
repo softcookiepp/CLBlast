@@ -55,12 +55,6 @@ Xgemv<T>::Xgemv(Queue& queue, EventPointer event, const std::string& name)
 		"trsv_forward",
 		"trsv_backward",
 		"FillVector"
-	},
-	{
-		"Xgemv", "XgemvFast", "XgemvFastRot",
-		"TrsvRoutine",
-		"TrsvRoutine",
-		"TrsvRoutine"
 	}
 #endif
 	)

@@ -172,12 +172,6 @@ Xherk<T, U>::Xherk(Queue& queue, EventPointer event, const std::string& name)
 		
 		"XgemmLower",
 		"XgemmUpper"
-	},
-	{
-		"Copy", "Pad", "Pad", "Pad", "Pad", "Pad", "Pad",
-		"Transpose", "Padtranspose", "Padtranspose","Padtranspose", "Padtranspose","Padtranspose", "Padtranspose",
-		"Xgemm",
-		"Xgemm"
 	}
 #endif
 	  ) {

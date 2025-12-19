@@ -116,10 +116,7 @@ Xomatcopy<T>::Xomatcopy(Queue& queue, EventPointer event, const std::string& nam
 							}
 #if VULKAN_API
 	, true, {"CopyMatrixFast", "CopyPadMatrix", "CopyPadMatrixBatched", "CopyPadMatrixStridedBatched", "CopyMatrix", "CopyMatrixBatched", "CopyMatrixStridedBatched",
-			"TransposeMatrixFast", "TransposePadMatrix", "TransposePadMatrixBatched", "TransposePadMatrixStridedBatched", "TransposeMatrix", "TransposeMatrixBatched", "TransposeMatrixStridedBatched"},
-		
-			{"Copy", "Pad", "Pad", "Pad", "Pad", "Pad", "Pad",
-				"Transpose", "Padtranspose", "Padtranspose", "Padtranspose", "Padtranspose", "Padtranspose", "Padtranspose"}
+			"TransposeMatrixFast", "TransposePadMatrix", "TransposePadMatrixBatched", "TransposePadMatrixStridedBatched", "TransposeMatrix", "TransposeMatrixBatched", "TransposeMatrixStridedBatched"}
 #endif
 	) {
 }

@@ -33,6 +33,8 @@ Xconvgemm<T>::Xconvgemm(Queue& queue, EventPointer event, const std::string& nam
               {
                   (method == ConvGemmMethod::kWithIm2Col) ? "#define CONVGEMM_WITH_IM2COL\n" : "",
 #if VULKAN_API
+#if 0
+#else
 	#include "../../kernels-vk/level3/level3.opencl"
                   ,  // separated in multiple parts to prevent C1091 in MSVC 2013
 	#include "../../kernels-vk/level3/xgemm_direct_part1.opencl"
@@ -41,6 +43,7 @@ Xconvgemm<T>::Xconvgemm(Queue& queue, EventPointer event, const std::string& nam
 					  ,  // separated in multiple parts to prevent C1091 in MSVC 2013
 	#include "../../kernels-vk/levelx/xconvgemm_part1.opencl"
 	#include "../../kernels-vk/levelx/xconvgemm_part2.opencl"
+#endif
 #else
 	#include "../../kernels/level3/level3.opencl"
 					  ,  // separated in multiple parts to prevent C1091 in MSVC 2013

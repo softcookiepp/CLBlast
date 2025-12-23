@@ -752,17 +752,14 @@ private:
 // =================================================================================================
 
 #if 1
-typedef std::pair<std::string, tart::cl_program_ptr> kernel_t;
+typedef std::pair<std::string, tart::program_ptr> kernel_t;
 
 // ahh, right. I remember how it works now
 // C++11 version of 'kernel_t'
 class Kernel {
 	std::string mEntryPoint;
-#if 1
 	std::shared_ptr<tart::Program> mProgramContainer = nullptr;
-#else
-	tart::cl_program_ptr mCLProgram = nullptr;
-#endif
+	tart::kernel_ptr mKernel = nullptr;
 	tart::device_ptr mDevice;
 	// arguments
 	kernel_t kernel_;
@@ -771,7 +768,7 @@ class Kernel {
 public:
 	// difference between Vulkan and OpenCL as far as local sizes go will influence this outcome greatly...
 	explicit Kernel(const kernel_t kernel) { kernel_ = kernel; }
-	explicit Kernel(tart::cl_program_ptr kernel) { kernel_ = {"none", kernel}; }
+	explicit Kernel(tart::program_ptr prg) { std::string ep = "none"; kernel_ = {ep, prg}; }
 	
 	// Regular constructor with memory management
 	explicit Kernel(const std::shared_ptr<Program> program, const std::string& name)
@@ -782,15 +779,17 @@ public:
 		// but a fixed local size is used.
 		// tart::CLProgram takes care of this, but it must be adapted to this library
 		mEntryPoint = name;
-#if 1
 		mProgramContainer = program->operator()();
 		mDevice = mProgramContainer->getDevice();
-#else
-		mCLProgram = program->operator()();
-		mDevice = mCLProgram->getDevice();
-#endif
+		mKernel = mProgramContainer->getKernel(mEntryPoint);
 	}
-	
+#if 1
+	// Sets a kernel argument at the indicated position
+	template <typename T>
+	void SetArgument(const size_t index, const T& value) {
+		mKernel->setArg(index, value);
+	}
+#else
 	void SetArgument(const size_t index, tart::buffer_ptr value) {
 		mBufferArgs[index] = value;
 	}
@@ -807,6 +806,7 @@ public:
 		std::memcpy(value_cast.data(), &value, sizeof(T));
 		mNonBufferArgs[index] = value_cast;
 	}
+#endif
 
 	// Sets all arguments in one go using parameter packs. Note that this overwrites previously set
 	// arguments using 'SetArgument' or 'SetArguments'.
@@ -866,7 +866,9 @@ public:
 		{
 			local32[i] = local[i];
 		}
-		
+#if 1
+		mKernel->enqueue(adjusted_global, local32);
+#else
 		tart::pipeline_ptr pipeline = mProgramContainer->getPipeline(mEntryPoint, local32);
 		
 		// parse push constants
@@ -897,6 +899,7 @@ public:
 		
 		// send it!
 		mDevice->submitSequence(sequence);
+#endif
 	}
 
 	// Accessor to the private data-member

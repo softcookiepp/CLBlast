@@ -763,8 +763,6 @@ class Kernel {
 	tart::device_ptr mDevice;
 	// arguments
 	kernel_t kernel_;
-	std::map<size_t, std::vector<uint8_t>> mNonBufferArgs;
-	std::map<size_t, tart::buffer_ptr> mBufferArgs;
 public:
 	// difference between Vulkan and OpenCL as far as local sizes go will influence this outcome greatly...
 	explicit Kernel(const kernel_t kernel) { kernel_ = kernel; }
@@ -783,30 +781,12 @@ public:
 		mDevice = mProgramContainer->getDevice();
 		mKernel = mProgramContainer->getKernel(mEntryPoint);
 	}
-#if 1
+
 	// Sets a kernel argument at the indicated position
 	template <typename T>
 	void SetArgument(const size_t index, const T& value) {
 		mKernel->setArg(index, value);
 	}
-#else
-	void SetArgument(const size_t index, tart::buffer_ptr value) {
-		mBufferArgs[index] = value;
-	}
-
-	// Sets a kernel argument at the indicated position
-	template <typename T>
-	void SetArgument(const size_t index, const T& value) {
-		// hmmm....how do we do this?
-		// It may require better SPIR-V reflection capability...
-		// or will it?
-		// i got some tricks up me sleeve!
-		// we will just cast it to bytes. easy.
-		std::vector<uint8_t> value_cast(sizeof(T));
-		std::memcpy(value_cast.data(), &value, sizeof(T));
-		mNonBufferArgs[index] = value_cast;
-	}
-#endif
 
 	// Sets all arguments in one go using parameter packs. Note that this overwrites previously set
 	// arguments using 'SetArgument' or 'SetArguments'.
@@ -866,40 +846,7 @@ public:
 		{
 			local32[i] = local[i];
 		}
-#if 1
 		mKernel->enqueue(adjusted_global, local32);
-#else
-		tart::pipeline_ptr pipeline = mProgramContainer->getPipeline(mEntryPoint, local32);
-		
-		// parse push constants
-		std::vector<uint8_t> push;
-		size_t pushConstIdx = 0;
-		for (auto& kv : mNonBufferArgs)
-		{
-			// copy the push constant to the block at the correct offset
-			size_t offset = pipeline->getPushConstantOffset(pushConstIdx);
-			push.resize(offset + kv.second.size(), 0);
-			
-			for (size_t i = 0; i < kv.second.size(); i += 1)
-			{
-				push[i + offset] = kv.second[i];
-			}
-			pushConstIdx += 1;
-		}
-		
-		// add buffer args
-		std::vector<tart::buffer_ptr> bufs;
-		for (auto& kv : mBufferArgs)
-		{
-			bufs.push_back(kv.second);
-		}
-		
-		tart::command_sequence_ptr sequence = mDevice->createSequence();
-		sequence->recordPipeline(pipeline, adjusted_global, bufs, push);
-		
-		// send it!
-		mDevice->submitSequence(sequence);
-#endif
 	}
 
 	// Accessor to the private data-member

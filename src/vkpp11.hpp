@@ -468,62 +468,11 @@ public:
 using ContextPointer = tart::device_ptr;
 // =================================================================================================
 
-// class for bundling both tart::CLProgram and multi-pipeline GLSL modules into the same object for easy sharing
-class ProgramContainerThingy
-{
-	tart::device_ref mDevice;
-	bool mIsGLSL = false;
-	tart::cl_program_ptr mCLProgram = nullptr;
-	std::map<std::string, tart::shader_module_ptr> mShaderModules;
-public:
-	ProgramContainerThingy(tart::device_ptr device, tart::cl_program_ptr clProgram):
-		mDevice(device)
-	{
-		mIsGLSL = false;
-		mCLProgram = clProgram;
-	}
-	ProgramContainerThingy(tart::device_ptr device, std::map<std::string, tart::shader_module_ptr>& shaderModules):
-		mDevice(device),
-		mIsGLSL(true),
-		mShaderModules(shaderModules)
-	{
-	}
-	
-	ProgramContainerThingy(tart::device_ptr device, std::map<std::string, std::string>& shaderSources):
-		mDevice(device),
-		mIsGLSL(true)
-	{
-		for (auto& pair : shaderSources)
-		{
-			mShaderModules[pair.first] = device->compileGLSL(pair.second);
-		}
-	}
-	
-	tart::device_ptr getDevice() { return mDevice.lock(); }
-	
-	tart::pipeline_ptr getPipeline(std::string& entryPoint, std::vector<uint32_t>& localSize, std::vector<uint8_t> push = {})
-	{
-		if (!mIsGLSL && mCLProgram)
-			return mCLProgram->getPipeline(entryPoint, localSize, push);
-		
-		localSize.resize(3, 1);
-		std::vector<uint8_t> spec;
-		if (mShaderModules[entryPoint]->getEntryPointData("main").specConstEntries.size() > 0)
-		{
-			spec.resize(localSize.size()*sizeof(uint32_t));
-			std::memcpy(spec.data(), localSize.data(), spec.size());
-		}
-		//std::cout << "fetching pipeline for kernel: " << entryPoint << std::endl;
-		return mDevice.lock()->createPipeline(mShaderModules[entryPoint], "main", spec, push);
-		//throw std::runtime_error("getPipeline not implemented");
-	}
-};
-
 // C++11 version of 'cl_program'.
 class Program {
 	std::string mSource;
 	tart::device_ptr mDevice = nullptr;
-	std::shared_ptr<ProgramContainerThingy> mProgramContainer = nullptr;
+	std::shared_ptr<tart::Program> mProgramContainer = nullptr;
 	tart::shader_module_ptr mShaderModule = nullptr;
 	//tart::cl_program_ptr mCLProgram = nullptr;
 public:
@@ -539,7 +488,7 @@ public:
 	explicit Program(const clblast::Context& context, std::map<std::string, std::string>& kernelSources):
 		mDevice(context.pointer())
 	{
-		mProgramContainer = std::make_shared<ProgramContainerThingy>(context.pointer(), kernelSources);
+		mProgramContainer = std::make_shared<tart::Program>(context.pointer(), kernelSources);
 	}
 
 	// Binary-based constructor with memory management
@@ -567,7 +516,7 @@ public:
 		// compile the shader module
 		mShaderModule = mDevice->compileCL(mSource);
 		// load it into the actual CL program handler thingy
-		mProgramContainer = std::make_shared<ProgramContainerThingy>(mDevice, mDevice->createCLProgram(mShaderModule));
+		mProgramContainer = std::make_shared<tart::Program>(mDevice, mDevice->createCLProgram(mShaderModule));
 		//mCLProgram = mDevice->createCLProgram(mShaderModule);
 	}
 
@@ -586,7 +535,7 @@ public:
 	}
 
 	// Accessor to the private data-member
-	std::shared_ptr<ProgramContainerThingy> operator()() const { return mProgramContainer; }
+	std::shared_ptr<tart::Program> operator()() const { return mProgramContainer; }
 };
 #endif
 
@@ -810,7 +759,7 @@ typedef std::pair<std::string, tart::cl_program_ptr> kernel_t;
 class Kernel {
 	std::string mEntryPoint;
 #if 1
-	std::shared_ptr<ProgramContainerThingy> mProgramContainer = nullptr;
+	std::shared_ptr<tart::Program> mProgramContainer = nullptr;
 #else
 	tart::cl_program_ptr mCLProgram = nullptr;
 #endif

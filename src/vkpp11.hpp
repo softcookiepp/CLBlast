@@ -114,23 +114,13 @@ public:
 	// Regular constructor with memory management
 	explicit Event()
 	{
-		// ok, we are actually going to want to change this
-		// the problem is that 
-		mEvent = std::make_shared<tart::Event>(nullptr);
+		mEvent = std::make_shared<tart::Event>();
 	}
 
 	// Waits for completion of this event
 	void WaitForCompletion() const
 	{
-#if 1
-		// not going to bother with this now
-		//sequence->getDevice()->sync();
-#else
-		if (mEvent == nullptr)
-			throw LogicError("Sequence cannot be null!");
-		auto sequence = mEvent->getSequence();
-		sequence->getDevice()->sync({sequence});
-#endif
+		if (mEvent && mEvent->isActive()) mEvent->sync();
 	}
 
 	// Retrieves the elapsed time of the last recorded event.
@@ -511,12 +501,12 @@ public:
 	void Build(const clblast::Device& device, std::vector<std::string>& options) {
 		// if program container already here, don't bother
 		if (mProgramContainer) return;
-		
+		throw std::runtime_error("who knows lool");
 		// TODO: parse options (look for dflags, etc.)
 		// compile the shader module
-		mShaderModule = mDevice->compileCL(mSource);
+		// mShaderModule = mDevice->compileCL(mSource);
 		// load it into the actual CL program handler thingy
-		mProgramContainer = std::make_shared<tart::Program>(mDevice, mDevice->createCLProgram(mShaderModule));
+		// mProgramContainer = std::make_shared<tart::Program>(mDevice, mDevice->createCLProgram(mShaderModule));
 		//mCLProgram = mDevice->createCLProgram(mShaderModule);
 	}
 
@@ -827,11 +817,6 @@ public:
 	void Launch(const Queue& queue, const std::vector<size_t>& global, const std::vector<size_t>& local,
 							EventPointer event, const std::vector<Event>& waitForEvents)
 	{
-		std::vector<tart::command_sequence_ptr> waitlist(waitForEvents.size());
-
-		// TODO: implement event waiting
-		queue.Finish();
-
 		if (global.size() != local.size() ) throw LogicError("local and global size must be same length");
 		std::vector<uint32_t> adjusted_global(global.size());
 		for (size_t i = 0; i < global.size(); i += 1 )
@@ -846,7 +831,15 @@ public:
 		{
 			local32[i] = local[i];
 		}
-		mKernel->enqueue(adjusted_global, local32);
+		// ensure size is correct
+		local32.resize(mKernel->getSpecConstantSize()/sizeof(uint32_t));
+		
+		std::vector<tart::event_ptr> wait(waitForEvents.size(), nullptr);
+		for (size_t i = 0; i < waitForEvents.size(); i += 1)
+		{
+			wait[i] = waitForEvents[i].pointer();
+		}
+		mKernel->enqueue(adjusted_global, local32, wait, event);
 	}
 
 	// Accessor to the private data-member

@@ -141,6 +141,7 @@ void main()
 				tile[_kl*VW3 + 2][lid] = avec.z;
 				tile[_kl*VW3 + 3][lid] = avec.w;
 			#elif VW3 == 8
+				//tile[_kl*VW3 + 0][lid] = avec[0][0];
 				tile[_kl*VW3 + 0][lid] = avec[0][0];
 				tile[_kl*VW3 + 1][lid] = avec[0][1];
 				tile[_kl*VW3 + 2][lid] = avec[0][2];

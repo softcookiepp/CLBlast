@@ -71,17 +71,22 @@
 // Complex single-precision
 #elif PRECISION == 3232
 	#define real vec2
-	struct cfloat2 {real x; real y;};
+	//struct cfloat2 {real x; real y;};
+	struct cfloat2 { real s[2]; };
 	#define real2 cfloat2
-	struct cfloat4 {real x; real y; real z; real w;};
+	// struct cfloat4 {real x; real y; real z; real w;};
+	struct cfloat4 { real s[4]; };
 	#define real4 cfloat4
-	struct cfloat8 {real s0; real s1; real s2; real s3;
-		real s4; real s5; real s6; real s7;};
+	//struct cfloat8 {real s0; real s1; real s2; real s3;
+	//	real s4; real s5; real s6; real s7;};
+	struct cfloat8 { real s[8]; };
 	#define real8 cfloat8
-	struct cfloat16 {real s0; real s1; real s2; real s3;
-													 real s4; real s5; real s6; real s7;
-													 real s8; real s9; real sA; real sB;
-													 real sC; real sD; real sE; real sF;};
+	//struct cfloat16 {real s0; real s1; real s2; real s3;
+	//												 real s4; real s5; real s6; real s7;
+	//												 real s8; real s9; real sA; real sB;
+	//												 real sC; real sD; real sE; real sF;};
+	struct cfloat16 { real s[16]; };
+	
 	#define real16 cfloat16
 	#define ZERO 0.0f
 	#define ONE 1.0f
@@ -105,6 +110,31 @@
 	#define ZERO 0.0
 	#define ONE 1.0
 	#define SMALLEST -1.0e37
+#endif
+
+#if PRECISION == 32  || PRECISION == 64 || PRECISION == 16
+	// can use standard vectors and matrices for this stuff
+	uvec2 get_matrix_indices(uint idx, uint width) { uint b = idx % width; return uvec2( (idx - b)/width, b); }
+	real get_velem(real2 vec, uint idx) { return vec[idx]; }
+	real get_velem(real4 vec, uint idx) { return vec[idx]; }
+	real get_velem(real8 vec, uint idx) { uvec2 idxs = get_matrix_indices(idx, 4); return vec[idxs.x][idxs.y]; }
+	real get_velem(real16 vec, uint idx) { uvec2 idxs = get_matrix_indices(idx, 4); return vec[idxs.x][idxs.y]; }
+	
+	real2 set_velem(real2 vec, real value, uint idx) { vec[idx] = value; return vec; }
+	real4 set_velem(real4 vec, real value, uint idx) { vec[idx] = value; return vec; }
+	real8 set_velem(real8 vec, real value, uint idx) { uvec2 idxs = get_matrix_indices(idx, 4); vec[idxs.x][idxs.y] = value; return vec; }
+	real16 set_velem(real16 vec, real value, uint idx) { uvec2 idxs = get_matrix_indices(idx, 4); vec[idxs.x][idxs.y] = value; return vec; }
+#else
+	// getting vector elements becomes a bit more complex (hur hur hur)
+	real get_velem(real2 vec, uint idx) { return vec.s[idx]; }
+	real get_velem(real4 vec, uint idx) { return vec.s[idx]; }
+	real get_velem(real8 vec, uint idx) { return vec.s[idx]; }
+	real get_velem(real16 vec, uint idx) { return vec.s[idx]; }
+	
+	real2 set_velem(real2 vec, real value, uint idx) { vec.s[idx] = value; return vec; }
+	real4 set_velem(real4 vec, real value, uint idx) { vec.s[idx] = value; return vec; }
+	real8 set_velem(real8 vec, real value, uint idx) { vec.s[idx] = value; return vec; }
+	real16 set_velem(real16 vec, real value, uint idx) { vec.s[idx] = value; return vec; }
 #endif
 
 // Single-element version of a complex number

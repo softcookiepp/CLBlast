@@ -20,7 +20,7 @@ realV MultiplyVectorVector(realV cvec, const realV aval, const realV bvec) {
 	#if VW == 1
 		Multiply(cvec, aval, bvec);
 	#else
-		vsMultiply(cvec, aval, bvec, VW);
+		vMultiply(cvec, aval, bvec, VW);
 	#endif
 	return cvec;
 }

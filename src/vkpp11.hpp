@@ -160,12 +160,14 @@ using RawPlatformID = size_t;
 
 // Vulkan doesn't have any direct equivalent to this, just use it to encapsulate device..or maybe instance?
 class Platform {
+	std::shared_ptr<tart::Instance> mInstance = nullptr;
 public:
 	// Initializes the platform
 	explicit Platform(const size_t platform_id)
 	{
 		// there can only be one, this is Vulkan c:
 		if (platform_id != 0) throw LogicError("Vulkan back-end requires a platform ID of 0");
+		mInstance = std::make_shared<tart::Instance>();
 	}
 
 	// Methods to retrieve platform information
@@ -178,16 +180,21 @@ public:
 	}
 	std::string Vendor() const { return "not implemented"; }
 	std::string Version() const { return "not implemented"; }
+	
+	// returns the tart::Instance
+	tart::Instance& getInstance() const
+	{
+		return *mInstance;
+	}
 
 	// Returns the number of devices on this platform
 	size_t NumDevices()
 	{
-		return static_cast<size_t>(tart::init().getNumDevices());
+		return static_cast<size_t>(getInstance().getNumDevices());
 	}
 
 	// Accessor to the private data-member
 	const RawPlatformID& operator()() const { return platform_; }
-	tart::Instance& getInstance() { return tart::init(); }
 
 private:
 	size_t platform_ = 0;
@@ -237,7 +244,7 @@ public:
 	// Initialize the device. Note that this constructor can throw exceptions!
 	explicit Device(const Platform& platform, const size_t device_id) {
 		// Use the global instance by default (this will mostly just be used for testing afaik)
-		mDevice = tart::init().createDevice(device_id);
+		mDevice = platform.getInstance().getDevice(device_id);
 	}
 
 	// Methods to retrieve device information

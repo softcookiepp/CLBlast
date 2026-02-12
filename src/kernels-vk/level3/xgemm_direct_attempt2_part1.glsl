@@ -163,7 +163,7 @@ real GlobalToPrivateCheckedA(const __global real* restrict agms, const int _mi,
 
 // Caches on-chip local memory into per-thread private memory (registers). This function is specific
 // for caching the A input matrix.
- real LocalToPrivateDirectA(LOCAL_PTR real* alm, const int _mi, const int kg,
+ real LocalToPrivateDirectA(shared real* alm, const int _mi, const int kg,
 																			 const int a_transpose) {
 	const int mg = _mi + get_local_id(0)*MWID;
 	const int index = (a_transpose) ? mg*(WGD + PADA) + kg : kg*(WGD + PADA) + mg;
@@ -171,7 +171,7 @@ real GlobalToPrivateCheckedA(const __global real* restrict agms, const int _mi,
 }
 
 // Same as above, but now for the B input matrix
- real LocalToPrivateDirectB(LOCAL_PTR real* blm, const int _ni, const int kg,
+ real LocalToPrivateDirectB(shared real* blm, const int _ni, const int kg,
 																			 const int b_transpose) {
 	const int ng = _ni + get_local_id(1)*NWID;
 	const int index = (b_transpose) ? ng*(WGD + PADB) + kg : kg*(WGD + PADB) + ng;

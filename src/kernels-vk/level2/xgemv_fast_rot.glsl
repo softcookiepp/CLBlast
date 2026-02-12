@@ -132,41 +132,10 @@ void main()
 			realVFR avec = agm[(args.a_ld/VW3) * y + x];
 			#if VW3 == 1
 				tile[_kl*VW3 + 0][lid] = avec;
-			#elif VW3 == 2
-				tile[_kl*VW3 + 0][lid] = avec.x;
-				tile[_kl*VW3 + 1][lid] = avec.y;
-			#elif VW3 == 4
-				tile[_kl*VW3 + 0][lid] = avec.x;
-				tile[_kl*VW3 + 1][lid] = avec.y;
-				tile[_kl*VW3 + 2][lid] = avec.z;
-				tile[_kl*VW3 + 3][lid] = avec.w;
-			#elif VW3 == 8
-				//tile[_kl*VW3 + 0][lid] = avec[0][0];
-				tile[_kl*VW3 + 0][lid] = avec[0][0];
-				tile[_kl*VW3 + 1][lid] = avec[0][1];
-				tile[_kl*VW3 + 2][lid] = avec[0][2];
-				tile[_kl*VW3 + 3][lid] = avec[0][3];
-				tile[_kl*VW3 + 4][lid] = avec[1][0];
-				tile[_kl*VW3 + 5][lid] = avec[1][1];
-				tile[_kl*VW3 + 6][lid] = avec[1][2];
-				tile[_kl*VW3 + 7][lid] = avec[1][3];
-			#elif VW3 == 16
-				tile[_kl*VW3 + 0][lid] = avec[0][0];
-				tile[_kl*VW3 + 1][lid] = avec[0][1];
-				tile[_kl*VW3 + 2][lid] = avec[0][2];
-				tile[_kl*VW3 + 3][lid] = avec[0][3];
-				tile[_kl*VW3 + 4][lid] = avec[1][0];
-				tile[_kl*VW3 + 5][lid] = avec[1][1];
-				tile[_kl*VW3 + 6][lid] = avec[1][2];
-				tile[_kl*VW3 + 7][lid] = avec[1][3];
-				tile[_kl*VW3 + 8][lid] = avec[2][0];
-				tile[_kl*VW3 + 9][lid] = avec[2][1];
-				tile[_kl*VW3 + 10][lid] = avec[2][2];
-				tile[_kl*VW3 + 11][lid] = avec[2][3];
-				tile[_kl*VW3 + 12][lid] = avec[3][0];
-				tile[_kl*VW3 + 13][lid] = avec[3][1];
-				tile[_kl*VW3 + 14][lid] = avec[3][2];
-				tile[_kl*VW3 + 15][lid] = avec[3][3];
+			#else
+				UNROLL(VW3)
+				for (uint iv = 0; iv < VW3; iv += 1)
+					tile[_kl*VW3 + iv][lid] = avec.s[iv];
 			#endif
 			barrier();
 		}
@@ -175,9 +144,9 @@ void main()
 		barrier();
 
 		// The multiply-add function (rotated)
-		
+		UNROLL(WPT3/VW3)
 		for (int _kl = 0; _kl < WPT3/VW3; _kl += 1) {
-			
+			UNROLL(VW3)
 			for (int _v = 0; _v < VW3; _v += 1) {
 				real aval = tile[lid_mod*VW3 + _v][lid_div * (WPT3/VW3) + _kl];
 				real xval = xlm[_kl*VW3 + _v];

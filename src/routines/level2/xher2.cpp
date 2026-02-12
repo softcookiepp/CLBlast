@@ -30,13 +30,13 @@ Xher2<T>::Xher2(Queue& queue, EventPointer event, const std::string& name)
               {
 #if VULKAN_API
 #if 1
-	#include "../../kernels-vk/level2/level2.glsl.inl"
+	#include "../../kernels-vk-inline/level2/level2.glsl.inl"
 	// (comment to prevent auto-re-ordering)
-	#include "../../kernels-vk/level2/xher2.glsl.inl"
+	#include "../../kernels-vk-inline/level2/xher2.glsl.inl"
 #else
-	#include "../../kernels-vk/level2/level2.opencl"
+	#include "../../kernels-vk-inline/level2/level2.opencl"
 	// (comment to prevent auto-re-ordering)
-	#include "../../kernels-vk/level2/xher2.opencl"
+	#include "../../kernels-vk-inline/level2/xher2.opencl"
 #endif
 #else
 	#include "../../kernels/level2/level2.opencl"

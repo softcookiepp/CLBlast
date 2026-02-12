@@ -171,45 +171,12 @@
 // =================================================================================================
 
 // Initializes the accumulation registers to zero
-INLINE_FUNC realM InitAccRegisters() {
+realM InitAccRegisters() {
 	realM result;
 	#if VWM == 1
 		SetToZero(result);
-	#elif VWM == 2
-		SetToZero(result.x);
-		SetToZero(result.y);
-	#elif VWM == 4
-		SetToZero(result.x);
-		SetToZero(result.y);
-		SetToZero(result.z);
-		SetToZero(result.w);
-	#elif VWM == 8
-		// TODO: implement expressions for this and VW == 16
-		SetToZero(result.s0);
-		SetToZero(result.s1);
-		SetToZero(result.s2);
-		SetToZero(result.s3);
-		SetToZero(result.s4);
-		SetToZero(result.s5);
-		SetToZero(result.s6);
-		SetToZero(result.s7);
-	#elif VWM == 16
-		SetToZero(result.s0);
-		SetToZero(result.s1);
-		SetToZero(result.s2);
-		SetToZero(result.s3);
-		SetToZero(result.s4);
-		SetToZero(result.s5);
-		SetToZero(result.s6);
-		SetToZero(result.s7);
-		SetToZero(result.s8);
-		SetToZero(result.s9);
-		SetToZero(result.sA);
-		SetToZero(result.sB);
-		SetToZero(result.sC);
-		SetToZero(result.sD);
-		SetToZero(result.sE);
-		SetToZero(result.sF);
+	#else
+		vSetToZero(result, VWM);
 	#endif
 	return result;
 }

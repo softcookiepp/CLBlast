@@ -29,9 +29,9 @@ Xger<T>::Xger(Queue& queue, EventPointer event, const std::string& name)
 		: Routine(queue, event, name, {"Xger"}, PrecisionValue<T>(), {},
 							{
 #if VULKAN_API
-	#include "../../kernels-vk/level2/level2.glsl.inl"
+	#include "../../kernels-vk-inline/level2/level2.glsl.inl"
 	// (comment to prevent auto-re-ordering)
-	#include "../../kernels-vk/level2/xger.glsl.inl"
+	#include "../../kernels-vk-inline/level2/xger.glsl.inl"
 #else
 	#include "../../kernels/level2/level2.opencl"
 	// (comment to prevent auto-re-ordering)

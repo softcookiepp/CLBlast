@@ -90,7 +90,7 @@
 
 // Loads global off-chip memory into thread-private register files. This function is specific for
 // loading the A input matrix.
-INLINE_FUNC real GlobalToPrivateDirectA(const __global real* restrict agms, const int _mi,
+real GlobalToPrivateDirectA(const __global real* restrict agms, const int _mi,
                                         const int a_ld, const int a_offset, const int idm, const int idk,
                                         const int a_transpose, const int a_conjugate) {
   const int a_index = (a_transpose) ? (idm + _mi)*a_ld + idk : idk*a_ld + (idm + _mi);
@@ -100,7 +100,7 @@ INLINE_FUNC real GlobalToPrivateDirectA(const __global real* restrict agms, cons
 }
 
 // Same as above, but now for the B input matrix
-INLINE_FUNC real GlobalToPrivateDirectB(const __global real* restrict bgms, const int _ni,
+real GlobalToPrivateDirectB(const __global real* restrict bgms, const int _ni,
                                         const int b_ld, const int b_offset, const int idn, const int idk,
                                         const int b_transpose, const int b_conjugate) {
   const int b_index = (b_transpose) ? (idn + _ni)*b_ld + idk : idk*b_ld + (idn + _ni);
@@ -111,7 +111,7 @@ INLINE_FUNC real GlobalToPrivateDirectB(const __global real* restrict bgms, cons
 
 // Loads global off-chip memory into thread-private register files. This function is specific for
 // loading the A input matrix. This is the same as above but now includes a bounds check.
-INLINE_FUNC real GlobalToPrivateCheckedA(const __global real* restrict agms, const int _mi,
+real GlobalToPrivateCheckedA(const __global real* restrict agms, const int _mi,
                                          const int a_ld, const int a_offset, const int idm, const int idk,
                                          const int a_transpose, const int a_conjugate,
                                          const int kSizeM) {
@@ -128,7 +128,7 @@ INLINE_FUNC real GlobalToPrivateCheckedA(const __global real* restrict agms, con
 }
 
 // Same as above, but now for the B input matrix
-INLINE_FUNC real GlobalToPrivateCheckedB(const __global real* restrict bgms, const int _ni,
+real GlobalToPrivateCheckedB(const __global real* restrict bgms, const int _ni,
                                          const int b_ld, const int b_offset, const int idn, const int idk,
                                          const int b_transpose, const int b_conjugate,
                                          const int kSizeN) {
@@ -148,7 +148,7 @@ INLINE_FUNC real GlobalToPrivateCheckedB(const __global real* restrict bgms, con
 
 // Caches on-chip local memory into per-thread private memory (registers). This function is specific
 // for caching the A input matrix.
-INLINE_FUNC real LocalToPrivateDirectA(LOCAL_PTR real* alm, const int _mi, const int kg,
+real LocalToPrivateDirectA(LOCAL_PTR real* alm, const int _mi, const int kg,
                                        const int a_transpose) {
   const int mg = _mi + get_local_id(0)*MWID;
   const int index = (a_transpose) ? mg*(WGD + PADA) + kg : kg*(WGD + PADA) + mg;
@@ -156,7 +156,7 @@ INLINE_FUNC real LocalToPrivateDirectA(LOCAL_PTR real* alm, const int _mi, const
 }
 
 // Same as above, but now for the B input matrix
-INLINE_FUNC real LocalToPrivateDirectB(LOCAL_PTR real* blm, const int _ni, const int kg,
+real LocalToPrivateDirectB(LOCAL_PTR real* blm, const int _ni, const int kg,
                                        const int b_transpose) {
   const int ng = _ni + get_local_id(1)*NWID;
   const int index = (b_transpose) ? ng*(WGD + PADB) + kg : kg*(WGD + PADB) + ng;
@@ -167,7 +167,7 @@ INLINE_FUNC real LocalToPrivateDirectB(LOCAL_PTR real* blm, const int _ni, const
 
 // Merges the results in Cpm with the global array in Cgm. This also performs the multiplication
 // with the constants: Cgm = alpha*A*B + beta*Cgm = alpha*Cpm + beta*Cgm
-INLINE_FUNC void StoreResultsDirect(__global real* cgm, const real c_value,
+void StoreResultsDirect(__global real* cgm, const real c_value,
                                     const int _mi, const int _ni, const int idm, const int idn,
                                     const real alpha, const real beta,
                                     const int c_ld, const int c_offset, const int c_transpose) {
@@ -189,7 +189,7 @@ INLINE_FUNC void StoreResultsDirect(__global real* cgm, const real c_value,
 
 // Merges the results in Cpm with the global array in Cgm. This also performs the multiplication
 // with the constants: Cgm = alpha*A*B + beta*Cgm = alpha*Cpm + beta*Cgm
-INLINE_FUNC void StoreResultsChecked(__global real* cgm, const real c_value,
+void StoreResultsChecked(__global real* cgm, const real c_value,
                                      const int _mi, const int _ni, const int idm, const int idn,
                                      const int kSizeM, const int kSizeN,
                                      const real alpha, const real beta,

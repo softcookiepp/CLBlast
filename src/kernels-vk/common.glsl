@@ -22,6 +22,10 @@
 
 // =================================================================================================
 	
+// reserved for when unrolling semantics are able to be used
+#ifndef UNROLL
+	#define UNROLL(N)
+#endif
 
 // Enable support for half-precision
 #if PRECISION == 16
@@ -37,105 +41,65 @@
 
 // Half-precision
 #if PRECISION == 16
+	struct vec2_t { f16vec2 s; };
+	struct vec4_t { f16vec4 s; };
+	struct vec8_t { float16_t s[8]; };
+	struct vec16_t { float16_t s[16]; };
 	#define real float16_t
-	#define real2 f16vec2
-	#define real4 f16vec4
-	#define real8 f16mat2x4
-	#define real16 f16mat4x4
 	#define ZERO float16_t(0.0)
 	#define ONE float16_t(1.0)
 	#define SMALLEST -1.0e14
 
 // Single-precision
 #elif PRECISION == 32
+	struct vec2_t { vec2 s; };
+	struct vec4_t { vec4 s; };
+	struct vec8_t { float s[8]; };
+	struct vec16_t { float s[16]; };
 	#define real float
-	#define real2 vec2
-	#define real4 vec4
-	#define real8 mat2x4
-	#define real16 mat4x4
 	#define ZERO real(0.0f)
 	#define ONE 1.0f
 	#define SMALLEST -1.0e37f
 
 // Double-precision 
 #elif PRECISION == 64
+	struct vec2_t { dvec2 s; };
+	struct vec4_t { dvec4 s; };
+	struct vec8_t { double s[8]; };
+	struct vec16_t { double s[16]; };
 	#define real double
-	#define real2 dvec2
-	#define real4 dvec4
-	#define real8 dmat2x4
-	#define real16 dmat4x4
 	#define ZERO 0.0
 	#define ONE 1.0
 	#define SMALLEST -1.0e37
 
 // Complex single-precision
 #elif PRECISION == 3232
+	struct vec2_t { mat2x2 s; };
+	struct vec4_t { mat4x2 s; };
+	struct vec8_t { vec2 s[8]; };
+	struct vec16_t { vec2 s[16]; };
 	#define real vec2
-	//struct cfloat2 {real x; real y;};
-	struct cfloat2 { real s[2]; };
-	#define real2 cfloat2
-	// struct cfloat4 {real x; real y; real z; real w;};
-	struct cfloat4 { real s[4]; };
-	#define real4 cfloat4
-	//struct cfloat8 {real s0; real s1; real s2; real s3;
-	//	real s4; real s5; real s6; real s7;};
-	struct cfloat8 { real s[8]; };
-	#define real8 cfloat8
-	//struct cfloat16 {real s0; real s1; real s2; real s3;
-	//												 real s4; real s5; real s6; real s7;
-	//												 real s8; real s9; real sA; real sB;
-	//												 real sC; real sD; real sE; real sF;};
-	struct cfloat16 { real s[16]; };
-	
-	#define real16 cfloat16
 	#define ZERO 0.0f
 	#define ONE 1.0f
 	#define SMALLEST -1.0e37f
 
 // Complex double-precision
 #elif PRECISION == 6464
+	struct vec2_t { dmat2x2 s; };
+	struct vec4_t { dmat4x2 s; };					 
+	struct vec8_t { dvec2 s[8]; };
+	struct vec16_t { dvec2 s[16]; };
 	#define real dvec2
-	struct cdouble2 {real x; real y;};
-	#define real2 cdouble2
-	struct cdouble4 {real x; real y; real z; real w;};
-	#define real4 cdouble4
-	struct cdouble8 {real s0; real s1; real s2; real s3;
-													 real s4; real s5; real s6; real s7;};
-	#define real8 cdouble8
-	struct cdouble16 {real s0; real s1; real s2; real s3;
-														real s4; real s5; real s6; real s7;
-														real s8; real s9; real sA; real sB;
-														real sC; real sD; real sE; real sF;};
-	#define real16 cdouble16
 	#define ZERO 0.0
 	#define ONE 1.0
 	#define SMALLEST -1.0e37
 #endif
 
-#if PRECISION == 32  || PRECISION == 64 || PRECISION == 16
-	// can use standard vectors and matrices for this stuff
-	uvec2 get_matrix_indices(uint idx, uint width) { uint b = idx % width; return uvec2( (idx - b)/width, b); }
-	real get_velem(real2 vec, uint idx) { return vec[idx]; }
-	real get_velem(real4 vec, uint idx) { return vec[idx]; }
-	real get_velem(real8 vec, uint idx) { uvec2 idxs = get_matrix_indices(idx, 4); return vec[idxs.x][idxs.y]; }
-	real get_velem(real16 vec, uint idx) { uvec2 idxs = get_matrix_indices(idx, 4); return vec[idxs.x][idxs.y]; }
-	
-	real2 set_velem(real2 vec, real value, uint idx) { vec[idx] = value; return vec; }
-	real4 set_velem(real4 vec, real value, uint idx) { vec[idx] = value; return vec; }
-	real8 set_velem(real8 vec, real value, uint idx) { uvec2 idxs = get_matrix_indices(idx, 4); vec[idxs.x][idxs.y] = value; return vec; }
-	real16 set_velem(real16 vec, real value, uint idx) { uvec2 idxs = get_matrix_indices(idx, 4); vec[idxs.x][idxs.y] = value; return vec; }
-#else
-	// getting vector elements becomes a bit more complex (hur hur hur)
-	real get_velem(real2 vec, uint idx) { return vec.s[idx]; }
-	real get_velem(real4 vec, uint idx) { return vec.s[idx]; }
-	real get_velem(real8 vec, uint idx) { return vec.s[idx]; }
-	real get_velem(real16 vec, uint idx) { return vec.s[idx]; }
-	
-	real2 set_velem(real2 vec, real value, uint idx) { vec.s[idx] = value; return vec; }
-	real4 set_velem(real4 vec, real value, uint idx) { vec.s[idx] = value; return vec; }
-	real8 set_velem(real8 vec, real value, uint idx) { vec.s[idx] = value; return vec; }
-	real16 set_velem(real16 vec, real value, uint idx) { vec.s[idx] = value; return vec; }
-#endif
+// this simplifies stuff c:
+#define real2 vec2_t
+#define real4 vec4_t
+#define real8 vec8_t
+#define real16 vec16_t
 
 // Single-element version of a complex number
 #if PRECISION == 3232
@@ -208,17 +172,13 @@
 
 // Determines whether a variable is zero
 #if PRECISION == 3232 || PRECISION == 6464
-	#define IsZero(a) ((a.x == ZERO) && (a.y == ZERO))
+	#define IsZero(a) ((a[0] == ZERO) && (a[1] == ZERO))
 #else
 	#define IsZero(a) (a == ZERO)
 #endif
 
-// The absolute value (component-wise)
-#if 0 //PRECISION == 3232 || PRECISION == 6464
-	#define AbsoluteValue(value) value.x = abs(value.x); value.y = abs(value.y)
-#else
-	#define AbsoluteValue(value) value = abs(value)
-#endif
+// component-wise absolute value
+#define AbsoluteValue(value) value = abs(value)
 
 // Negation (component-wise)
 #if 0 //PRECISION == 3232 || PRECISION == 6464
@@ -228,14 +188,14 @@
 #endif
 
 // Adds two complex variables
-#if PRECISION == 3232 || PRECISION == 6464
+#if 0 //PRECISION == 3232 || PRECISION == 6464
 	#define Add(c,a,b) c = real(a.x + b.x, a.y + b.y)
 #else
 	#define Add(c,a,b) c = a + b
 #endif
 
 // Subtracts two complex variables
-#if PRECISION == 3232 || PRECISION == 6464
+#if 0 //PRECISION == 3232 || PRECISION == 6464
 	#define Subtract(c,a,b) c = real(a.x - b.x, a.y - b.y)
 #else
 	#define Subtract(c,a,b) c = a - b
@@ -243,8 +203,8 @@
 
 // Multiply two complex variables (used in the defines below)
 #if PRECISION == 3232 || PRECISION == 6464
-	#define MulReal(a,b) a.x*b.x - a.y*b.y
-	#define MulImag(a,b) a.x*b.y + a.y*b.x
+	#define MulReal(a,b) a[0]*b[0] - a[1]*b[1]
+	#define MulImag(a,b) a[0]*b[1] + a[1]*b[0]
 #endif
 
 // The scalar multiply function
@@ -253,6 +213,44 @@
 #else
 	#define Multiply(c,a,b) c = a * b
 #endif
+
+#define vMultiply(c, a, b, vWidth) \
+{ \
+	UNROLL(vWidth) \
+	for (uint i = 0; i < vWidth; i += 1) \
+	{ \
+		Multiply(c.s[i], a.s[i], b.s[i]); \
+	} \
+}
+
+// c is vector, a is scalar, b is vector
+#define vsMultiply(c, a, b, vWidth) \
+{ \
+	UNROLL(vWidth) \
+	for (uint i = 0; i < vWidth; i += 1) \
+	{ \
+		Multiply(c.s[i], a, b.s[i]); \
+	} \
+}
+
+// c is vector, a is scalar, b is vector
+#define vsMultiplyAdd(c, a, b, vWidth) \
+{ \
+	UNROLL(vWidth) \
+	for (uint i = 0; i < vWidth; i += 1) \
+	{ \
+		MultiplyAdd(c.s[i], a, b.s[i]); \
+	} \
+}
+
+#define vSetToZero(v, vWidth) \
+{ \
+	UNROLL(vWidth) \
+	for (uint i = 0; i < vWidth; i += 1) \
+	{ \
+		SetToZero(v.s[i]); \
+	} \
+}
 
 // The scalar multiply-add function
 #if PRECISION == 3232 || PRECISION == 6464
@@ -296,11 +294,6 @@
 
 // =================================================================================================
 
-// GLSL has no inlining; compiler handles that automatically
-#define INLINE_FUNC
-
-// =================================================================================================
-
 // Macro for storing and loading, to accomodate BDA
 #if USE_BDA
 	// this needs to be changed, but I forget how it works
@@ -314,6 +307,27 @@
 // vector load methods
 #define vload2_single_alignment(index, buf) real2(INDEX(buf, index), INDEX(buf, index+1))
 #define vload4_signle_alignment(index, buf) real4(INDEX(buf, index), INDEX(buf, index+1), INDEX(buf, index+2), INDEX(buf, index+3))
+
+#define vload2(index, buf) real2(real[2](INDEX(buf, index), INDEX(buf, index+1)))
+#define vload4(index, buf) real4(real[4](INDEX(buf, index), INDEX(buf, index+1), INDEX(buf, index+2), INDEX(buf, index+3)))
+#define vload8(index, buf) real8(real[8](INDEX(buf, index), INDEX(buf, index+1), INDEX(buf, index+2),\
+	INDEX(buf, index+3), INDEX(buf, index+4), INDEX(buf, index+5), INDEX(buf, index+6), INDEX(buf, index+7)))
+#define vload16(index, buf) real16(real[16](INDEX(buf, index), INDEX(buf, index+1), INDEX(buf, index+2),\
+	INDEX(buf, index+3), INDEX(buf, index+4), INDEX(buf, index+5), INDEX(buf, index+6), INDEX(buf, index+7),\
+	INDEX(buf, index+8), INDEX(buf, index+9), INDEX(buf, index+10), INDEX(buf, index+11), INDEX(buf, index+12),\
+	INDEX(buf, index+13), INDEX(buf, index+14), INDEX(buf, index+15) ))
+	
+#define vloadN(index, buf, N) vload##N(index, buf)
+
+#define vTranspose(dst, src, vWidth) \
+{ \
+	UNROLL(vWidth) \
+	for (uint i = 0; i < vWidth; i += 1) \
+	{ \
+		UNROLL(vWidth) \
+		for (uint j = 0; j < vWidth; j += 1) dst[i].s[j] = src[j].s[i]; \
+	} \
+}
 
 // =================================================================================================
 

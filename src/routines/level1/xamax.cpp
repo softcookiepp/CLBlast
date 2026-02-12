@@ -29,9 +29,9 @@ Xamax<T>::Xamax(Queue& queue, EventPointer event, const std::string& name)
 		: Routine(queue, event, name, {"Xdot"}, PrecisionValue<T>(), {},
 							{
 #if VULKAN_API
-	#include "../../kernels-vk/level1/xamax.glsl.inl"
+	#include "../../kernels-vk-inline/level1/xamax.glsl.inl"
 	,
-	#include "../../kernels-vk/level1/xamax_epilogue.glsl.inl"
+	#include "../../kernels-vk-inline/level1/xamax_epilogue.glsl.inl"
 #else
 	#include "../../kernels/level1/xamax.opencl"
 #endif

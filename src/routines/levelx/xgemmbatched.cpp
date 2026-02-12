@@ -31,192 +31,192 @@ XgemmBatched<T>::XgemmBatched(Queue& queue, EventPointer event, const std::strin
 							PrecisionValue<T>(), {},
 							{
 #if VULKAN_API
-	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	// 
-		#include "../../kernels-vk/level3/copy_fast.glsl.inl"
+		#include "../../kernels-vk-inline/level3/copy_fast.glsl.inl"
 	,
 	
-	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	// 
-	#include "../../kernels-vk/level3/copy_matrix_impl.glsl.inl"
-		#include "../../kernels-vk/level3/copy_matrix.glsl.inl"
+	#include "../../kernels-vk-inline/level3/copy_matrix_impl.glsl.inl"
+		#include "../../kernels-vk-inline/level3/copy_matrix.glsl.inl"
 	,
 	
-	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	// 
-	#include "../../kernels-vk/level3/copy_matrix_batched_impl.glsl.inl"
-	#include "../../kernels-vk/level3/copy_matrix_batched.glsl.inl"
+	#include "../../kernels-vk-inline/level3/copy_matrix_batched_impl.glsl.inl"
+	#include "../../kernels-vk-inline/level3/copy_matrix_batched.glsl.inl"
 	,
 	
-	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	// 
-	#include "../../kernels-vk/level3/copy_matrix_impl.glsl.inl"
-	#include "../../kernels-vk/level3/copy_matrix_strided_batched.glsl.inl"
+	#include "../../kernels-vk-inline/level3/copy_matrix_impl.glsl.inl"
+	#include "../../kernels-vk-inline/level3/copy_matrix_strided_batched.glsl.inl"
 	,
 	
-	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	// 
-	#include "../../kernels-vk/level3/copy_pad_matrix_impl.glsl.inl"
-		#include "../../kernels-vk/level3/copy_pad_matrix.glsl.inl"
+	#include "../../kernels-vk-inline/level3/copy_pad_matrix_impl.glsl.inl"
+		#include "../../kernels-vk-inline/level3/copy_pad_matrix.glsl.inl"
 	,
 	
-	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	// 
-	#include "../../kernels-vk/level3/copy_pad_matrix_batched_impl.glsl.inl"
-	#include "../../kernels-vk/level3/copy_pad_matrix_batched.glsl.inl"
+	#include "../../kernels-vk-inline/level3/copy_pad_matrix_batched_impl.glsl.inl"
+	#include "../../kernels-vk-inline/level3/copy_pad_matrix_batched.glsl.inl"
 	,
 	
-	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	// 
-	#include "../../kernels-vk/level3/copy_pad_matrix_impl.glsl.inl"
-	#include "../../kernels-vk/level3/copy_pad_matrix_strided_batched.glsl.inl"
+	#include "../../kernels-vk-inline/level3/copy_pad_matrix_impl.glsl.inl"
+	#include "../../kernels-vk-inline/level3/copy_pad_matrix_strided_batched.glsl.inl"
 	,
 	//ok...onto the next big thingy
-	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	// 
-		#include "../../kernels-vk/level3/transpose_fast.glsl.inl"
+		#include "../../kernels-vk-inline/level3/transpose_fast.glsl.inl"
 	,
 	// wow this was a lot to translate, goodness...
-	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	// 
-	#include "../../kernels-vk/level3/transpose_matrix_impl.glsl.inl"
-		#include "../../kernels-vk/level3/transpose_matrix.glsl.inl"
+	#include "../../kernels-vk-inline/level3/transpose_matrix_impl.glsl.inl"
+		#include "../../kernels-vk-inline/level3/transpose_matrix.glsl.inl"
 	,
 	
-	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	// 
-	#include "../../kernels-vk/level3/transpose_matrix_batched_impl.glsl.inl"
-	#include "../../kernels-vk/level3/transpose_matrix_batched.glsl.inl"
+	#include "../../kernels-vk-inline/level3/transpose_matrix_batched_impl.glsl.inl"
+	#include "../../kernels-vk-inline/level3/transpose_matrix_batched.glsl.inl"
 	,
 	
-	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	// 
-	#include "../../kernels-vk/level3/transpose_matrix_impl.glsl.inl"
-	#include "../../kernels-vk/level3/transpose_matrix_strided_batched.glsl.inl"
+	#include "../../kernels-vk-inline/level3/transpose_matrix_impl.glsl.inl"
+	#include "../../kernels-vk-inline/level3/transpose_matrix_strided_batched.glsl.inl"
 	,
 	
-	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	// 
-	#include "../../kernels-vk/level3/transpose_pad_matrix_impl.glsl.inl"
-		#include "../../kernels-vk/level3/transpose_pad_matrix.glsl.inl"
+	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_impl.glsl.inl"
+		#include "../../kernels-vk-inline/level3/transpose_pad_matrix.glsl.inl"
 	,
 	
-	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	// 
-	#include "../../kernels-vk/level3/transpose_pad_matrix_batched_impl.glsl.inl"
-	#include "../../kernels-vk/level3/transpose_pad_matrix_batched.glsl.inl"
+	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_batched_impl.glsl.inl"
+	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_batched.glsl.inl"
 	,
 	
-	#include "../../kernels-vk/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	// 
-	#include "../../kernels-vk/level3/transpose_pad_matrix_impl.glsl.inl"
-	#include "../../kernels-vk/level3/transpose_pad_matrix_strided_batched.glsl.inl"
+	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_impl.glsl.inl"
+	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_strided_batched.glsl.inl"
 	// END OF COPY PAD TRANSPOSE ROUTINES
 	,
 	// direct nn
-	#include "../../kernels-vk/level3/level3.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part3.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_nn.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_nn.glsl.inl"
 	,
 	// direct nt
-	#include "../../kernels-vk/level3/level3.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part3.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_nt.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_nt.glsl.inl"
 	,
 	// direct tn
-	#include "../../kernels-vk/level3/level3.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part3.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_tn.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_tn.glsl.inl"
 	,
 	// direct tt
-	#include "../../kernels-vk/level3/level3.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part3.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_tt.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_tt.glsl.inl"
 	,
 	// xgemm routine
-	#include "../../kernels-vk/level3/level3.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_part1.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_part2.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_part3.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_part4_xgemm.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_part1.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_part2.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_part3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_part4_xgemm.glsl.inl"
 	,
 	// xgemm batched
-	#include "../../kernels-vk/level3/level3.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_part1_batched.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_part2.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_part3.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_batched.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_part1_batched.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_part2.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_part3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_batched.glsl.inl"
 	,
 	// xgemm strided batched
-	#include "../../kernels-vk/level3/level3.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_part1.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_part2.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_part3.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_batched_xgemm_strided_batched.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_part1.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_part2.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_part3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_batched_xgemm_strided_batched.glsl.inl"
 	,
 	// direct batched nn
-	#include "../../kernels-vk/level3/level3.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part3_batched.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_batched_nn.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part3_batched.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_batched_nn.glsl.inl"
 	,
 	// direct batched nt
-	#include "../../kernels-vk/level3/level3.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part3_batched.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_batched_nt.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part3_batched.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_batched_nt.glsl.inl"
 	,
 	// direct batched tn
-	#include "../../kernels-vk/level3/level3.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part3_batched.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_batched_tn.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part3_batched.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_batched_tn.glsl.inl"
 	,
 	// direct batched tt
-	#include "../../kernels-vk/level3/level3.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part3_batched.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_batched_tt.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part3_batched.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_batched_tt.glsl.inl"
 	,
 	// direct strided batched nn
-	#include "../../kernels-vk/level3/level3.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part3_strided_batched.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_strided_batched_nn.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part3_strided_batched.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_strided_batched_nn.glsl.inl"
 	,
 	// direct strided batched nt
-	#include "../../kernels-vk/level3/level3.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part3_strided_batched.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_strided_batched_nt.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part3_strided_batched.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_strided_batched_nt.glsl.inl"
 	,
 	// direct strided batched tn
-	#include "../../kernels-vk/level3/level3.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part3_strided_batched.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_strided_batched_tn.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part3_strided_batched.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_strided_batched_tn.glsl.inl"
 	,
 	// direct strided batched tt
-	#include "../../kernels-vk/level3/level3.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part3_strided_batched.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_strided_batched_tt.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part3_strided_batched.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_strided_batched_tt.glsl.inl"
 #else
 	#include "../../kernels/level3/level3.opencl"
 	// (comment to prevent auto-re-ordering)

@@ -44,161 +44,29 @@ ivec2 getIndexForGlobalToLocalN()
 // wait a second...I think I know what to do!
 #if VWMD == 1
 	#define StoreMDInLocal(lm, lm_idx, value) lm[lm_idx] = value
-#elif VWMD == 2 || VWMD == 4
-	#if PRECISION == 3232 || PRECISION == 6464
-		#if VWMD == 2
-			#define StoreMDInLocal(lm, lm_idx, value) \
-			{ \
-				lm[lm_idx + 0] = value.x; \
-				lm[lm_idx + 1] = value.y; \
-			}
-		#elif VWMD == 4
-			#define StoreMDInLocal(lm, lm_idx, value) \
-			{ \
-				lm[lm_idx + 0] = value.x; \
-				lm[lm_idx + 1] = value.y; \
-				lm[lm_idx + 2] = value.z; \
-				lm[lm_idx + 3] = value.w; \
-			}
-		#endif
-	#else
-		#define StoreMDInLocal(lm, lm_idx, value) \
-		{ \
-			for (uint i = 0; i < VWMD; i += 1) \
-			{ \
-				lm[lm_idx + i] = value[i]; \
-			} \
-		}
-	#endif
 #else
-	// 8 or 16
-	#if PRECISION == 3232 || PRECISION == 6464
-		#if VWMD == 8
-			#define StoreMDInLocal(lm, lm_idx, value) \
-			{ \
-				lm[lm_idx + 0] = value.s0; \
-				lm[lm_idx + 1] = value.s1; \
-				lm[lm_idx + 2] = value.s2; \
-				lm[lm_idx + 3] = value.s3; \
-				lm[lm_idx + 4] = value.s4; \
-				lm[lm_idx + 5] = value.s5; \
-				lm[lm_idx + 6] = value.s6; \
-				lm[lm_idx + 7] = value.s7; \
-			}
-		#elif VWMD == 16
-			#define StoreMDInLocal(lm, lm_idx, value) \
-			{ \
-				lm[lm_idx + 0] = value.s0; \
-				lm[lm_idx + 1] = value.s1; \
-				lm[lm_idx + 2] = value.s2; \
-				lm[lm_idx + 3] = value.s3; \
-				lm[lm_idx + 4] = value.s4; \
-				lm[lm_idx + 5] = value.s5; \
-				lm[lm_idx + 6] = value.s6; \
-				lm[lm_idx + 7] = value.s7; \
-				lm[lm_idx + 8] = value.s8; \
-				lm[lm_idx + 9] = value.s9; \
-				lm[lm_idx + 10] = value.sA; \
-				lm[lm_idx + 11] = value.sB; \
-				lm[lm_idx + 12] = value.sC; \
-				lm[lm_idx + 13] = value.sD; \
-				lm[lm_idx + 14] = value.sE; \
-				lm[lm_idx + 15] = value.sF; \
-			}
-		#endif
-	// with non-complex precisions,  matrices are used as a workaround for GLSL's lack of large vector support, so that SIMD can still be used to some degree
-	#else
-		#define StoreMDInLocal(lm, lm_idx, value) \
+	#define StoreMDInLocal(lm, lm_idx, value) \
+	{ \
+		UNROLL(VWMD) \
+		for (uint iv = 0; iv < VWMD; iv += 1) \
 		{ \
-			for (uint i = 0; i < VWMD/4; i += 1) \
-			{ \
-				for (uint j = 0; j < 4; j += 1) \
-				{ \
-					lm[lm_idx + 4*i + j] = value[i][j]; \
-				} \
-			} \
-		}
-	#endif
+			lm[lm_idx + iv] = value.s[iv]; \
+		} \
+	}
 #endif
 
 // same as above but for ND
 #if VWND == 1
 	#define StoreNDInLocal(lm, lm_idx, value) lm[lm_idx] = value
-#elif VWND == 2 || VWND == 4
-	#if PRECISION == 3232 || PRECISION == 6464
-		#if VWND == 2
-			#define StoreNDInLocal(lm, lm_idx, value) \
-			{ \
-				lm[lm_idx + 0] = value.x; \
-				lm[lm_idx + 1] = value.y; \
-			}
-		#elif VWND == 4
-			#define StoreNDInLocal(lm, lm_idx, value) \
-			{ \
-				lm[lm_idx + 0] = value.x; \
-				lm[lm_idx + 1] = value.y; \
-				lm[lm_idx + 2] = value.z; \
-				lm[lm_idx + 3] = value.w; \
-			}
-		#endif
-	#else
-		#define StoreNDInLocal(lm, lm_idx, value) \
-		{ \
-			for (uint i = 0; i < VWND; i += 1) \
-			{ \
-				lm[lm_idx + i] = value[i]; \
-			} \
-		}
-	#endif
 #else
-	// 8 or 16
-	#if PRECISION == 3232 || PRECISION == 6464
-		#if VWND == 8
-			#define StoreNDInLocal(lm, lm_idx, value) \
-			{ \
-				lm[lm_idx + 0] = value.s0; \
-				lm[lm_idx + 1] = value.s1; \
-				lm[lm_idx + 2] = value.s2; \
-				lm[lm_idx + 3] = value.s3; \
-				lm[lm_idx + 4] = value.s4; \
-				lm[lm_idx + 5] = value.s5; \
-				lm[lm_idx + 6] = value.s6; \
-				lm[lm_idx + 7] = value.s7; \
-			}
-		#elif VWND == 16
-			#define StoreNDInLocal(lm, lm_idx, value) \
-			{ \
-				lm[lm_idx + 0] = value.s0; \
-				lm[lm_idx + 1] = value.s1; \
-				lm[lm_idx + 2] = value.s2; \
-				lm[lm_idx + 3] = value.s3; \
-				lm[lm_idx + 4] = value.s4; \
-				lm[lm_idx + 5] = value.s5; \
-				lm[lm_idx + 6] = value.s6; \
-				lm[lm_idx + 7] = value.s7; \
-				lm[lm_idx + 8] = value.s8; \
-				lm[lm_idx + 9] = value.s9; \
-				lm[lm_idx + 10] = value.sA; \
-				lm[lm_idx + 11] = value.sB; \
-				lm[lm_idx + 12] = value.sC; \
-				lm[lm_idx + 13] = value.sD; \
-				lm[lm_idx + 14] = value.sE; \
-				lm[lm_idx + 15] = value.sF; \
-			}
-		#endif
-	// with non-complex precisions,  matrices are used as a workaround for GLSL's lack of large vector support, so that SIMD can still be used to some degree
-	#else
-		#define StoreNDInLocal(lm, lm_idx, value) \
+	#define StoreNDInLocal(lm, lm_idx, value) \
+	{ \
+		UNROLL(VWND) \
+		for (uint iv = 0; iv < VWND; iv += 1) \
 		{ \
-			for (uint i = 0; i < VWND/4; i += 1) \
-			{ \
-				for (uint j = 0; j < 4; j += 1) \
-				{ \
-					lm[lm_idx + 4*i + j] = value[i][j]; \
-				} \
-			} \
-		}
-	#endif
+			lm[lm_idx + iv] = value.s[iv]; \
+		} \
+	}
 #endif
 
 // Caches global off-chip memory into local (shared) memory on-chip. This function is specific for

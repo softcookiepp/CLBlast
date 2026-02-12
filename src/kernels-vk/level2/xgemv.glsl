@@ -289,7 +289,7 @@ void main()
 				// The multiply-add function for the main part (divisable by WGS1)
 				if (args.a_rotated == 0) { // Not rotated
 					for (int kloop=0; kloop<WGS1; kloop+=UNROLL1) {
-						#pragma unroll
+						UNROLL(UNROLL1)
 						for (int _kunroll = 0; _kunroll < UNROLL1; _kunroll += 1) {
 							const int k = kwg + kloop + _kunroll;
 							real value = LoadMatrixA(
@@ -304,7 +304,7 @@ void main()
 				}
 				else { // Transposed
 					for (int kloop=0; kloop<WGS1; kloop+=UNROLL1) {
-						#pragma unroll
+						UNROLL(UNROLL1)
 						for (int _kunroll = 0; _kunroll < UNROLL1; _kunroll += 1) {
 							const int k = kwg + kloop + _kunroll;
 							real value = LoadMatrixA(

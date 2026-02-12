@@ -100,7 +100,7 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 	if (isGLSL)
 	{
 		header_string +=
-#include "kernels-vk/common.glsl.inl"
+#include "kernels-vk-inline/common.glsl.inl"
 		;
 	}
 	else

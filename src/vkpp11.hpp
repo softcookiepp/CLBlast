@@ -120,7 +120,9 @@ public:
 	// Waits for completion of this event
 	void WaitForCompletion() const
 	{
+#if 0
 		if (mEvent && mEvent->isActive()) mEvent->sync();
+#endif
 	}
 
 	// Retrieves the elapsed time of the last recorded event.
@@ -839,7 +841,11 @@ public:
 		{
 			wait[i] = waitForEvents[i].pointer();
 		}
+#if 0
 		mKernel->enqueue(adjusted_global, local32, wait, event);
+#else
+		mKernel->run(adjusted_global, local32);
+#endif
 	}
 
 	// Accessor to the private data-member

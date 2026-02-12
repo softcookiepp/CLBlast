@@ -171,45 +171,13 @@
 // =================================================================================================
 
 // Initializes the accumulation registers to zero
-INLINE_FUNC realM InitAccRegisters() {
+realM InitAccRegisters()
+{
 	realM result;
 	#if VWM == 1
 		SetToZero(result);
-	#elif VWM == 2
-		SetToZero(result.x);
-		SetToZero(result.y);
-	#elif VWM == 4
-		SetToZero(result.x);
-		SetToZero(result.y);
-		SetToZero(result.z);
-		SetToZero(result.w);
-	#elif VWM == 8
-		// TODO: implement expressions for this and VW == 16
-		SetToZero(result.s0);
-		SetToZero(result.s1);
-		SetToZero(result.s2);
-		SetToZero(result.s3);
-		SetToZero(result.s4);
-		SetToZero(result.s5);
-		SetToZero(result.s6);
-		SetToZero(result.s7);
-	#elif VWM == 16
-		SetToZero(result.s0);
-		SetToZero(result.s1);
-		SetToZero(result.s2);
-		SetToZero(result.s3);
-		SetToZero(result.s4);
-		SetToZero(result.s5);
-		SetToZero(result.s6);
-		SetToZero(result.s7);
-		SetToZero(result.s8);
-		SetToZero(result.s9);
-		SetToZero(result.sA);
-		SetToZero(result.sB);
-		SetToZero(result.sC);
-		SetToZero(result.sD);
-		SetToZero(result.sE);
-		SetToZero(result.sF);
+	#else
+		vSetToZero(result, VWM);
 	#endif
 	return result;
 }
@@ -389,61 +357,9 @@ realN GlobalToPrivateA2D(
 		const int a_index = (tid_y * NWI + _ni) * kSizeK + idk + _ki * VWN + a_ptr_offset;
 		#if VWN == 1
 			return a_ptr[a_index];
-		#elif VWN == 2
+		#else
 			//return vload2(0, a_ptr + a_index);
-			return real2(a_ptr[a_index], a_ptr[a_index + 1]);
-		#elif VWN == 4
-			//return vload4(0, a_ptr + a_index);
-			return real4(
-				a_ptr[a_index],
-				a_ptr[a_index + 1]
-				a_ptr[a_index + 2]
-				a_ptr[a_index + 3]
-			);
-		#elif VWN == 8
-			//return vload8(0, a_ptr + a_index);
-			return real8(
-				real4(
-					a_ptr[a_index],
-					a_ptr[a_index + 1]
-					a_ptr[a_index + 2]
-					a_ptr[a_index + 3]
-				),
-				real4(
-					a_ptr[a_index + 4],
-					a_ptr[a_index + 5]
-					a_ptr[a_index + 6]
-					a_ptr[a_index + 7]
-				)
-			);
-		#elif VWN == 16
-			//return vload16(0, a_ptr + a_index);
-			return real16(
-				real4(
-					a_ptr[a_index],
-					a_ptr[a_index + 1]
-					a_ptr[a_index + 2]
-					a_ptr[a_index + 3]
-				),
-				real4(
-					a_ptr[a_index + 4],
-					a_ptr[a_index + 5]
-					a_ptr[a_index + 6]
-					a_ptr[a_index + 7]
-				),
-				real4(
-					a_ptr[a_index + 8],
-					a_ptr[a_index + 9]
-					a_ptr[a_index + 10]
-					a_ptr[a_index + 11]
-				),
-				real4(
-					a_ptr[a_index + 12],
-					a_ptr[a_index + 13]
-					a_ptr[a_index + 14]
-					a_ptr[a_index + 15]
-				)
-			);
+			return vloadN(a_index, a_ptr, VWN);
 		#endif
 	#endif
 }

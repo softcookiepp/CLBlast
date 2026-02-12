@@ -18,22 +18,8 @@ realM MultiplyAddVector(realM cvec, const realM avec, const real bval) {
 	#else
 		#if VWM == 1
 			MultiplyAdd(cvec, avec, bval);
-		#elif VWM == 2
-			MultiplyAdd(cvec.x , avec.x,	bval);
-			MultiplyAdd(cvec.y , avec.y,	bval);
-		#elif VWM == 4
-			MultiplyAdd(cvec.x , avec.x,	bval);
-			MultiplyAdd(cvec.y , avec.y,	bval);
-			MultiplyAdd(cvec.z , avec.z,	bval);
-			MultiplyAdd(cvec.w , avec.w,	bval);
-		#elif VWM == 8
-			MultiplyAdd(cvec[0], avec[0], bval);
-			MultiplyAdd(cvec[1], avec[1], bval);
-		#elif VWM == 16
-			MultiplyAdd(cvec[0], avec[0], bval);
-			MultiplyAdd(cvec[1], avec[1], bval);
-			MultiplyAdd(cvec[2], avec[2], bval);
-			MultiplyAdd(cvec[3], avec[3], bval);
+		#else
+			vsMultiplyAdd(cvec, bval, avec, VWM);
 		#endif
 	#endif
 	return cvec;
@@ -82,22 +68,8 @@ void StoreResults(
 	if (IsZero(beta)) {
 		#if VWM == 1
 			Multiply(result, alpha, xval);
-		#elif VWM == 2
-			Multiply(result.x, alpha, xval.x);
-			Multiply(result.y, alpha, xval.y);
-		#elif VWM == 4
-			Multiply(result.x, alpha, xval.x);
-			Multiply(result.y, alpha, xval.y);
-			Multiply(result.z, alpha, xval.z);
-			Multiply(result.w, alpha, xval.w);
-		#elif VWM == 8
-			Multiply(result[0], alpha, xval[0]);
-			Multiply(result[1], alpha, xval[1]);
-		#elif VWM == 16
-			Multiply(result[0], alpha, xval[0]);
-			Multiply(result[1], alpha, xval[1]);
-			Multiply(result[2], alpha, xval[2]);
-			Multiply(result[3], alpha, xval[3]);
+		#else
+			vsMultiply(result, alpha, xval, VWM);
 		#endif
 	}
 
@@ -106,22 +78,11 @@ void StoreResults(
 		realM yval = cgm[index + c_offset];
 		#if VWM == 1
 			AXPBY(result, alpha, xval, beta, yval);
-		#elif VWM == 2
-			AXPBY(result.x, alpha, xval.x, beta, yval.x);
-			AXPBY(result.y, alpha, xval.y, beta, yval.y);
-		#elif VWM == 4
-			AXPBY(result.x, alpha, xval.x, beta, yval.x);
-			AXPBY(result.y, alpha, xval.y, beta, yval.y);
-			AXPBY(result.z, alpha, xval.z, beta, yval.z);
-			AXPBY(result.w, alpha, xval.w, beta, yval.w);
-		#elif VWM == 8
-			AXPBY(result[0], alpha, xval[0], beta, yval[0]);
-			AXPBY(result[1], alpha, xval[1], beta, yval[1]);
-		#elif VWM == 16
-			AXPBY(result[0], alpha, xval[0], beta, yval[0]);
-			AXPBY(result[1], alpha, xval[1], beta, yval[1]);
-			AXPBY(result[2], alpha, xval[2], beta, yval[2]);
-			AXPBY(result[3], alpha, xval[3], beta, yval[3]);
+		#else
+			// TODO: make a macro for this that vectorizes stuff better. maybe.
+			UNROLL(VWM)
+			for (uint iv = 0; iv < VWM; iv += 1)
+				AXPBY(result.s[iv], alpha, xval.s[iv], beta, yval.s[iv]);
 		#endif
 	}
 	cgm[index + c_offset] = result;

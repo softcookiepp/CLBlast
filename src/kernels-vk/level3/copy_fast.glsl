@@ -57,7 +57,7 @@ void main()
 	if (args.ld % COPY_VW != 0) return;
 
 	const real alpha = GetRealArg(args.arg_alpha);
-	#pragma unroll
+	UNROLL(COPY_WPT)
 	for (int _w_one = 0; _w_one < COPY_WPT; _w_one += 1) {
 		const int id_one = get_global_id(0);
 		const int id_two = (get_group_id(1)*COPY_WPT + _w_one) * COPY_DIMY + get_local_id(1);
@@ -65,22 +65,8 @@ void main()
 		realC result;
 		#if COPY_VW == 1
 			Multiply(result, alpha, src[id]);
-		#elif COPY_VW == 2
-			Multiply(result.x, alpha, src[id].x);
-			Multiply(result.y, alpha, src[id].y);
-		#elif COPY_VW == 4
-			Multiply(result.x, alpha, src[id].x);
-			Multiply(result.y, alpha, src[id].y);
-			Multiply(result.z, alpha, src[id].z);
-			Multiply(result.w, alpha, src[id].w);
-		#elif COPY_VW == 8
-			Multiply(result[0], alpha, src[id][0]);
-			Multiply(result[1], alpha, src[id][1]);
-		#elif COPY_VW == 16
-			Multiply(result[0], alpha, src[id][0]);
-			Multiply(result[1], alpha, src[id][1]);
-			Multiply(result[2], alpha, src[id][2]);
-			Multiply(result[3], alpha, src[id][3]);
+		#else
+			vsMultiply(result, alpha, src[id], COPY_VW);
 		#endif
 		dest[id] = result;
 	}

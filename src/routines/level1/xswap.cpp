@@ -30,17 +30,17 @@ Xswap<T>::Xswap(Queue& queue, EventPointer event, const std::string& name)
               {
 #if VULKAN_API
 #if 1
-	#include "../../kernels-vk/level1/level1.glsl.inl"
+	#include "../../kernels-vk-inline/level1/level1.glsl.inl"
 	//
-	#include "../../kernels-vk/level1/xswap.glsl.inl"
+	#include "../../kernels-vk-inline/level1/xswap.glsl.inl"
 	,
-	#include "../../kernels-vk/level1/level1.glsl.inl"
+	#include "../../kernels-vk-inline/level1/level1.glsl.inl"
 	//
-	#include "../../kernels-vk/level1/xswap-fast.glsl.inl"
+	#include "../../kernels-vk-inline/level1/xswap-fast.glsl.inl"
 #else
-	#include "../../kernels-vk/level1/level1.opencl"
+	#include "../../kernels-vk-inline/level1/level1.opencl"
 	// (comment to prevent auto-re-ordering)
-	#include "../../kernels-vk/level1/xswap.opencl"
+	#include "../../kernels-vk-inline/level1/xswap.opencl"
 #endif
 #else
 	#include "../../kernels/level1/level1.opencl"

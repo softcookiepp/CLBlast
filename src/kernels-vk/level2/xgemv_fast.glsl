@@ -134,40 +134,10 @@ void main()
 				realVF avec = agm[(args.a_ld/VW2)*k + gid];
 				#if VW2 == 1
 					MultiplyAdd(acc2[VW2*_w+0], xlm[_kl], avec);
-				#elif VW2 == 2
-					MultiplyAdd(acc2[VW2*_w+0], xlm[_kl], avec.x);
-					MultiplyAdd(acc2[VW2*_w+1], xlm[_kl], avec.y);
-				#elif VW2 == 4
-					MultiplyAdd(acc2[VW2*_w+0], xlm[_kl], avec.x);
-					MultiplyAdd(acc2[VW2*_w+1], xlm[_kl], avec.y);
-					MultiplyAdd(acc2[VW2*_w+2], xlm[_kl], avec.z);
-					MultiplyAdd(acc2[VW2*_w+3], xlm[_kl], avec.w);
-				#elif VW2 == 8
-					MultiplyAdd(acc2[VW2*_w+0], xlm[_kl], avec.s0);
-					MultiplyAdd(acc2[VW2*_w+1], xlm[_kl], avec.s1);
-					MultiplyAdd(acc2[VW2*_w+2], xlm[_kl], avec.s2);
-					MultiplyAdd(acc2[VW2*_w+3], xlm[_kl], avec.s3);
-					MultiplyAdd(acc2[VW2*_w+4], xlm[_kl], avec.s4);
-					MultiplyAdd(acc2[VW2*_w+5], xlm[_kl], avec.s5);
-					MultiplyAdd(acc2[VW2*_w+6], xlm[_kl], avec.s6);
-					MultiplyAdd(acc2[VW2*_w+7], xlm[_kl], avec.s7);
-				#elif VW2 == 16
-					MultiplyAdd(acc2[VW2*_w+0], xlm[_kl], avec.s0);
-					MultiplyAdd(acc2[VW2*_w+1], xlm[_kl], avec.s1);
-					MultiplyAdd(acc2[VW2*_w+2], xlm[_kl], avec.s2);
-					MultiplyAdd(acc2[VW2*_w+3], xlm[_kl], avec.s3);
-					MultiplyAdd(acc2[VW2*_w+4], xlm[_kl], avec.s4);
-					MultiplyAdd(acc2[VW2*_w+5], xlm[_kl], avec.s5);
-					MultiplyAdd(acc2[VW2*_w+6], xlm[_kl], avec.s6);
-					MultiplyAdd(acc2[VW2*_w+7], xlm[_kl], avec.s7);
-					MultiplyAdd(acc2[VW2*_w+8], xlm[_kl], avec.s8);
-					MultiplyAdd(acc2[VW2*_w+9], xlm[_kl], avec.s9);
-					MultiplyAdd(acc2[VW2*_w+10], xlm[_kl], avec.sA);
-					MultiplyAdd(acc2[VW2*_w+11], xlm[_kl], avec.sB);
-					MultiplyAdd(acc2[VW2*_w+12], xlm[_kl], avec.sC);
-					MultiplyAdd(acc2[VW2*_w+13], xlm[_kl], avec.sD);
-					MultiplyAdd(acc2[VW2*_w+14], xlm[_kl], avec.sE);
-					MultiplyAdd(acc2[VW2*_w+15], xlm[_kl], avec.sF);
+				#else
+					UNROLL(VW2)
+					for (uint iv = 0; iv < VW2; iv += 1)
+						MultiplyAdd(acc2[VW2*_w+iv], xlm[_kl], avec.s[iv]);
 				#endif
 			}
 		}

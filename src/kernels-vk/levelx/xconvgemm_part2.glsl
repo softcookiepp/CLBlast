@@ -37,7 +37,7 @@ void Xconvgemm(const int num_patches, const int num_kernels, const int patch_siz
 	const int stride_h, const int stride_w,
 	const int dilation_h, const int dilation_w,
 	const int output_h, const int output_w,
-	//LOCAL_PTR real* alm, LOCAL_PTR real* blm,
+	//shared real* alm, shared real* blm,
 	const bool kernel_flip)
 {
 

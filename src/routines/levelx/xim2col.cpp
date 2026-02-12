@@ -28,9 +28,9 @@ Xim2col<T>::Xim2col(Queue& queue, EventPointer event, const std::string& name)
     : Routine(queue, event, name, {"Copy"}, PrecisionValue<T>(), {},
               {
 #if VULKAN_API
-	#include "../../kernels-vk/levelx/im2col_kernel_flip.glsl.inl"
+	#include "../../kernels-vk-inline/levelx/im2col_kernel_flip.glsl.inl"
 	,
-	#include "../../kernels-vk/levelx/im2col_kernel_normal.glsl.inl"
+	#include "../../kernels-vk-inline/levelx/im2col_kernel_normal.glsl.inl"
 #else
 	#include "../../kernels/levelx/im2col.opencl"
 #endif

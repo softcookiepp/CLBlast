@@ -25,7 +25,7 @@ inline int grid_ceil(const int x, const int step) {
 }
 
 // Main body of the kernel
-INLINE_FUNC void Xcol2im(const int input_h, const int input_w, const int channels,
+void Xcol2im(const int input_h, const int input_w, const int channels,
                          const int output_h, const int output_w,
                          const int kernel_h, const int kernel_w,
                          const int pad_h, const int pad_w,

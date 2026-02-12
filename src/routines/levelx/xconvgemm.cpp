@@ -34,37 +34,37 @@ Xconvgemm<T>::Xconvgemm(Queue& queue, EventPointer event, const std::string& nam
 #if VULKAN_API
 #if 1
 	// regular kernel
-	#include "../../kernels-vk/level3/level3.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk/levelx/xconvgemm_part1.glsl.inl"
-	#include "../../kernels-vk/levelx/xconvgemm_part2_xconvgemm_kernel.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
+	#include "../../kernels-vk-inline/levelx/xconvgemm_part1.glsl.inl"
+	#include "../../kernels-vk-inline/levelx/xconvgemm_part2_xconvgemm_kernel.glsl.inl"
 	,
 	// normal
-	#include "../../kernels-vk/level3/level3.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk/levelx/xconvgemm_part1.glsl.inl"
-	#include "../../kernels-vk/levelx/xconvgemm_part2_xconvgemm_function.glsl.inl"
-	#include "../../kernels-vk/levelx/xconvgemm_part2_xconvgemm_normal.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
+	#include "../../kernels-vk-inline/levelx/xconvgemm_part1.glsl.inl"
+	#include "../../kernels-vk-inline/levelx/xconvgemm_part2_xconvgemm_function.glsl.inl"
+	#include "../../kernels-vk-inline/levelx/xconvgemm_part2_xconvgemm_normal.glsl.inl"
 	,
 	// flip
-	#include "../../kernels-vk/level3/level3.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk/levelx/xconvgemm_part1.glsl.inl"
-	#include "../../kernels-vk/levelx/xconvgemm_part2_xconvgemm_function.glsl.inl"
-	#include "../../kernels-vk/levelx/xconvgemm_part2_xconvgemm_flip.glsl.inl"
+	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
+	#include "../../kernels-vk-inline/levelx/xconvgemm_part1.glsl.inl"
+	#include "../../kernels-vk-inline/levelx/xconvgemm_part2_xconvgemm_function.glsl.inl"
+	#include "../../kernels-vk-inline/levelx/xconvgemm_part2_xconvgemm_flip.glsl.inl"
 #else
 	(method == ConvGemmMethod::kWithIm2Col) ? "#define CONVGEMM_WITH_IM2COL\n" : "",
-	#include "../../kernels-vk/level3/level3.opencl"
+	#include "../../kernels-vk-inline/level3/level3.opencl"
 									,	// separated in multiple parts to prevent C1091 in MSVC 2013
-	#include "../../kernels-vk/level3/xgemm_direct_part1.opencl"
-	#include "../../kernels-vk/level3/xgemm_direct_part2.opencl"
-	#include "../../kernels-vk/level3/xgemm_direct_part3.opencl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.opencl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.opencl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct_part3.opencl"
 						,	// separated in multiple parts to prevent C1091 in MSVC 2013
-	#include "../../kernels-vk/levelx/xconvgemm_part1.opencl"
-	#include "../../kernels-vk/levelx/xconvgemm_part2.opencl"
+	#include "../../kernels-vk-inline/levelx/xconvgemm_part1.opencl"
+	#include "../../kernels-vk-inline/levelx/xconvgemm_part2.opencl"
 #endif
 #else
 	(method == ConvGemmMethod::kWithIm2Col) ? "#define CONVGEMM_WITH_IM2COL\n" : "",

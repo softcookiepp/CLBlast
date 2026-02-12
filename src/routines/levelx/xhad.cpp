@@ -30,21 +30,21 @@ Xhad<T>::Xhad(Queue& queue, EventPointer event, const std::string& name)
 							{
 #if VULKAN_API
 #if 1
-	#include "../../kernels-vk/level1/level1.glsl.inl"
+	#include "../../kernels-vk-inline/level1/level1.glsl.inl"
 	// 
-	#include "../../kernels-vk/level1/xhad.glsl.inl"
+	#include "../../kernels-vk-inline/level1/xhad.glsl.inl"
 	,
-	#include "../../kernels-vk/level1/level1.glsl.inl"
+	#include "../../kernels-vk-inline/level1/level1.glsl.inl"
 	// 
-	#include "../../kernels-vk/level1/xhad_faster.glsl.inl"
+	#include "../../kernels-vk-inline/level1/xhad_faster.glsl.inl"
 	,
-	#include "../../kernels-vk/level1/level1.glsl.inl"
+	#include "../../kernels-vk-inline/level1/level1.glsl.inl"
 	// 
-	#include "../../kernels-vk/level1/xhad_fastest.glsl.inl"
+	#include "../../kernels-vk-inline/level1/xhad_fastest.glsl.inl"
 #else
-	#include "../../kernels-vk/level1/level1.opencl"
+	#include "../../kernels-vk-inline/level1/level1.opencl"
 	// (comment to prevent auto-re-ordering)
-	#include "../../kernels-vk/level1/xhad.opencl"
+	#include "../../kernels-vk-inline/level1/xhad.opencl"
 #endif
 #else
 	#include "../../kernels/level1/level1.opencl"

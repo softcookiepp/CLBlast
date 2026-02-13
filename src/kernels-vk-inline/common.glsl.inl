@@ -1,12 +1,4 @@
 
-// =================================================================================================
-// This file is part of the CLBlast project. Author(s):
-//	 Cedric Nugteren <www.cedricnugteren.nl>
-//
-// This file contains the common defines and type-defs for the CLBlast OpenCL kernels.
-//
-// =================================================================================================
-
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
 // =================================================================================================

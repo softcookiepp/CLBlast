@@ -69,9 +69,9 @@ void main()
 	while (id < args.n) {
 		const int x_index = id*args.x_inc + args.x_offset;
 		#if PRECISION == 3232 || PRECISION == 6464
-			singlereal x = abs(xgm[x_index].x) + abs(xgm[x_index].y);
+			precise singlereal x = abs(xgm[x_index].x) + abs(xgm[x_index].y);
 		#else
-			singlereal x = xgm[x_index];
+			precise singlereal x = xgm[x_index];
 		#endif
 		#if defined(ROUTINE_MAX) // non-absolute maximum version
 			// nothing special here
@@ -82,7 +82,8 @@ void main()
 		#else
 			x = abs(x);
 		#endif
-		if (x > max) {
+		precise singlereal dif = x - max;
+		if (dif > ZERO) {
 			max = x;
 			imax = id;
 		}

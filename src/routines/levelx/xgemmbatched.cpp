@@ -189,34 +189,6 @@ XgemmBatched<T>::XgemmBatched(Queue& queue, EventPointer event, const std::strin
 	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
 	#include "../../kernels-vk-inline/level3/xgemm_direct_part3_batched.glsl.inl"
 	#include "../../kernels-vk-inline/level3/xgemm_direct_batched_tt.glsl.inl"
-	,
-	// direct strided batched nn
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part3_strided_batched.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_strided_batched_nn.glsl.inl"
-	,
-	// direct strided batched nt
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part3_strided_batched.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_strided_batched_nt.glsl.inl"
-	,
-	// direct strided batched tn
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part3_strided_batched.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_strided_batched_tn.glsl.inl"
-	,
-	// direct strided batched tt
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part3_strided_batched.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_strided_batched_tt.glsl.inl"
 #else
 	#include "../../kernels/level3/level3.opencl"
 	// (comment to prevent auto-re-ordering)
@@ -271,11 +243,7 @@ XgemmBatched<T>::XgemmBatched(Queue& queue, EventPointer event, const std::strin
 		"XgemmDirectBatchedNN",
 		"XgemmDirectBatchedNT",
 		"XgemmDirectBatchedTN",
-		"XgemmDirectBatchedTT",
-		"XgemmDirectStridedBatchedNN",
-		"XgemmDirectStridedBatchedNT",
-		"XgemmDirectStridedBatchedTN",
-		"XgemmDirectStridedBatchedTT"
+		"XgemmDirectBatchedTT"
 	}
 #endif
 							) {

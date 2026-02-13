@@ -155,13 +155,6 @@ XgemmBatched<T>::XgemmBatched(Queue& queue, EventPointer event, const std::strin
 	#include "../../kernels-vk-inline/level3/xgemm_part3.glsl.inl"
 	#include "../../kernels-vk-inline/level3/xgemm_batched.glsl.inl"
 	,
-	// xgemm strided batched
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_part1.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_part2.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_part3.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_batched_xgemm_strided_batched.glsl.inl"
-	,
 	// direct batched nn
 	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
@@ -238,7 +231,6 @@ XgemmBatched<T>::XgemmBatched(Queue& queue, EventPointer event, const std::strin
 		"Xgemm",
 		
 		"XgemmBatched",
-		"XgemmStridedBatched",
 		
 		"XgemmDirectBatchedNN",
 		"XgemmDirectBatchedNT",

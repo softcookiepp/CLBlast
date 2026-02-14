@@ -40,35 +40,10 @@ Xgemm<T>::Xgemm(Queue& queue, EventPointer event, const std::string& name)
 	#include "../../kernels-vk-inline/level3/copy_matrix_impl.glsl.inl"
 		#include "../../kernels-vk-inline/level3/copy_matrix.glsl.inl"
 	,
-	
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/copy_matrix_batched_impl.glsl.inl"
-	#include "../../kernels-vk-inline/level3/copy_matrix_batched.glsl.inl"
-	,
-	
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/copy_matrix_impl.glsl.inl"
-	#include "../../kernels-vk-inline/level3/copy_matrix_strided_batched.glsl.inl"
-	,
-	
 	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	// 
 	#include "../../kernels-vk-inline/level3/copy_pad_matrix_impl.glsl.inl"
 		#include "../../kernels-vk-inline/level3/copy_pad_matrix.glsl.inl"
-	,
-	
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/copy_pad_matrix_batched_impl.glsl.inl"
-	#include "../../kernels-vk-inline/level3/copy_pad_matrix_batched.glsl.inl"
-	,
-	
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/copy_pad_matrix_impl.glsl.inl"
-	#include "../../kernels-vk-inline/level3/copy_pad_matrix_strided_batched.glsl.inl"
 	,
 	//ok...onto the next big thingy
 	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
@@ -81,36 +56,12 @@ Xgemm<T>::Xgemm(Queue& queue, EventPointer event, const std::string& name)
 	#include "../../kernels-vk-inline/level3/transpose_matrix_impl.glsl.inl"
 		#include "../../kernels-vk-inline/level3/transpose_matrix.glsl.inl"
 	,
-	
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/transpose_matrix_batched_impl.glsl.inl"
-	#include "../../kernels-vk-inline/level3/transpose_matrix_batched.glsl.inl"
-	,
-	
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/transpose_matrix_impl.glsl.inl"
-	#include "../../kernels-vk-inline/level3/transpose_matrix_strided_batched.glsl.inl"
-	,
-	
 	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	// 
 	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_impl.glsl.inl"
 		#include "../../kernels-vk-inline/level3/transpose_pad_matrix.glsl.inl"
 	,
-	
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_batched_impl.glsl.inl"
-	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_batched.glsl.inl"
-	,
-	
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_impl.glsl.inl"
-	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_strided_batched.glsl.inl"
-	,
+
 	// END OF THE COPY PAD TRANSPOSE ROUTINES
 	// direct nn
 	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
@@ -194,20 +145,11 @@ Xgemm<T>::Xgemm(Queue& queue, EventPointer event, const std::string& name)
 	{	
 		"CopyMatrixFast",
 		"CopyMatrix",
-		"CopyMatrixBatched",
-		"CopyMatrixStridedBatched",
-		"CopyPadMatrix",
-		"CopyPadMatrixBatched",
-		"CopyPadMatrixStridedBatched",
 		
+		"CopyPadMatrix",
 		"TransposeMatrixFast",
 		"TransposeMatrix",
-		"TransposeMatrixBatched",
-		"TransposeMatrixStridedBatched",
 		"TransposePadMatrix",
-		"TransposePadMatrixBatched",
-		"TransposePadMatrixStridedBatched",
-		
 		"XgemmDirectNN",
 		"XgemmDirectNT",
 		"XgemmDirectTN",

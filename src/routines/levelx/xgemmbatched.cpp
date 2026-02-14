@@ -33,44 +33,15 @@ XgemmBatched<T>::XgemmBatched(Queue& queue, EventPointer event, const std::strin
 #if VULKAN_API
 	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	// 
-		#include "../../kernels-vk-inline/level3/copy_fast.glsl.inl"
-	,
-	
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/copy_matrix_impl.glsl.inl"
-		#include "../../kernels-vk-inline/level3/copy_matrix.glsl.inl"
-	,
-	
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
 	#include "../../kernels-vk-inline/level3/copy_matrix_batched_impl.glsl.inl"
 	#include "../../kernels-vk-inline/level3/copy_matrix_batched.glsl.inl"
 	,
-	
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/copy_matrix_impl.glsl.inl"
-	#include "../../kernels-vk-inline/level3/copy_matrix_strided_batched.glsl.inl"
-	,
-	
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/copy_pad_matrix_impl.glsl.inl"
-		#include "../../kernels-vk-inline/level3/copy_pad_matrix.glsl.inl"
-	,
-	
 	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	// 
 	#include "../../kernels-vk-inline/level3/copy_pad_matrix_batched_impl.glsl.inl"
 	#include "../../kernels-vk-inline/level3/copy_pad_matrix_batched.glsl.inl"
 	,
-	
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/copy_pad_matrix_impl.glsl.inl"
-	#include "../../kernels-vk-inline/level3/copy_pad_matrix_strided_batched.glsl.inl"
-	,
+#if 0
 	//ok...onto the next big thingy
 	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	// 
@@ -82,72 +53,25 @@ XgemmBatched<T>::XgemmBatched(Queue& queue, EventPointer event, const std::strin
 	#include "../../kernels-vk-inline/level3/transpose_matrix_impl.glsl.inl"
 		#include "../../kernels-vk-inline/level3/transpose_matrix.glsl.inl"
 	,
-	
+#endif
 	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	// 
 	#include "../../kernels-vk-inline/level3/transpose_matrix_batched_impl.glsl.inl"
 	#include "../../kernels-vk-inline/level3/transpose_matrix_batched.glsl.inl"
 	,
-	
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/transpose_matrix_impl.glsl.inl"
-	#include "../../kernels-vk-inline/level3/transpose_matrix_strided_batched.glsl.inl"
-	,
-	
+#if 0
 	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	// 
 	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_impl.glsl.inl"
 		#include "../../kernels-vk-inline/level3/transpose_pad_matrix.glsl.inl"
 	,
-	
+#endif
 	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	// 
 	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_batched_impl.glsl.inl"
 	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_batched.glsl.inl"
 	,
-	
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_impl.glsl.inl"
-	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_strided_batched.glsl.inl"
 	// END OF COPY PAD TRANSPOSE ROUTINES
-	,
-	// direct nn
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part3.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_nn.glsl.inl"
-	,
-	// direct nt
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part3.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_nt.glsl.inl"
-	,
-	// direct tn
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part3.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_tn.glsl.inl"
-	,
-	// direct tt
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part3.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_tt.glsl.inl"
-	,
-	// xgemm routine
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_part1.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_part2.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_part3.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_part4_xgemm.glsl.inl"
-	,
 	// xgemm batched
 	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	#include "../../kernels-vk-inline/level3/xgemm_part1_batched.glsl.inl"
@@ -207,29 +131,18 @@ XgemmBatched<T>::XgemmBatched(Queue& queue, EventPointer event, const std::strin
 #if VULKAN_API
 	, true,
 	{
-		"CopyMatrixFast",
-		"CopyMatrix",
 		"CopyMatrixBatched",
-		"CopyMatrixStridedBatched",
-		"CopyPadMatrix",
 		"CopyPadMatrixBatched",
-		"CopyPadMatrixStridedBatched",
-		
+#if 0
 		"TransposeMatrixFast",
 		"TransposeMatrix",
+#endif
 		"TransposeMatrixBatched",
-		"TransposeMatrixStridedBatched",
+#if 0
 		"TransposePadMatrix",
+#endif
 		"TransposePadMatrixBatched",
-		"TransposePadMatrixStridedBatched",
-		
-		"XgemmDirectNN",
-		"XgemmDirectNT",
-		"XgemmDirectTN",
-		"XgemmDirectTT",
-		
-		"Xgemm",
-		
+
 		"XgemmBatched",
 		
 		"XgemmDirectBatchedNN",
@@ -258,11 +171,7 @@ void XgemmBatched<T>::DoGemmBatched(const Layout layout, const Transpose a_trans
 	}
 
 	// Two methods to choose from, select which one to run
-#if 0
-	const bool do_gemm_direct = false;
-#else
 	const auto do_gemm_direct = Xgemm<T>::UseDirectKernel(m, n, k, db_["XGEMM_MIN_INDIRECT_SIZE"]);
-#endif
 	const auto gemm_kernel_id = (do_gemm_direct) ? 0 : db_["GEMMK"];
 
 	// Computes the transpose/conjugate options and sets the a/b/c sizes based on that

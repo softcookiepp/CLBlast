@@ -41,31 +41,11 @@ XgemmBatched<T>::XgemmBatched(Queue& queue, EventPointer event, const std::strin
 	#include "../../kernels-vk-inline/level3/copy_pad_matrix_batched_impl.glsl.inl"
 	#include "../../kernels-vk-inline/level3/copy_pad_matrix_batched.glsl.inl"
 	,
-#if 0
-	//ok...onto the next big thingy
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-		#include "../../kernels-vk-inline/level3/transpose_fast.glsl.inl"
-	,
-	// wow this was a lot to translate, goodness...
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/transpose_matrix_impl.glsl.inl"
-		#include "../../kernels-vk-inline/level3/transpose_matrix.glsl.inl"
-	,
-#endif
 	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	// 
 	#include "../../kernels-vk-inline/level3/transpose_matrix_batched_impl.glsl.inl"
 	#include "../../kernels-vk-inline/level3/transpose_matrix_batched.glsl.inl"
 	,
-#if 0
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_impl.glsl.inl"
-		#include "../../kernels-vk-inline/level3/transpose_pad_matrix.glsl.inl"
-	,
-#endif
 	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	// 
 	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_batched_impl.glsl.inl"
@@ -133,18 +113,9 @@ XgemmBatched<T>::XgemmBatched(Queue& queue, EventPointer event, const std::strin
 	{
 		"CopyMatrixBatched",
 		"CopyPadMatrixBatched",
-#if 0
-		"TransposeMatrixFast",
-		"TransposeMatrix",
-#endif
 		"TransposeMatrixBatched",
-#if 0
-		"TransposePadMatrix",
-#endif
 		"TransposePadMatrixBatched",
-
 		"XgemmBatched",
-		
 		"XgemmDirectBatchedNN",
 		"XgemmDirectBatchedNT",
 		"XgemmDirectBatchedTN",

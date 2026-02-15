@@ -34,75 +34,39 @@ Xinvert<T>::Xinvert(Queue& queue, EventPointer event, const std::string& name)
     : Routine(queue, event, name, {"Invert"}, PrecisionValue<T>(), {},
               {
 #if VULKAN_API
-#if 1
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	#include "../../kernels-vk-inline/level3/level3_fill_matrix.glsl.inl"
 	,
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	#include "../../kernels-vk-inline/level3//invert_diagonal_blocks_part1_invert_diagonal_block.glsl.inl"
 	,
 	// 16 lower
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3//invert_diagonal_blocks_part1_triple_matmul.glsl.inl"
 	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_16_part1_lower.glsl.inl"
 	,
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3//invert_diagonal_blocks_part1_triple_matmul.glsl.inl"
 	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_16_part2_lower.glsl.inl"
 	,
 	// 32 lower
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3//invert_diagonal_blocks_part1_triple_matmul.glsl.inl"
 	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_32_part1_lower.glsl.inl"
 	,
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3//invert_diagonal_blocks_part1_triple_matmul.glsl.inl"
 	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_32_part2_lower.glsl.inl"
 	,
 	// 64 lower
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3//invert_diagonal_blocks_part1_triple_matmul.glsl.inl"
 	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_64_part1_lower.glsl.inl"
 	,
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3//invert_diagonal_blocks_part1_triple_matmul.glsl.inl"
 	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_64_part2_lower.glsl.inl"
 	,
 	// 16 upper
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3//invert_diagonal_blocks_part1_triple_matmul.glsl.inl"
 	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_16_part1_upper.glsl.inl"
 	,
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3//invert_diagonal_blocks_part1_triple_matmul.glsl.inl"
 	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_16_part2_upper.glsl.inl"
 	,
 	// 32 upper
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3//invert_diagonal_blocks_part1_triple_matmul.glsl.inl"
 	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_32_part1_upper.glsl.inl"
 	,
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3//invert_diagonal_blocks_part1_triple_matmul.glsl.inl"
 	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_32_part2_upper.glsl.inl"
 	,
 	// 64 upper
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3//invert_diagonal_blocks_part1_triple_matmul.glsl.inl"
 	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_64_part1_upper.glsl.inl"
 	,
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3//invert_diagonal_blocks_part1_triple_matmul.glsl.inl"
 	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_64_part2_upper.glsl.inl"
-	,
-	
-#else
-	#include "../../kernels-vk-inline/level3/level3.opencl"
-					  ,  // separated in multiple parts to prevent C1091 in MSVC 2013
-	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part1.opencl"
-					  ,  // separated in multiple parts to prevent C1091 in MSVC 2013
-	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2.opencl"
-#endif
 #else
 	#include "../../kernels/level3/level3.opencl"
 					  ,  // separated in multiple parts to prevent C1091 in MSVC 2013

@@ -9,7 +9,8 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
-
+#ifndef XTRSV_GLSL
+#define XTRSV_GLSL
 // =================================================================================================
 #if defined(ROUTINE_TRSV)
 
@@ -140,7 +141,7 @@ void trsv_backward(int n,
 
 #endif
 // =================================================================================================
-
+#endif
 // End of the C++11 raw string literal
 )"
 

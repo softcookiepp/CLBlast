@@ -9,6 +9,8 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
+#ifndef IM2COL_GLSL
+#define IM2COL_GLSL
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 #ifndef COMMON_GLSL
@@ -479,7 +481,7 @@ void Xim2colKernelNormal(const int input_h, const int input_w, const int channel
 }
 #endif
 // =================================================================================================
-
+#endif
 // End of the C++11 raw string literal
 )"
 

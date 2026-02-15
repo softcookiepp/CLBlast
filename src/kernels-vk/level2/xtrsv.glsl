@@ -10,7 +10,8 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
-
+#ifndef XTRSV_GLSL
+#define XTRSV_GLSL
 // =================================================================================================
 #if defined(ROUTINE_TRSV)
 
@@ -141,7 +142,7 @@ void trsv_backward(int n,
 
 #endif
 // =================================================================================================
-
+#endif
 // End of the C++11 raw string literal
 //)"
 

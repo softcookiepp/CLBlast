@@ -118,6 +118,8 @@ Xgemm<T>::Xgemm(Queue& queue, EventPointer event, const std::string& name)
 	,
 	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	#include "../../kernels-vk-inline/level3/convert_triangular_upper.glsl.inl"
+	,
+	#include "../../kernels-vk-inline/level3/level3_fill_matrix.glsl.inl"
 #else
 	#include "../../kernels/level3/level3.opencl"
 	// (comment to prevent auto-re-ordering)
@@ -164,7 +166,9 @@ Xgemm<T>::Xgemm(Queue& queue, EventPointer event, const std::string& name)
 		"SymmUpperToSquared",
 		
 		"TriaLowerToSquared",
-		"TriaUpperToSquared"
+		"TriaUpperToSquared",
+		
+		"FillMatrix"
 	}
 #endif
 				) {

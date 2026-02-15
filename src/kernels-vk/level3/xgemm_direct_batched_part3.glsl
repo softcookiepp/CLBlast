@@ -10,6 +10,8 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
+#ifndef XGEMM_DIRECT_BATCHED_PART3_GLSL
+#define XGEMM_DIRECT_BATCHED_PART3_GLSL
 #include "xgemm_direct_part2.glsl"
 // =================================================================================================
 
@@ -240,7 +242,7 @@ void XgemmDirect(const int kSizeM, const int kSizeN, const int kSizeK, const rea
 }
 
 // =================================================================================================
-
+#endif
 // End of the C++11 raw string literal
 //)"
 

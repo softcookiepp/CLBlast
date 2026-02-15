@@ -389,7 +389,8 @@ R"(
 // =================================================================================================
 
 // literal). Comment-out this line for syntax-highlighting when developing.
-
+#ifndef LEVEL2_GLSL
+#define LEVEL2_GLSL
 // =================================================================================================
 
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
@@ -550,7 +551,7 @@ real MatrixUpdate2Impl(const int id1, const int id2, const int max1, const int m
 }
 
 // =================================================================================================
-
+#endif
 // End of the C++11 raw string literal
 
 // =================================================================================================

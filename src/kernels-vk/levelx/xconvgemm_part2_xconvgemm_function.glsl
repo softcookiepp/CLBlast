@@ -13,6 +13,9 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
+#ifndef XCONVGEMM_PART2_XCONVGEMM_FUNCTION_GLSL
+#define XCONVGEMM_PART2_XCONVGEMM_FUNCTION_GLSL
+
 #include "xconvgemm_part1.glsl"
 // =================================================================================================
 
@@ -313,7 +316,7 @@ void XconvgemmNormal(const int num_patches, const int num_kernels, const int pat
 
 
 // =================================================================================================
-
+#endif
 // End of the C++11 raw string literal
 //)"
 

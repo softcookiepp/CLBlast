@@ -60,6 +60,9 @@ R"(
 // =================================================================================================
 
 // literal). Comment-out this line for syntax-highlighting when developing.
+#ifndef INVERT_DIAGONAL_BLOCKS_PART1_TRIPLE_MATMUL_GLSL
+#define INVERT_DIAGONAL_BLOCKS_PART1_TRIPLE_MATMUL_GLSL
+
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 #ifndef COMMON_GLSL
@@ -643,7 +646,7 @@ R"(
 
 #endif
 // =================================================================================================
-
+#endif
 // End of the C++11 raw string literal
 
 // =================================================================================================

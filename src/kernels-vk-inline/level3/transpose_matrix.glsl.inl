@@ -29,6 +29,9 @@ R"(
 // =================================================================================================
 
 // literal). Comment-out this line for syntax-highlighting when developing.
+#ifndef TRANSPOSE_MATRIX_IMPL_GLSL
+#define TRANSPOSE_MATRIX_IMPL_GLSL
+
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 #ifndef COMMON_GLSL
@@ -574,7 +577,7 @@ void _TransposeMatrix(
 }
 
 // =================================================================================================
-
+#endif
 // End of the C++11 raw string literal
 
 // =================================================================================================

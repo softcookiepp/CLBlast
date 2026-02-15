@@ -14,7 +14,8 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
-
+#ifndef TRANSPOSE_PAD_GLSL
+#define TRANSPOSE_PAD_GLSL
 // =================================================================================================
 
 // Transposes a matrix from source to destination. The output is padded with zero values in case the
@@ -291,7 +292,7 @@ void TransposeMatrixStridedBatched(const int src_one, const int src_two,
 
 #endif
 // =================================================================================================
-
+#endif
 // End of the C++11 raw string literal
 )"
 

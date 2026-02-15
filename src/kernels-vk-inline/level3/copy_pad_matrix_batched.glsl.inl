@@ -31,6 +31,8 @@ R"(
 // =================================================================================================
 
 // literal). Comment-out this line for syntax-highlighting when developing.
+#ifndef COPY_PAD_MATRIX_BATCHED_IMPL_GLSL
+#define COPY_PAD_MATRIX_BATCHED_IMPL_GLSL
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 #ifndef COMMON_GLSL
@@ -532,7 +534,7 @@ void _CopyPadMatrix(const int src_one, const int src_two,
 }
 
 // =================================================================================================
-
+#endif
 // End of the C++11 raw string literal
 
 // =================================================================================================

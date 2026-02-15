@@ -13,6 +13,8 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
+#ifndef COPY_MATRIX_BATCHED_IMPL_GLSL
+#define COPY_MATRIX_BATCHED_IMPL_GLSL
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 #ifndef COMMON_GLSL
@@ -518,7 +520,7 @@ void _CopyMatrix(const int src_one, const int src_two,
 		}
 	}
 }
-
+#endif
 // End of the C++11 raw string literal
 )"
 

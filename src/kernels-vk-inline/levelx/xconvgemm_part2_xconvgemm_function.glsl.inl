@@ -12,6 +12,9 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
+#ifndef XCONVGEMM_PART2_XCONVGEMM_FUNCTION_GLSL
+#define XCONVGEMM_PART2_XCONVGEMM_FUNCTION_GLSL
+
 
 
 // =================================================================================================
@@ -26,6 +29,8 @@ R"(
 // =================================================================================================
 
 // literal). Comment-out this line for syntax-highlighting when developing.
+#ifndef XCONVGEMM_PART1_GLSL
+#define XCONVGEMM_PART1_GLSL
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
@@ -36,6 +41,8 @@ R"(
 // =================================================================================================
 
 // literal). Comment-out this line for syntax-highlighting when developing.
+#ifndef XGEMM_DIRECT_PART2_GLSL
+#define XGEMM_DIRECT_PART2_GLSL
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
@@ -49,6 +56,9 @@ R"(
 // =================================================================================================
 
 // literal). Comment-out this line for syntax-highlighting when developing.
+#ifndef XGEMM_DIRECT_PART1_GLSL
+#define XGEMM_DIRECT_PART1_GLSL
+
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 #ifndef COMMON_GLSL
@@ -665,7 +675,7 @@ R"(
 } \
 
 // =================================================================================================
-
+#endif
 // End of the C++11 raw string literal
 
 // =================================================================================================
@@ -872,7 +882,7 @@ ivec2 getIndexForGlobalToLocalN()
 }
 
 // =================================================================================================
-
+#endif
 // End of the C++11 raw string literal
 
 // =================================================================================================
@@ -959,7 +969,7 @@ ivec2 get_la0_la1()
 }
 
 // =================================================================================================
-
+#endif
 // End of the C++11 raw string literal
 
 // =================================================================================================
@@ -1263,7 +1273,7 @@ void XconvgemmNormal(const int num_patches, const int num_kernels, const int pat
 
 
 // =================================================================================================
-
+#endif
 // End of the C++11 raw string literal
 )"
 

@@ -11,6 +11,8 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
+#ifndef IM2COL_GLSL
+#define IM2COL_GLSL
 #include "../common.glsl"
 // Work-group size parameters re-used from the 'copy' kernel
 #ifndef COPY_DIMX
@@ -113,7 +115,7 @@ void Xim2colKernelNormal(const int input_h, const int input_w, const int channel
 }
 #endif
 // =================================================================================================
-
+#endif
 // End of the C++11 raw string literal
 //)"
 

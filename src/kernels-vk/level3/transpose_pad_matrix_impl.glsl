@@ -15,6 +15,9 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
+#ifndef TRANSPOSE_PAD_MATRIX_IMPL
+#define TRANSPOSE_PAD_MATRIX_IMPL
+
 #include "../common.glsl"
 #include "level3.glsl"
 // =================================================================================================
@@ -108,7 +111,7 @@ void _TransposePadMatrix(
 }
 
 // =================================================================================================
-
+#endif
 // End of the C++11 raw string literal
 //)"
 

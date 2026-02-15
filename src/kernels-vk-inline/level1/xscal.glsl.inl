@@ -391,6 +391,9 @@ R"(
 // =================================================================================================
 
 // literal). Comment-out this line for syntax-highlighting when developing.
+#ifndef LEVEL1_GLSL
+#define LEVEL1_GLSL
+
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 #ifndef COMMON_GLSL
@@ -812,7 +815,7 @@ realV MultiplyAddVector(realV cvec, const real aval, const realV bvec) {
 }
 
 // =================================================================================================
-
+#endif
 // End of the C++11 raw string literal
 
 // =================================================================================================

@@ -14,6 +14,9 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
+#ifndef COPY_MATRIX_IMPL_GLSL
+#define COPY_MATRIX_IMPL_GLSL
+
 #include "../common.glsl"
 #include "level3.glsl"
 // =================================================================================================
@@ -76,7 +79,7 @@ void _CopyMatrix(const int src_one, const int src_two,
 		}
 	}
 }
-
+#endif
 // End of the C++11 raw string literal
 //)"
 

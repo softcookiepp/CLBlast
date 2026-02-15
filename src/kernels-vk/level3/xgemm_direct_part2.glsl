@@ -10,6 +10,8 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
+#ifndef XGEMM_DIRECT_PART2_GLSL
+#define XGEMM_DIRECT_PART2_GLSL
 #include "xgemm_direct_part1.glsl"
 // =================================================================================================
 
@@ -213,7 +215,7 @@ ivec2 getIndexForGlobalToLocalN()
 }
 
 // =================================================================================================
-
+#endif
 // End of the C++11 raw string literal
 //)"
 

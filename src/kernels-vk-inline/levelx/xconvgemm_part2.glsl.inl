@@ -12,7 +12,8 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
-
+#ifndef XCONVGEMM_PART2_GLSL
+#define XCONVGEMM_PART2_GLSL
 // =================================================================================================
 #if defined(ROUTINE_CONVGEMM)
 
@@ -295,7 +296,7 @@ void XconvgemmNormal(const int num_patches, const int num_kernels, const int pat
 #endif	// defined(ROUTINE_CONVGEMM)
 
 // =================================================================================================
-
+#endif
 // End of the C++11 raw string literal
 )"
 

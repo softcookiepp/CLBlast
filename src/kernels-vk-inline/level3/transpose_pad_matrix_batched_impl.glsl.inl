@@ -14,6 +14,9 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
+#ifndef TRANSPOSE_PAD_MATRIX_BATCHED_IMPL
+#define TRANSPOSE_PAD_MATRIX_BATCHED_IMPL
+
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 #ifndef COMMON_GLSL
@@ -550,7 +553,7 @@ void _TransposePadMatrix(
 }
 
 // =================================================================================================
-
+#endif
 // End of the C++11 raw string literal
 )"
 

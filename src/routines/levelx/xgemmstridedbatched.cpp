@@ -31,61 +31,28 @@ XgemmStridedBatched<T>::XgemmStridedBatched(Queue& queue, EventPointer event, co
 							PrecisionValue<T>(), {},
 							{
 #if VULKAN_API
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/copy_matrix_impl.glsl.inl"
 	#include "../../kernels-vk-inline/level3/copy_matrix_strided_batched.glsl.inl"
 	,
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/copy_pad_matrix_impl.glsl.inl"
 	#include "../../kernels-vk-inline/level3/copy_pad_matrix_strided_batched.glsl.inl"
 	,
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/transpose_matrix_impl.glsl.inl"
 	#include "../../kernels-vk-inline/level3/transpose_matrix_strided_batched.glsl.inl"
 	,
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_impl.glsl.inl"
 	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_strided_batched.glsl.inl"
 	// END OF COPY PAD TRANSPOSE ROUTINES
 	,
-
 	// xgemm strided batched
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_part1.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_part2.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_part3.glsl.inl"
 	#include "../../kernels-vk-inline/level3/xgemm_batched_xgemm_strided_batched.glsl.inl"
 	,
 	// direct strided batched nn
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part3_strided_batched.glsl.inl"
 	#include "../../kernels-vk-inline/level3/xgemm_direct_strided_batched_nn.glsl.inl"
 	,
 	// direct strided batched nt
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part3_strided_batched.glsl.inl"
 	#include "../../kernels-vk-inline/level3/xgemm_direct_strided_batched_nt.glsl.inl"
 	,
 	// direct strided batched tn
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part3_strided_batched.glsl.inl"
 	#include "../../kernels-vk-inline/level3/xgemm_direct_strided_batched_tn.glsl.inl"
 	,
 	// direct strided batched tt
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part3_strided_batched.glsl.inl"
 	#include "../../kernels-vk-inline/level3/xgemm_direct_strided_batched_tt.glsl.inl"
 #else
 	#include "../../kernels/level3/level3.opencl"

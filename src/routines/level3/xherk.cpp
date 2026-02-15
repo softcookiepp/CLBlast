@@ -29,113 +29,39 @@ Xherk<T, U>::Xherk(Queue& queue, EventPointer event, const std::string& name)
     : Routine(queue, event, name, {"Copy", "Pad", "Transpose", "Padtranspose", "Xgemm"}, PrecisionValue<T>(), {},
               {
 #if VULKAN_API
-#if 1
-		#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-		#include "../../kernels-vk-inline/level3/copy_fast.glsl.inl"
+	#include "../../kernels-vk-inline/level3/copy_fast.glsl.inl"
 	,
-	
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/copy_matrix_impl.glsl.inl"
-		#include "../../kernels-vk-inline/level3/copy_matrix.glsl.inl"
+	#include "../../kernels-vk-inline/level3/copy_matrix.glsl.inl"
 	,
-	
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/copy_matrix_batched_impl.glsl.inl"
 	#include "../../kernels-vk-inline/level3/copy_matrix_batched.glsl.inl"
 	,
-	
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/copy_matrix_impl.glsl.inl"
 	#include "../../kernels-vk-inline/level3/copy_matrix_strided_batched.glsl.inl"
 	,
-	
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/copy_pad_matrix_impl.glsl.inl"
-		#include "../../kernels-vk-inline/level3/copy_pad_matrix.glsl.inl"
+	#include "../../kernels-vk-inline/level3/copy_pad_matrix.glsl.inl"
 	,
-	
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/copy_pad_matrix_batched_impl.glsl.inl"
 	#include "../../kernels-vk-inline/level3/copy_pad_matrix_batched.glsl.inl"
 	,
-	
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/copy_pad_matrix_impl.glsl.inl"
 	#include "../../kernels-vk-inline/level3/copy_pad_matrix_strided_batched.glsl.inl"
 	,
 	//ok...onto the next big thingy
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-		#include "../../kernels-vk-inline/level3/transpose_fast.glsl.inl"
+	#include "../../kernels-vk-inline/level3/transpose_fast.glsl.inl"
 	,
 	// wow this was a lot to translate, goodness...
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/transpose_matrix_impl.glsl.inl"
-		#include "../../kernels-vk-inline/level3/transpose_matrix.glsl.inl"
+	#include "../../kernels-vk-inline/level3/transpose_matrix.glsl.inl"
 	,
-	
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/transpose_matrix_batched_impl.glsl.inl"
 	#include "../../kernels-vk-inline/level3/transpose_matrix_batched.glsl.inl"
 	,
-	
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/transpose_matrix_impl.glsl.inl"
 	#include "../../kernels-vk-inline/level3/transpose_matrix_strided_batched.glsl.inl"
 	,
-	
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_impl.glsl.inl"
-		#include "../../kernels-vk-inline/level3/transpose_pad_matrix.glsl.inl"
+	#include "../../kernels-vk-inline/level3/transpose_pad_matrix.glsl.inl"
 	,
-	
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_batched_impl.glsl.inl"
 	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_batched.glsl.inl"
 	,
-	
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_impl.glsl.inl"
 	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_strided_batched.glsl.inl"
 	,
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_part1.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_part2.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_part3.glsl.inl"
 	#include "../../kernels-vk-inline/level3/xgemm_part4_xgemm_lower.glsl.inl"
 	,
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_part1.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_part2.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_part3.glsl.inl"
 	#include "../../kernels-vk-inline/level3/xgemm_part4_xgemm_upper.glsl.inl"
-#else
-	#include "../../kernels-vk-inline/level3/level3.opencl"
-	// (comment to prevent auto-re-ordering)
-	#include "../../kernels-vk-inline/level3/copy_fast.opencl"
-	#include "../../kernels-vk-inline/level3/copy_pad.opencl"
-	#include "../../kernels-vk-inline/level3/transpose_fast.opencl"
-	#include "../../kernels-vk-inline/level3/transpose_pad.opencl"
-					  ,  // separated in multiple parts to prevent C1091 in MSVC 2013
-	#include "../../kernels-vk-inline/level3/xgemm_part1.opencl"
-	#include "../../kernels-vk-inline/level3/xgemm_part2.opencl"
-					  ,  // separated in multiple parts to prevent C1091 in MSVC 2013
-	#include "../../kernels-vk-inline/level3/xgemm_part3.opencl"
-	#include "../../kernels-vk-inline/level3/xgemm_part4.opencl"
-#endif
 #else
 	#include "../../kernels/level3/level3.opencl"
 	// (comment to prevent auto-re-ordering)

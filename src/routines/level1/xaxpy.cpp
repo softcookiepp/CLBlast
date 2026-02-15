@@ -29,16 +29,10 @@ Xaxpy<T>::Xaxpy(Queue& queue, EventPointer event, const std::string& name)
 		: Routine(queue, event, name, {"Xaxpy"}, PrecisionValue<T>(), {},
 							{
 #if VULKAN_API
-	#include "../../kernels-vk-inline/level1/level1.glsl.inl"
-	// (comment to prevent auto-re-ordering)
 	#include "../../kernels-vk-inline/level1/xaxpy.glsl.inl"
 	,
-	#include "../../kernels-vk-inline/level1/level1.glsl.inl"
-	// (comment to prevent auto-re-ordering)
 	#include "../../kernels-vk-inline/level1/xaxpy_faster.glsl.inl"
 	,
-	#include "../../kernels-vk-inline/level1/level1.glsl.inl"
-	// (comment to prevent auto-re-ordering)
 	#include "../../kernels-vk-inline/level1/xaxpy_fastest.glsl.inl"
 #else
 	#include "../../kernels/level1/level1.opencl"
@@ -81,7 +75,7 @@ void Xaxpy<T>::DoAxpy(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 	if (use_faster_kernel || use_fastest_kernel)
 	{
 #if VULKAN_API
-		if (!mIsGLSL || !use_fastest_kernel)
+		if (!use_fastest_kernel)
 #endif
 			kernel.SetArgument(0, static_cast<int>(n));
 		kernel.SetArgument(1, GetRealArg(alpha));

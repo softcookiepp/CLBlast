@@ -30,93 +30,50 @@ Xgemm<T>::Xgemm(Queue& queue, EventPointer event, const std::string& name)
 							PrecisionValue<T>(), {},
 							{
 #if VULKAN_API
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-		#include "../../kernels-vk-inline/level3/copy_fast.glsl.inl"
+	#include "../../kernels-vk-inline/level3/copy_fast.glsl.inl"
 	,
-	
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/copy_matrix_impl.glsl.inl"
-		#include "../../kernels-vk-inline/level3/copy_matrix.glsl.inl"
+	#include "../../kernels-vk-inline/level3/copy_matrix.glsl.inl"
 	,
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/copy_pad_matrix_impl.glsl.inl"
-		#include "../../kernels-vk-inline/level3/copy_pad_matrix.glsl.inl"
+	#include "../../kernels-vk-inline/level3/copy_pad_matrix.glsl.inl"
 	,
 	//ok...onto the next big thingy
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-		#include "../../kernels-vk-inline/level3/transpose_fast.glsl.inl"
+	#include "../../kernels-vk-inline/level3/transpose_fast.glsl.inl"
 	,
 	// wow this was a lot to translate, goodness...
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/transpose_matrix_impl.glsl.inl"
-		#include "../../kernels-vk-inline/level3/transpose_matrix.glsl.inl"
+	#include "../../kernels-vk-inline/level3/transpose_matrix.glsl.inl"
 	,
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	// 
-	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_impl.glsl.inl"
-		#include "../../kernels-vk-inline/level3/transpose_pad_matrix.glsl.inl"
+	#include "../../kernels-vk-inline/level3/transpose_pad_matrix.glsl.inl"
 	,
 
 	// END OF THE COPY PAD TRANSPOSE ROUTINES
 	// direct nn
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part3.glsl.inl"
 	#include "../../kernels-vk-inline/level3/xgemm_direct_nn.glsl.inl"
 	,
 	// direct nt
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part3.glsl.inl"
 	#include "../../kernels-vk-inline/level3/xgemm_direct_nt.glsl.inl"
 	,
 	// direct tn
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part3.glsl.inl"
 	#include "../../kernels-vk-inline/level3/xgemm_direct_tn.glsl.inl"
 	,
 	// direct tt
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part1.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part2.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_direct_part3.glsl.inl"
 	#include "../../kernels-vk-inline/level3/xgemm_direct_tt.glsl.inl"
 	,
 	// the final boss
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_part1.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_part2.glsl.inl"
-	#include "../../kernels-vk-inline/level3/xgemm_part3.glsl.inl"
 	#include "../../kernels-vk-inline/level3/xgemm_part4_xgemm.glsl.inl"
 	,
 	// oh yeah, forgot to add these too
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	#include "../../kernels-vk-inline/level3/convert_hermitian_lower.glsl.inl"
 	,
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	#include "../../kernels-vk-inline/level3/convert_hermitian_upper.glsl.inl"
 	,
 	// and these
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	#include "../../kernels-vk-inline/level3/convert_symmetric_lower.glsl.inl"
 	,
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	#include "../../kernels-vk-inline/level3/convert_symmetric_upper.glsl.inl"
 	,
 	// and these
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	#include "../../kernels-vk-inline/level3/convert_triangular_lower.glsl.inl"
 	,
-	#include "../../kernels-vk-inline/level3/level3.glsl.inl"
 	#include "../../kernels-vk-inline/level3/convert_triangular_upper.glsl.inl"
 	,
 	#include "../../kernels-vk-inline/level3/level3_fill_matrix.glsl.inl"

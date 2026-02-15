@@ -29,19 +29,9 @@ Xscal<T>::Xscal(Queue& queue, EventPointer event, const std::string& name)
     : Routine(queue, event, name, {"Xaxpy"}, PrecisionValue<T>(), {},
               {
 #if VULKAN_API
-#if 1
-	#include "../../kernels-vk-inline/level1/level1.glsl.inl"
-	// (comment to prevent auto-re-ordering)
 	#include "../../kernels-vk-inline/level1/xscal.glsl.inl"
 	,
-	#include "../../kernels-vk-inline/level1/level1.glsl.inl"
-	// (comment to prevent auto-re-ordering)
 	#include "../../kernels-vk-inline/level1/xscal-fast.glsl.inl"
-#else
-	#include "../../kernels-vk-inline/level1/level1.opencl"
-	// (comment to prevent auto-re-ordering)
-	#include "../../kernels-vk-inline/level1/xscal.opencl"
-#endif
 #else
 	#include "../../kernels/level1/level1.opencl"
 	// (comment to prevent auto-re-ordering)

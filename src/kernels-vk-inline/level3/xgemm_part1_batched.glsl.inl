@@ -37,6 +37,11 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
+// use the same header guard as xgemm_part1.glsl because the two are mutually exclusive
+
+#ifndef XGEMM_PART1_GLSL
+#define XGEMM_PART1_GLSL
+
 
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library.
@@ -528,7 +533,7 @@ realN LocalToPrivateB(
 	return blm[kg*(NWG/VWN) + ng];
 }
 #endif
-
+#endif
 // End of the C++11 raw string literal
 )"
 // =================================================================================================

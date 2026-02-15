@@ -19,7 +19,7 @@
 	#define ROUTINE_GEMMBATCHED
 #endif
 
-#include "copy_pad_matrix_impl.glsl"
+#include "copy_pad_matrix_batched_impl.glsl"
 // =================================================================================================
 #if 1//def ROUTINE_GEMMBATCHED
 

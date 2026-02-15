@@ -10,6 +10,10 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
+#ifndef XGEMM_PART2_GLSL
+#define XGEMM_PART2_GLSL
+
+#include "xgemm_part1.glsl"
 
 // The vectorised multiply-add function
 realM MultiplyAddVector(realM cvec, const realM avec, const real bval) {
@@ -88,6 +92,7 @@ void StoreResults(
 	cgm[index + c_offset] = result;
 }
 
+#endif
 //)"
 // End of the C++11 raw string literal
 

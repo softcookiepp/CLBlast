@@ -9,6 +9,9 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
+#ifndef XGEMM_PART2_GLSL
+#define XGEMM_PART2_GLSL
+
 
 // The vectorised multiply-add function
 realM MultiplyAddVector(realM cvec, const realM avec, const real bval) {
@@ -87,6 +90,7 @@ void StoreResults(
 	cgm[index + c_offset] = result;
 }
 
+#endif
 )"
 // End of the C++11 raw string literal
 

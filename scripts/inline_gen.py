@@ -1,4 +1,5 @@
 import os
+import sys
 
 if os.path.exists("../src"):
 	os.chdir("..")
@@ -6,11 +7,17 @@ assert os.path.exists("src/kernels-vk")
 KERNEL_DIR = "src/kernels-vk"
 INL_DIR = "src/kernels-vk-inline"
 
-def compile_glsl():
-	raise NotImplementedError
+def compile_glsl(glsl_path, spv_path):
+	exit_code = os.system(f"glslc -fshader-stage=compute {glsl_path} -o {spv_path}")
+	if exit_code != 0:
+		sys.exit()
 
 def process_includes_recursive(in_path, body):
+	with open(in_path, "r") as f:
+		if "void main()" in f.read():
+			compile_glsl(in_path, "/dev/shm/tmp.spv")
 	new_lines = []
+	
 	for line in body.split("\n"):
 		if not ("#version" in line or "#include" in line):
 			new_lines.append(line)
@@ -18,6 +25,7 @@ def process_includes_recursive(in_path, body):
 			include_path = line.split(" ")[1].replace("\"", "")
 			include_path = os.path.join(os.path.dirname(in_path), include_path)
 			assert os.path.exists(include_path)
+			
 	
 	return "\n".join(new_lines)
 

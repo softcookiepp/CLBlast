@@ -10,7 +10,10 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
+#ifndef XGEMM_PART3_GLSL
+#define XGEMM_PART3_GLSL
 
+#include "xgemm_part2.glsl"
 // A common interface for subgroup functions
 // genuinely no idea how this maps to GLSL as of now; Vulkan probably has entirely different extensions
 // We will just have to disable it host-side until a solution is found...
@@ -301,7 +304,7 @@ void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
 		}
 	}
 }
-
+#endif
 //)"
 // End of the C++11 raw string literal
 

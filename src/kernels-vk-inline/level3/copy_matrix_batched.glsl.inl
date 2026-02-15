@@ -1,7 +1,5 @@
 
-#ifndef ROUTINE_GEMMBATCHED
-	#define ROUTINE_GEMMBATCHED
-#endif
+
 
 
 
@@ -19,6 +17,9 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
+#ifndef ROUTINE_GEMMBATCHED
+	#define ROUTINE_GEMMBATCHED
+#endif
 // =================================================================================================
 #if 1//def ROUTINE_GEMMBATCHED
 

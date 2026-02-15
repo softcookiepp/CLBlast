@@ -38,6 +38,11 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
+// use the same header guard as xgemm_part1.glsl because the two are mutually exclusive
+
+#ifndef XGEMM_PART1_GLSL
+#define XGEMM_PART1_GLSL
+
 #include "../common.glsl"
 #include "level3.glsl"
 
@@ -531,7 +536,7 @@ realN LocalToPrivateB(
 	return blm[kg*(NWG/VWN) + ng];
 }
 #endif
-
+#endif
 // End of the C++11 raw string literal
 //)"
 // =================================================================================================

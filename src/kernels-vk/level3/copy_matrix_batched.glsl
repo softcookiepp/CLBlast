@@ -1,8 +1,6 @@
 #version 450
 
-#ifndef ROUTINE_GEMMBATCHED
-	#define ROUTINE_GEMMBATCHED
-#endif
+
 
 
 
@@ -21,7 +19,10 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
-#include "copy_matrix_impl.glsl"
+#ifndef ROUTINE_GEMMBATCHED
+	#define ROUTINE_GEMMBATCHED
+#endif
+#include "copy_matrix_batched_impl.glsl"
 // =================================================================================================
 #if 1//def ROUTINE_GEMMBATCHED
 

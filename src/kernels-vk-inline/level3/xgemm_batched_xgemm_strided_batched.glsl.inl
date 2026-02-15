@@ -10,8 +10,6 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
-//
-//
 // =================================================================================================
 
 #if RELAX_WORKGROUP_SIZE == 0

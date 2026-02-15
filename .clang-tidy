@@ -1,0 +1,5 @@
+Checks: "performance-* -performance-enum-size"
+
+CheckOptions:
+  - key: performance-unnecessary-value-param.AllowedTypes
+    value: std::shared_ptr

@@ -19,7 +19,8 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
-#include "transpose_matrix_impl.glsl"
+#include "level3.glsl"
+#include "transpose_matrix_batched_impl.glsl"
 // =================================================================================================
 #if 1//def ROUTINE_GEMMBATCHED
 

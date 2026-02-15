@@ -13,11 +13,7 @@ def compile_glsl(glsl_path, spv_path):
 		sys.exit()
 
 def process_includes_recursive(in_path, body):
-	with open(in_path, "r") as f:
-		if "void main()" in f.read():
-			compile_glsl(in_path, "/dev/shm/tmp.spv")
 	new_lines = []
-	
 	for line in body.split("\n"):
 		if not ("#version" in line or "#include" in line):
 			new_lines.append(line)
@@ -25,6 +21,13 @@ def process_includes_recursive(in_path, body):
 			include_path = line.split(" ")[1].replace("\"", "")
 			include_path = os.path.join(os.path.dirname(in_path), include_path)
 			assert os.path.exists(include_path)
+			# now process the include!
+			with open(include_path, "r") as f:
+				include_body = f.read()
+				# get rid of the stringy thingies
+				include_body = include_body.replace('//R"(\n', '')
+				include_body = include_body.replace('//)"\n', '')
+				new_lines.append(process_includes_recursive(include_path, include_body))
 			
 	
 	return "\n".join(new_lines)

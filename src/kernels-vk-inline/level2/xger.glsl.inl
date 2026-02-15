@@ -1,4 +1,5 @@
 
+
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -9,7 +10,6 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
-
 // =================================================================================================
 
 // Regular version of the rank-1 matrix update kernel (GER, GERU, GERC)

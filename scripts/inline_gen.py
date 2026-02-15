@@ -8,7 +8,19 @@ INL_DIR = "src/kernels-vk-inline"
 
 def compile_glsl():
 	raise NotImplementedError
+
+def process_includes_recursive(in_path, body):
+	new_lines = []
+	for line in body.split("\n"):
+		if not ("#version" in line or "#include" in line):
+			new_lines.append(line)
+		elif "#include" in line[0:8]:
+			include_path = line.split(" ")[1].replace("\"", "")
+			include_path = os.path.join(os.path.dirname(in_path), include_path)
+			assert os.path.exists(include_path)
 	
+	return "\n".join(new_lines)
+
 def create_inline(in_path, out_path):
 	with open(in_path, "r") as f:
 		body = f.read()
@@ -18,12 +30,7 @@ def create_inline(in_path, out_path):
 	# then uncomment the string ending
 	body = body.replace('//)"\n', ')"\n')
 	# finally, get rid of any include/version statements
-	new_lines = []
-	for line in body.split("\n"):
-		if not ("#version" in line or "#include" in line):
-			new_lines.append(line)
-	
-	new_body = "\n".join(new_lines)
+	new_body = process_includes_recursive(in_path, body)
 	if os.path.exists(out_path):
 		# check to see if contents are identical.
 		# if they are, leave it alone so the file isn't flagged as changed

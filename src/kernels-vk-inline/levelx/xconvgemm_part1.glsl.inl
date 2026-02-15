@@ -1,3 +1,5 @@
+
+
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -11,7 +13,6 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
-
 // =================================================================================================
 
 // Loads global off-chip memory into thread-private register files. This function is specific for

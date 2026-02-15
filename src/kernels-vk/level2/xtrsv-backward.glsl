@@ -1,5 +1,4 @@
 //#version 450
-//#include "../common.glsl"
 //#define ROUTINE_TRSV 1
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):

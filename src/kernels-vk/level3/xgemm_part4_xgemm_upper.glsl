@@ -1,5 +1,5 @@
 #version 450
-#include "xgemm_part3.glsl"
+
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -11,7 +11,7 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
-
+#include "xgemm_part3.glsl"
 // The upper-triangular and lower-triangular kernels are only used in special cases
 
 // Main entry point of the kernel. This is the upper-triangular version.

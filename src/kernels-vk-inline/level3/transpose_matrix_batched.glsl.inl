@@ -1,6 +1,7 @@
 #ifndef ROUTINE_GEMMBATCHED
 	#define ROUTINE_GEMMBATCHED
 #endif
+
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -16,7 +17,6 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
-
 // =================================================================================================
 #if 1//def ROUTINE_GEMMBATCHED
 

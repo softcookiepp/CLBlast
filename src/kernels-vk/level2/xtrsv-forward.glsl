@@ -1,5 +1,4 @@
 #version 450
-#include "../common.glsl"
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
@@ -12,6 +11,8 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
+
+#include "../common.glsl"
 
 // =================================================================================================
 #define ROUTINE_TRSV

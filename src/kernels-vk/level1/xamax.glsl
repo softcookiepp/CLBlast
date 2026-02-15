@@ -1,5 +1,5 @@
 #version 450
-#include "../common.glsl"
+
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -14,7 +14,7 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
-
+#include "../common.glsl"
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library.
 #ifndef WGS1
@@ -32,9 +32,9 @@
 #endif
 
 #if USE_BDA == 0
-	layout(binding = 0, std430) buffer xgm_buf { real xgm[]; };
-	layout(binding = 1, std430) buffer maxgm_buf { singlereal maxgm[]; };
-	layout(binding = 2, std430) buffer imaxgm_buf { uint imaxgm[]; };
+	layout(binding = 0, std430) readonly buffer xgm_buf { real xgm[]; };
+	layout(binding = 1, std430) writeonly buffer maxgm_buf { singlereal maxgm[]; };
+	layout(binding = 2, std430) writeonly buffer imaxgm_buf { uint imaxgm[]; };
 #endif
 
 layout(push_constant) uniform Xamax

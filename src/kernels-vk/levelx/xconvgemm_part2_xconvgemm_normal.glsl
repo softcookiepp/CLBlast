@@ -1,5 +1,5 @@
 #version 450
-#include "xconvgemm_part2_xconvgemm_function.glsl"
+
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -14,7 +14,7 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
-
+#include "xconvgemm_part2_xconvgemm_function.glsl"
 // =================================================================================================
 
 layout(push_constant, std430) uniform XconvgemmNormal

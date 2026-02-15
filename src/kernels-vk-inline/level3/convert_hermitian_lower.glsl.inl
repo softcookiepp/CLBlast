@@ -1,6 +1,4 @@
-#ifndef PRECISION
-	#define PRECISION 3232
-#endif
+
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -11,7 +9,9 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
-
+#ifndef PRECISION
+	#define PRECISION 3232
+#endif
 // =================================================================================================
 
 #if 1

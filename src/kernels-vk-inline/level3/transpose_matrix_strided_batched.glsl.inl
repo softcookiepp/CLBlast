@@ -1,3 +1,4 @@
+
 #ifndef ROUTINE_GEMMSTRIDEDBATCHED
 	#define ROUTINE_GEMMSTRIDEDBATCHED
 #endif
@@ -16,7 +17,6 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
-
 // =================================================================================================
 #if 1
 

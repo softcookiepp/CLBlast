@@ -1,3 +1,4 @@
+
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -8,7 +9,6 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
-
 // Main entry point of the kernel. This is the regular full version.
 #if RELAX_WORKGROUP_SIZE == 0
 	layout(local_size_x = MDIMC, local_size_y = NDIMC, local_size_z = 1) in;

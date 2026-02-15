@@ -1,6 +1,5 @@
 #version 450
-#include "../common.glsl"
-#include "level1.glsl"
+
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -16,7 +15,8 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
-
+#include "../common.glsl"
+#include "level1.glsl"
 // =================================================================================================
 
 // Faster version of the kernel without offsets and strided accesses but with if-statement. Also

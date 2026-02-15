@@ -65,7 +65,7 @@ void Xamax<T>::DoAmax(const size_t n, const Buffer<unsigned int>& imax_buffer, c
 	// Creates the buffer for intermediate values
 	auto temp_size = 2 * db_["WGS2"];
 	auto temp_buffer1 = Buffer<T>(context_, temp_size);
-	auto temp_buffer2 = Buffer<unsigned int>(context_, temp_size);
+	auto temp_buffer2 = Buffer<unsigned int>(context_, temp_size + 1024);
 
 	// Sets the kernel arguments
 	kernel1.SetArgument(0, static_cast<int>(n));
@@ -84,13 +84,16 @@ void Xamax<T>::DoAmax(const size_t n, const Buffer<unsigned int>& imax_buffer, c
 	auto kernelEvent = Event();
 	
 #if VULKAN_API
-	if (mIsGLSL)
-	{
-		// the number of workgroups in the X dimension
-		kernel1.SetArgument(6, static_cast<int>(global1[0]/local1[0]));
-	}
+	// the number of workgroups in the X dimension
+	int num_groups_0 = static_cast<int>(global1[0]/local1[0]);
+	kernel1.SetArgument(6, num_groups_0);
+#if 0
+	std::cout << "\n	DEFINES: " << db_("Xdot").GetDefines() << std::endl;
+	std::cout << "\n	WGS1: " << db_["WGS1"] << std::endl;
+	std::cout << "\n	WGS2: " << db_["WGS2"] << std::endl;
+	std::cout << "\n	num_groups_0: " << num_groups_0 << std::endl;
 #endif
-	
+#endif
 	RunKernel(kernel1, queue_, device_, global1, local1, kernelEvent.pointer());
 	eventWaitList.push_back(kernelEvent);
 

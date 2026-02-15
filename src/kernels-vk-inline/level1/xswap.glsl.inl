@@ -12,7 +12,6 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
-
 // =================================================================================================
 
 // Full version of the kernel with offsets and strided accesses

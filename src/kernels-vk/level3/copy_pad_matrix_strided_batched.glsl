@@ -4,7 +4,7 @@
 	#define ROUTINE_GEMMSTRIDEDBATCHED
 #endif
 
-#include "copy_pad_matrix_impl.glsl"
+
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -20,7 +20,7 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
-
+#include "copy_pad_matrix_impl.glsl"
 // =================================================================================================
 #if 1
 

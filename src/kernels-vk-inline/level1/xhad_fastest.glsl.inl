@@ -1,3 +1,4 @@
+
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -12,7 +13,6 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
-
 // =================================================================================================
 
 // A vector-vector multiply function. See also level1.opencl for a vector-scalar version

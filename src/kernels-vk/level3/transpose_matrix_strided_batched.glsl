@@ -1,5 +1,5 @@
 #version 450
-#include "transpose_matrix_impl.glsl"
+
 #ifndef ROUTINE_GEMMSTRIDEDBATCHED
 	#define ROUTINE_GEMMSTRIDEDBATCHED
 #endif
@@ -19,7 +19,7 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
-
+#include "transpose_matrix_impl.glsl"
 // =================================================================================================
 #if 1
 

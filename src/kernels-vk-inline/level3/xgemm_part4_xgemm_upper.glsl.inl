@@ -1,3 +1,4 @@
+
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -8,7 +9,6 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
-
 // The upper-triangular and lower-triangular kernels are only used in special cases
 
 // Main entry point of the kernel. This is the upper-triangular version.

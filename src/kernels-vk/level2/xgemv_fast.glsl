@@ -1,5 +1,5 @@
 #version 450
-#include "../common.glsl"
+
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -11,7 +11,7 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
-
+#include "../common.glsl"
 // =================================================================================================
 
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case

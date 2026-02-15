@@ -1,3 +1,4 @@
+
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -11,7 +12,6 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
-
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library.
 #ifndef WGS1

@@ -1,3 +1,4 @@
+
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -8,7 +9,6 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
-
 // Work-group size parameters re-used from the 'copy' kernel
 #ifndef COPY_DIMX
 	#define COPY_DIMX 8			// Local workgroup size in the first dimension (w)

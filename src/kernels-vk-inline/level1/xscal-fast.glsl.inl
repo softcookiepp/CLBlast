@@ -12,7 +12,6 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
-
 // =================================================================================================
 
 // Faster version of the kernel without offsets and strided accesses. Also assumes that 'n' is

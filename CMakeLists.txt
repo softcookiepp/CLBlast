@@ -733,6 +733,10 @@ if(VULKAN)
 	add_executable(linktest samples/sgemm_vk.cpp)
 	target_link_libraries(linktest ${API_LIBRARIES} clblast)
 	target_include_directories(linktest PUBLIC $<TARGET_PROPERTY:clblast,INTERFACE_INCLUDE_DIRECTORIES> $<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES>)
+	
+	add_executable(test-fp16 test/test_fp16.cpp)
+	target_link_libraries(test-fp16 ${API_LIBRARIES} clblast)
+	target_include_directories(test-fp16 PUBLIC $<TARGET_PROPERTY:clblast,INTERFACE_INCLUDE_DIRECTORIES> $<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES>)
 endif()
 
 # ==================================================================================================

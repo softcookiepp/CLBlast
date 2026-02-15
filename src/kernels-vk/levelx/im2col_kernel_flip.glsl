@@ -1,5 +1,5 @@
 #version 450
-#include "../common.glsl"
+
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -11,7 +11,7 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
-
+#include "../common.glsl"
 // Work-group size parameters re-used from the 'copy' kernel
 #ifndef COPY_DIMX
 	#define COPY_DIMX 8			// Local workgroup size in the first dimension (w)

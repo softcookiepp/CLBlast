@@ -1,5 +1,4 @@
-#include "../common.glsl"
-#include "level3.glsl"
+
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
@@ -16,7 +15,8 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
-
+#include "../common.glsl"
+#include "level3.glsl"
 // =================================================================================================
 
 // just define some shader parameters here, they are basically the same across all

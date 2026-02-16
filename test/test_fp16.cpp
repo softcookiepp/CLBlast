@@ -5,6 +5,14 @@
 
 int main(int argc, char** argv)
 {
+#if 1
+	float nan = std::numeric_limits<float>::signaling_NaN();
+	float pInf = std::numeric_limits<float>::infinity();
+	float nInf = -1.0*std::numeric_limits<float>::infinity();
+	std::cout << "nan: " << HalfToFloat(FloatToHalf(nan)) << std::endl;
+	std::cout << "pInf: " << HalfToFloat(FloatToHalf(pInf)) << std::endl;
+	std::cout << "nInf: " << HalfToFloat(FloatToHalf(nInf)) << std::endl;
+#else
 	// here we test every possible 32-bit floating point value to see if any don't work.
 	for (uint32_t i = 0; i < std::numeric_limits<uint32_t>::max(); i += 1)
 	{
@@ -17,4 +25,5 @@ int main(int argc, char** argv)
 		}
 	}
 	std::cout << std::endl;
+#endif
 }

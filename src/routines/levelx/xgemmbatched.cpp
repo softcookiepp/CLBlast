@@ -110,7 +110,11 @@ void XgemmBatched<T>::DoGemmBatched(const Layout layout, const Transpose a_trans
 	}
 
 	// Two methods to choose from, select which one to run
+#if 1
+	const bool do_gemm_direct = true;
+#else
 	const auto do_gemm_direct = Xgemm<T>::UseDirectKernel(m, n, k, db_["XGEMM_MIN_INDIRECT_SIZE"]);
+#endif
 	const auto gemm_kernel_id = (do_gemm_direct) ? 0 : db_["GEMMK"];
 
 	// Computes the transpose/conjugate options and sets the a/b/c sizes based on that

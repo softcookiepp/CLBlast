@@ -55,6 +55,9 @@ R"(
 	#define ZERO float16_t(0.0)
 	#define ONE float16_t(1.0)
 	#define SMALLEST -1.0e14
+	#define INFINITY float16_t(uintBitsToFloat(0x7F800000))
+	#define NAN float16_t(uintBitsToFloat(0x7FC00000))
+	#define PI float16_t(3.14159265358979323846)
 
 // Single-precision
 #elif PRECISION == 32
@@ -66,6 +69,9 @@ R"(
 	#define ZERO real(0.0f)
 	#define ONE 1.0f
 	#define SMALLEST -1.0e37f
+	#define INFINITY uintBitsToFloat(0x7F800000)
+	#define NAN uintBitsToFloat(0x7FC00000)
+	#define PI float(3.14159265358979323846)
 
 // Double-precision 
 #elif PRECISION == 64
@@ -77,6 +83,9 @@ R"(
 	#define ZERO 0.0
 	#define ONE 1.0
 	#define SMALLEST -1.0e37
+	#define INFINITY double(uintBitsToFloat(0x7F800000))
+	#define NAN double(uintBitsToFloat(0x7FC00000))
+	#define PI double(3.14159265358979323846)
 
 // Complex single-precision
 #elif PRECISION == 3232
@@ -88,6 +97,9 @@ R"(
 	#define ZERO 0.0f
 	#define ONE 1.0f
 	#define SMALLEST -1.0e37f
+	#define INFINITY uintBitsToFloat(0x7F800000)
+	#define NAN uintBitsToFloat(0x7FC00000)
+	#define PI float(3.14159265358979323846)
 
 // Complex double-precision
 #elif PRECISION == 6464
@@ -99,6 +111,9 @@ R"(
 	#define ZERO 0.0
 	#define ONE 1.0
 	#define SMALLEST -1.0e37
+	#define INFINITY double(uintBitsToFloat(0x7F800000))
+	#define NAN double(uintBitsToFloat(0x7FC00000))
+	#define PI double(3.14159265358979323846)
 #endif
 
 // this simplifies stuff c:
@@ -279,6 +294,12 @@ R"(
 // The scalar division function: full division
 #if PRECISION == 3232 || PRECISION == 6464
 	#define DivideFull(c,a,b) singlereal num_x = (a.x * b.x) + (a.y * b.y); singlereal num_y = (a.y * b.x) - (a.x * b.y); singlereal denom = (b.x * b.x) + (b.y * b.y); c = real(num_x / denom, num_y / denom)
+#elif PRECISION == 16
+	// Some hardware doesn't compute NaN properly
+	// #define DivideFull(c,a,b) c = (b == ZERO ? NAN : a / b)
+	// still need to test the specifics.
+	// until then, just use default behavior...
+	#define DivideFull(c,a,b) c = a / b
 #else
 	#define DivideFull(c,a,b) c = a / b
 #endif
@@ -437,6 +458,9 @@ R"(
 	#define ZERO float16_t(0.0)
 	#define ONE float16_t(1.0)
 	#define SMALLEST -1.0e14
+	#define INFINITY float16_t(uintBitsToFloat(0x7F800000))
+	#define NAN float16_t(uintBitsToFloat(0x7FC00000))
+	#define PI float16_t(3.14159265358979323846)
 
 // Single-precision
 #elif PRECISION == 32
@@ -448,6 +472,9 @@ R"(
 	#define ZERO real(0.0f)
 	#define ONE 1.0f
 	#define SMALLEST -1.0e37f
+	#define INFINITY uintBitsToFloat(0x7F800000)
+	#define NAN uintBitsToFloat(0x7FC00000)
+	#define PI float(3.14159265358979323846)
 
 // Double-precision 
 #elif PRECISION == 64
@@ -459,6 +486,9 @@ R"(
 	#define ZERO 0.0
 	#define ONE 1.0
 	#define SMALLEST -1.0e37
+	#define INFINITY double(uintBitsToFloat(0x7F800000))
+	#define NAN double(uintBitsToFloat(0x7FC00000))
+	#define PI double(3.14159265358979323846)
 
 // Complex single-precision
 #elif PRECISION == 3232
@@ -470,6 +500,9 @@ R"(
 	#define ZERO 0.0f
 	#define ONE 1.0f
 	#define SMALLEST -1.0e37f
+	#define INFINITY uintBitsToFloat(0x7F800000)
+	#define NAN uintBitsToFloat(0x7FC00000)
+	#define PI float(3.14159265358979323846)
 
 // Complex double-precision
 #elif PRECISION == 6464
@@ -481,6 +514,9 @@ R"(
 	#define ZERO 0.0
 	#define ONE 1.0
 	#define SMALLEST -1.0e37
+	#define INFINITY double(uintBitsToFloat(0x7F800000))
+	#define NAN double(uintBitsToFloat(0x7FC00000))
+	#define PI double(3.14159265358979323846)
 #endif
 
 // this simplifies stuff c:
@@ -661,6 +697,12 @@ R"(
 // The scalar division function: full division
 #if PRECISION == 3232 || PRECISION == 6464
 	#define DivideFull(c,a,b) singlereal num_x = (a.x * b.x) + (a.y * b.y); singlereal num_y = (a.y * b.x) - (a.x * b.y); singlereal denom = (b.x * b.x) + (b.y * b.y); c = real(num_x / denom, num_y / denom)
+#elif PRECISION == 16
+	// Some hardware doesn't compute NaN properly
+	// #define DivideFull(c,a,b) c = (b == ZERO ? NAN : a / b)
+	// still need to test the specifics.
+	// until then, just use default behavior...
+	#define DivideFull(c,a,b) c = a / b
 #else
 	#define DivideFull(c,a,b) c = a / b
 #endif

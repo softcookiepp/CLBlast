@@ -548,7 +548,7 @@ real MatrixUpdate2Impl(const int id1, const int id2, const int max1, const int m
 
 	// For hermetian matrices
 	#if defined(ROUTINE_HER2) || defined(ROUTINE_HPR2)
-		if (id1 == id2 && (alpha1.x > 0.0 || alpha1.y > 0.0)) { result.y = ZERO; }
+		if (id1 == id2 && (alpha1.x > 0.0 || alpha1.y > 0.0 || alpha2.x > 0 || alpha2.y > 0)) { result.y = ZERO; }
 	#endif
 
 	// Stores the final result

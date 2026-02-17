@@ -916,26 +916,6 @@ shared real blm[WGD * (WGD + PADB)];
 	layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
 #endif
 
-// somehow the args are shared across the entire thingy
-layout(push_constant) uniform XgemmDirectArgs
-{
-	int kSizeM; int kSizeN; int kSizeK;
-	real_arg arg_alpha; real_arg arg_beta;
-#if USE_BDA
-	__global realMD* restrict agm;
-#endif
-	int a_offset; int a_ld;
-#if USE_BDA
-	__global realND* restrict bgm;
-#endif
-	int b_offset; int b_ld;
-#if USE_BDA
-	__global real* cgm;
-#endif
-	int c_offset; int c_ld;
-	int c_transpose; int a_conjugate; int b_conjugate;
-} args;
-
 // Main body of the kernel. This is the direct version without pre/post processing and restrictions.
 void XgemmDirect(const int kSizeM, const int kSizeN, const int kSizeK, const real_arg arg_alpha,
 		const real_arg arg_beta,
@@ -1155,7 +1135,27 @@ void XgemmDirect(const int kSizeM, const int kSizeN, const int kSizeK, const rea
 // =================================================================================================
 
 // Direct version of the GEMM kernel with [A, B] = [transposed, transposed]
-// XgemmDirectTT
+// somehow the args are shared across the entire thingy
+layout(push_constant) uniform XgemmDirectTT
+{
+	int kSizeM; int kSizeN; int kSizeK;
+	real_arg arg_alpha; real_arg arg_beta;
+#if USE_BDA
+	__global realMD* restrict agm;
+#endif
+	int a_offset; int a_ld;
+#if USE_BDA
+	__global realND* restrict bgm;
+#endif
+	int b_offset; int b_ld;
+#if USE_BDA
+	__global real* cgm;
+#endif
+	int c_offset; int c_ld;
+	int c_transpose; int a_conjugate; int b_conjugate;
+} args;
+
+
 void main()
 {
 	XgemmDirect(args.kSizeM, args.kSizeN, args.kSizeK, args.arg_alpha, args.arg_beta,

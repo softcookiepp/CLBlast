@@ -115,7 +115,24 @@ void XgemmStridedBatched<T>::DoGemmStridedBatched(const Layout layout, const Tra
 	if (c_stride == 0) {
 		throw BLASError(StatusCode::kInvalidDimension);
 	}
-
+	
+#if 0
+	// will this work? just maybe!
+	size_t a_offset_batch;
+	size_t b_offset_batch;
+	size_t c_offset_batch;
+	Xgemm<T> xgemm(queue_, event_);
+	for (size_t batch = 0; batch < batch_count; batch += 1)
+	{
+		a_offset_batch = a_offset + (a_stride * batch);
+		b_offset_batch = b_offset + (b_stride * batch);
+		c_offset_batch = c_offset + (c_stride * batch);
+		xgemm.DoGemm(layout, a_transpose, b_transpose, m,
+			n, k, alpha, a_buffer, a_offset_batch,
+			a_ld, b_buffer, b_offset_batch, b_ld,
+			beta, c_buffer, c_offset_batch, c_ld);
+	}
+#else
 	// Two methods to choose from, select which one to run
 	const auto do_gemm_direct = Xgemm<T>::UseDirectKernel(m, n, k, db_["XGEMM_MIN_INDIRECT_SIZE"]);
 	const auto gemm_kernel_id = (do_gemm_direct) ? 0 : db_["GEMMK"];
@@ -141,6 +158,7 @@ void XgemmStridedBatched<T>::DoGemmStridedBatched(const Layout layout, const Tra
 												c_buffer, c_offset, c_ld, c_stride, a_do_transpose, b_do_transpose, c_do_transpose, a_conjugate,
 												b_conjugate, a_one, a_two, b_one, b_two, c_one, c_two, batch_count);
 	}
+#endif
 }
 
 // =================================================================================================
@@ -271,16 +289,31 @@ void XgemmStridedBatched<T>::BatchedGemmDirect(
 	kernel.SetArgument(2, static_cast<int>(k));
 	kernel.SetArgument(3, GetRealArg(alpha));
 	kernel.SetArgument(4, GetRealArg(beta));
+#if VULKAN_API
+	kernel.SetArgument(5, a_buffer()->view(a_offset*sizeof(T)));
+	kernel.SetArgument(6, static_cast<int>(0));
+#else
 	kernel.SetArgument(5, a_buffer());
 	kernel.SetArgument(6, static_cast<int>(a_offset));
+#endif
 	kernel.SetArgument(7, static_cast<int>(a_ld));
 	kernel.SetArgument(8, static_cast<int>(a_stride));
+#if VULKAN_API
+	kernel.SetArgument(9, b_buffer()->view(b_offset*sizeof(T)));
+	kernel.SetArgument(10, static_cast<int>(0));
+#else
 	kernel.SetArgument(9, b_buffer());
 	kernel.SetArgument(10, static_cast<int>(b_offset));
+#endif
 	kernel.SetArgument(11, static_cast<int>(b_ld));
 	kernel.SetArgument(12, static_cast<int>(b_stride));
+#if VULKAN_API
+	kernel.SetArgument(13, c_buffer()->view(c_offset*sizeof(T)));
+	kernel.SetArgument(14, static_cast<int>(0));
+#else
 	kernel.SetArgument(13, c_buffer());
 	kernel.SetArgument(14, static_cast<int>(c_offset));
+#endif
 	kernel.SetArgument(15, static_cast<int>(c_ld));
 	kernel.SetArgument(16, static_cast<int>(c_stride));
 	kernel.SetArgument(17, static_cast<int>(c_do_transpose));

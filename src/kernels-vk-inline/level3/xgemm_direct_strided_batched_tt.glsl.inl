@@ -20,9 +20,8 @@ R"(
 // =================================================================================================
 
 // literal). Comment-out this line for syntax-highlighting when developing.
-#ifndef XGEMM_DIRECT_PART3_STRIDED_BATCHED_GLSL
-#define XGEMM_DIRECT_PART3_STRIDED_BATCHED_GLSL
-
+#ifndef XGEMM_DIRECT_PART3_GLSL
+#define XGEMM_DIRECT_PART3_GLSL
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):

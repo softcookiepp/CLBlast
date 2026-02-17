@@ -1,77 +1,33 @@
-
-// =================================================================================================
-// This file is part of the CLBlast project. Author(s):
-//	 Cedric Nugteren <www.cedricnugteren.nl>
-//
-// This is part 3 of 3 of the GEMM kernel. See part 1 for more information.
-//
-// =================================================================================================
-
-// Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
-// literal). Comment-out this line for syntax-highlighting when developing.
-//R"(
-#ifndef XGEMM_DIRECT_PART3_GLSL
-#define XGEMM_DIRECT_PART3_GLSL
 #include "xgemm_direct_part2.glsl"
 // =================================================================================================
 
-// global and shared memory declarations go here, since they are shared across all kernels c:
-// *gm and *gms both bind to the same underlying memory
-layout(binding = 0) buffer agm_buf { realMD agm[]; };
-layout(binding = 1) buffer bgm_buf { realND bgm[]; };
-layout(binding = 2) buffer cgm_buf { real cgm[]; };
-
-layout(binding = 3) buffer agms_buf { real agms[]; };
-layout(binding = 4) buffer bgms_buf { real bgms[]; };
-
-shared real alm[WGD * (WGD + PADA)];
-shared real blm[WGD * (WGD + PADB)];
-
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
-#endif
-
 // Main body of the kernel. This is the direct version without pre/post processing and restrictions.
-void XgemmDirect(const int kSizeM, const int kSizeN, const int kSizeK, const real_arg arg_alpha,
-		const real_arg arg_beta,
-#if USE_BDA
-		const __global realMD* restrict agm,
-#endif
-		const int a_offset, const int a_ld,
-#if USE_BDA
-		const __global realND* restrict bgm,
-#endif
-		const int b_offset, const int b_ld,
-#if USE_BDA
-		__global real* cgm,
-#endif
-		const int c_offset, const int c_ld,
-		// no local memory args allowed :c
-		//LOCAL_PTR real* alm, LOCAL_PTR real* blm,
-		const int a_transpose, const int b_transpose, const int c_transpose,
-		const int a_conjugate, const int b_conjugate)
+void XgemmDirect(const int kSizeM, const int kSizeN, const int kSizeK,
+	const real_arg arg_alpha,
+	const real_arg arg_beta,
+	const __global realMD* restrict agm, const int a_offset, const int a_ld,
+	const __global realND* restrict bgm, const int b_offset, const int b_ld,
+	__global real* cgm, const int c_offset, const int c_ld,
+	LOCAL_PTR real* alm, LOCAL_PTR real* blm,
+	bool a_transpose, bool b_transpose, bool c_transpose,
+	bool a_conjugate, bool b_conjugate)
 {
 	const real alpha = GetRealArg(arg_alpha);
 	const real beta = GetRealArg(arg_beta);
 
 	// Extra pointers to scalar versions of global memory
-#if USE_BDA
 	const __global real* restrict agms = (const __global real* restrict) agm;
 	const __global real* restrict bgms = (const __global real* restrict) bgm;
-#endif
 
 	// Allocates workitem-private memory (registers)
-	
 	real apd[MWID];
-	
 	real bpd[NWID];
-	
 	real cpd[NWID * MWID];
 
 	// Initializes the accumulation registers
-	
+	#pragma unroll
 	for (int _mi = 0; _mi < MWID; _mi += 1) {
-		
+		#pragma unroll
 		for (int _ni = 0; _ni < NWID; _ni += 1) {
 			SetToZero(cpd[_ni * MWID + _mi]);
 		}
@@ -100,54 +56,54 @@ void XgemmDirect(const int kSizeM, const int kSizeN, const int kSizeK, const rea
 			else {
 				GlobalToLocalScalarB(bgms, blm, b_ld, b_offset, kwg, b_transpose, b_conjugate);
 			}
-			barrier();
+			barrier(CLK_LOCAL_MEM_FENCE);
 
 			// Loops over all workitem tiles, unrolled by a factor KWID
 			for (int pwi = 0; pwi < WGD; pwi += KWID) {
-				
+				#pragma unroll
 				for (int _pit = 0; _pit < KWID; _pit += 1) {
 					int kg = pwi + _pit;
 
 					// Loads data: local --> private (matrix A and B)
-					
+					#pragma unroll
 					for (int _mi = 0; _mi < MWID; _mi += 1) {
-						 LocalToPrivateDirectA(apd[_mi], alm, _mi, kg, a_transpose);
+						apd[_mi] = LocalToPrivateDirectA(alm, _mi, kg, a_transpose);
 					}
-					
+					#pragma unroll
 					for (int _ni = 0; _ni < NWID; _ni += 1) {
-						LocalToPrivateDirectB(bpd[_ni], blm, _ni, kg, b_transpose);
+						bpd[_ni] = LocalToPrivateDirectB(blm, _ni, kg, b_transpose);
 					}
 
 					// Performs the accumulation (Cpmd += Apmd * Bpmd)
-					
+					#pragma unroll
 					for (int _ni = 0; _ni < NWID; _ni += 1) {
-						
+						#pragma unroll
 						for (int _mi = 0; _mi < MWID; _mi += 1) {
 							MultiplyAdd(cpd[_ni * MWID + _mi], apd[_mi], bpd[_ni]);
 						}
 					}
 				}
 			}
-			barrier();
+			barrier(CLK_LOCAL_MEM_FENCE);
 		}
 
 		// Loop over the remaining part (incomplete tile in K-dimension)
 		for (; kwg < kSizeK; ++kwg) {
 
 			// Loads data: off-chip --> private (matrix A and B)
-			
+			#pragma unroll
 			for (int _mi = 0; _mi < MWID; _mi += 1) {
-				GlobalToPrivateDirectA(apd[_mi], agms, _mi, a_ld, a_offset, idm, kwg, a_transpose, a_conjugate);
+				apd[_mi] = GlobalToPrivateDirectA(agms, _mi, a_ld, a_offset, idm, kwg, a_transpose, a_conjugate);
 			}
-			
+			#pragma unroll
 			for (int _ni = 0; _ni < NWID; _ni += 1) {
-				GlobalToPrivateDirectB(bpd[_ni], bgms, _ni, b_ld, b_offset, idn, kwg, b_transpose, b_conjugate);
+				bpd[_ni] = GlobalToPrivateDirectB(bgms, _ni, b_ld, b_offset, idn, kwg, b_transpose, b_conjugate);
 			}
 
 			// Performs the accumulation (Cpmd += Apmd * Bpmd)
-			
+			#pragma unroll
 			for (int _ni = 0; _ni < NWID; _ni += 1) {
-				
+				#pragma unroll
 				for (int _mi = 0; _mi < MWID; _mi += 1) {
 					MultiplyAdd(cpd[_ni * MWID + _mi], apd[_mi], bpd[_ni]);
 				}
@@ -155,9 +111,9 @@ void XgemmDirect(const int kSizeM, const int kSizeN, const int kSizeK, const rea
 		}
 
 		// Stores a tile of results and performs the multiplication with alpha and beta
-		
+		#pragma unroll
 		for (int _ni = 0; _ni < NWID; _ni += 1) {
-			
+			#pragma unroll
 			for (int _mi = 0; _mi < MWID; _mi += 1) {
 				StoreResultsDirect(cgm, cpd[_ni * MWID + _mi], _mi, _ni, idm, idn,
 													 alpha, beta, c_ld, c_offset, c_transpose);
@@ -175,54 +131,54 @@ void XgemmDirect(const int kSizeM, const int kSizeN, const int kSizeK, const rea
 			// Loads data: off-chip --> local (matrix A and B)
 			GlobalToLocalCheckedA(agms, alm, a_ld, a_offset, kwg, a_transpose, a_conjugate, kSizeM, kSizeK);
 			GlobalToLocalCheckedB(bgms, blm, b_ld, b_offset, kwg, b_transpose, b_conjugate, kSizeN, kSizeK);
-			barrier();
+			barrier(CLK_LOCAL_MEM_FENCE);
 
 			// Loops over all workitem tiles, unrolled by a factor KWID
 			for (int pwi = 0; pwi < WGD; pwi += KWID) {
-				
+				#pragma unroll
 				for (int _pit = 0; _pit < KWID; _pit += 1) {
 					int kg = pwi + _pit;
 
 					// Loads data: local --> private (matrix A and B)
-					
+					#pragma unroll
 					for (int _mi = 0; _mi < MWID; _mi += 1) {
-						LocalToPrivateDirectA(apd[_mi], alm, _mi, kg, a_transpose);
+						apd[_mi] = LocalToPrivateDirectA(alm, _mi, kg, a_transpose);
 					}
-					
+					#pragma unroll
 					for (int _ni = 0; _ni < NWID; _ni += 1) {
-						LocalToPrivateDirectB(bpd[_ni], blm, _ni, kg, b_transpose);
+						bpd[_ni] = LocalToPrivateDirectB(blm, _ni, kg, b_transpose);
 					}
 
 					// Performs the accumulation (C += A * B)
-					
+					#pragma unroll
 					for (int _ni = 0; _ni < NWID; _ni += 1) {
-						
+						#pragma unroll
 						for (int _mi = 0; _mi < MWID; _mi += 1) {
 							MultiplyAdd(cpd[_ni * MWID + _mi], apd[_mi], bpd[_ni]);
 						}
 					}
 				}
 			}
-			barrier();
+			barrier(CLK_LOCAL_MEM_FENCE);
 		}
 
 		// Loop over the remaining part (incomplete tile in K-dimension)
 		for (; kwg < kSizeK; ++kwg) {
 
 			// Loads data: off-chip --> private (matrix A and B)
-			
+			#pragma unroll
 			for (int _mi = 0; _mi < MWID; _mi += 1) {
-				GlobalToPrivateCheckedA(apd[_mi], agms, _mi, a_ld, a_offset, idm, kwg, a_transpose, a_conjugate, kSizeM);
+				apd[_mi] = GlobalToPrivateCheckedA(agms, _mi, a_ld, a_offset, idm, kwg, a_transpose, a_conjugate, kSizeM);
 			}
-			
+			#pragma unroll
 			for (int _ni = 0; _ni < NWID; _ni += 1) {
-				GlobalToPrivateCheckedB(bpd[_ni], bgms, _ni, b_ld, b_offset, idn, kwg, b_transpose, b_conjugate, kSizeN);
+				bpd[_ni] = GlobalToPrivateCheckedB(bgms, _ni, b_ld, b_offset, idn, kwg, b_transpose, b_conjugate, kSizeN);
 			}
 
 			// Performs the accumulation (C += A * B)
-			
+			#pragma unroll
 			for (int _ni = 0; _ni < NWID; _ni += 1) {
-				
+				#pragma unroll
 				for (int _mi = 0; _mi < MWID; _mi += 1) {
 					MultiplyAdd(cpd[_ni * MWID + _mi], apd[_mi], bpd[_ni]);
 				}
@@ -230,9 +186,9 @@ void XgemmDirect(const int kSizeM, const int kSizeN, const int kSizeK, const rea
 		}
 
 		// Stores a tile of results and performs the multiplication with alpha and beta
-		
+		#pragma unroll
 		for (int _ni = 0; _ni < NWID; _ni += 1) {
-			
+			#pragma unroll
 			for (int _mi = 0; _mi < MWID; _mi += 1) {
 				StoreResultsChecked(cgm, cpd[_ni * MWID + _mi], _mi, _ni, idm, idn, kSizeM, kSizeN,
 														alpha, beta, c_ld, c_offset, c_transpose);
@@ -240,10 +196,3 @@ void XgemmDirect(const int kSizeM, const int kSizeN, const int kSizeK, const rea
 		}
 	}
 }
-
-// =================================================================================================
-#endif
-// End of the C++11 raw string literal
-//)"
-
-// =================================================================================================

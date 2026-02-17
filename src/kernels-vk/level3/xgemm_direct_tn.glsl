@@ -15,7 +15,25 @@
 // =================================================================================================
 
 // Direct version of the GEMM kernel with [A, B] = [transposed, non-transposed]
-//void XgemmDirectTN
+layout(push_constant) uniform XgemmDirectTN
+{
+	int kSizeM; int kSizeN; int kSizeK;
+	real_arg arg_alpha; real_arg arg_beta;
+#if USE_BDA
+	__global realMD* restrict agm;
+#endif
+	int a_offset; int a_ld;
+#if USE_BDA
+	__global realND* restrict bgm;
+#endif
+	int b_offset; int b_ld;
+#if USE_BDA
+	__global real* cgm;
+#endif
+	int c_offset; int c_ld;
+	int c_transpose; int a_conjugate; int b_conjugate;
+} args;
+
 void main()
 {
 	XgemmDirect(args.kSizeM, args.kSizeN, args.kSizeK, args.arg_alpha, args.arg_beta,

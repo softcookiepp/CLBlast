@@ -133,6 +133,12 @@ void XgemmStridedBatched<T>::DoGemmStridedBatched(const Layout layout, const Tra
 			beta, c_buffer, c_offset_batch, c_ld);
 	}
 #else
+#if VULKAN_API
+	// right now, using any sort of offset is broken for the Vulkan version of the kernels :c
+	if (a_offset || b_offset || c_offset)
+		throw std::invalid_argument("Offsets with the vulkan kernels are not supported right now");
+#endif
+
 	// Two methods to choose from, select which one to run
 	const auto do_gemm_direct = Xgemm<T>::UseDirectKernel(m, n, k, db_["XGEMM_MIN_INDIRECT_SIZE"]);
 	const auto gemm_kernel_id = (do_gemm_direct) ? 0 : db_["GEMMK"];

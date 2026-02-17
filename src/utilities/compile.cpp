@@ -132,9 +132,9 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 		log_debug("Running built-in pre-processor");
 		kernel_string = PreprocessKernelSource(kernel_string);
 	}
-
 	// Compiles the kernel
 	std::shared_ptr<Program> program = nullptr;
+#if VULKAN_API
 	if (isGLSL)
 	{
 		// append the header to everything
@@ -145,6 +145,7 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 		program = std::make_shared<Program>(context, kernelSources);
 	}
 	else
+#endif
 		program = std::make_shared<Program>(context, kernel_string);
 	try {
 		SetOpenCLKernelStandard(device, options);

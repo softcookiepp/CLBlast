@@ -26,7 +26,7 @@
 	layout(binding = 2, std430) buffer agm_buf { real agm[]; };
 #endif
 
-layout(push_constant) uniform Xher2
+layout(push_constant, std430) uniform Xher2
 {
 	int n;
 	real_arg arg_alpha;
@@ -50,13 +50,9 @@ void main()
 	const real alpha = GetRealArg(args.arg_alpha);
 
 	// Register storage for X and Y
-	//#pragma promote_to_registers
 	real xvalues[WPT];
-	//#pragma promote_to_registers
 	real yvalues[WPT];
-	//#pragma promote_to_registers
 	real xtvalues[WPT];
-	//#pragma promote_to_registers
 	real ytvalues[WPT];
 
 	// Loads the X-vector

@@ -311,7 +311,7 @@ R"(
 
 // The complex conjugate operation for complex transforms
 #if PRECISION == 3232 || PRECISION == 6464
-	#define COMPLEX_CONJUGATE(value) value.x = value.x; value.y = -value.y
+	#define COMPLEX_CONJUGATE(value) value.y = -1.0*value.y
 #else
 	#define COMPLEX_CONJUGATE(value) 
 #endif
@@ -548,7 +548,7 @@ real MatrixUpdate2Impl(const int id1, const int id2, const int max1, const int m
 
 	// For hermetian matrices
 	#if defined(ROUTINE_HER2) || defined(ROUTINE_HPR2)
-		if (id1 == id2) { result.y = ZERO; }
+		if (id1 == id2 && (alpha1.x > 0.0 || alpha1.y > 0.0)) { result.y = ZERO; }
 	#endif
 
 	// Stores the final result
@@ -589,7 +589,7 @@ real MatrixUpdate2Impl(const int id1, const int id2, const int max1, const int m
 	layout(binding = 2, std430) buffer agm_buf { real agm[]; };
 #endif
 
-layout(push_constant) uniform Xher2
+layout(push_constant, std430) uniform Xher2
 {
 	int n;
 	real_arg arg_alpha;
@@ -613,13 +613,9 @@ void main()
 	const real alpha = GetRealArg(args.arg_alpha);
 
 	// Register storage for X and Y
-	//#pragma promote_to_registers
 	real xvalues[WPT];
-	//#pragma promote_to_registers
 	real yvalues[WPT];
-	//#pragma promote_to_registers
 	real xtvalues[WPT];
-	//#pragma promote_to_registers
 	real ytvalues[WPT];
 
 	// Loads the X-vector

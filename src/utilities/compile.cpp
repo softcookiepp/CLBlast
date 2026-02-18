@@ -63,7 +63,15 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 	if ((device.IsARM() && device.IsGPU()) || (device.IsQualcomm() && device.IsGPU())) {
 		header_string += "#define GLOBAL_MEM_FENCE 1\n";
 	}
-
+#if VULKAN_API
+	tart::DeviceMetadata meta = device()->getMetadata();
+	if (meta.subgroupShuffle)
+	{
+		header_string += "#define USE_SUBGROUP_SHUFFLING 1\n";
+		header_string += ("#define SUBGROUP_SIZE " + std::to_string(meta.subgroupSize) + "\n");
+		std::cout << "EVERYDAY I'M SHUFFLING" << std::endl;
+	}
+#else
 	// For Intel GPUs with subgroup support, use subgroup shuffling.
 	if (device.IsGPU() && device.HasExtension(kKhronosIntelSubgroups) &&
 			(precision == Precision::kSingle || precision == Precision::kHalf)) {
@@ -82,6 +90,7 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 			header_string += "#define SUBGROUP_SHUFFLING_NVIDIA_PRE_VOLTA 1\n";
 		}
 	}
+#endif
 
 	// For Qualcomm devices, specifying the OpenCL kernel attribute reqd_work_group_size reduces performance.
 	// This option compiles without the workgroup size requirement and does not affect correctness.

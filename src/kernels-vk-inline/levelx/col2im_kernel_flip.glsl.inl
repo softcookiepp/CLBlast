@@ -29,6 +29,15 @@ R"(
 	#define UNROLL(N)
 #endif
 
+// support for subgroup operations
+#ifndef USE_SUBGROUP_SHUFFLING
+	#define USE_SUBGROUP_SHUFFLING 0
+#endif
+#if USE_SUBGROUP_SHUFFLING
+	//#extension GL_EXT_shader_subgroup : require
+	#extension GL_KHR_shader_subgroup_shuffle : require
+#endif
+
 // Enable support for half-precision
 #if PRECISION == 16
 	#extension GL_EXT_shader_16bit_storage : require
@@ -367,6 +376,7 @@ R"(
 #define get_global_size(idx) int(gl_NumWorkGroups[idx] * gl_WorkGroupSize[idx])
 #define get_local_size(idx) int(gl_WorkGroupSize[idx])
 #define get_num_groups(dim) int(gl_NumWorkGroups[dim])
+#define get_sub_group_local_id() int(gl_SubgroupInvocationID)
 
 // Staggered/shuffled group indices to avoid partition camping (AMD GPUs). Formula's are taken from:
 // http://docs.nvidia.com/cuda/samples/6_Advanced/transpose/doc/MatrixTranspose.pdf

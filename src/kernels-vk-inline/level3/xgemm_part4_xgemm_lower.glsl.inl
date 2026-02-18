@@ -97,6 +97,15 @@ R"(
 	#define UNROLL(N)
 #endif
 
+// support for subgroup operations
+#ifndef USE_SUBGROUP_SHUFFLING
+	#define USE_SUBGROUP_SHUFFLING 0
+#endif
+#if USE_SUBGROUP_SHUFFLING
+	//#extension GL_EXT_shader_subgroup : require
+	#extension GL_KHR_shader_subgroup_shuffle : require
+#endif
+
 // Enable support for half-precision
 #if PRECISION == 16
 	#extension GL_EXT_shader_16bit_storage : require
@@ -435,6 +444,7 @@ R"(
 #define get_global_size(idx) int(gl_NumWorkGroups[idx] * gl_WorkGroupSize[idx])
 #define get_local_size(idx) int(gl_WorkGroupSize[idx])
 #define get_num_groups(dim) int(gl_NumWorkGroups[dim])
+#define get_sub_group_local_id() int(gl_SubgroupInvocationID)
 
 // Staggered/shuffled group indices to avoid partition camping (AMD GPUs). Formula's are taken from:
 // http://docs.nvidia.com/cuda/samples/6_Advanced/transpose/doc/MatrixTranspose.pdf
@@ -611,30 +621,8 @@ R"(
 	#define GLOBAL_MEM_FENCE 0		// Global synchronisation barrier for potential better performance
 #endif
 
-#ifndef SUBGROUP_SHUFFLING_NVIDIA_PRE_VOLTA
-	#define SUBGROUP_SHUFFLING_NVIDIA_PRE_VOLTA 0
-#endif
-#ifndef SUBGROUP_SHUFFLING_NVIDIA_POST_VOLTA
-	#define SUBGROUP_SHUFFLING_NVIDIA_POST_VOLTA 0
-#endif
-#ifndef SUBGROUP_SHUFFLING_INTEL
-	#define SUBGROUP_SHUFFLING_INTEL 0
-#endif
 #ifndef USE_SUBGROUP_SHUFFLING
 	#define USE_SUBGROUP_SHUFFLING 0		 // Optionally enables subgroup shuffling for Intel GPUs
-#endif
-
-// Intel subgroups (https://www.khronos.org/registry/OpenCL/extensions/intel/cl_intel_subgroups.html)
-#if USE_SUBGROUP_SHUFFLING == 1 && SUBGROUP_SHUFFLING_INTEL == 1
-	#pragma OPENCL EXTENSION cl_intel_subgroups: enable
-	#define SUBGROUP_SIZE 8							// Assumes subgroup size is always 8 on Intel GPUs
-#endif
-
-// NVIDIA warps as subgroups using inline PTX (https://docs.nvidia.com/cuda/inline-ptx-assembly/index.html)
-#if USE_SUBGROUP_SHUFFLING == 1
-	#if SUBGROUP_SHUFFLING_NVIDIA_PRE_VOLTA == 1 || SUBGROUP_SHUFFLING_NVIDIA_POST_VOLTA == 1
-		#define SUBGROUP_SIZE 32						// Assumes subgroup size is always 32 on NVIDIA GPUs
-	#endif
 #endif
 
 #if NWI != SUBGROUP_SIZE || MDIMC < SUBGROUP_SIZE
@@ -1072,36 +1060,12 @@ void StoreResults(
 
 int clblast_get_sub_group_local_id()
 {
-
-	// Intel extension 
-	#if SUBGROUP_SHUFFLING_INTEL == 1
 	return get_sub_group_local_id();
-	
-	// Nvidia inline PTX
-	#elif SUBGROUP_SHUFFLING_NVIDIA_PRE_VOLTA == 1 || SUBGROUP_SHUFFLING_NVIDIA_POST_VOLTA == 1
-	int ret;
-	asm volatile("mov.u32 %0, %%laneid;" : "=r"(ret) );
-	return ret;
-	#endif 
 }
 
-realN clblast_sub_group_shuffle(realN reg, int src) {
-
-	// Intel extension 
-	#if SUBGROUP_SHUFFLING_INTEL == 1
-	return intel_sub_group_shuffle(reg, src);
-	
-	// Nvidia inline PTX
-	// Volta and later requires .sync shuffle instructions with an extra mask arg
-	#elif SUBGROUP_SHUFFLING_NVIDIA_PRE_VOLTA == 1 || SUBGROUP_SHUFFLING_NVIDIA_POST_VOLTA == 1
-	realN ret;
-		#if SUBGROUP_SHUFFLING_NVIDIA_POST_VOLTA == 1
-		asm volatile("shfl.sync.idx.b32 %0, %1, %2, 0x1f, 0xffffffff;" : "=f"(ret): "f"(reg), "r"(src));
-		#else
-		asm volatile("shfl.idx.b32 %0, %1, %2, 0x1f;" : "=f"(ret): "f"(reg), "r"(src));
-		#endif
-	return ret;
-	#endif
+realN clblast_sub_group_shuffle(realN reg, int src)
+{
+	return subgroupShuffle(reg, uint(src));
 }
 #endif
 
@@ -1124,7 +1088,7 @@ void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
 		realN bpm[NWI/VWN]; // 1 * NWI
 	#elif GEMMK == 1
 		#if USE_SUBGROUP_SHUFFLING == 1
-			
+			#error "gey"
 			realN apm[KREG/VWN]; // KREG (subgroup shuffling in NWI dimension)
 		#else
 			

@@ -21,41 +21,12 @@
 
 int clblast_get_sub_group_local_id()
 {
-
-	// Intel extension 
-	#if SUBGROUP_SHUFFLING_INTEL == 1
 	return get_sub_group_local_id();
-	
-	// Nvidia inline PTX
-	#elif SUBGROUP_SHUFFLING_NVIDIA_PRE_VOLTA == 1 || SUBGROUP_SHUFFLING_NVIDIA_POST_VOLTA == 1
-	int ret;
-	asm volatile("mov.u32 %0, %%laneid;" : "=r"(ret) );
-	return ret;
-	#endif 
 }
 
 realN clblast_sub_group_shuffle(realN reg, int src)
 {
-#if 1
 	return subgroupShuffle(reg, uint(src));
-#else
-	// just keeping this for reference as of now
-	// Intel extension 
-	#if SUBGROUP_SHUFFLING_INTEL == 1
-	return intel_sub_group_shuffle(reg, src);
-	
-	// Nvidia inline PTX
-	// Volta and later requires .sync shuffle instructions with an extra mask arg
-	#elif SUBGROUP_SHUFFLING_NVIDIA_PRE_VOLTA == 1 || SUBGROUP_SHUFFLING_NVIDIA_POST_VOLTA == 1
-	realN ret;
-		#if SUBGROUP_SHUFFLING_NVIDIA_POST_VOLTA == 1
-		asm volatile("shfl.sync.idx.b32 %0, %1, %2, 0x1f, 0xffffffff;" : "=f"(ret): "f"(reg), "r"(src));
-		#else
-		asm volatile("shfl.idx.b32 %0, %1, %2, 0x1f;" : "=f"(ret): "f"(reg), "r"(src));
-		#endif
-	return ret;
-	#endif
-#endif
 }
 #endif
 
@@ -78,7 +49,6 @@ void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
 		realN bpm[NWI/VWN]; // 1 * NWI
 	#elif GEMMK == 1
 		#if USE_SUBGROUP_SHUFFLING == 1
-			
 			realN apm[KREG/VWN]; // KREG (subgroup shuffling in NWI dimension)
 		#else
 			

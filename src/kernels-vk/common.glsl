@@ -26,7 +26,7 @@
 	#define USE_SUBGROUP_SHUFFLING 0
 #endif
 #if USE_SUBGROUP_SHUFFLING
-	#extension GL_KHR_shader_subgroup : require
+	//#extension GL_EXT_shader_subgroup : require
 	#extension GL_KHR_shader_subgroup_shuffle : require
 #endif
 

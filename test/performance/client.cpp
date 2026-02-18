@@ -24,7 +24,11 @@
 #include <utility>
 #include <vector>
 
-#include "clblast.h"
+#if OPENCL_API
+	#include "clblast.h"
+#elif VULKAN_API
+	#include "clblast_vk.h"
+#endif
 #include "routine.hpp"
 #include "test/test_utilities.hpp"
 #include "test/wrapper_cuda.hpp"

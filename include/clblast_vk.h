@@ -108,7 +108,7 @@ enum class StatusCode {
   kInvalidIncrementZ = -2037,         // Increment of vector Z cannot be zero
   kInsufficientMemoryZ = -2036,       // Vector Z's OpenCL buffer is too small
 };
-#endif
+
 // Matrix layout and transpose types
 enum class Layout { kRowMajor = 101, kColMajor = 102 };
 enum class Transpose { kNo = 111, kYes = 112, kConjugate = 113 };
@@ -126,7 +126,7 @@ enum class Precision {
   kComplexDouble = 6464,
   kAny = -1
 };
-
+#endif
 // =================================================================================================
 // BLAS level-1 (vector-vector) routines
 // =================================================================================================

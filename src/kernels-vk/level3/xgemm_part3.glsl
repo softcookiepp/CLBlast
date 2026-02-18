@@ -34,8 +34,12 @@ int clblast_get_sub_group_local_id()
 	#endif 
 }
 
-realN clblast_sub_group_shuffle(realN reg, int src) {
-
+realN clblast_sub_group_shuffle(realN reg, int src)
+{
+#if 1
+	return subgroupShuffle(reg, uint(src));
+#else
+	// just keeping this for reference as of now
 	// Intel extension 
 	#if SUBGROUP_SHUFFLING_INTEL == 1
 	return intel_sub_group_shuffle(reg, src);
@@ -51,6 +55,7 @@ realN clblast_sub_group_shuffle(realN reg, int src) {
 		#endif
 	return ret;
 	#endif
+#endif
 }
 #endif
 

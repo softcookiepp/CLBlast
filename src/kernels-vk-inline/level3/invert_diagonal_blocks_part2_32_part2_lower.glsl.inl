@@ -753,7 +753,7 @@ layout(push_constant, std430) uniform TripleMatMulPart2
 	__global real* restrict dest,
 #endif
 	int current_size; int num_pages; int block_size;
-} args;
+};
 
 shared real lm[LOCALY * LOCALX];
 
@@ -761,7 +761,7 @@ shared real lm[LOCALY * LOCALX];
 //TripleMatMul32Part2Lower
 void main()
 {
-	TripleMatMulPart2(32, false, lm, args.n, dest, args.current_size, args.num_pages, args.block_size);
+	TripleMatMulPart2(32, false, lm, n, dest, current_size, num_pages, block_size);
 }
 
 // =================================================================================================

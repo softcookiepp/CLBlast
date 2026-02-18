@@ -104,22 +104,22 @@ layout(push_constant) uniform Xim2colKernelFlip
 	__global real* col_buffer;
 #endif
 	int col_offset;
-} args;
+};
 
 void main()
 {
 	const bool kernel_flip = true;
-	Xim2col(args.input_h, args.input_w, args.channels, args.output_h, args.output_w, args.kernel_h, args.kernel_w,
-					args.pad_h, args.pad_w, args.stride_h, args.stride_w, args.dilation_h, args.dilation_w,
+	Xim2col(input_h, input_w, channels, output_h, output_w, kernel_h, kernel_w,
+					pad_h, pad_w, stride_h, stride_w, dilation_h, dilation_w,
 					kernel_flip,
 #if USE_BDA
 					im_buffer,
 #endif
-					args.im_offset,
+					im_offset,
 #if USE_BDA
 					col_buffer,
 #endif
-					args.col_offset);
+					col_offset);
 }
 
 // =================================================================================================

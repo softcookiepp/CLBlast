@@ -626,7 +626,7 @@ layout(push_constant, std430) uniform InvertDiagonalBlock
 #endif
 	int outer_block_size;
 	int unit_diagonal; int is_upper;
-} args;
+};
 
 // Local memory to store the inverted block of INTERNAL_BLOCK_SIZE by INTERNAL_BLOCK_SIZE
 shared real lm[INTERNAL_BLOCK_SIZE][INTERNAL_BLOCK_SIZE];
@@ -638,26 +638,26 @@ void main()
 
 	// Sets the offset for this particular block in the source and destination matrices
 	const int block_index_per_block = block_index * INTERNAL_BLOCK_SIZE;
-	const int src_block_offset = block_index * (INTERNAL_BLOCK_SIZE + args.src_ld * INTERNAL_BLOCK_SIZE) + args.src_offset;
-	const int num_inner_blocks = args.outer_block_size / INTERNAL_BLOCK_SIZE;
+	const int src_block_offset = block_index * (INTERNAL_BLOCK_SIZE + src_ld * INTERNAL_BLOCK_SIZE) + src_offset;
+	const int num_inner_blocks = outer_block_size / INTERNAL_BLOCK_SIZE;
 	const int block_index_div = block_index / num_inner_blocks;
 	const int block_index_mod = block_index % num_inner_blocks;
-	const int offset_part1 = block_index_div * args.outer_block_size * args.outer_block_size; // go to the block_index_div outer args.outer_block_size*args.outer_block_size block
-	const int offset_part2 = block_index_mod * (args.outer_block_size*INTERNAL_BLOCK_SIZE + INTERNAL_BLOCK_SIZE); // then to the block_index_mod inner INTERNAL_BLOCK_SIZE*INTERNAL_BLOCK_SIZE block inside that
+	const int offset_part1 = block_index_div * outer_block_size * outer_block_size; // go to the block_index_div outer outer_block_size*outer_block_size block
+	const int offset_part2 = block_index_mod * (outer_block_size*INTERNAL_BLOCK_SIZE + INTERNAL_BLOCK_SIZE); // then to the block_index_mod inner INTERNAL_BLOCK_SIZE*INTERNAL_BLOCK_SIZE block inside that
 	const int dest_block_offset = offset_part1 + offset_part2;
 
 	// Loads the source lower triangle into local memory. Any values in the upper triangle or
 	// outside of the matrix are set to zero
 	for (int _j = 0; _j < INTERNAL_BLOCK_SIZE; _j += 1) {
 		bool condition = false;
-		if (args.is_upper != 0) {
-			condition = (thread_index <= _j) && (block_index_per_block + _j < args.n);
+		if (is_upper != 0) {
+			condition = (thread_index <= _j) && (block_index_per_block + _j < n);
 		}
 		else {
-			condition = (thread_index >= _j) && (block_index_per_block + thread_index < args.n);
+			condition = (thread_index >= _j) && (block_index_per_block + thread_index < n);
 		}
 		if (condition) {
-			const int src_index = _j*args.src_ld + thread_index + src_block_offset;
+			const int src_index = _j*src_ld + thread_index + src_block_offset;
 			lm[thread_index][_j] = src[src_index];
 		}
 		else {
@@ -669,7 +669,7 @@ void main()
 	// Inverts the diagonal
 	real inverted_diagonal;
 	SetToOne(inverted_diagonal);
-	if (args.unit_diagonal == 0) {
+	if (unit_diagonal == 0) {
 		const real diagonal_value = lm[thread_index][thread_index];
 		if (!IsZero(diagonal_value)) { // Only for non-singular values and values inside the matrix
 			real constant_one;
@@ -681,7 +681,7 @@ void main()
 	barrier();
 
 	// Upper-triangular
-	if (args.is_upper != 0) {
+	if (is_upper != 0) {
 
 		// Computes the elements 0:j-1 of the j-th column
 		for (int j = 1; j < INTERNAL_BLOCK_SIZE; ++j) {
@@ -727,7 +727,7 @@ void main()
 	// Writes the result to global memory
 	#pragma unroll
 	for (int j = 0; j < INTERNAL_BLOCK_SIZE; j += 1) {
-		dest[j*args.outer_block_size + thread_index + dest_block_offset] = lm[thread_index][j];
+		dest[j*outer_block_size + thread_index + dest_block_offset] = lm[thread_index][j];
 	}
 }
 

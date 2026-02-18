@@ -50,19 +50,19 @@ layout(push_constant) uniform XhadFaster
 	__global real* restrict ygm;
 	__global real* zgm;
 #endif
-} args;
+};
 
 // Faster version of the kernel without offsets and strided accesses but with if-statement. Also
 // assumes that 'n' is dividable by 'VW' and 'WPT'.
 
 void main()
 {
-	if (!(args.n % VW == 0 && args.n % WPT == 0)) return;
+	if (!(n % VW == 0 && n % WPT == 0)) return;
 	
-	const real alpha = GetRealArg(args.arg_alpha);
-	const real beta = GetRealArg(args.arg_beta);
+	const real alpha = GetRealArg(arg_alpha);
+	const real beta = GetRealArg(arg_beta);
 
-	const int num_desired_threads = args.n / (VW * WPT);
+	const int num_desired_threads = n / (VW * WPT);
 
 	if (get_global_id(0) < num_desired_threads) {
 		//#pragma unroll

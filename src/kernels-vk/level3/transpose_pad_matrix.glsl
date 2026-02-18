@@ -34,22 +34,22 @@ layout(push_constant) uniform TransposePadMatrix
 #endif
 	real_arg arg_alpha;
 	int do_conjugate;
-} args;
+};
 
 void main()
 {
-	const real alpha = GetRealArg(args.arg_alpha);
+	const real alpha = GetRealArg(arg_alpha);
 	
 	_TransposePadMatrix(//tile,
-		args.src_one, args.src_two, args.src_ld, args.src_offset,
+		src_one, src_two, src_ld, src_offset,
 #if USE_BDA
 		src,
 #endif
-		args.dest_one, args.dest_two, args.dest_ld, args.dest_offset,
+		dest_one, dest_two, dest_ld, dest_offset,
 #if USE_BDA
 		dest,
 #endif
-		alpha, args.do_conjugate);
+		alpha, do_conjugate);
 }
 
 

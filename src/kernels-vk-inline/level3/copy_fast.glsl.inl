@@ -575,18 +575,18 @@ layout(push_constant) uniform CopyMatrixFast
 	__global realC* dest,
 #endif
 	real_arg arg_alpha;
-} args;
+};
 
 void main()
 {
-	if (args.ld % COPY_VW != 0) return;
+	if (ld % COPY_VW != 0) return;
 
-	const real alpha = GetRealArg(args.arg_alpha);
+	const real alpha = GetRealArg(arg_alpha);
 	UNROLL(COPY_WPT)
 	for (int _w_one = 0; _w_one < COPY_WPT; _w_one += 1) {
 		const int id_one = get_global_id(0);
 		const int id_two = (get_group_id(1)*COPY_WPT + _w_one) * COPY_DIMY + get_local_id(1);
-		const int id = id_two*(args.ld/COPY_VW) + id_one;
+		const int id = id_two*(ld/COPY_VW) + id_one;
 		realC result;
 		#if COPY_VW == 1
 			Multiply(result, alpha, src[id]);

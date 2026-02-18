@@ -49,17 +49,17 @@ layout(push_constant) uniform XhadFaster
 	__global real* restrict ygm;
 	__global real* zgm;
 #endif
-} args;
+};
 
 // Faster version of the kernel without offsets and strided accesses. Also assumes that 'n' is
 // dividable by 'VW', 'WGS' and 'WPT'.
 
 void main()
 {
-	if (!(args.n % VW == 0 && args.n % WPT == 0 && args.n % WGS == 0) ) return;
+	if (!(n % VW == 0 && n % WPT == 0 && n % WGS == 0) ) return;
 	
-	const real alpha = GetRealArg(args.arg_alpha);
-	const real beta = GetRealArg(args.arg_beta);
+	const real alpha = GetRealArg(arg_alpha);
+	const real beta = GetRealArg(arg_beta);
 
 	//#pragma unroll
 	for (int _w = 0; _w < WPT; _w += 1) {

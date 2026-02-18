@@ -52,14 +52,14 @@ layout(push_constant) uniform TransposeMatrixFast
 	__global realT* dest,
 #endif
 	real_arg arg_alpha;
-} args;
+};
 
 // Local memory to store a tile of the matrix (for coalescing)
 shared realT tile[TRA_WPT*TRA_DIM][TRA_DIM + TRA_PAD];
 
 void main()
 {
-	const real alpha = GetRealArg(args.arg_alpha);
+	const real alpha = GetRealArg(arg_alpha);
 
 	// Sets the group identifiers. They might be 'shuffled' around to distribute work in a different
 	// way over workgroups, breaking memory-bank dependencies.
@@ -80,7 +80,7 @@ void main()
 		const int id_two = (gid0 * TRA_DIM + get_local_id(1))*TRA_WPT + _w_one;
 
 		// Loads data into the local memory
-		realT value = src[id_two*(args.ld/TRA_WPT) + id_one];
+		realT value = src[id_two*(ld/TRA_WPT) + id_one];
 		tile[get_local_id(0)*TRA_WPT + _w_one][get_local_id(1)] = value;
 	}
 
@@ -115,7 +115,7 @@ void main()
 		#endif
 		const int id_one = gid0*TRA_DIM + get_local_id(0);
 		const int id_two = (gid1*TRA_DIM + get_local_id(1))*TRA_WPT + _w_two;
-		dest[id_two*(args.ld/TRA_WPT) + id_one] = result;
+		dest[id_two*(ld/TRA_WPT) + id_one] = result;
 	}
 }
 

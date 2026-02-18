@@ -41,17 +41,17 @@ layout(push_constant, std430) uniform Xswap
 #endif
 	int y_offset;
 	int y_inc;
-} args;
+};
 
 //void Xswap(
 void main()
 {
 	// Loops over the work that needs to be done (allows for an arbitrary number of threads)
-	for (int id = get_global_id(0); id<args.n; id += get_global_size(0))
+	for (int id = get_global_id(0); id<n; id += get_global_size(0))
 	{
-		real temp = xgm[id*args.x_inc + args.x_offset];
-		xgm[id*args.x_inc + args.x_offset] = ygm[id*args.y_inc + args.y_offset];
-		ygm[id*args.y_inc + args.y_offset] = temp;
+		real temp = xgm[id*x_inc + x_offset];
+		xgm[id*x_inc + x_offset] = ygm[id*y_inc + y_offset];
+		ygm[id*y_inc + y_offset] = temp;
 	}
 }
 

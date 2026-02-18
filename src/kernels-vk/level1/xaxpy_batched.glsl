@@ -44,7 +44,7 @@ layout(push_constant) uniform XaxpyBatched
 	__global real* ygm; __constant int* y_offsets;
 #endif
 	int y_inc;
-} args;
+};
 
 void main()
 {
@@ -52,11 +52,11 @@ void main()
 	const real alpha = arg_alphas[batch];
 
 	// Loops over the work that needs to be done (allows for an arbitrary number of threads)
-	for (int id = get_global_id(0); id < args.n; id += get_global_size(0))
+	for (int id = get_global_id(0); id < n; id += get_global_size(0))
 	{
 		// will have to update this later
-		real xvalue = xgm[id*args.x_inc + x_offsets[batch]];
-		MultiplyAdd(ygm[id*args.y_inc + y_offsets[batch]], alpha, xvalue);
+		real xvalue = xgm[id*x_inc + x_offsets[batch]];
+		MultiplyAdd(ygm[id*y_inc + y_offsets[batch]], alpha, xvalue);
 	}
 }
 

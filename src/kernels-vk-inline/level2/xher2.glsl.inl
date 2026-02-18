@@ -669,11 +669,11 @@ layout(push_constant, std430) uniform Xher2
 #endif
 	int a_offset; int a_ld;
 	int is_upper; int is_rowmajor;
-} args;
+};
 
 void main()
 {
-	const real alpha = GetRealArg(args.arg_alpha);
+	const real alpha = GetRealArg(arg_alpha);
 
 	// Register storage for X and Y
 	real xvalues[WPT];
@@ -685,35 +685,35 @@ void main()
 	//#pragma unroll
 	for (int _w = 0; _w < WPT; _w += 1) {
 		const int id2 = _w*get_global_size(1) + get_global_id(1);
-		LoadVector(xvalues[_w], id2, args.n, xgm, args.x_offset, args.x_inc, !bool(args.is_rowmajor));
+		LoadVector(xvalues[_w], id2, n, xgm, x_offset, x_inc, !bool(is_rowmajor));
 	}
 
 	// Loads the X-transposed-vector
 	//#pragma unroll
 	for (int _w = 0; _w < WPT; _w += 1) {
 		const int id1 = _w*get_global_size(0) + get_global_id(0);
-		LoadVector(xtvalues[_w], id1, args.n, xgm, args.x_offset, args.x_inc, bool(args.is_rowmajor));
+		LoadVector(xtvalues[_w], id1, n, xgm, x_offset, x_inc, bool(is_rowmajor));
 	}
 
 	// Loads the Y-vector
 	//#pragma unroll
 	for (int _w = 0; _w < WPT; _w += 1) {
 		const int id1 = _w*get_global_size(0) + get_global_id(0);
-		LoadVector(yvalues[_w], id1, args.n, ygm, args.y_offset, args.y_inc, bool(args.is_rowmajor));
+		LoadVector(yvalues[_w], id1, n, ygm, y_offset, y_inc, bool(is_rowmajor));
 	}
 
 	// Loads the Y-transposed-vector
 	//#pragma unroll
 	for (int _w = 0; _w < WPT; _w += 1) {
 		const int id2 = _w*get_global_size(1) + get_global_id(1);
-		LoadVector(ytvalues[_w], id2, args.n, ygm, args.y_offset, args.y_inc, !bool(args.is_rowmajor));
+		LoadVector(ytvalues[_w], id2, n, ygm, y_offset, y_inc, !bool(is_rowmajor));
 	}
 
 	// Sets the proper value of alpha in case conjugation is needed
 	real alpha1 = alpha;
 	real alpha2 = alpha;
 	#if defined(ROUTINE_HER2) || defined(ROUTINE_HPR2)
-		if (bool(args.is_rowmajor)) {
+		if (bool(is_rowmajor)) {
 			COMPLEX_CONJUGATE(alpha1);
 		}
 		else {
@@ -732,15 +732,15 @@ void main()
 			const int id2 = _w2*get_global_size(1) + get_global_id(1);
 
 			// Skip these threads if they do not contain threads contributing to the matrix-triangle
-			if ((bool(args.is_upper) && (id1 > id2)) || (!bool(args.is_upper) && (id2 > id1))) {
+			if ((bool(is_upper) && (id1 > id2)) || (!bool(is_upper) && (id2 > id1))) {
 				// Do nothing
 			}
 
 			// Loads A, performs the operation, and stores the result into A
 			else {
-				MatrixUpdate2(id1, id2, args.n, args.n, agm, args.a_offset, args.a_ld,
+				MatrixUpdate2(id1, id2, n, n, agm, a_offset, a_ld,
 											alpha1, xvalues[_w2], yvalues[_w1],
-											alpha2, xtvalues[_w1], ytvalues[_w2], bool(args.is_upper));
+											alpha2, xtvalues[_w1], ytvalues[_w2], bool(is_upper));
 			}
 		}
 	}

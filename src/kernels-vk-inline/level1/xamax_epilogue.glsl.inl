@@ -498,7 +498,7 @@ layout(push_constant) uniform XamaxEpilogue
 	__global unsigned int* imax,
 #endif
 	int imax_offset;
-} args;
+};
 
 shared singlereal maxlm[WGS2];
 shared uint imaxlm[WGS2];
@@ -532,7 +532,7 @@ void main()
 
 	// Stores the final result
 	if (lid == 0) {
-		imax[args.imax_offset] = imaxlm[0];
+		imax[imax_offset] = imaxlm[0];
 	}
 }
 

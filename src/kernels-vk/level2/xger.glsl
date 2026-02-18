@@ -50,11 +50,11 @@ layout(push_constant) uniform Xger
 	int a_offset;
 	int a_ld;
 	int is_rowmajor;
-} args;
+};
 
 void main()
 {
-	const real alpha = GetRealArg(args.arg_alpha);
+	const real alpha = GetRealArg(arg_alpha);
 
 	// Register storage for X and Y
 	//#pragma promote_to_registers
@@ -63,16 +63,16 @@ void main()
 	real yvalues[WPT];
 
 	// Row-major version
-	if (bool(args.is_rowmajor)) {
+	if (bool(is_rowmajor)) {
 
 		// Loads the X-vector
 		//#pragma unroll
 		for (int _w = 0; _w < WPT; _w += 1) {
 			const int id2 = _w*get_global_size(1) + get_global_id(1);
 #if 1
-			LoadVector(xvalues[_w], id2, args.max2, xgm, args.x_offset, args.x_inc, false);
+			LoadVector(xvalues[_w], id2, max2, xgm, x_offset, x_inc, false);
 #else
-			xvalues[_w] = LoadVector(id2, args.max2, xgm, args.x_offset, args.x_inc, false);
+			xvalues[_w] = LoadVector(id2, max2, xgm, x_offset, x_inc, false);
 #endif
 		}
 
@@ -81,9 +81,9 @@ void main()
 		for (int _w = 0; _w < WPT; _w += 1) {
 			const int id1 = _w*get_global_size(0) + get_global_id(0);
 #if 1
-			LoadVector(yvalues[_w], id1, args.max1, ygm, args.y_offset, args.y_inc, true);
+			LoadVector(yvalues[_w], id1, max1, ygm, y_offset, y_inc, true);
 #else
-			yvalues[_w] = LoadVector(id1, args.max1, ygm, args.y_offset, args.y_inc, true);
+			yvalues[_w] = LoadVector(id1, max1, ygm, y_offset, y_inc, true);
 #endif
 		}
 
@@ -98,7 +98,7 @@ void main()
 				const int id2 = _w2*get_global_size(1) + get_global_id(1);
 
 				// Loads A, performs the operation, and stores the result into A
-				MatrixUpdate(id1, id2, args.max1, args.max2, agm, args.a_offset, args.a_ld,
+				MatrixUpdate(id1, id2, max1, max2, agm, a_offset, a_ld,
 										 alpha, xvalues[_w2], yvalues[_w1], false);
 			}
 		}
@@ -112,9 +112,9 @@ void main()
 		for (int _w = 0; _w < WPT; _w += 1) {
 			const int id1 = _w*get_global_size(0) + get_global_id(0);
 #if 1
-			LoadVector(xvalues[_w], id1, args.max1, xgm, args.x_offset, args.x_inc, false);
+			LoadVector(xvalues[_w], id1, max1, xgm, x_offset, x_inc, false);
 #else
-			xvalues[_w] = LoadVector(id1, args.max1, xgm, args.x_offset, args.x_inc, false);
+			xvalues[_w] = LoadVector(id1, max1, xgm, x_offset, x_inc, false);
 #endif
 		}
 
@@ -123,9 +123,9 @@ void main()
 		for (int _w = 0; _w < WPT; _w += 1) {
 			const int id2 = _w*get_global_size(1) + get_global_id(1);
 #if 1
-			LoadVector(yvalues[_w], id2, args.max2, ygm, args.y_offset, args.y_inc, true);
+			LoadVector(yvalues[_w], id2, max2, ygm, y_offset, y_inc, true);
 #else
-			yvalues[_w] = LoadVector(id2, args.max2, ygm, args.y_offset, args.y_inc, true);
+			yvalues[_w] = LoadVector(id2, max2, ygm, y_offset, y_inc, true);
 #endif
 		}
 
@@ -140,7 +140,7 @@ void main()
 				const int id2 = _w2*get_global_size(1) + get_global_id(1);
 
 				// Loads A, performs the operation, and stores the result into A
-				MatrixUpdate(id1, id2, args.max1, args.max2, agm, args.a_offset, args.a_ld,
+				MatrixUpdate(id1, id2, max1, max2, agm, a_offset, a_ld,
 										 alpha, xvalues[_w1], yvalues[_w2], false);
 			}
 		}

@@ -576,23 +576,23 @@ layout(push_constant) uniform Xcol2imKernelFlip
 	__global real* im_buffer;
 #endif
 	int im_offset;
-} args;
+};
 
 void main()
 {
 	const bool kernel_flip = true;
-	Xcol2im(args.input_h, args.input_w, args.channels, args.output_h, args.output_w, args.kernel_h, args.kernel_w,
-					args.pad_h, args.pad_w, args.stride_h, args.stride_w, args.dilation_h, args.dilation_w,
-					args.stride_bez_h, args.stride_bez_w, args.dilation_bez_h, args.dilation_bez_w, args.gcd_h, args.gcd_w,
+	Xcol2im(input_h, input_w, channels, output_h, output_w, kernel_h, kernel_w,
+					pad_h, pad_w, stride_h, stride_w, dilation_h, dilation_w,
+					stride_bez_h, stride_bez_w, dilation_bez_h, dilation_bez_w, gcd_h, gcd_w,
 					kernel_flip,
 #if USE_BDA
 					col_buffer,
 #endif
-					args.col_offset,
+					col_offset,
 #if USE_BDA
 					im_buffer,
 #endif		
-					args.im_offset);
+					im_offset);
 }
 
 // =================================================================================================

@@ -89,18 +89,18 @@ layout(push_constant) uniform XgemvFast
 	//int parameter;
 	//int kl_unused;
 	//int ku_unused;
-} args;
+};
 
 // Local memory for the vector X
 shared real xlm[WGS2];
 
 void main()
 {
-	if (!(args.m % WGS2 == 0 && args.n % WGS2 == 0 && args.a_ld % VW2 == 0)) return;
+	if (!(m % WGS2 == 0 && n % WGS2 == 0 && a_ld % VW2 == 0)) return;
 	
 	
-	const real alpha = GetRealArg(args.arg_alpha);
-	const real beta = GetRealArg(args.arg_beta);
+	const real alpha = GetRealArg(arg_alpha);
+	const real beta = GetRealArg(arg_beta);
 
 	// Local memory for the vector X
 	//__local real xlm[WGS2];
@@ -115,11 +115,11 @@ void main()
 	}
 
 	// Loops over work-group sized portions of the work
-	for (int kwg=0; kwg<args.n; kwg+=WGS2) {
+	for (int kwg=0; kwg<n; kwg+=WGS2) {
 
 		// Loads the vector X into local memory
 		const int lid = get_local_id(0);
-		xlm[lid] = xgm[(kwg + lid)*args.x_inc + args.x_offset];
+		xlm[lid] = xgm[(kwg + lid)*x_inc + x_offset];
 
 		// Synchronizes all threads in a workgroup
 		barrier();
@@ -131,7 +131,7 @@ void main()
 			
 			for (int _w = 0; _w < WPT2/VW2; _w += 1) {
 				const int gid = (WPT2/VW2)*get_global_id(0) + _w;
-				realVF avec = agm[(args.a_ld/VW2)*k + gid];
+				realVF avec = agm[(a_ld/VW2)*k + gid];
 				#if VW2 == 1
 					MultiplyAdd(acc2[VW2*_w+0], xlm[_kl], avec);
 				#else
@@ -150,8 +150,8 @@ void main()
 	
 	for (int _w = 0; _w < WPT2; _w += 1) {
 		const int gid = WPT2*get_global_id(0) + _w;
-		real yval = ygm[gid*args.y_inc + args.y_offset];
-		AXPBY(ygm[gid*args.y_inc + args.y_offset], alpha, acc2[_w], beta, yval);
+		real yval = ygm[gid*y_inc + y_offset];
+		AXPBY(ygm[gid*y_inc + y_offset], alpha, acc2[_w], beta, yval);
 	}
 }
 

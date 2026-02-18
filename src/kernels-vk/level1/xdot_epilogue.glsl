@@ -46,7 +46,7 @@ layout(push_constant) uniform XdotEpilogue
 	__global real* dot,
 #endif
 	int dot_offset;
-} args;
+};
 
 shared real lm[WGS2];
 
@@ -68,7 +68,7 @@ void main()
 
 	// Stores the final result
 	if (lid == 0) {
-		dot[args.dot_offset] = lm[0];
+		dot[dot_offset] = lm[0];
 	}
 }
 

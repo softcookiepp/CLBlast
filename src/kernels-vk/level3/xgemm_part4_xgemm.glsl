@@ -30,12 +30,12 @@ layout(push_constant, std430) uniform Xgemm
 	__global realM* cgm;
 #endif
 	int b_offset; int c_offset;
-} args;
+};
 
 void main()
 {
-	const real alpha = GetRealArg(args.arg_alpha);
-	const real beta = GetRealArg(args.arg_beta);
+	const real alpha = GetRealArg(arg_alpha);
+	const real beta = GetRealArg(arg_beta);
 
 	// Adds the offsets (in case of use of a single temporary buffer for A, B, and C)
 #if USE_BDA
@@ -45,11 +45,11 @@ void main()
 #endif
 
 	// Computes the matrix-multiplication and stores the result in global memory
-	XgemmBody(args.kSizeM, args.kSizeN, args.kSizeK,
+	XgemmBody(kSizeM, kSizeN, kSizeK,
 #if USE_BDA
 		agm, bgm, cgm,
 #else
-		0, args.b_offset, args.c_offset,
+		0, b_offset, c_offset,
 #endif
 		alpha, beta
 	);

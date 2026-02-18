@@ -46,7 +46,7 @@ layout(push_constant, std430) uniform Xconvgemm
 	__global realMD* restrict colgm;
 #endif
 	int col_offset; int col_stride;
-} args;
+};
 
 // these may be defined elsewhere. I really don't know at this point
 shared real alm[WGD * (WGD + PADA)];
@@ -56,8 +56,8 @@ void main()
 {
 	// Batch offsets
 	const int batch = get_group_id(2);
-	const int col_offset_batch = args.col_offset + args.col_stride * batch;
-	const int result_offset_batch = args.result_offset + args.result_stride * batch;
+	const int col_offset_batch = col_offset + col_stride * batch;
+	const int result_offset_batch = result_offset + result_stride * batch;
 
 	// Extra pointers to scalar versions of global memory
 #if USE_BDA
@@ -88,25 +88,25 @@ void main()
 
 	// The faster version of GEMM is not allowed on the (incomplete) borders. Therefore, this section
 	// processes only the main parts: output blocks of WGD by WGD.
-	if ((idm < (args.num_patches/WGD)*WGD) && (idn < (args.num_kernels/WGD)*WGD)) {
+	if ((idm < (num_patches/WGD)*WGD) && (idn < (num_kernels/WGD)*WGD)) {
 
 		// Loops over all complete workgroup tiles (K-dimension)
 		int kwg = 0;
-		for (kwg = 0; kwg < (args.patch_size/WGD) * WGD; kwg += WGD) {
+		for (kwg = 0; kwg < (patch_size/WGD) * WGD; kwg += WGD) {
 
 			// Loads data: off-chip --> local (matrix A and B)
-			if (args.num_patches % VWMD == 0 && col_offset_batch % VWMD == 0) {
-				GlobalToLocalDirectA(colgm, alm, args.num_patches, col_offset_batch, kwg, false, false);
+			if (num_patches % VWMD == 0 && col_offset_batch % VWMD == 0) {
+				GlobalToLocalDirectA(colgm, alm, num_patches, col_offset_batch, kwg, false, false);
 			}
 			else {
-				GlobalToLocalScalarA(colgms, alm, args.num_patches, col_offset_batch, kwg, false, false);
+				GlobalToLocalScalarA(colgms, alm, num_patches, col_offset_batch, kwg, false, false);
 			}
 			
-			if (args.patch_size % VWND == 0 && args.kernel_offset % VWND == 0) {
-				GlobalToLocalDirectB(kernelgm, blm, args.patch_size, args.kernel_offset, kwg, true, false);
+			if (patch_size % VWND == 0 && kernel_offset % VWND == 0) {
+				GlobalToLocalDirectB(kernelgm, blm, patch_size, kernel_offset, kwg, true, false);
 			}
 			else {
-				GlobalToLocalScalarB(kernelgms, blm, args.patch_size, args.kernel_offset, kwg, true, false);
+				GlobalToLocalScalarB(kernelgms, blm, patch_size, kernel_offset, kwg, true, false);
 			}
 			barrier();
 
@@ -140,16 +140,16 @@ void main()
 		}
 
 		// Loop over the remaining part (incomplete tile in K-dimension)
-		for (; kwg < args.patch_size; ++kwg) {
+		for (; kwg < patch_size; ++kwg) {
 
 			// Loads data: off-chip --> private (matrix A and B)
 			
 			for (int _mi = 0; _mi < MWID; _mi += 1) {
-				GlobalToPrivateDirectA(apd[_mi], colgms, _mi, args.num_patches, col_offset_batch, idm, kwg, false, false);
+				GlobalToPrivateDirectA(apd[_mi], colgms, _mi, num_patches, col_offset_batch, idm, kwg, false, false);
 			}
 			
 			for (int _ni = 0; _ni < NWID; _ni += 1) {
-				GlobalToPrivateDirectB(bpd[_ni], kernelgms, _ni, args.patch_size, args.kernel_offset, idn, kwg, true, false);
+				GlobalToPrivateDirectB(bpd[_ni], kernelgms, _ni, patch_size, kernel_offset, idn, kwg, true, false);
 			}
 
 			// Performs the accumulation (Cpmd += Apmd * Bpmd)
@@ -168,7 +168,7 @@ void main()
 			
 			for (int _mi = 0; _mi < MWID; _mi += 1) {
 				StoreResultsDirect(resultgm, cpd[_ni * MWID + _mi], _mi, _ni, idm, idn,
-													 ONE, ZERO, args.num_patches, result_offset_batch, false);
+													 ONE, ZERO, num_patches, result_offset_batch, false);
 			}
 		}
 	}
@@ -177,11 +177,11 @@ void main()
 	else {
 		// Loops over all complete workgroup tiles (K-dimension)
 		int kwg = 0;
-		for (; kwg < (args.patch_size/WGD) * WGD; kwg+=WGD) {
+		for (; kwg < (patch_size/WGD) * WGD; kwg+=WGD) {
 
 			// Loads data: off-chip --> local
-			GlobalToLocalCheckedA(colgms, alm, args.num_patches, col_offset_batch, kwg, false, false, args.num_patches, args.patch_size);
-			GlobalToLocalCheckedB(kernelgms, blm, args.patch_size, args.kernel_offset, kwg, true, false, args.num_kernels, args.patch_size);
+			GlobalToLocalCheckedA(colgms, alm, num_patches, col_offset_batch, kwg, false, false, num_patches, patch_size);
+			GlobalToLocalCheckedB(kernelgms, blm, patch_size, kernel_offset, kwg, true, false, num_kernels, patch_size);
 			barrier();
 
 			// Loops over all workitem tiles, unrolled by a factor KWID
@@ -214,16 +214,16 @@ void main()
 		}
 
 		// Loop over the remaining part (incomplete tile in K-dimension)
-		for (; kwg < args.patch_size; ++kwg) {
+		for (; kwg < patch_size; ++kwg) {
 
 			// Loads data: off-chip --> private
 			
 			for (int _mi = 0; _mi < MWID; _mi += 1) {
-				GlobalToPrivateCheckedA(apd[_mi], colgms, _mi, args.num_patches, col_offset_batch, idm, kwg, false, false, args.num_patches);
+				GlobalToPrivateCheckedA(apd[_mi], colgms, _mi, num_patches, col_offset_batch, idm, kwg, false, false, num_patches);
 			}
 			
 			for (int _ni = 0; _ni < NWID; _ni += 1) {
-				GlobalToPrivateCheckedB(bpd[_ni], kernelgms, _ni, args.patch_size, args.kernel_offset, idn, kwg, true, false, args.num_kernels);
+				GlobalToPrivateCheckedB(bpd[_ni], kernelgms, _ni, patch_size, kernel_offset, idn, kwg, true, false, num_kernels);
 			}
 
 			// Performs the accumulation (C += A * B)
@@ -241,8 +241,8 @@ void main()
 		for (int _ni = 0; _ni < NWID; _ni += 1) {
 			
 			for (int _mi = 0; _mi < MWID; _mi += 1) {
-				StoreResultsChecked(resultgm, cpd[_ni * MWID + _mi], _mi, _ni, idm, idn, args.num_patches, args.num_kernels,
-														ONE, ZERO, args.num_patches, result_offset_batch, false);
+				StoreResultsChecked(resultgm, cpd[_ni * MWID + _mi], _mi, _ni, idm, idn, num_patches, num_kernels,
+														ONE, ZERO, num_patches, result_offset_batch, false);
 			}
 		}
 	}

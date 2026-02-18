@@ -652,7 +652,7 @@ layout(push_constant) uniform CopyMatrixBatched
 	__constant int* dest_offsets;
 	__global real* dest;
 #endif
-} args;
+};
 
 void main()
 {
@@ -660,11 +660,11 @@ void main()
 	const int src_offset = src_offsets[batch];
 	const int dest_offset = dest_offsets[batch];
 	real alpha; SetToOne(alpha);
-	_CopyMatrix(args.src_one, args.src_two, args.src_ld, src_offset,
+	_CopyMatrix(src_one, src_two, src_ld, src_offset,
 #if USE_BDA
 		src,
 #endif
-		args.dest_one, args.dest_two, args.dest_ld, dest_offset,
+		dest_one, dest_two, dest_ld, dest_offset,
 #if USE_BDA
 		dest,
 #endif

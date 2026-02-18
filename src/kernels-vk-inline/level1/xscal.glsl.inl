@@ -1008,20 +1008,20 @@ layout(push_constant, std430) uniform Xscal
 #endif
 	int x_offset;
 	int x_inc;
-} args;
+};
 
 // Xscal
 void main()
 {
-	const real alpha = GetRealArg(args.arg_alpha);
+	const real alpha = GetRealArg(arg_alpha);
 
 	// Loops over the work that needs to be done (allows for an arbitrary number of threads)
-	for (int id = get_global_id(0); id<args.n; id += get_global_size(0))
+	for (int id = get_global_id(0); id<n; id += get_global_size(0))
 	{
-		real xvalue = INDEX(xgm, id*args.x_inc + args.x_offset);
+		real xvalue = INDEX(xgm, id*x_inc + x_offset);
 		real result;
 		Multiply(result, alpha, xvalue);
-		INDEX(xgm, id*args.x_inc + args.x_offset) = result;
+		INDEX(xgm, id*x_inc + x_offset) = result;
 	}
 }
 

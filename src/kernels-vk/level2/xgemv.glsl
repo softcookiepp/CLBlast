@@ -245,15 +245,15 @@ layout(push_constant) uniform Xgemv
 	int parameter;
 	int kl;
 	int ku;
-} args;
+};
 
 // Local memory for the vector X
 shared real xlm[WGS1];
 
 void main()
 {
-	const real alpha = GetRealArg(args.arg_alpha);
-	const real beta = GetRealArg(args.arg_beta);
+	const real alpha = GetRealArg(arg_alpha);
+	const real beta = GetRealArg(arg_beta);
 
 	// Local memory for the vector X
 	//__local real xlm[WGS1];
@@ -267,15 +267,15 @@ void main()
 	}
 
 	// Divides the work in a main and tail section
-	const int n_tail = args.n % WGS1;
-	const int n_floor = args.n - n_tail;
+	const int n_tail = n % WGS1;
+	const int n_floor = n - n_tail;
 
 	// Loops over work-group sized portions of the work
 	for (int kwg=0; kwg<n_floor; kwg+=WGS1) {
 
 		// Loads the vector X into local memory
 		const int lid = get_local_id(0);
-		xlm[lid] = xgm[(kwg + lid)*args.x_inc + args.x_offset];
+		xlm[lid] = xgm[(kwg + lid)*x_inc + x_offset];
 
 		// Synchronizes all threads in a workgroup
 		barrier();
@@ -284,10 +284,10 @@ void main()
 		#pragma unroll
 		for (int _w = 0; _w < WPT1; _w += 1) {
 			const int gid = _w*get_global_size(0) + get_global_id(0);
-			if (gid < args.m) {
+			if (gid < m) {
 
 				// The multiply-add function for the main part (divisable by WGS1)
-				if (args.a_rotated == 0) { // Not rotated
+				if (a_rotated == 0) { // Not rotated
 					for (int kloop=0; kloop<WGS1; kloop+=UNROLL1) {
 						UNROLL(UNROLL1)
 						for (int _kunroll = 0; _kunroll < UNROLL1; _kunroll += 1) {
@@ -296,8 +296,8 @@ void main()
 		#if USE_BDA
 								agm,
 		#endif
-								gid, k, args.a_ld, args.a_offset, args.parameter, args.kl, args.ku);
-							if (args.do_conjugate == 1) { COMPLEX_CONJUGATE(value); }
+								gid, k, a_ld, a_offset, parameter, kl, ku);
+							if (do_conjugate == 1) { COMPLEX_CONJUGATE(value); }
 							MultiplyAdd(acc1[_w], xlm[kloop + _kunroll], value);
 						}
 					}
@@ -311,8 +311,8 @@ void main()
 		#if USE_BDA
 								agm,
 		#endif
-								k, gid, args.a_ld, args.a_offset, args.parameter, args.kl, args.ku);
-							if (args.do_conjugate == 1) { COMPLEX_CONJUGATE(value); }
+								k, gid, a_ld, a_offset, parameter, kl, ku);
+							if (do_conjugate == 1) { COMPLEX_CONJUGATE(value); }
 							MultiplyAdd(acc1[_w], xlm[kloop + _kunroll], value);
 						}
 					}
@@ -328,35 +328,35 @@ void main()
 	#pragma unroll
 	for (int _w = 0; _w < WPT1; _w += 1) {
 		const int gid = _w*get_global_size(0) + get_global_id(0);
-		if (gid < args.m) {
+		if (gid < m) {
 
 			// The multiply-add function for the remainder part (not divisable by WGS1)
-			if (args.a_rotated == 0) { // Not rotated
-				for (int k=n_floor; k<args.n; ++k) {
+			if (a_rotated == 0) { // Not rotated
+				for (int k=n_floor; k<n; ++k) {
 					real value = LoadMatrixA(
 #if USE_BDA
 						agm,
 #endif
-						gid, k, args.a_ld, args.a_offset, args.parameter, args.kl, args.ku);
-					if (args.do_conjugate == 1) { COMPLEX_CONJUGATE(value); }
-					MultiplyAdd(acc1[_w], xgm[k*args.x_inc + args.x_offset], value);
+						gid, k, a_ld, a_offset, parameter, kl, ku);
+					if (do_conjugate == 1) { COMPLEX_CONJUGATE(value); }
+					MultiplyAdd(acc1[_w], xgm[k*x_inc + x_offset], value);
 				}
 			}
 			else { // Transposed
-				for (int k=n_floor; k<args.n; ++k) {
+				for (int k=n_floor; k<n; ++k) {
 					real value = LoadMatrixA(
 #if USE_BDA
 						agm,
 #endif
-						k, gid, args.a_ld, args.a_offset, args.parameter, args.kl, args.ku);
-					if (args.do_conjugate == 1) { COMPLEX_CONJUGATE(value); }
-					MultiplyAdd(acc1[_w], xgm[k*args.x_inc + args.x_offset], value);
+						k, gid, a_ld, a_offset, parameter, kl, ku);
+					if (do_conjugate == 1) { COMPLEX_CONJUGATE(value); }
+					MultiplyAdd(acc1[_w], xgm[k*x_inc + x_offset], value);
 				}
 			}
 
 			// Stores the final result
-			real yval = ygm[gid*args.y_inc + args.y_offset];
-			AXPBY(ygm[gid*args.y_inc + args.y_offset], alpha, acc1[_w], beta, yval);
+			real yval = ygm[gid*y_inc + y_offset];
+			AXPBY(ygm[gid*y_inc + y_offset], alpha, acc1[_w], beta, yval);
 		}
 	}
 }

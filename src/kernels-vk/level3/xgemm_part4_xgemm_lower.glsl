@@ -29,12 +29,12 @@ layout(push_constant, std430) uniform XgemmLower
 	__global realN* restrict bgm;
 	__global realM* cgm;
 #endif
-} args;
+};
 
 void main()
 {
-	const real alpha = GetRealArg(args.arg_alpha);
-	const real beta = GetRealArg(args.arg_beta);
+	const real alpha = GetRealArg(arg_alpha);
+	const real beta = GetRealArg(arg_beta);
 
 	// Skip these threads if they do not contain threads contributing to the lower-triangle
 	if (GetGroupID1()*NWG > (GetGroupID0() + 1)*MWG) {
@@ -42,7 +42,7 @@ void main()
 	}
 
 	// Computes the matrix-multiplication and stores the result in global memory
-	XgemmBody(args.kSizeN, args.kSizeN, args.kSizeK,
+	XgemmBody(kSizeN, kSizeN, kSizeK,
 #if USE_BDA
 		agm, bgm, cgm,
 #else

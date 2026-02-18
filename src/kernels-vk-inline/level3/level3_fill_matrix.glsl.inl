@@ -535,14 +535,14 @@ layout(push_constant) uniform FillMatrix
 	__global real* restrict dest;
 #endif
 	real_arg arg_value;
-} args;
+};
 void main()
 {
-	const real value = GetRealArg(args.arg_value);
+	const real value = GetRealArg(arg_value);
 	const int id_one = get_global_id(0);
 	const int id_two = get_global_id(1);
-	if (id_one < args.m && id_two < args.n) {
-		dest[id_two*args.ld + id_one + args.offset] = value;
+	if (id_one < m && id_two < n) {
+		dest[id_two*ld + id_one + offset] = value;
 	}
 }
 

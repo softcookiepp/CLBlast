@@ -563,7 +563,7 @@ layout(push_constant) uniform SymmUpperToSquared
 #if USE_BDA
 	__global real* dest
 #endif
-} args;
+};
 
 void main()
 {
@@ -574,18 +574,18 @@ void main()
 		// #pragma unroll
 		for (int _w_two = 0; _w_two < PAD_WPTY; _w_two += 1) {
 			const int id_two = (get_group_id(1)*PAD_WPTY + _w_two) * PAD_DIMY + get_local_id(1);
-			if (id_two < args.dest_dim && id_one < args.dest_dim) {
+			if (id_two < dest_dim && id_one < dest_dim) {
 
 				// Loads data from the upper-symmetric matrix
 				real result;
 				SetToZero(result);
-				if (id_two < args.src_dim && id_one < args.src_dim) {
-					if (id_one <= id_two) { result = src[id_two*args.src_ld + id_one + args.src_offset]; }
-					else									{ result = src[id_one*args.src_ld + id_two + args.src_offset]; }
+				if (id_two < src_dim && id_one < src_dim) {
+					if (id_one <= id_two) { result = src[id_two*src_ld + id_one + src_offset]; }
+					else									{ result = src[id_one*src_ld + id_two + src_offset]; }
 				}
 
 				// Stores the result in the destination matrix
-				dest[id_two*args.dest_ld + id_one + args.dest_offset] = result;
+				dest[id_two*dest_ld + id_one + dest_offset] = result;
 			}
 		}
 	}

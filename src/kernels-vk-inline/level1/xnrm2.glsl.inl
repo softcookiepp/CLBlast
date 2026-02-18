@@ -1020,7 +1020,7 @@ layout(push_constant) uniform Xnrm2
 #if USE_BDA
 	__global real* outp
 #endif
-} args;
+};
 
 shared real lm[WGS1];
 
@@ -1035,8 +1035,8 @@ void main()
 	real acc;
 	SetToZero(acc);
 	int id = wgid*WGS1 + lid;
-	while (id < args.n) {
-		real x1 = INDEX(xgm, id*args.x_inc + args.x_offset);
+	while (id < n) {
+		real x1 = INDEX(xgm, id*x_inc + x_offset);
 		real x2 = x1;
 		COMPLEX_CONJUGATE(x2);
 		MultiplyAdd(acc, x1, x2);

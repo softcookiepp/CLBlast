@@ -38,13 +38,13 @@ layout(push_constant) uniform XaxpyFaster
 	const __global realV* restrict xgm,
 	__global realV* ygm
 #endif
-} args;
+};
 
 void main()
 {
-	const real alpha = GetRealArg(args.arg_alpha);
+	const real alpha = GetRealArg(arg_alpha);
 
-	const int num_usefull_threads = args.n / (VW * WPT);
+	const int num_usefull_threads = n / (VW * WPT);
 	if (get_global_id(0) < num_usefull_threads) {
 		//#pragma unroll
 		for (int _w = 0; _w < WPT; _w += 1) {

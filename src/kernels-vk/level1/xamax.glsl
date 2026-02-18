@@ -50,7 +50,7 @@ layout(push_constant) uniform Xamax
 	__global uint* imaxgm
 #endif
 	int num_groups_0; // because this is not exposed in Vulkan :c
-} args;
+};
 
 shared singlereal maxlm[WGS1];
 shared uint imaxlm[WGS1];
@@ -59,7 +59,7 @@ void main()
 {
 	const int lid = get_local_id(0);
 	const int wgid = get_group_id(0);
-	const int num_groups = args.num_groups_0;
+	const int num_groups = num_groups_0;
 
 	// Performs loading and the first steps of the reduction
 	#if defined(ROUTINE_MAX) || defined(ROUTINE_MIN) || defined(ROUTINE_AMIN)
@@ -69,8 +69,8 @@ void main()
 	#endif
 	uint imax = 0;
 	int id = wgid*WGS1 + lid;
-	while (id < args.n) {
-		const int x_index = id*args.x_inc + args.x_offset;
+	while (id < n) {
+		const int x_index = id*x_inc + x_offset;
 		#if PRECISION == 3232 || PRECISION == 6464
 			precise singlereal x = abs(xgm[x_index].x) + abs(xgm[x_index].y);
 		#else

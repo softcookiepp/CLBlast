@@ -564,11 +564,11 @@ layout(push_constant) uniform TriaUpperToSquared
 	__global real* dest
 #endif
 	int unit_diagonal;
-} args;
+};
 
 void main()
 {
-	const bool unit_diagonal = bool(args.unit_diagonal);
+	const bool unit_diagonal = bool(unit_diagonal);
 	// Loops over the work per thread in both dimensions
 	// #pragma unroll
 	for (int _w_one = 0; _w_one < PAD_WPTX; _w_one += 1) {
@@ -576,19 +576,19 @@ void main()
 		// #pragma unroll
 		for (int _w_two = 0; _w_two < PAD_WPTY; _w_two += 1) {
 			const int id_two = (get_group_id(1)*PAD_WPTY + _w_two) * PAD_DIMY + get_local_id(1);
-			if (id_two < args.dest_dim && id_one < args.dest_dim) {
+			if (id_two < dest_dim && id_one < dest_dim) {
 
 				// Loads data from the upper-triangular matrix
 				real result;
 				SetToZero(result);
-				if (id_two < args.src_dim && id_one < args.src_dim) {
-					if (id_one <= id_two) { result = src[id_two*args.src_ld + id_one + args.src_offset]; }
+				if (id_two < src_dim && id_one < src_dim) {
+					if (id_one <= id_two) { result = src[id_two*src_ld + id_one + src_offset]; }
 					if (id_one == id_two && unit_diagonal) { SetToOne(result); }
 					// Else: result is zero
 				}
 
 				// Stores the result in the destination matrix
-				dest[id_two*args.dest_ld + id_one + args.dest_offset] = result;
+				dest[id_two*dest_ld + id_one + dest_offset] = result;
 			}
 		}
 	}

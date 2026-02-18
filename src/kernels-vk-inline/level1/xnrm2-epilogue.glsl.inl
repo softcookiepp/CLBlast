@@ -1017,7 +1017,7 @@ layout(push_constant) uniform Xnrm2Epilogue
 	__global real* nrm2;
 #endif
 	int nrm2_offset;
-} args;
+};
 
 shared real lm[WGS2];
 
@@ -1041,9 +1041,9 @@ void main()
 	// Computes the square root and stores the final result
 	if (lid == 0) {
 		#if PRECISION == 3232 || PRECISION == 6464
-			nrm2[args.nrm2_offset].x = sqrt(lm[0].x); // the result is a non-complex number
+			nrm2[nrm2_offset].x = sqrt(lm[0].x); // the result is a non-complex number
 		#else
-			nrm2[args.nrm2_offset] = sqrt(lm[0]);
+			nrm2[nrm2_offset] = sqrt(lm[0]);
 		#endif
 	}
 }

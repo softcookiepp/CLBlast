@@ -34,14 +34,14 @@ layout(push_constant) uniform FillVector
 	__global real* restrict dest;
 #endif
 	real_arg arg_value;
-} args;
+};
 
 void main()
 {
-	const real value = GetRealArg(args.arg_value);
+	const real value = GetRealArg(arg_value);
 	const int tid = get_global_id(0);
-	if (tid < args.n) {
-		dest[tid*args.inc + args.offset] = value;
+	if (tid < n) {
+		dest[tid*inc + offset] = value;
 	}
 }
 

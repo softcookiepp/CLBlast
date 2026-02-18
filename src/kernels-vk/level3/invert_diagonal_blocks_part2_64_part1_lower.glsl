@@ -36,7 +36,7 @@ layout(push_constant, std430) uniform TripleMatMulPart1
 	__global real* restrict dest;
 #endif
 	int current_size; int num_pages; int block_size;
-} args;
+};
 
 shared real lm[LOCALY * LOCALX];
 
@@ -44,8 +44,8 @@ shared real lm[LOCALY * LOCALX];
 // TripleMatMul64Part1Lower
 void main()
 {
-	TripleMatMulPart1(64, false, lm, args.n, src, args.a_offset,
-		args.lda, dest, args.current_size, args.num_pages, args.block_size);
+	TripleMatMulPart1(64, false, lm, n, src, a_offset,
+		lda, dest, current_size, num_pages, block_size);
 }
 
 // =================================================================================================

@@ -91,17 +91,17 @@ layout(push_constant) uniform XgemvFastRot
 	//int parameter;
 	//int kl_unused;
 	//int ku_unused;
-} args;
+};
 
 shared real tile[WPT3][WGS3];
 shared real xlm[WPT3];
 
 void main()
 {
-	if ( !(args.m % WGS3 == 0 && args.n % WGS3 == 0 && args.a_ld % VW3 == 0) ) return;
+	if ( !(m % WGS3 == 0 && n % WGS3 == 0 && a_ld % VW3 == 0) ) return;
 	
-	const real alpha = GetRealArg(args.arg_alpha);
-	const real beta = GetRealArg(args.arg_beta);
+	const real alpha = GetRealArg(arg_alpha);
+	const real beta = GetRealArg(arg_beta);
 
 	// Local memory to store a tile of the matrix (for coalescing)
 	//__local real tile[WPT3][WGS3];
@@ -117,11 +117,11 @@ void main()
 	SetToZero(acc3);
 
 	// Loops over tile-sized portions of the work
-	for (int kwg=0; kwg<args.n; kwg+=WPT3) {
+	for (int kwg=0; kwg<n; kwg+=WPT3) {
 
 		// Loads the vector X into local memory
 		if (lid < WPT3) {
-			xlm[lid] = xgm[(kwg + lid) * args.x_inc + args.x_offset];
+			xlm[lid] = xgm[(kwg + lid) * x_inc + x_offset];
 		}
 
 		// Loads the matrix A into local memory
@@ -129,7 +129,7 @@ void main()
 		for (int _kl = 0; _kl < WPT3/VW3; _kl += 1) {
 			const int x = (kwg/VW3) + lid_mod;
 			const int y = int(gl_WorkGroupID[0]) * WGS3 + lid_div * (WPT3/VW3) + _kl;
-			realVFR avec = agm[(args.a_ld/VW3) * y + x];
+			realVFR avec = agm[(a_ld/VW3) * y + x];
 			#if VW3 == 1
 				tile[_kl*VW3 + 0][lid] = avec;
 			#else
@@ -160,8 +160,8 @@ void main()
 
 	// Stores the final result
 	const int gid = int(gl_GlobalInvocationID[0]);
-	real yval = ygm[gid * args.y_inc + args.y_offset];
-	AXPBY(ygm[gid * args.y_inc + args.y_offset], alpha, acc3, beta, yval);
+	real yval = ygm[gid * y_inc + y_offset];
+	AXPBY(ygm[gid * y_inc + y_offset], alpha, acc3, beta, yval);
 }
 
 // =================================================================================================

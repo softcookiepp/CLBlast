@@ -1029,24 +1029,24 @@ layout(push_constant) uniform Xhad
 	__global real* zgm;
 #endif
 	int z_offset; int z_inc;
-} args;
+};
 
 void main()
 {
-	const real alpha = GetRealArg(args.arg_alpha);
-	const real beta = GetRealArg(args.arg_beta);
+	const real alpha = GetRealArg(arg_alpha);
+	const real beta = GetRealArg(arg_beta);
 	
 	// Loops over the work that needs to be done (allows for an arbitrary number of threads)
-	for (int id = get_global_id(0); id < args.n; id += get_global_size(0)) {
-		real xvalue = xgm[id*args.x_inc + args.x_offset];
-		real yvalue = ygm[id*args.y_inc + args.y_offset];
-		real zvalue = zgm[id*args.z_inc + args.z_offset];
+	for (int id = get_global_id(0); id < n; id += get_global_size(0)) {
+		real xvalue = xgm[id*x_inc + x_offset];
+		real yvalue = ygm[id*y_inc + y_offset];
+		real zvalue = zgm[id*z_inc + z_offset];
 		real result;
 		real alpha_times_x;
 		Multiply(alpha_times_x, alpha, xvalue);
 		Multiply(result, alpha_times_x, yvalue);
 		MultiplyAdd(result, beta, zvalue);
-		zgm[id*args.z_inc + args.z_offset] = result;
+		zgm[id*z_inc + z_offset] = result;
 	}
 }
 #if 0
@@ -1064,10 +1064,10 @@ void XhadFaster(const int n, const real_arg arg_alpha, const real_arg arg_beta,
 	__builtin_assume(n % VW == 0);
 	__builtin_assume(n % WPT == 0);
 #endif
-	const real alpha = GetRealArg(args.arg_alpha);
-	const real beta = GetRealArg(args.arg_beta);
+	const real alpha = GetRealArg(arg_alpha);
+	const real beta = GetRealArg(arg_beta);
 
-	const int num_desired_threads = args.n / (VW * WPT);
+	const int num_desired_threads = n / (VW * WPT);
 
 	if (get_global_id(0) < num_desired_threads) {
 		//#pragma unroll
@@ -1101,8 +1101,8 @@ void XhadFastest(const int n, const real_arg arg_alpha, const real_arg arg_beta,
 	__builtin_assume(n % WPT == 0);
 	__builtin_assume(n % WGS == 0);
 #endif
-	const real alpha = GetRealArg(args.arg_alpha);
-	const real beta = GetRealArg(args.arg_beta);
+	const real alpha = GetRealArg(arg_alpha);
+	const real beta = GetRealArg(arg_beta);
 
 	//#pragma unroll
 	for (int _w = 0; _w < WPT; _w += 1) {

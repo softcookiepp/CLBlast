@@ -24,7 +24,7 @@ layout(push_constant, std430) uniform XgemmDirectBatchedNN
 #endif
 	int c_ld;
 	int c_transpose; int a_conjugate; int b_conjugate;
-} args;
+};
 
 void main()
 {
@@ -35,20 +35,20 @@ void main()
 	const int b_offset = b_offsets[batch];
 	const int c_offset = c_offsets[batch];
 
-	XgemmDirect(args.kSizeM, args.kSizeN, args.kSizeK, arg_alpha, arg_beta,
+	XgemmDirect(kSizeM, kSizeN, kSizeK, arg_alpha, arg_beta,
 #if USE_BDA
 		agm,
 #endif
-		a_offset, args.a_ld,
+		a_offset, a_ld,
 #if USE_BDA
 		bgm,
 #endif
-		b_offset, args.b_ld,
+		b_offset, b_ld,
 #if USE_BDA
 		cgm,
 #endif
-		c_offset, args.c_ld,
+		c_offset, c_ld,
 		//alm, blm,
-		0, 0, args.c_transpose, args.a_conjugate, args.b_conjugate);
+		0, 0, c_transpose, a_conjugate, b_conjugate);
 }
 //)"

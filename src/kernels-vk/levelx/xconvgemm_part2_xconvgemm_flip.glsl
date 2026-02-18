@@ -38,30 +38,30 @@ layout(push_constant, std430) uniform XconvgemmFlip
 	int stride_h; int stride_w;
 	int dilation_h; int dilation_w;
 	int output_h; int output_w;
-} args;
+};
 
 void main()										 
 {
 	const bool kernel_flip = true;
-	Xconvgemm(args.num_patches, args.num_kernels, args.patch_size,
+	Xconvgemm(num_patches, num_kernels, patch_size,
 #if USE_BDA
 		kernelgm,
 #endif
-		args.kernel_offset,
+		kernel_offset,
 #if USE_BDA
 		resultgm,
 #endif
-		args.result_offset, args.result_stride,
+		result_offset, result_stride,
 #if USE_BDA
 		imagegm,
 #endif
-		args.image_offset,
-		args.input_h, args.input_w, args.channels,
-		args.kernel_h, args.kernel_w,
-		args.pad_h, args.pad_w,
-		args.stride_h, args.stride_w,
-		args.dilation_h, args.dilation_w,
-		args.output_h, args.output_w,
+		image_offset,
+		input_h, input_w, channels,
+		kernel_h, kernel_w,
+		pad_h, pad_w,
+		stride_h, stride_w,
+		dilation_h, dilation_w,
+		output_h, output_w,
 		//alm, blm,
 		kernel_flip);
 }

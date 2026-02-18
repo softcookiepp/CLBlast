@@ -687,22 +687,22 @@ layout(push_constant) uniform TransposeMatrixStridedBatched
 #if USE_BDA
 	__global real* dest
 #endif
-} args;
+};
 
 void main()
 {
 	const int batch = get_group_id(2);
-	const int src_offset_batch = args.src_offset + args.src_stride * batch;
-	const int dest_offset_batch = args.dest_offset + args.dest_stride * batch;
+	const int src_offset_batch = src_offset + src_stride * batch;
+	const int dest_offset_batch = dest_offset + dest_stride * batch;
 	real alpha; SetToOne(alpha);
 
 	_TransposeMatrix(
 		//tile,
-		args.src_one, args.src_two, args.src_ld, src_offset_batch,
+		src_one, src_two, src_ld, src_offset_batch,
 #if USE_BDA
 		src,
 #endif
-		args.dest_one, args.dest_two, args.dest_ld, dest_offset_batch,
+		dest_one, dest_two, dest_ld, dest_offset_batch,
 #if USE_BDA
 		dest,
 #endif

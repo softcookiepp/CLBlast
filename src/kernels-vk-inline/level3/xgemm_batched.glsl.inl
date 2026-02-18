@@ -3526,7 +3526,7 @@ layout(push_constant, std430) uniform XgemmBatched
 	__global realM* cgm;
 #endif
 	int c_one; int c_two;
-} args;
+};
 
 void main()
 {
@@ -3535,9 +3535,9 @@ void main()
 	const real beta = GetRealArg(arg_betas[batch]);
 
 	// Sets the offsets
-	const int a_offset = batch * args.a_one * args.a_two;
-	const int b_offset = batch * args.b_one * args.b_two;
-	const int c_offset = batch * args.c_one * args.c_two;
+	const int a_offset = batch * a_one * a_two;
+	const int b_offset = batch * b_one * b_two;
+	const int c_offset = batch * c_one * c_two;
 #if USE_BDA
 	const __global realM* restrict agm_ = &agm[a_offset / VWM];
 	const __global realN* restrict bgm_ = &bgm[b_offset / VWN];
@@ -3545,7 +3545,7 @@ void main()
 #endif
 
 	// Computes the matrix-multiplication and stores the result in global memory
-	XgemmBody(args.kSizeM, args.kSizeN, args.kSizeK,
+	XgemmBody(kSizeM, kSizeN, kSizeK,
 #if USE_BDA
 		agm_, bgm_, cgm_,
 #else

@@ -679,7 +679,7 @@ layout(push_constant) uniform TransposePadMatrixBatched
 	__global real* dest;
 #endif
 	int do_conjugate;
-} args;
+};
 
 void main()
 {
@@ -689,15 +689,15 @@ void main()
 	real alpha; SetToOne(alpha);
 
 	_TransposePadMatrix(//tile,
-		args.src_one, args.src_two, args.src_ld, src_offset,
+		src_one, src_two, src_ld, src_offset,
 #if USE_BDA
 		src,
 #endif
-		args.dest_one, args.dest_two, args.dest_ld, dest_offset,
+		dest_one, dest_two, dest_ld, dest_offset,
 #if USE_BDA
 		dest,
 #endif
-		alpha, args.do_conjugate);
+		alpha, do_conjugate);
 }
 
 #endif

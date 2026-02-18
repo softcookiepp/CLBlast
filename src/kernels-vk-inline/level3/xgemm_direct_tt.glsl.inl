@@ -1216,26 +1216,26 @@ layout(push_constant) uniform XgemmDirectTT
 #endif
 	int c_offset; int c_ld;
 	int c_transpose; int a_conjugate; int b_conjugate;
-} args;
+};
 
 
 void main()
 {
-	XgemmDirect(args.kSizeM, args.kSizeN, args.kSizeK, args.arg_alpha, args.arg_beta,
+	XgemmDirect(kSizeM, kSizeN, kSizeK, arg_alpha, arg_beta,
 #if USE_BDA
 		agm,
 #endif
-		args.a_offset, args.a_ld,
+		a_offset, a_ld,
 #if USE_BDA
 		bgm,
 #endif
-		args.b_offset, args.b_ld,
+		b_offset, b_ld,
 #if USE_BDA
 		cgm,
 #endif
-		args.c_offset, args.c_ld,
+		c_offset, c_ld,
 		//alm, blm,
-		1, 1, args.c_transpose, args.a_conjugate, args.b_conjugate);
+		1, 1, c_transpose, a_conjugate, b_conjugate);
 }
 
 // =================================================================================================

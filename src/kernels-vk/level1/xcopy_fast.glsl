@@ -39,7 +39,7 @@ layout(push_constant) uniform XcopyFast
 	__global realV* ygm
 #endif
 	//int global_size_0;
-} args;
+};
 #endif
 
 #if RELAX_WORKGROUP_SIZE == 0
@@ -48,12 +48,12 @@ layout(push_constant) uniform XcopyFast
 
 void main()
 {
-	if (args.n % VW == 0 && args.n % WPT == 0 && args.n % WGS == 0)
+	if (n % VW == 0 && n % WPT == 0 && n % WGS == 0)
 	{
 		for (int _w = 0; _w < WPT; _w += 1)
 		{
 			const int id = _w*get_global_size(0) + get_global_id(0);
-			//const int id = _w*args.global_size_0 + get_global_id(0);
+			//const int id = _w*global_size_0 + get_global_id(0);
 			ygm[id] = xgm[id];
 		}
 	}

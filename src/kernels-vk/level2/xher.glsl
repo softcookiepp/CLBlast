@@ -38,13 +38,13 @@ layout(push_constant) uniform Xher
 #endif
 	int a_offset; int a_ld;
 	int is_upper; int is_rowmajor;
-} args;
+};
 
 void main()
 {
-	const real alpha = GetRealArg(args.arg_alpha);
-	const bool is_upper = bool(args.is_upper);
-	const bool is_rowmajor = bool(args.is_rowmajor);
+	const real alpha = GetRealArg(arg_alpha);
+	const bool is_upper = bool(is_upper);
+	const bool is_rowmajor = bool(is_rowmajor);
 
 	// Register storage for X and XT
 	//#pragma promote_to_registers
@@ -56,14 +56,14 @@ void main()
 	//#pragma unroll
 	for (int _w = 0; _w < WPT; _w += 1) {
 		const int id2 = _w*get_global_size(1) + get_global_id(1);
-		LoadVector(xvalues[_w], id2, args.n, xgm, args.x_offset, args.x_inc, !is_rowmajor);
+		LoadVector(xvalues[_w], id2, n, xgm, x_offset, x_inc, !is_rowmajor);
 	}
 
 	// Loads the X-transposed-vector
 	//#pragma unroll
 	for (int _w = 0; _w < WPT; _w += 1) {
 		const int id1 = _w*get_global_size(0) + get_global_id(0);
-		LoadVector(xtvalues[_w], id1, args.n, xgm, args.x_offset, args.x_inc, is_rowmajor);
+		LoadVector(xtvalues[_w], id1, n, xgm, x_offset, x_inc, is_rowmajor);
 	}
 
 	// Loops over the work per thread twice
@@ -83,7 +83,7 @@ void main()
 
 			// Loads A, performs the operation, and stores the result into A
 			else {
-				MatrixUpdate(id1, id2, args.n, args.n, agm, args.a_offset, args.a_ld, alpha, xvalues[_w2], xtvalues[_w1], is_upper);
+				MatrixUpdate(id1, id2, n, n, agm, a_offset, a_ld, alpha, xvalues[_w2], xtvalues[_w1], is_upper);
 			}
 		}
 	}

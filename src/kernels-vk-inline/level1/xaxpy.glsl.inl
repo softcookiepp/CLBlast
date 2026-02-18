@@ -1015,22 +1015,22 @@ layout(push_constant) uniform Xaxpy
 #endif
 	int y_offset;
 	int y_inc;
-} args;
+};
 
 void main()
 {
-	const real alpha = GetRealArg(args.arg_alpha);
+	const real alpha = GetRealArg(arg_alpha);
 
 	// Loops over the work that needs to be done (allows for an arbitrary number of threads)
-	for (int id = get_global_id(0); id < args.n; id += get_global_size(0))
+	for (int id = get_global_id(0); id < n; id += get_global_size(0))
 	{
 		// probably won't be possible to have a VW of > 1 when x_inc > 1
 #if 1
-		real xvalue = xgm[id*args.x_inc + args.x_offset];
-		real yvalue = ygm[id*args.y_inc + args.y_offset];
+		real xvalue = xgm[id*x_inc + x_offset];
+		real yvalue = ygm[id*y_inc + y_offset];
 		//yvalue += alpha*xvalue;
 		MultiplyAdd(yvalue, alpha, xvalue);
-		ygm[id*args.y_inc + args.y_offset] = yvalue;
+		ygm[id*y_inc + y_offset] = yvalue;
 #endif
 	}
 }

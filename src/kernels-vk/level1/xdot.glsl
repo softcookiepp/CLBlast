@@ -56,7 +56,7 @@ layout(push_constant) uniform Xdot
 #endif
 	int do_conjugate;
 	int num_groups_0;
-} args;
+};
 
 shared real lm[WGS1];
 
@@ -64,16 +64,16 @@ void main()
 {
 	const int lid = get_local_id(0);
 	const int wgid = get_group_id(0);
-	const int num_groups = args.num_groups_0;
+	const int num_groups = num_groups_0;
 
 	// Performs multiplication and the first steps of the reduction
 	real acc;
 	SetToZero(acc);
 	int id = wgid*WGS1 + lid;
-	while (id < args.n) {
-		real x = xgm[id*args.x_inc + args.x_offset];
-		real y = ygm[id*args.y_inc + args.y_offset];
-		if (bool(args.do_conjugate)) { COMPLEX_CONJUGATE(x); }
+	while (id < n) {
+		real x = xgm[id*x_inc + x_offset];
+		real y = ygm[id*y_inc + y_offset];
+		if (bool(do_conjugate)) { COMPLEX_CONJUGATE(x); }
 		MultiplyAdd(acc, x, y);
 		id += WGS1*num_groups;
 	}

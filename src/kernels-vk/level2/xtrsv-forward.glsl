@@ -59,7 +59,7 @@ layout(push_constant) uniform trsv_forward
 	int is_transposed;
 	int is_unit_diagonal;
 	int do_conjugate;
-} args;
+};
 
 precise shared real alm[TRSV_BLOCK_SIZE][TRSV_BLOCK_SIZE];
 precise shared real xlm[TRSV_BLOCK_SIZE];
@@ -69,20 +69,20 @@ void main()
 	const int tid = get_local_id(0);
 
 	// Pre-loads the data into local memory
-	if (tid < args.n) {
-		Subtract(xlm[tid], b[tid*args.b_inc + args.b_offset], x[tid*args.x_inc + args.x_offset]);
-		if (args.is_transposed == 0) {
-			for (int i = 0; i < args.n; ++i) {
-				alm[i][tid] = A[i + tid*args.a_ld + args.a_offset];
+	if (tid < n) {
+		Subtract(xlm[tid], b[tid*b_inc + b_offset], x[tid*x_inc + x_offset]);
+		if (is_transposed == 0) {
+			for (int i = 0; i < n; ++i) {
+				alm[i][tid] = A[i + tid*a_ld + a_offset];
 			}
 		}
 		else {
-			for (int i = 0; i < args.n; ++i) {
-				alm[i][tid] = A[tid + i*args.a_ld + args.a_offset];
+			for (int i = 0; i < n; ++i) {
+				alm[i][tid] = A[tid + i*a_ld + a_offset];
 			}
 		}
-		if (args.do_conjugate != 0) {
-			for (int i = 0; i < args.n; ++i) {
+		if (do_conjugate != 0) {
+			for (int i = 0; i < n; ++i) {
 				COMPLEX_CONJUGATE(alm[i][tid]);
 			}
 		}
@@ -91,18 +91,18 @@ void main()
 
 	// Computes the result (single-threaded for now)
 	if (tid == 0) {
-		for (int i = 0; i < args.n; ++i) {
+		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < i; ++j) {
 				MultiplySubtract(xlm[i], alm[i][j], xlm[j]);
 			}
-			if (args.is_unit_diagonal == 0) { DivideFull(xlm[i], xlm[i], alm[i][i]); }
+			if (is_unit_diagonal == 0) { DivideFull(xlm[i], xlm[i], alm[i][i]); }
 		}
 	}
 	barrier();
 
 	// Stores the results
-	if (tid < args.n) {
-		x[tid*args.x_inc + args.x_offset] = xlm[tid];
+	if (tid < n) {
+		x[tid*x_inc + x_offset] = xlm[tid];
 	}
 }
 

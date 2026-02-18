@@ -43,21 +43,21 @@ layout(push_constant) uniform XasumEpilogue
 	real_ptr_t inp;
 	real_ptr_t asum;
 #endif
-	int asum_offset;
+	uint asum_offset;
 };
 
 shared real lm[WGS2];
 
 void main()
 {
-	const int lid = get_local_id(0);
+	const uint lid = gl_LocalInvocationID[0];
 
 	// Performs the first step of the reduction while loading the data
-	Add(lm[lid], INDEX(inp, lid), INDEX(inp, lid + WGS2));
+	Add(lm[lid], indexGM(inp, lid), indexGM(inp, lid + WGS2));
 	barrier();
 
 	// Performs reduction in local memory
-	for (int s=WGS2/2; s>0; s=s>>1) {
+	for (uint s=WGS2/2; s>0; s=s>>1) {
 		if (lid < s) {
 			Add(lm[lid], lm[lid], lm[lid + s]);
 		}
@@ -67,9 +67,9 @@ void main()
 	// Computes the absolute value and stores the final result
 	if (lid == 0) {
 		#if (PRECISION == 3232 || PRECISION == 6464) && defined(ROUTINE_ASUM)
-			INDEX(asum, asum_offset).x = lm[0].x + lm[0].y; // the result is a non-complex number
+			indexGM(asum, asum_offset).x = lm[0].x + lm[0].y; // the result is a non-complex number
 		#else
-			INDEX(asum, asum_offset) = lm[0];
+			indexGM(asum, asum_offset) = lm[0];
 		#endif
 	}
 }

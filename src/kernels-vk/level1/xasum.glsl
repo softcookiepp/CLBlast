@@ -38,32 +38,32 @@
 
 layout(push_constant) uniform Xasum
 {
-	int n;
+	uint n;
 #if USE_BDA
 	real_ptr_t xgm;
 #endif
-	int x_offset;
-	int x_inc;
+	uint x_offset;
+	uint x_inc;
 #if USE_BDA
 	real_ptr_t outp;
 #endif
-	int num_groups_0; // because this is not exposed in Vulkan :c
+	uint num_groups_0; // because this is not exposed in Vulkan :c
 };
 
 shared real lm[WGS1];
 
 void main()
 {
-	const int lid = get_local_id(0);
-	const int wgid = get_group_id(0);
-	const int num_groups = num_groups_0;
+	const uint lid = gl_LocalInvocationID[0];
+	const uint wgid = gl_WorkGroupID[0];
+	const uint num_groups = num_groups_0;
 
 	// Performs loading and the first steps of the reduction
 	real acc;
 	SetToZero(acc);
-	int id = wgid*WGS1 + lid;
+	uint id = wgid*WGS1 + lid;
 	while (id < n) {
-		real x = INDEX(xgm, id*x_inc + x_offset);
+		real x = indexGM(xgm, id*x_inc + x_offset);
 		#if defined(ROUTINE_SUM) // non-absolute version
 		#else
 			AbsoluteValue(x);
@@ -75,7 +75,7 @@ void main()
 	barrier();
 
 	// Performs reduction in local memory
-	for (int s=WGS1/2; s>0; s=s>>1) {
+	for (uint s=WGS1/2; s>0; s=s>>1) {
 		if (lid < s) {
 			Add(lm[lid], lm[lid], lm[lid + s]);
 		}
@@ -84,7 +84,7 @@ void main()
 
 	// Stores the per-workgroup result
 	if (lid == 0) {
-		INDEX(outp, wgid) = lm[0];
+		indexGM(outp, wgid) = lm[0];
 	}
 }
 

@@ -73,7 +73,10 @@ R"(
 		#define addr_t uint64_t
 		uint64_t addPtrOffset(uint64_t ptr, uint64_t offset) { return ptr + offset; }
 		uint64_t addPtrOffset(uint64_t ptr, uint offset) { return ptr + uint64_t(offset); }
+		uint64_t mulPtrCoef(uint64_t ptr, uint64_t coef) { return ptr*coef; }
+		uint64_t mulPtrCoef(uint64_t ptr, uint coef) { return ptr*uint64_t(coef); }
 	#else
+		#error "not implemented!"
 		#extension GL_EXT_buffer_reference_uvec2 : require
 		#define addr_t uvec2
 		uvec2 addPtrOffset(uvec2 addr, uvec2 offset)
@@ -182,6 +185,17 @@ R"(
 	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE*4) buffer real4_ptr_t { real4 s[]; };
 	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE*8) buffer real8_ptr_t { real8 s[]; };
 	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE*16) buffer real16_ptr_t { real16 s[]; };
+	
+	// this will not work for addresses represented as uvec2; those still need to be implemented
+	#define INDEX_AS_ALIGNED(buffer_t, ptr, index, alignment) buffer_t(addPtrOffset(addr_t(ptr), index*alignment))
+	real_ptr_t indexGMimpl(real_ptr_t ptr, uint index) { return INDEX_AS_ALIGNED(real_ptr_t, ptr, index, DTYPE_SIZE); }
+	real2_ptr_t indexGMimpl(real2_ptr_t ptr, uint index) { return INDEX_AS_ALIGNED(real2_ptr_t, ptr, index, DTYPE_SIZE*2); }
+	real4_ptr_t indexGMimpl(real4_ptr_t ptr, uint index) { return INDEX_AS_ALIGNED(real4_ptr_t, ptr, index, DTYPE_SIZE*4); }
+	real8_ptr_t indexGMimpl(real8_ptr_t ptr, uint index) { return INDEX_AS_ALIGNED(real8_ptr_t, ptr, index, DTYPE_SIZE*8); }
+	real16_ptr_t indexGMimpl(real16_ptr_t ptr, uint index) { return INDEX_AS_ALIGNED(real16_ptr_t, ptr, index, DTYPE_SIZE*16); }
+	#define indexGM(ptr, index) indexGMimpl(ptr, index).s[0]
+#else
+	#define indexGM(ptr, index) ptr[index]
 #endif
 
 // Single-element version of a complex number
@@ -386,7 +400,12 @@ R"(
 // Macro for storing and loading, to accomodate BDA
 #if USE_BDA
 	// this needs to be changed, but I forget how it works
-	#define INDEX(buf, idx) buf.s[idx]
+	#if 1
+		#define INDEX(buf, idx) buf.s[idx]
+	#else
+		// normally you could just use buf.s[idx], but sometimes the alignment does not match the element size.
+		#error "not implemented"
+	#endif
 #else
 	#define INDEX(buf, idx) buf[idx]
 #endif
@@ -488,32 +507,32 @@ R"(
 
 layout(push_constant) uniform Xasum
 {
-	int n;
+	uint n;
 #if USE_BDA
 	real_ptr_t xgm;
 #endif
-	int x_offset;
-	int x_inc;
+	uint x_offset;
+	uint x_inc;
 #if USE_BDA
 	real_ptr_t outp;
 #endif
-	int num_groups_0; // because this is not exposed in Vulkan :c
+	uint num_groups_0; // because this is not exposed in Vulkan :c
 };
 
 shared real lm[WGS1];
 
 void main()
 {
-	const int lid = get_local_id(0);
-	const int wgid = get_group_id(0);
-	const int num_groups = num_groups_0;
+	const uint lid = gl_LocalInvocationID[0];
+	const uint wgid = gl_WorkGroupID[0];
+	const uint num_groups = num_groups_0;
 
 	// Performs loading and the first steps of the reduction
 	real acc;
 	SetToZero(acc);
-	int id = wgid*WGS1 + lid;
+	uint id = wgid*WGS1 + lid;
 	while (id < n) {
-		real x = INDEX(xgm, id*x_inc + x_offset);
+		real x = indexGM(xgm, id*x_inc + x_offset);
 		#if defined(ROUTINE_SUM) // non-absolute version
 		#else
 			AbsoluteValue(x);
@@ -525,7 +544,7 @@ void main()
 	barrier();
 
 	// Performs reduction in local memory
-	for (int s=WGS1/2; s>0; s=s>>1) {
+	for (uint s=WGS1/2; s>0; s=s>>1) {
 		if (lid < s) {
 			Add(lm[lid], lm[lid], lm[lid + s]);
 		}
@@ -534,7 +553,7 @@ void main()
 
 	// Stores the per-workgroup result
 	if (lid == 0) {
-		INDEX(outp, wgid) = lm[0];
+		indexGM(outp, wgid) = lm[0];
 	}
 }
 

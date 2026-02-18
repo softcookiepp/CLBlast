@@ -69,8 +69,16 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 	{
 		header_string += "#define USE_SUBGROUP_SHUFFLING 1\n";
 		header_string += ("#define SUBGROUP_SIZE " + std::to_string(meta.subgroupSize) + "\n");
-		std::cout << "EVERYDAY I'M SHUFFLING" << std::endl;
 	}
+#if VULKAN_USE_BDA
+	if (meta.bda)
+	{
+		// buffer device address support
+		header_string += "#define USE_BDA 1\n";
+	}
+#endif
+	// just add this in here cause why not
+	header_string += "#define USE_CL_MAD 1\n";
 #else
 	// For Intel GPUs with subgroup support, use subgroup shuffling.
 	if (device.IsGPU() && device.HasExtension(kKhronosIntelSubgroups) &&

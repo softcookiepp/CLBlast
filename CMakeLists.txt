@@ -45,6 +45,7 @@ option(TUNERS "Enable compilation of the tuners" ON)
 option(CLIENTS "Enable compilation of the clients to test and compare performance" OFF)
 option(TESTS "Enable compilation of the correctness tests" OFF)
 option(CUBLAS "Enables performance comparison against cuBLAS on NVIDIA GPUs" OFF)
+option(VULKAN_BDA "Enable Vulkan support of Buffer Device Addresses" OFF)
 
 # The optional Netlib API for CLBlast
 option(NETLIB "Enable compilation of the CBLAS Netlib API" OFF)
@@ -91,6 +92,9 @@ elseif(CUDA)
 elseif(VULKAN)
   message("-- Building CLBlast with VULKAN API (cover your butts)")
   add_definitions(-DVULKAN_API)
+  if (VULKAN_BDA)
+	add_definitions(-DVULKAN_USE_BDA)
+  endif()
 endif()
 
 # Compile in verbose mode with additional diagnostic messages

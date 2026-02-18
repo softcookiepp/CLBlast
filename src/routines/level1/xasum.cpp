@@ -68,11 +68,26 @@ void Xasum<T>::DoAsum(const size_t n, const Buffer<T>& asum_buffer, const size_t
 	auto temp_buffer = Buffer<T>(context_, temp_size);
 
 	// Sets the kernel arguments
+#if VULKAN_USE_BDA
+	tart::DeviceMetadata meta = device_()->getMetadata();
+	kernel1.SetArgument(0, static_cast<int>(n));
+	if (meta.bda)
+		kernel1.SetArgument(1, x_buffer()->getAddress());
+	else
+		kernel1.SetArgument(1, x_buffer());
+	kernel1.SetArgument(2, static_cast<int>(x_offset));
+	kernel1.SetArgument(3, static_cast<int>(x_inc));
+	if (meta.bda)
+		kernel1.SetArgument(4, temp_buffer()->getAddress());
+	else
+		kernel1.SetArgument(4, temp_buffer());
+#else
 	kernel1.SetArgument(0, static_cast<int>(n));
 	kernel1.SetArgument(1, x_buffer());
 	kernel1.SetArgument(2, static_cast<int>(x_offset));
 	kernel1.SetArgument(3, static_cast<int>(x_inc));
 	kernel1.SetArgument(4, temp_buffer());
+#endif
 
 	// Event waiting list
 	auto eventWaitList = std::vector<Event>();
@@ -94,9 +109,23 @@ void Xasum<T>::DoAsum(const size_t n, const Buffer<T>& asum_buffer, const size_t
 	eventWaitList.push_back(kernelEvent);
 
 	// Sets the arguments for the epilogue kernel
+#if VULKAN_USE_BDA
+	if (meta.bda)
+	{
+		kernel2.SetArgument(0, temp_buffer()->getAddress());
+		kernel2.SetArgument(1, asum_buffer()->getAddress());
+	}
+	else
+	{
+		kernel2.SetArgument(0, temp_buffer());
+		kernel2.SetArgument(1, asum_buffer());
+	}
+	kernel2.SetArgument(2, static_cast<int>(asum_offset));
+#else
 	kernel2.SetArgument(0, temp_buffer());
 	kernel2.SetArgument(1, asum_buffer());
 	kernel2.SetArgument(2, static_cast<int>(asum_offset));
+#endif
 
 	// Launches the epilogue kernel
 	auto global2 = std::vector<size_t>{db_["WGS2"]};

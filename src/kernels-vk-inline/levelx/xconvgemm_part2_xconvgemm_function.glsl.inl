@@ -65,7 +65,16 @@ R"(
 #define COMMON_GLSL
 // =================================================================================================
 
-#define USE_BDA 0
+// whether or not to use buffer device addresses instead of descriptors
+// default to false
+#ifndef USE_BDA
+	#define USE_BDA 0
+#endif
+
+// if 64-bit integers are supported
+#ifndef USE_INT64
+	#define USE_INT64 0
+#endif
 
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this file is used outside of the CLBlast library.
@@ -100,6 +109,37 @@ R"(
 	#extension GL_EXT_shader_explicit_arithmetic_types_float64 : require
 #endif
 
+#ifdef USE_INT64
+	#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+#endif
+
+#if USE_BDA
+	// if BDA is supported but uint64_t isn't, then we need to use uvec2 for the address types
+	#if USE_UINT64
+		#extension GL_EXT_buffer_reference : require
+		#define addr_t uint64_t
+		uint64_t addPtrOffset(uint64_t ptr, uint64_t offset) { return ptr + offset; }
+		uint64_t addPtrOffset(uint64_t ptr, uint offset) { return ptr + uint64_t(offset); }
+	#else
+		#extension GL_EXT_buffer_reference_uvec2 : require
+		#define addr_t uvec2
+		uvec2 addPtrOffset(uvec2 addr, uvec2 offset)
+		{
+			uint carry;
+			uint lo = uaddCarry(addr.x, offset.x, carry);
+			uint hi = addr.y + offset.y + carry;
+			return uvec2(lo, hi);
+		}
+		uvec2 addPtrOffset(uvec2 addr, uint offset)
+		{
+			uint carry;
+			uint lo = uaddCarry(addr.x, offset, carry);
+			uint hi = addr.y + carry;
+			return uvec2(lo, hi);
+		}
+	#endif
+#endif
+
 
 // Half-precision
 #if PRECISION == 16
@@ -107,6 +147,7 @@ R"(
 	struct vec4_t { f16vec4 s; };
 	struct vec8_t { float16_t s[8]; };
 	struct vec16_t { float16_t s[16]; };
+	#define DTYPE_SIZE 2
 	#define real float16_t
 	#define ZERO float16_t(0.0)
 	#define ONE float16_t(1.0)
@@ -121,6 +162,7 @@ R"(
 	struct vec4_t { vec4 s; };
 	struct vec8_t { float s[8]; };
 	struct vec16_t { float s[16]; };
+	#define DTYPE_SIZE 4
 	#define real float
 	#define ZERO real(0.0f)
 	#define ONE 1.0f
@@ -135,6 +177,7 @@ R"(
 	struct vec4_t { dvec4 s; };
 	struct vec8_t { double s[8]; };
 	struct vec16_t { double s[16]; };
+	#define DTYPE_SIZE 8
 	#define real double
 	#define ZERO 0.0
 	#define ONE 1.0
@@ -149,6 +192,7 @@ R"(
 	struct vec4_t { mat4x2 s; };
 	struct vec8_t { vec2 s[8]; };
 	struct vec16_t { vec2 s[16]; };
+	#define DTYPE_SIZE 8
 	#define real vec2
 	#define ZERO 0.0f
 	#define ONE 1.0f
@@ -163,6 +207,7 @@ R"(
 	struct vec4_t { dmat4x2 s; };					 
 	struct vec8_t { dvec2 s[8]; };
 	struct vec16_t { dvec2 s[16]; };
+	#define DTYPE_SIZE 16
 	#define real dvec2
 	#define ZERO 0.0
 	#define ONE 1.0
@@ -177,6 +222,14 @@ R"(
 #define real4 vec4_t
 #define real8 vec8_t
 #define real16 vec16_t
+
+#if USE_BDA
+	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE) buffer real_ptr_t { real s[]; };
+	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE*2) buffer real2_ptr_t { real2 s[]; };
+	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE*4) buffer real4_ptr_t { real4 s[]; };
+	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE*8) buffer real8_ptr_t { real8 s[]; };
+	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE*16) buffer real16_ptr_t { real16 s[]; };
+#endif
 
 // Single-element version of a complex number
 #if PRECISION == 3232
@@ -333,8 +386,8 @@ R"(
 #if PRECISION == 3232 || PRECISION == 6464
 	#define MultiplyAdd(c,a,b) c += real(MulReal(a,b), MulImag(a,b))
 #else
-	#if 0 //USE_CL_MAD == 1
-		#define MultiplyAdd(c,a,b) c = mad(a, b, c)
+	#if USE_CL_MAD == 1
+		#define MultiplyAdd(c,a,b) c = fma(a, b, c)
 	#else
 		#define MultiplyAdd(c,a,b) c += (a * b)
 	#endif
@@ -380,7 +433,7 @@ R"(
 // Macro for storing and loading, to accomodate BDA
 #if USE_BDA
 	// this needs to be changed, but I forget how it works
-	#define INDEX(buf, idx) buf[idx]
+	#define INDEX(buf, idx) buf.s[idx]
 #else
 	#define INDEX(buf, idx) buf[idx]
 #endif

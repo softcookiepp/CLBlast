@@ -40,11 +40,11 @@
 layout(push_constant) uniform XasumEpilogue
 {
 #if USE_BDA
-	const __global real* restrict inp,
-	__global real* asum,
+	real_ptr_t inp;
+	real_ptr_t asum;
 #endif
 	int asum_offset;
-} args;
+};
 
 shared real lm[WGS2];
 
@@ -53,7 +53,7 @@ void main()
 	const int lid = get_local_id(0);
 
 	// Performs the first step of the reduction while loading the data
-	Add(lm[lid], inp[lid], inp[lid + WGS2]);
+	Add(lm[lid], INDEX(inp, lid), INDEX(inp, lid + WGS2));
 	barrier();
 
 	// Performs reduction in local memory
@@ -67,9 +67,9 @@ void main()
 	// Computes the absolute value and stores the final result
 	if (lid == 0) {
 		#if (PRECISION == 3232 || PRECISION == 6464) && defined(ROUTINE_ASUM)
-			asum[args.asum_offset].x = lm[0].x + lm[0].y; // the result is a non-complex number
+			INDEX(asum, asum_offset).x = lm[0].x + lm[0].y; // the result is a non-complex number
 		#else
-			asum[args.asum_offset] = lm[0];
+			INDEX(asum, asum_offset) = lm[0];
 		#endif
 	}
 }

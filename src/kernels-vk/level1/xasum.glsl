@@ -40,15 +40,15 @@ layout(push_constant) uniform Xasum
 {
 	int n;
 #if USE_BDA
-	__global real* restrict xgm;
+	real_ptr_t xgm;
 #endif
 	int x_offset;
 	int x_inc;
 #if USE_BDA
-	__global real* output;
+	real_ptr_t outp;
 #endif
 	int num_groups_0; // because this is not exposed in Vulkan :c
-} args;
+};
 
 shared real lm[WGS1];
 
@@ -56,14 +56,14 @@ void main()
 {
 	const int lid = get_local_id(0);
 	const int wgid = get_group_id(0);
-	const int num_groups = args.num_groups_0;
+	const int num_groups = num_groups_0;
 
 	// Performs loading and the first steps of the reduction
 	real acc;
 	SetToZero(acc);
 	int id = wgid*WGS1 + lid;
-	while (id < args.n) {
-		real x = xgm[id*args.x_inc + args.x_offset];
+	while (id < n) {
+		real x = INDEX(xgm, id*x_inc + x_offset);
 		#if defined(ROUTINE_SUM) // non-absolute version
 		#else
 			AbsoluteValue(x);
@@ -84,7 +84,7 @@ void main()
 
 	// Stores the per-workgroup result
 	if (lid == 0) {
-		outp[wgid] = lm[0];
+		INDEX(outp, wgid) = lm[0];
 	}
 }
 

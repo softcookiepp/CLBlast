@@ -62,7 +62,11 @@ void Xaxpy<T>::DoAxpy(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 	TestVectorY(n, y_buffer, y_offset, y_inc);
 
 	// Determines whether or not the fast-version can be used
-	const auto use_faster_kernel =(x_offset == 0) && (x_inc == 1) && (y_offset == 0) && (y_inc == 1) && IsMultiple(n, db_["WPT"] * db_["VW"]);
+#if VULKAN_API
+	const auto use_faster_kernel = (x_inc == 1) && (y_inc == 1) && IsMultiple(n, db_["WPT"] * db_["VW"]);
+#else
+	const auto use_faster_kernel = (x_offset == 0) && (x_inc == 1) && (y_offset == 0) && (y_inc == 1) && IsMultiple(n, db_["WPT"] * db_["VW"]);
+#endif
 	const auto use_fastest_kernel = use_faster_kernel && IsMultiple(n, db_["WGS"] * db_["WPT"] * db_["VW"]);
 
 	// If possible, run the fast-version of the kernel
@@ -79,8 +83,13 @@ void Xaxpy<T>::DoAxpy(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 #endif
 			kernel.SetArgument(0, static_cast<int>(n));
 		kernel.SetArgument(1, GetRealArg(alpha));
+#if VULKAN_API
+		kernel.SetArgument(2, x_buffer()->view(x_offset*sizeof(T)));
+		kernel.SetArgument(3, y_buffer()->view(y_offset*sizeof(T)));
+#else
 		kernel.SetArgument(2, x_buffer());
 		kernel.SetArgument(3, y_buffer());
+#endif
 	} else {
 		kernel.SetArgument(0, static_cast<int>(n));
 		kernel.SetArgument(1, GetRealArg(alpha));

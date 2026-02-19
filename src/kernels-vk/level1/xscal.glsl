@@ -32,7 +32,7 @@ layout(push_constant, std430) uniform Xscal
 	int n;
 	real_arg arg_alpha;
 #if USE_BDA
-	__global real* xgm;
+	real_ptr_t xgm;
 #endif
 	int x_offset;
 	int x_inc;
@@ -46,10 +46,10 @@ void main()
 	// Loops over the work that needs to be done (allows for an arbitrary number of threads)
 	for (int id = get_global_id(0); id<n; id += get_global_size(0))
 	{
-		real xvalue = INDEX(xgm, id*x_inc + x_offset);
+		real xvalue = indexGM(xgm, id*x_inc + x_offset);
 		real result;
 		Multiply(result, alpha, xvalue);
-		INDEX(xgm, id*x_inc + x_offset) = result;
+		indexGM(xgm, id*x_inc + x_offset) = result;
 	}
 }
 

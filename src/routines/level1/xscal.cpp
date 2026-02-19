@@ -67,49 +67,48 @@ void Xscal<T>::DoScal(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 
 	// If possible, run the fast-version of the kernel
 	auto kernel_name = (use_fast_kernel) ? "XscalFast" : "Xscal";
-
+	
 	// Retrieves the Xscal kernel from the compiled binary
 	auto kernel = Kernel(program_, kernel_name);
 #if VULKAN_API
 	#if VULKAN_USE_BDA
-		tart::DeviceMetadata meta = device_()->getMetadata();
-		if (meta.bda)
+	tart::DeviceMetadata meta = device_()->getMetadata();
+	if (meta.bda)
+	{
+		if (use_fast_kernel)
 		{
-			if (use_fast_kernel)
-			{
-				kernel.SetArgument(0, static_cast<int>(n));
-				kernel.SetArgument(1, GetRealArg(alpha));
-				kernel.SetArgument(2, x_buffer()->getAddress() + x_offset*sizeof(T));
-			}
-			else
-			{
-				kernel.SetArgument(0, static_cast<int>(n));
-				kernel.SetArgument(1, GetRealArg(alpha));
-				kernel.SetArgument(2, x_buffer()->getAddress());
-				kernel.SetArgument(3, static_cast<int>(x_offset));
-				kernel.SetArgument(4, static_cast<int>(x_inc));
-			}
+			kernel.SetArgument(0, static_cast<int>(n));
+			kernel.SetArgument(1, GetRealArg(alpha));
+			kernel.SetArgument(2, x_buffer()->getAddress() + x_offset*sizeof(T));
 		}
 		else
-	#else
 		{
-			// Sets the kernel arguments
-			if (use_fast_kernel)
-			{
-				kernel.SetArgument(0, static_cast<int>(n));
-				kernel.SetArgument(1, GetRealArg(alpha));
-				kernel.SetArgument(2, x_buffer()->view(x_offset*sizeof(T)));
-			}
-			else
-			{
-				kernel.SetArgument(0, static_cast<int>(n));
-				kernel.SetArgument(1, GetRealArg(alpha));
-				kernel.SetArgument(2, x_buffer());
-				kernel.SetArgument(3, static_cast<int>(x_offset));
-				kernel.SetArgument(4, static_cast<int>(x_inc));
-			}
+			kernel.SetArgument(0, static_cast<int>(n));
+			kernel.SetArgument(1, GetRealArg(alpha));
+			kernel.SetArgument(2, x_buffer()->getAddress());
+			kernel.SetArgument(3, static_cast<int>(x_offset));
+			kernel.SetArgument(4, static_cast<int>(x_inc));
 		}
+	}
+	else
 	#endif
+	{
+		// Sets the kernel arguments
+		if (use_fast_kernel)
+		{
+			kernel.SetArgument(0, static_cast<int>(n));
+			kernel.SetArgument(1, GetRealArg(alpha));
+			kernel.SetArgument(2, x_buffer()->view(x_offset*sizeof(T)));
+		}
+		else
+		{
+			kernel.SetArgument(0, static_cast<int>(n));
+			kernel.SetArgument(1, GetRealArg(alpha));
+			kernel.SetArgument(2, x_buffer());
+			kernel.SetArgument(3, static_cast<int>(x_offset));
+			kernel.SetArgument(4, static_cast<int>(x_inc));
+		}
+	}
 #else
 	// Sets the kernel arguments
 	if (use_fast_kernel) {

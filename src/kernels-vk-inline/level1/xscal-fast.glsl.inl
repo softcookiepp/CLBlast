@@ -1089,7 +1089,7 @@ layout(push_constant, std430) uniform XscalFast
 	int n;
 	real_arg arg_alpha;
 #if USE_BDA
-	__global real* xgm;
+	realV_ptr_t xgm;
 #endif
 };
 
@@ -1100,10 +1100,10 @@ void main()
 	for (int _w = 0; _w < WPT; _w += 1)
 	{
 		const int id = _w*get_global_size(0) + get_global_id(0);
-		realV xvalue = INDEX(xgm, id);
+		realV xvalue = indexGM(xgm, id);
 		realV result;
 		result = MultiplyVector(result, alpha, xvalue);
-		INDEX(xgm, id) = result;
+		indexGM(xgm, id) = result;
 	}
 }
 

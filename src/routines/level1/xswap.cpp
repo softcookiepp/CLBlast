@@ -77,6 +77,9 @@ void Xswap<T>::DoSwap(const size_t n, const Buffer<T>& x_buffer, const size_t x_
 	// Sets the kernel arguments
 #if VULKAN_API
 	#if VULKAN_USE_BDA
+	tart::DeviceMetadata meta = device_()->getMetadata();
+	if(meta.bda)
+	{
 		if (use_fast_kernel)
 		{
 			kernel.SetArgument(0, static_cast<int>(n));
@@ -93,7 +96,10 @@ void Xswap<T>::DoSwap(const size_t n, const Buffer<T>& x_buffer, const size_t x_
 			kernel.SetArgument(5, static_cast<int>(0));
 			kernel.SetArgument(6, static_cast<int>(y_inc));
 		}
+	}
+	else
 	#else
+	{
 		if (use_fast_kernel)
 		{
 			kernel.SetArgument(0, static_cast<int>(n));
@@ -110,7 +116,7 @@ void Xswap<T>::DoSwap(const size_t n, const Buffer<T>& x_buffer, const size_t x_
 			kernel.SetArgument(5, static_cast<int>(0));
 			kernel.SetArgument(6, static_cast<int>(y_inc));
 		}
-
+	}
 	#endif
 #else
 	if (use_fast_kernel) {

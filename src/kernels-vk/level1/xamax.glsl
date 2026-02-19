@@ -41,13 +41,13 @@ layout(push_constant) uniform Xamax
 {
 	int n;
 #if USE_BDA
-	__global real* restrict xgm,
+	real_ptr_t xgm;
 #endif
 	int x_offset;
 	int x_inc;
 #if USE_BDA
-	__global singlereal* maxgm,
-	__global uint* imaxgm
+	singlereal_ptr_t maxgm;
+	uint_ptr_t imaxgm;
 #endif
 	int num_groups_0; // because this is not exposed in Vulkan :c
 };
@@ -71,10 +71,11 @@ void main()
 	int id = wgid*WGS1 + lid;
 	while (id < n) {
 		const int x_index = id*x_inc + x_offset;
+		real v = indexGM(xgm, x_index);
 		#if PRECISION == 3232 || PRECISION == 6464
-			precise singlereal x = abs(xgm[x_index].x) + abs(xgm[x_index].y);
+			precise singlereal x = abs(v.x) + abs(v.y);
 		#else
-			precise singlereal x = xgm[x_index];
+			precise singlereal x = v;
 		#endif
 		#if defined(ROUTINE_MAX) // non-absolute maximum version
 			// nothing special here
@@ -109,8 +110,8 @@ void main()
 
 	// Stores the per-workgroup result
 	if (lid == 0) {
-		maxgm[wgid] = maxlm[0];
-		imaxgm[wgid] = imaxlm[0];
+		indexGM(maxgm, wgid) = maxlm[0];
+		indexGM(imaxgm, wgid) = imaxlm[0];
 	}
 }
 

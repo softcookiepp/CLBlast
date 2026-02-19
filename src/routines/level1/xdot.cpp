@@ -68,15 +68,33 @@ void Xdot<T>::DoDot(const size_t n, const Buffer<T>& dot_buffer, const size_t do
 	auto temp_buffer = Buffer<T>(context_, temp_size);
 
 	// Sets the kernel arguments
-	kernel1.SetArgument(0, static_cast<int>(n));
-	kernel1.SetArgument(1, x_buffer());
-	kernel1.SetArgument(2, static_cast<int>(x_offset));
-	kernel1.SetArgument(3, static_cast<int>(x_inc));
-	kernel1.SetArgument(4, y_buffer());
-	kernel1.SetArgument(5, static_cast<int>(y_offset));
-	kernel1.SetArgument(6, static_cast<int>(y_inc));
-	kernel1.SetArgument(7, temp_buffer());
-	kernel1.SetArgument(8, static_cast<int>(do_conjugate));
+#if VULKAN_USE_BDA
+	tart::DeviceMetadata meta = device_()->getMetadata();
+	if (meta.bda)
+	{
+		kernel1.SetArgument(0, static_cast<int>(n));
+		kernel1.SetArgument(1, x_buffer());
+		kernel1.SetArgument(2, static_cast<int>(x_offset));
+		kernel1.SetArgument(3, static_cast<int>(x_inc));
+		kernel1.SetArgument(4, y_buffer());
+		kernel1.SetArgument(5, static_cast<int>(y_offset));
+		kernel1.SetArgument(6, static_cast<int>(y_inc));
+		kernel1.SetArgument(7, temp_buffer());
+		kernel1.SetArgument(8, static_cast<int>(do_conjugate));
+	}
+	else
+#endif
+	{
+		kernel1.SetArgument(0, static_cast<int>(n));
+		kernel1.SetArgument(1, x_buffer());
+		kernel1.SetArgument(2, static_cast<int>(x_offset));
+		kernel1.SetArgument(3, static_cast<int>(x_inc));
+		kernel1.SetArgument(4, y_buffer());
+		kernel1.SetArgument(5, static_cast<int>(y_offset));
+		kernel1.SetArgument(6, static_cast<int>(y_inc));
+		kernel1.SetArgument(7, temp_buffer());
+		kernel1.SetArgument(8, static_cast<int>(do_conjugate));
+	}
 
 	// Event waiting list
 	auto eventWaitList = std::vector<Event>();

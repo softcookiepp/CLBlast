@@ -66,31 +66,33 @@ void Xamax<T>::DoAmax(const size_t n, const Buffer<unsigned int>& imax_buffer, c
 	auto temp_size = 2 * db_["WGS2"];
 	auto temp_buffer1 = Buffer<T>(context_, temp_size);
 	auto temp_buffer2 = Buffer<unsigned int>(context_, temp_size);
+	
+	// ugh.
+	std::vector<Event> eventWaitList;
 
 	// Sets the kernel arguments
 #if VULKAN_API
 	#if VULKAN_USE_BDA
-		tart::DeviceMetadata meta = device_()->getMetadata();
-		if (meta.bda)
-		{
-			kernel1.SetArgument(0, static_cast<int>(n));
-			kernel1.SetArgument(1, x_buffer()->getAddress() + x_offset*sizeof(T));
-			kernel1.SetArgument(2, static_cast<int>(0));
-			kernel1.SetArgument(3, static_cast<int>(x_inc));
-			kernel1.SetArgument(4, temp_buffer1()->getAddress());
-			kernel1.SetArgument(5, temp_buffer2()->getAddress());
-		}
-		else
-	#else
-		{
-			kernel1.SetArgument(0, static_cast<int>(n));
-			kernel1.SetArgument(1, x_buffer());
-			kernel1.SetArgument(2, static_cast<int>(x_offset));
-			kernel1.SetArgument(3, static_cast<int>(x_inc));
-			kernel1.SetArgument(4, temp_buffer1());
-			kernel1.SetArgument(5, temp_buffer2());
-		}
+	tart::DeviceMetadata meta = device_()->getMetadata();
+	if (meta.bda)
+	{
+		kernel1.SetArgument(0, static_cast<int>(n));
+		kernel1.SetArgument(1, x_buffer()->getAddress() + x_offset*sizeof(T));
+		kernel1.SetArgument(2, static_cast<int>(0));
+		kernel1.SetArgument(3, static_cast<int>(x_inc));
+		kernel1.SetArgument(4, temp_buffer1()->getAddress());
+		kernel1.SetArgument(5, temp_buffer2()->getAddress());
+	}
+	else
 	#endif
+	{
+		kernel1.SetArgument(0, static_cast<int>(n));
+		kernel1.SetArgument(1, x_buffer());
+		kernel1.SetArgument(2, static_cast<int>(x_offset));
+		kernel1.SetArgument(3, static_cast<int>(x_inc));
+		kernel1.SetArgument(4, temp_buffer1());
+		kernel1.SetArgument(5, temp_buffer2());
+	}
 #else
 	kernel1.SetArgument(0, static_cast<int>(n));
 	kernel1.SetArgument(1, x_buffer());
@@ -99,9 +101,6 @@ void Xamax<T>::DoAmax(const size_t n, const Buffer<unsigned int>& imax_buffer, c
 	kernel1.SetArgument(4, temp_buffer1());
 	kernel1.SetArgument(5, temp_buffer2());
 #endif
-
-	// Event waiting list
-	auto eventWaitList = std::vector<Event>();
 
 	// Launches the main kernel
 	auto global1 = std::vector<size_t>{db_["WGS1"] * temp_size};

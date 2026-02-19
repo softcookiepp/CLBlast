@@ -34,12 +34,12 @@ layout(push_constant) uniform Xaxpy
 	int n;
 	real_arg arg_alpha;
 #if USE_BDA
-	__global real* restrict xgm,
+	real_ptr_t xgm;
 #endif
 	int x_offset;
 	int x_inc;
 #if USE_BDA
-	__global real* ygm,
+	real_ptr_t ygm;
 #endif
 	int y_offset;
 	int y_inc;
@@ -52,14 +52,11 @@ void main()
 	// Loops over the work that needs to be done (allows for an arbitrary number of threads)
 	for (int id = get_global_id(0); id < n; id += get_global_size(0))
 	{
-		// probably won't be possible to have a VW of > 1 when x_inc > 1
-#if 1
-		real xvalue = xgm[id*x_inc + x_offset];
-		real yvalue = ygm[id*y_inc + y_offset];
+		real xvalue = indexGM(xgm, id*x_inc + x_offset);
+		real yvalue = indexGM(ygm, id*y_inc + y_offset);
 		//yvalue += alpha*xvalue;
 		MultiplyAdd(yvalue, alpha, xvalue);
-		ygm[id*y_inc + y_offset] = yvalue;
-#endif
+		indexGM(ygm, id*y_inc + y_offset) = yvalue;
 	}
 }
 

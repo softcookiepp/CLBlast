@@ -36,8 +36,8 @@ layout(push_constant) uniform XaxpyFastest
 	//int n;
 	real_arg arg_alpha;
 #if USE_BDA
-	__global realV* restrict xgm,
-	__global realV* ygm
+	realV_ptr_t xgm;
+	realV_ptr_t ygm;
 #endif
 };
 void main()
@@ -47,9 +47,9 @@ void main()
 	//#pragma unroll
 	for (int _w = 0; _w < WPT; _w += 1) {
 		const int id = _w*get_global_size(0) + get_global_id(0);
-		realV xvalue = xgm[id];
-		realV yvalue = ygm[id];
-		ygm[id] = MultiplyAddVector(yvalue, alpha, xvalue);
+		realV xvalue = indexGM(xgm, id);
+		realV yvalue = indexGM(ygm, id);
+		indexGM(ygm, id) = MultiplyAddVector(yvalue, alpha, xvalue);
 	}
 }
 

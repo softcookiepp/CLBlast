@@ -74,22 +74,58 @@ void Xaxpy<T>::DoAxpy(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 
 	// Retrieves the Xaxpy kernel from the compiled binary
 	auto kernel = Kernel(program_, kernel_name);
+#if VULKAN_API
+	// Sets the kernel arguments
+	#if VULKAN_USE_BDA
+	tart::DeviceMetadata meta = device_()->getMetadata();
+	if (meta.bda)
+	{
+		if (use_faster_kernel || use_fastest_kernel)
+		{
+			if (!use_fastest_kernel) kernel.SetArgument(0, static_cast<int>(n));
+			kernel.SetArgument(1, GetRealArg(alpha));
+			kernel.SetArgument(2, x_buffer()->getAddress() + x_offset*sizeof(T));
+			kernel.SetArgument(3, y_buffer()->getAddress() + y_offset*sizeof(T));
+		} else {
+			kernel.SetArgument(0, static_cast<int>(n));
+			kernel.SetArgument(1, GetRealArg(alpha));
+			kernel.SetArgument(2, x_buffer()->getAddress() );
+			kernel.SetArgument(3, static_cast<int>(x_offset));
+			kernel.SetArgument(4, static_cast<int>(x_inc));
+			kernel.SetArgument(5, y_buffer()->getAddress() );
+			kernel.SetArgument(6, static_cast<int>(y_offset));
+			kernel.SetArgument(7, static_cast<int>(y_inc));
+		}
+	}
+	else
+	#endif
+	{
+		if (use_faster_kernel || use_fastest_kernel)
+		{
+			if (!use_fastest_kernel) kernel.SetArgument(0, static_cast<int>(n));
+			kernel.SetArgument(1, GetRealArg(alpha));
+			kernel.SetArgument(2, x_buffer()->view(x_offset*sizeof(T)));
+			kernel.SetArgument(3, y_buffer()->view(y_offset*sizeof(T)));
+		} else {
+			kernel.SetArgument(0, static_cast<int>(n));
+			kernel.SetArgument(1, GetRealArg(alpha));
+			kernel.SetArgument(2, x_buffer());
+			kernel.SetArgument(3, static_cast<int>(x_offset));
+			kernel.SetArgument(4, static_cast<int>(x_inc));
+			kernel.SetArgument(5, y_buffer());
+			kernel.SetArgument(6, static_cast<int>(y_offset));
+			kernel.SetArgument(7, static_cast<int>(y_inc));
+		}
+	}
 	
+#else
 	// Sets the kernel arguments
 	if (use_faster_kernel || use_fastest_kernel)
 	{
-#if VULKAN_API
-		if (!use_fastest_kernel)
-#endif
-			kernel.SetArgument(0, static_cast<int>(n));
+		kernel.SetArgument(0, static_cast<int>(n));
 		kernel.SetArgument(1, GetRealArg(alpha));
-#if VULKAN_API
-		kernel.SetArgument(2, x_buffer()->view(x_offset*sizeof(T)));
-		kernel.SetArgument(3, y_buffer()->view(y_offset*sizeof(T)));
-#else
 		kernel.SetArgument(2, x_buffer());
 		kernel.SetArgument(3, y_buffer());
-#endif
 	} else {
 		kernel.SetArgument(0, static_cast<int>(n));
 		kernel.SetArgument(1, GetRealArg(alpha));
@@ -100,6 +136,7 @@ void Xaxpy<T>::DoAxpy(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 		kernel.SetArgument(6, static_cast<int>(y_offset));
 		kernel.SetArgument(7, static_cast<int>(y_inc));
 	}
+#endif
 
 	// Launches the kernel
 	if (use_fastest_kernel) {

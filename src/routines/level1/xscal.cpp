@@ -72,22 +72,42 @@ void Xscal<T>::DoScal(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 	auto kernel = Kernel(program_, kernel_name);
 #if VULKAN_API
 	#if VULKAN_USE_BDA
-		#error "not implemented"
-	#else
-		// Sets the kernel arguments
-		if (use_fast_kernel)
+		tart::DeviceMetadata meta = device_()->getMetadata();
+		if (meta.bda)
 		{
-			kernel.SetArgument(0, static_cast<int>(n));
-			kernel.SetArgument(1, GetRealArg(alpha));
-			kernel.SetArgument(2, x_buffer()->view(x_offset*sizeof(T)));
+			if (use_fast_kernel)
+			{
+				kernel.SetArgument(0, static_cast<int>(n));
+				kernel.SetArgument(1, GetRealArg(alpha));
+				kernel.SetArgument(2, x_buffer()->getAddress() + x_offset*sizeof(T));
+			}
+			else
+			{
+				kernel.SetArgument(0, static_cast<int>(n));
+				kernel.SetArgument(1, GetRealArg(alpha));
+				kernel.SetArgument(2, x_buffer()->getAddress());
+				kernel.SetArgument(3, static_cast<int>(x_offset));
+				kernel.SetArgument(4, static_cast<int>(x_inc));
+			}
 		}
 		else
+	#else
 		{
-			kernel.SetArgument(0, static_cast<int>(n));
-			kernel.SetArgument(1, GetRealArg(alpha));
-			kernel.SetArgument(2, x_buffer()->view(x_offset*sizeof(T)));
-			kernel.SetArgument(3, static_cast<int>(0));
-			kernel.SetArgument(4, static_cast<int>(x_inc));
+			// Sets the kernel arguments
+			if (use_fast_kernel)
+			{
+				kernel.SetArgument(0, static_cast<int>(n));
+				kernel.SetArgument(1, GetRealArg(alpha));
+				kernel.SetArgument(2, x_buffer()->view(x_offset*sizeof(T)));
+			}
+			else
+			{
+				kernel.SetArgument(0, static_cast<int>(n));
+				kernel.SetArgument(1, GetRealArg(alpha));
+				kernel.SetArgument(2, x_buffer());
+				kernel.SetArgument(3, static_cast<int>(x_offset));
+				kernel.SetArgument(4, static_cast<int>(x_inc));
+			}
 		}
 	#endif
 #else

@@ -1,7 +1,7 @@
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
-//   Cedric Nugteren <www.cedricnugteren.nl>
+//	 Cedric Nugteren <www.cedricnugteren.nl>
 //
 // This file implements the Xswap class (see the header for information about the class).
 //
@@ -26,8 +26,8 @@ namespace clblast {
 // Constructor: forwards to base class constructor
 template <typename T>
 Xswap<T>::Xswap(Queue& queue, EventPointer event, const std::string& name)
-    : Routine(queue, event, name, {"Xaxpy"}, PrecisionValue<T>(), {},
-              {
+		: Routine(queue, event, name, {"Xaxpy"}, PrecisionValue<T>(), {},
+							{
 #if VULKAN_API
 	#include "../../kernels-vk-inline/level1/xswap.glsl.inl"
 	,
@@ -37,11 +37,11 @@ Xswap<T>::Xswap(Queue& queue, EventPointer event, const std::string& name)
 	// (comment to prevent auto-re-ordering)
 	#include "../../kernels/level1/xswap.opencl"
 #endif
-              }
+							}
 #if VULKAN_API
 		, true, {"Xswap", "XswapFast"}
 #endif
-              ) {
+							) {
 }
 
 // =================================================================================================
@@ -49,52 +49,95 @@ Xswap<T>::Xswap(Queue& queue, EventPointer event, const std::string& name)
 // The main routine
 template <typename T>
 void Xswap<T>::DoSwap(const size_t n, const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc,
-                      const Buffer<T>& y_buffer, const size_t y_offset, const size_t y_inc) {
-  // Makes sure all dimensions are larger than zero
-  if (n == 0) {
-    throw BLASError(StatusCode::kInvalidDimension);
-  }
+											const Buffer<T>& y_buffer, const size_t y_offset, const size_t y_inc) {
+	// Makes sure all dimensions are larger than zero
+	if (n == 0) {
+		throw BLASError(StatusCode::kInvalidDimension);
+	}
 
-  // Tests the vectors for validity
-  TestVectorX(n, x_buffer, x_offset, x_inc);
-  TestVectorY(n, y_buffer, y_offset, y_inc);
+	// Tests the vectors for validity
+	TestVectorX(n, x_buffer, x_offset, x_inc);
+	TestVectorY(n, y_buffer, y_offset, y_inc);
+#if VULKAN_API
+	// Determines whether or not the fast-version can be used.
+	// In Vulkan, we can modify the buffer offset pre-submission, so that is no longer a criteria!
+	bool use_fast_kernel = (x_inc == 1) && (y_inc == 1) && IsMultiple(n, db_["WGS"] * db_["WPT"] * db_["VW"]);
+#else
+	// Determines whether or not the fast-version can be used
+	bool use_fast_kernel = (x_offset == 0) && (x_inc == 1) && (y_offset == 0) && (y_inc == 1) &&
+												 IsMultiple(n, db_["WGS"] * db_["WPT"] * db_["VW"]);
+#endif
 
-  // Determines whether or not the fast-version can be used
-  bool use_fast_kernel = (x_offset == 0) && (x_inc == 1) && (y_offset == 0) && (y_inc == 1) &&
-                         IsMultiple(n, db_["WGS"] * db_["WPT"] * db_["VW"]);
+	// If possible, run the fast-version of the kernel
+	auto kernel_name = (use_fast_kernel) ? "XswapFast" : "Xswap";
 
-  // If possible, run the fast-version of the kernel
-  auto kernel_name = (use_fast_kernel) ? "XswapFast" : "Xswap";
+	// Retrieves the Xswap kernel from the compiled binary
+	auto kernel = Kernel(program_, kernel_name);
 
-  // Retrieves the Xswap kernel from the compiled binary
-  auto kernel = Kernel(program_, kernel_name);
+	// Sets the kernel arguments
+#if VULKAN_API
+	#if VULKAN_USE_BDA
+		if (use_fast_kernel)
+		{
+			kernel.SetArgument(0, static_cast<int>(n));
+			kernel.SetArgument(1, x_buffer()->view(x_offset*sizeof(T))->getAddress());
+			kernel.SetArgument(2, y_buffer()->view(y_offset*sizeof(T))->getAddress());
+		}
+		else
+		{
+			kernel.SetArgument(0, static_cast<int>(n));
+			kernel.SetArgument(1, x_buffer()->view(x_offset*sizeof(T))->getAddress());
+			kernel.SetArgument(2, static_cast<int>(0));
+			kernel.SetArgument(3, static_cast<int>(x_inc));
+			kernel.SetArgument(4, y_buffer()->view(y_offset*sizeof(T))->getAddress());
+			kernel.SetArgument(5, static_cast<int>(0));
+			kernel.SetArgument(6, static_cast<int>(y_inc));
+		}
+	#else
+		if (use_fast_kernel)
+		{
+			kernel.SetArgument(0, static_cast<int>(n));
+			kernel.SetArgument(1, x_buffer()->view(x_offset*sizeof(T)));
+			kernel.SetArgument(2, y_buffer()->view(y_offset*sizeof(T)));
+		}
+		else
+		{
+			kernel.SetArgument(0, static_cast<int>(n));
+			kernel.SetArgument(1, x_buffer()->view(x_offset*sizeof(T)));
+			kernel.SetArgument(2, static_cast<int>(0));
+			kernel.SetArgument(3, static_cast<int>(x_inc));
+			kernel.SetArgument(4, y_buffer()->view(y_offset*sizeof(T)));
+			kernel.SetArgument(5, static_cast<int>(0));
+			kernel.SetArgument(6, static_cast<int>(y_inc));
+		}
 
-  // Sets the kernel arguments
-  if (use_fast_kernel) {
-    kernel.SetArgument(0, static_cast<int>(n));
-    kernel.SetArgument(1, x_buffer());
-    kernel.SetArgument(2, y_buffer());
-  } else {
-    kernel.SetArgument(0, static_cast<int>(n));
-    kernel.SetArgument(1, x_buffer());
-    kernel.SetArgument(2, static_cast<int>(x_offset));
-    kernel.SetArgument(3, static_cast<int>(x_inc));
-    kernel.SetArgument(4, y_buffer());
-    kernel.SetArgument(5, static_cast<int>(y_offset));
-    kernel.SetArgument(6, static_cast<int>(y_inc));
-  }
-
-  // Launches the kernel
-  if (use_fast_kernel) {
-    auto global = std::vector<size_t>{CeilDiv(n, db_["WPT"] * db_["VW"])};
-    auto local = std::vector<size_t>{db_["WGS"]};
-    RunKernel(kernel, queue_, device_, global, local, event_);
-  } else {
-    auto n_ceiled = Ceil(n, db_["WGS"] * db_["WPT"]);
-    auto global = std::vector<size_t>{n_ceiled / db_["WPT"]};
-    auto local = std::vector<size_t>{db_["WGS"]};
-    RunKernel(kernel, queue_, device_, global, local, event_);
-  }
+	#endif
+#else
+	if (use_fast_kernel) {
+		kernel.SetArgument(0, static_cast<int>(n));
+		kernel.SetArgument(1, x_buffer());
+		kernel.SetArgument(2, y_buffer());
+	} else {
+		kernel.SetArgument(0, static_cast<int>(n));
+		kernel.SetArgument(1, x_buffer());
+		kernel.SetArgument(2, static_cast<int>(x_offset));
+		kernel.SetArgument(3, static_cast<int>(x_inc));
+		kernel.SetArgument(4, y_buffer());
+		kernel.SetArgument(5, static_cast<int>(y_offset));
+		kernel.SetArgument(6, static_cast<int>(y_inc));
+	}
+#endif
+	// Launches the kernel
+	if (use_fast_kernel) {
+		auto global = std::vector<size_t>{CeilDiv(n, db_["WPT"] * db_["VW"])};
+		auto local = std::vector<size_t>{db_["WGS"]};
+		RunKernel(kernel, queue_, device_, global, local, event_);
+	} else {
+		auto n_ceiled = Ceil(n, db_["WGS"] * db_["WPT"]);
+		auto global = std::vector<size_t>{n_ceiled / db_["WPT"]};
+		auto local = std::vector<size_t>{db_["WGS"]};
+		RunKernel(kernel, queue_, device_, global, local, event_);
+	}
 }
 
 // =================================================================================================
@@ -107,4 +150,4 @@ template class Xswap<float2>;
 template class Xswap<double2>;
 
 // =================================================================================================
-}  // namespace clblast
+}	// namespace clblast

@@ -61,8 +61,15 @@ void Xcopy<T>::DoCopy(const size_t n, const Buffer<T>& x_buffer, const size_t x_
 	TestVectorY(n, y_buffer, y_offset, y_inc);
 
 	// Determines whether or not the fast-version can be used
+#if VULKAN_API
+	// TODO: it may be possible to use pure transfer operations if we are doing this via Vulkan.
+	// Will look into it.
+	bool use_fast_kernel = (x_inc == 1) && (y_inc == 1) &&
+												 IsMultiple(n, db_["WGS"] * db_["WPT"] * db_["VW"]);
+#else
 	bool use_fast_kernel = (x_offset == 0) && (x_inc == 1) && (y_offset == 0) && (y_inc == 1) &&
 												 IsMultiple(n, db_["WGS"] * db_["WPT"] * db_["VW"]);
+#endif
 
 	// If possible, run the fast-version of the kernel
 	auto kernel_name = (use_fast_kernel) ? "XcopyFast" : "Xcopy";
@@ -73,8 +80,13 @@ void Xcopy<T>::DoCopy(const size_t n, const Buffer<T>& x_buffer, const size_t x_
 	// Sets the kernel arguments
 	if (use_fast_kernel) {
 		kernel.SetArgument(0, static_cast<int>(n));
+#if VULKAN_API
+		kernel.SetArgument(1, x_buffer()->view(x_offset*sizeof(T)));
+		kernel.SetArgument(2, y_buffer()->view(y_offset*sizeof(T)));
+#else
 		kernel.SetArgument(1, x_buffer());
 		kernel.SetArgument(2, y_buffer());
+#endif
 	} else {
 		kernel.SetArgument(0, static_cast<int>(n));
 		kernel.SetArgument(1, x_buffer());

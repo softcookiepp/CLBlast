@@ -32,12 +32,12 @@ layout(push_constant, std430) uniform Xswap
 {
 	int n;
 #if USE_BDA
-	__global real* xgm;
+	real_ptr_t xgm;
 #endif
 	int x_offset;
 	int x_inc;
 #if USE_BDA
-	__global real* ygm; 
+	real_ptr_t ygm;
 #endif
 	int y_offset;
 	int y_inc;
@@ -49,9 +49,9 @@ void main()
 	// Loops over the work that needs to be done (allows for an arbitrary number of threads)
 	for (int id = get_global_id(0); id<n; id += get_global_size(0))
 	{
-		real temp = xgm[id*x_inc + x_offset];
-		xgm[id*x_inc + x_offset] = ygm[id*y_inc + y_offset];
-		ygm[id*y_inc + y_offset] = temp;
+		real temp = indexGM(xgm, id*x_inc + x_offset);
+		indexGM(xgm, id*x_inc + x_offset) = indexGM(ygm, id*y_inc + y_offset);
+		indexGM(ygm, id*y_inc + y_offset) = temp;
 	}
 }
 

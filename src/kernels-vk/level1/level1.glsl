@@ -32,14 +32,19 @@
 
 // Data-widths
 #if VW == 1
+	#define realV_ptr_t real_ptr_t
 	#define realV real
 #elif VW == 2
+	#define realV_ptr_t real2_ptr_t
 	#define realV real2
 #elif VW == 4
+	#define realV_ptr_t real4_ptr_t
 	#define realV real4
 #elif VW == 8
+	#define realV_ptr_t real8_ptr_t
 	#define realV real8
 #elif VW == 16
+	#define realV_ptr_t real16_ptr_t
 	#define realV real16
 #endif
 

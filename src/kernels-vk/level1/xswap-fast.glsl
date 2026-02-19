@@ -37,8 +37,8 @@ layout(push_constant) uniform XswapFast
 {
 	int n;
 #if USE_BDA
-	__global realV* xgm;
-	__global realV* ygm;
+	realV_ptr_t xgm;
+	realV_ptr_t ygm;
 #endif
 };
 
@@ -49,9 +49,9 @@ void main()
 	for (int _w = 0; _w < WPT; _w += 1)
 	{
 		const int id = _w*get_global_size(0) + get_global_id(0);
-		realV temp = xgm[id];
-		xgm[id] = ygm[id];
-		ygm[id] = temp;
+		realV temp = indexGM(xgm, id);
+		indexGM(xgm, id) = indexGM(ygm, id);
+		indexGM(ygm, id) = temp;
 	}
 }
 // =================================================================================================

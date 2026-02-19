@@ -32,9 +32,7 @@
 	layout(local_size_x = WGS2, local_size_y = 1, local_size_z = 1) in;
 #endif
 
-#if USE_BDA
-	// not yet implemented
-#else
+#if USE_BDA == 0
 	layout(binding = 0, std430) readonly buffer maxgm_buf { singlereal maxgm[]; };
 	layout(binding = 1, std430) readonly buffer imaxgm_buf { uint imaxgm[]; };
 	layout(binding = 2, std430) writeonly buffer imax_buf { uint imax[]; };
@@ -43,9 +41,9 @@
 layout(push_constant) uniform XamaxEpilogue
 {
 #if USE_BDA
-	const __global singlereal* restrict maxgm,
-	const __global unsigned int* restrict imaxgm,
-	__global unsigned int* imax,
+	singlereal_ptr_t maxgm;
+	uint_ptr_t imaxgm;
+	uint_ptr_t imax;
 #endif
 	int imax_offset;
 };
@@ -58,14 +56,14 @@ void main()
 	const int lid = get_local_id(0);
 
 	// Performs the first step of the reduction while loading the data
-	if (maxgm[lid + WGS2] > maxgm[lid])
+	if (indexGM(maxgm, lid + WGS2) > indexGM(maxgm, lid) )
 	{
-		maxlm[lid] = maxgm[lid + WGS2];
-		imaxlm[lid] = imaxgm[lid + WGS2];
+		maxlm[lid] = indexGM(maxgm, lid + WGS2);
+		imaxlm[lid] = indexGM(imaxgm, lid + WGS2);
 	}
 	else {
-		maxlm[lid] = maxgm[lid];
-		imaxlm[lid] = imaxgm[lid];
+		maxlm[lid] = indexGM(maxgm, lid);
+		imaxlm[lid] = indexGM(imaxgm, lid);
 	}
 	barrier();
 
@@ -82,7 +80,7 @@ void main()
 
 	// Stores the final result
 	if (lid == 0) {
-		imax[imax_offset] = imaxlm[0];
+		indexGM(imax, imax_offset) = imaxlm[0];
 	}
 }
 

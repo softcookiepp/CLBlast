@@ -76,7 +76,6 @@ R"(
 		uint64_t mulPtrCoef(uint64_t ptr, uint64_t coef) { return ptr*coef; }
 		uint64_t mulPtrCoef(uint64_t ptr, uint coef) { return ptr*uint64_t(coef); }
 	#else
-		#error "not implemented!"
 		#extension GL_EXT_buffer_reference_uvec2 : require
 		#define addr_t uvec2
 		uvec2 addPtrOffset(uvec2 addr, uvec2 offset)
@@ -180,31 +179,52 @@ R"(
 #define real16 vec16_t
 
 #if USE_BDA
+	// floating point BDA
 	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE) buffer real_ptr_t { real s[]; };
-	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE*2) buffer real2_ptr_t { real2 s[]; };
+	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE*2) buffer real2_ptr_t { vec2_t s[]; };
 	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE*4) buffer real4_ptr_t { real4 s[]; };
 	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE*8) buffer real8_ptr_t { real8 s[]; };
 	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE*16) buffer real16_ptr_t { real16 s[]; };
 	
-	// this will not work for addresses represented as uvec2; those still need to be implemented
-	#define INDEX_AS_ALIGNED(buffer_t, ptr, index, alignment) buffer_t(addPtrOffset(addr_t(ptr), index*alignment))
-	real_ptr_t indexGMimpl(real_ptr_t ptr, uint index) { return INDEX_AS_ALIGNED(real_ptr_t, ptr, index, DTYPE_SIZE); }
-	real2_ptr_t indexGMimpl(real2_ptr_t ptr, uint index) { return INDEX_AS_ALIGNED(real2_ptr_t, ptr, index, DTYPE_SIZE*2); }
-	real4_ptr_t indexGMimpl(real4_ptr_t ptr, uint index) { return INDEX_AS_ALIGNED(real4_ptr_t, ptr, index, DTYPE_SIZE*4); }
-	real8_ptr_t indexGMimpl(real8_ptr_t ptr, uint index) { return INDEX_AS_ALIGNED(real8_ptr_t, ptr, index, DTYPE_SIZE*8); }
-	real16_ptr_t indexGMimpl(real16_ptr_t ptr, uint index) { return INDEX_AS_ALIGNED(real16_ptr_t, ptr, index, DTYPE_SIZE*16); }
-	#define indexGM(ptr, index) indexGMimpl(ptr, index).s[0]
+	// uint BDA
+	layout(buffer_reference, buffer_reference_align = 4) buffer int_ptr_t { int s[]; };
+	layout(buffer_reference, buffer_reference_align = 4) buffer uint_ptr_t { uint s[]; };
+	#if 0
+		// index function to make BDA and non-BDA devices share the same code
+		#define INDEX_AS_ALIGNED(buffer_t, ptr, index, alignment) buffer_t(addPtrOffset(addr_t(ptr), index*alignment))
+		real_ptr_t indexGMimpl(real_ptr_t ptr, uint index) { return INDEX_AS_ALIGNED(real_ptr_t, ptr, index, DTYPE_SIZE); }
+		real2_ptr_t indexGMimpl(real2_ptr_t ptr, uint index, uint gae) { return INDEX_AS_ALIGNED(real2_ptr_t, ptr, index, DTYPE_SIZE*2); }
+		real4_ptr_t indexGMimpl(real4_ptr_t ptr, uint index) { return INDEX_AS_ALIGNED(real4_ptr_t, ptr, index, DTYPE_SIZE*4); }
+		real8_ptr_t indexGMimpl(real8_ptr_t ptr, uint index) { return INDEX_AS_ALIGNED(real8_ptr_t, ptr, index, DTYPE_SIZE*8); }
+		real16_ptr_t indexGMimpl(real16_ptr_t ptr, uint index) { return INDEX_AS_ALIGNED(real16_ptr_t, ptr, index, DTYPE_SIZE*16); }
+		int_ptr_t indexGMimpl(int_ptr_t, uint index) {return INDEX_AS_ALIGNED(int_ptr_t, ptr, index, 4); }
+		uint_ptr_t indexGMimpl(uint_ptr_t, uint index) {return INDEX_AS_ALIGNED(uint_ptr_t, ptr, index, 4); }
+	
+		#define indexGM(ptr, index) indexGMimpl(ptr, index).s[0]
+	#else
+		// that, above, does not seem to work right now.
+		// Therefore, it is only possible to do it this way:
+		#define indexGM(ptr, index) ptr.s[index]
+	#endif
 #else
 	#define indexGM(ptr, index) ptr[index]
 #endif
 
 // Single-element version of a complex number
 #if PRECISION == 3232
-	#define singlereal float 
+	#define singlereal float
 #elif PRECISION == 6464
 	#define singlereal double 
 #else
+	#if USE_BDA
+		#define singlereal_ptr_t real_ptr_t
+	#endif
 	#define singlereal real 
+#endif
+
+#if USE_BDA && PRECISION >= 3232
+	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE/2) buffer singlereal_ptr_t { singlereal s[]; };
+	//
 #endif
 
 // Converts a 'real argument' value to a 'real' value as passed to the kernel. Normally there is no
@@ -561,7 +581,6 @@ R"(
 		uint64_t mulPtrCoef(uint64_t ptr, uint64_t coef) { return ptr*coef; }
 		uint64_t mulPtrCoef(uint64_t ptr, uint coef) { return ptr*uint64_t(coef); }
 	#else
-		#error "not implemented!"
 		#extension GL_EXT_buffer_reference_uvec2 : require
 		#define addr_t uvec2
 		uvec2 addPtrOffset(uvec2 addr, uvec2 offset)
@@ -665,31 +684,52 @@ R"(
 #define real16 vec16_t
 
 #if USE_BDA
+	// floating point BDA
 	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE) buffer real_ptr_t { real s[]; };
-	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE*2) buffer real2_ptr_t { real2 s[]; };
+	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE*2) buffer real2_ptr_t { vec2_t s[]; };
 	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE*4) buffer real4_ptr_t { real4 s[]; };
 	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE*8) buffer real8_ptr_t { real8 s[]; };
 	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE*16) buffer real16_ptr_t { real16 s[]; };
 	
-	// this will not work for addresses represented as uvec2; those still need to be implemented
-	#define INDEX_AS_ALIGNED(buffer_t, ptr, index, alignment) buffer_t(addPtrOffset(addr_t(ptr), index*alignment))
-	real_ptr_t indexGMimpl(real_ptr_t ptr, uint index) { return INDEX_AS_ALIGNED(real_ptr_t, ptr, index, DTYPE_SIZE); }
-	real2_ptr_t indexGMimpl(real2_ptr_t ptr, uint index) { return INDEX_AS_ALIGNED(real2_ptr_t, ptr, index, DTYPE_SIZE*2); }
-	real4_ptr_t indexGMimpl(real4_ptr_t ptr, uint index) { return INDEX_AS_ALIGNED(real4_ptr_t, ptr, index, DTYPE_SIZE*4); }
-	real8_ptr_t indexGMimpl(real8_ptr_t ptr, uint index) { return INDEX_AS_ALIGNED(real8_ptr_t, ptr, index, DTYPE_SIZE*8); }
-	real16_ptr_t indexGMimpl(real16_ptr_t ptr, uint index) { return INDEX_AS_ALIGNED(real16_ptr_t, ptr, index, DTYPE_SIZE*16); }
-	#define indexGM(ptr, index) indexGMimpl(ptr, index).s[0]
+	// uint BDA
+	layout(buffer_reference, buffer_reference_align = 4) buffer int_ptr_t { int s[]; };
+	layout(buffer_reference, buffer_reference_align = 4) buffer uint_ptr_t { uint s[]; };
+	#if 0
+		// index function to make BDA and non-BDA devices share the same code
+		#define INDEX_AS_ALIGNED(buffer_t, ptr, index, alignment) buffer_t(addPtrOffset(addr_t(ptr), index*alignment))
+		real_ptr_t indexGMimpl(real_ptr_t ptr, uint index) { return INDEX_AS_ALIGNED(real_ptr_t, ptr, index, DTYPE_SIZE); }
+		real2_ptr_t indexGMimpl(real2_ptr_t ptr, uint index, uint gae) { return INDEX_AS_ALIGNED(real2_ptr_t, ptr, index, DTYPE_SIZE*2); }
+		real4_ptr_t indexGMimpl(real4_ptr_t ptr, uint index) { return INDEX_AS_ALIGNED(real4_ptr_t, ptr, index, DTYPE_SIZE*4); }
+		real8_ptr_t indexGMimpl(real8_ptr_t ptr, uint index) { return INDEX_AS_ALIGNED(real8_ptr_t, ptr, index, DTYPE_SIZE*8); }
+		real16_ptr_t indexGMimpl(real16_ptr_t ptr, uint index) { return INDEX_AS_ALIGNED(real16_ptr_t, ptr, index, DTYPE_SIZE*16); }
+		int_ptr_t indexGMimpl(int_ptr_t, uint index) {return INDEX_AS_ALIGNED(int_ptr_t, ptr, index, 4); }
+		uint_ptr_t indexGMimpl(uint_ptr_t, uint index) {return INDEX_AS_ALIGNED(uint_ptr_t, ptr, index, 4); }
+	
+		#define indexGM(ptr, index) indexGMimpl(ptr, index).s[0]
+	#else
+		// that, above, does not seem to work right now.
+		// Therefore, it is only possible to do it this way:
+		#define indexGM(ptr, index) ptr.s[index]
+	#endif
 #else
 	#define indexGM(ptr, index) ptr[index]
 #endif
 
 // Single-element version of a complex number
 #if PRECISION == 3232
-	#define singlereal float 
+	#define singlereal float
 #elif PRECISION == 6464
 	#define singlereal double 
 #else
+	#if USE_BDA
+		#define singlereal_ptr_t real_ptr_t
+	#endif
 	#define singlereal real 
+#endif
+
+#if USE_BDA && PRECISION >= 3232
+	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE/2) buffer singlereal_ptr_t { singlereal s[]; };
+	//
 #endif
 
 // Converts a 'real argument' value to a 'real' value as passed to the kernel. Normally there is no
@@ -987,14 +1027,19 @@ R"(
 
 // Data-widths
 #if VW == 1
+	#define realV_ptr_t real_ptr_t
 	#define realV real
 #elif VW == 2
+	#define realV_ptr_t real2_ptr_t
 	#define realV real2
 #elif VW == 4
+	#define realV_ptr_t real4_ptr_t
 	#define realV real4
 #elif VW == 8
+	#define realV_ptr_t real8_ptr_t
 	#define realV real8
 #elif VW == 16
+	#define realV_ptr_t real16_ptr_t
 	#define realV real16
 #endif
 
@@ -1042,12 +1087,12 @@ layout(push_constant, std430) uniform Xswap
 {
 	int n;
 #if USE_BDA
-	__global real* xgm;
+	real_ptr_t xgm;
 #endif
 	int x_offset;
 	int x_inc;
 #if USE_BDA
-	__global real* ygm; 
+	real_ptr_t ygm;
 #endif
 	int y_offset;
 	int y_inc;
@@ -1059,9 +1104,9 @@ void main()
 	// Loops over the work that needs to be done (allows for an arbitrary number of threads)
 	for (int id = get_global_id(0); id<n; id += get_global_size(0))
 	{
-		real temp = xgm[id*x_inc + x_offset];
-		xgm[id*x_inc + x_offset] = ygm[id*y_inc + y_offset];
-		ygm[id*y_inc + y_offset] = temp;
+		real temp = indexGM(xgm, id*x_inc + x_offset);
+		indexGM(xgm, id*x_inc + x_offset) = indexGM(ygm, id*y_inc + y_offset);
+		indexGM(ygm, id*y_inc + y_offset) = temp;
 	}
 }
 

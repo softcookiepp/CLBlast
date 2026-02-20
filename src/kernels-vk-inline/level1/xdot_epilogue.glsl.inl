@@ -1097,8 +1097,8 @@ realV MultiplyAddVector(realV cvec, const real aval, const realV bvec) {
 layout(push_constant) uniform XdotEpilogue
 {
 #if USE_BDA
-	const __global real* restrict inp,
-	__global real* dot,
+	real_ptr_t inp;
+	real_ptr_t dot;
 #endif
 	int dot_offset;
 };
@@ -1110,7 +1110,7 @@ void main()
 	const int lid = get_local_id(0);
 
 	// Performs the first step of the reduction while loading the data
-	Add(lm[lid], inp[lid], inp[lid + WGS2]);
+	Add(lm[lid], indexGM(inp, lid), indexGM(inp, lid + WGS2));
 	barrier();
 
 	// Performs reduction in local memory
@@ -1123,7 +1123,7 @@ void main()
 
 	// Stores the final result
 	if (lid == 0) {
-		dot[dot_offset] = lm[0];
+		indexGM(dot, dot_offset) = lm[0];
 	}
 }
 

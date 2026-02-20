@@ -42,17 +42,17 @@ layout(push_constant) uniform Xdot
 {
 	int n;
 #if USE_BDA
-	__global real* restrict xgm,
+	real_ptr_t xgm;
 #endif
 	int x_offset;
 	int x_inc;
 #if USE_BDA
-	__global real* restrict ygm,
+	real_ptr_t ygm;
 #endif
 	int y_offset;
 	int y_inc;
 #if USE_BDA
-	__global real* outp,
+	real_ptr_t outp;
 #endif
 	int do_conjugate;
 	int num_groups_0;
@@ -71,8 +71,8 @@ void main()
 	SetToZero(acc);
 	int id = wgid*WGS1 + lid;
 	while (id < n) {
-		real x = xgm[id*x_inc + x_offset];
-		real y = ygm[id*y_inc + y_offset];
+		real x = indexGM(xgm, id*x_inc + x_offset);
+		real y = indexGM(ygm, id*y_inc + y_offset);
 		if (bool(do_conjugate)) { COMPLEX_CONJUGATE(x); }
 		MultiplyAdd(acc, x, y);
 		id += WGS1*num_groups;
@@ -90,7 +90,7 @@ void main()
 
 	// Stores the per-workgroup result
 	if (lid == 0) {
-		outp[wgid] = lm[0];
+		indexGM(outp, wgid) = lm[0];
 	}
 }
 

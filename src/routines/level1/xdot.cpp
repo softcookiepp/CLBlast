@@ -73,13 +73,13 @@ void Xdot<T>::DoDot(const size_t n, const Buffer<T>& dot_buffer, const size_t do
 	if (meta.bda)
 	{
 		kernel1.SetArgument(0, static_cast<int>(n));
-		kernel1.SetArgument(1, x_buffer());
+		kernel1.SetArgument(1, x_buffer()->getAddress());
 		kernel1.SetArgument(2, static_cast<int>(x_offset));
 		kernel1.SetArgument(3, static_cast<int>(x_inc));
-		kernel1.SetArgument(4, y_buffer());
+		kernel1.SetArgument(4, y_buffer()->getAddress());
 		kernel1.SetArgument(5, static_cast<int>(y_offset));
 		kernel1.SetArgument(6, static_cast<int>(y_inc));
-		kernel1.SetArgument(7, temp_buffer());
+		kernel1.SetArgument(7, temp_buffer()->getAddress());
 		kernel1.SetArgument(8, static_cast<int>(do_conjugate));
 	}
 	else
@@ -110,9 +110,20 @@ void Xdot<T>::DoDot(const size_t n, const Buffer<T>& dot_buffer, const size_t do
 	eventWaitList.push_back(kernelEvent);
 
 	// Sets the arguments for the epilogue kernel
-	kernel2.SetArgument(0, temp_buffer());
-	kernel2.SetArgument(1, dot_buffer());
-	kernel2.SetArgument(2, static_cast<int>(dot_offset));
+	#if VULKAN_USE_BDA
+	if (meta.bda)
+	{
+		kernel2.SetArgument(0, temp_buffer()->getAddress());
+		kernel2.SetArgument(1, dot_buffer()->getAddress());
+		kernel2.SetArgument(2, static_cast<int>(dot_offset));
+	}
+	else
+	#endif
+	{
+		kernel2.SetArgument(0, temp_buffer());
+		kernel2.SetArgument(1, dot_buffer());
+		kernel2.SetArgument(2, static_cast<int>(dot_offset));
+	}
 
 	// Launches the epilogue kernel
 	auto global2 = std::vector<size_t>{db_["WGS2"]};

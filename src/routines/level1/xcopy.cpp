@@ -77,10 +77,6 @@ void Xcopy<T>::DoCopy(const size_t n, const Buffer<T>& x_buffer, const size_t x_
 	// Retrieves the Xcopy kernel from the compiled binary
 	auto kernel = Kernel(program_, kernel_name);
 
-#if VULKAN_API
-#if VULKAN_USE_BDA
-#endif
-#else
 	// Sets the kernel arguments
 	if (use_fast_kernel) {
 		kernel.SetArgument(0, static_cast<int>(n));
@@ -100,7 +96,6 @@ void Xcopy<T>::DoCopy(const size_t n, const Buffer<T>& x_buffer, const size_t x_
 		kernel.SetArgument(5, static_cast<int>(y_offset));
 		kernel.SetArgument(6, static_cast<int>(y_inc));
 	}
-#endif
 
 	// Launches the kernel
 	if (use_fast_kernel) {

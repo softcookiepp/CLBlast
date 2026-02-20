@@ -718,7 +718,7 @@ layout(push_constant) uniform TransposePadMatrixStridedBatched
 	__global real* dest;
 #endif
 	int do_conjugate;
-}args;
+};
 
 void main()
 {

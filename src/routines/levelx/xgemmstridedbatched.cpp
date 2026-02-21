@@ -135,12 +135,16 @@ void XgemmStridedBatched<T>::DoGemmStridedBatched(const Layout layout, const Tra
 #else
 #if VULKAN_API
 	// right now, using any sort of offset is broken for the Vulkan version of the kernels :c
-	if (a_offset || b_offset || c_offset)
-		throw std::invalid_argument("Offsets with the vulkan kernels are not supported right now");
+	//if (a_offset || b_offset || c_offset)
+	//	throw std::invalid_argument("Offsets with the vulkan kernels are not supported right now");
 #endif
 
 	// Two methods to choose from, select which one to run
+#if VULKAN_API
+	const auto do_gemm_direct = true;
+#else
 	const auto do_gemm_direct = Xgemm<T>::UseDirectKernel(m, n, k, db_["XGEMM_MIN_INDIRECT_SIZE"]);
+#endif
 	const auto gemm_kernel_id = (do_gemm_direct) ? 0 : db_["GEMMK"];
 
 	// Computes the transpose/conjugate options and sets the a/b/c sizes based on that
@@ -295,31 +299,16 @@ void XgemmStridedBatched<T>::BatchedGemmDirect(
 	kernel.SetArgument(2, static_cast<int>(k));
 	kernel.SetArgument(3, GetRealArg(alpha));
 	kernel.SetArgument(4, GetRealArg(beta));
-#if VULKAN_API
-	kernel.SetArgument(5, a_buffer()->view(a_offset*sizeof(T)));
-	kernel.SetArgument(6, static_cast<int>(0));
-#else
 	kernel.SetArgument(5, a_buffer());
 	kernel.SetArgument(6, static_cast<int>(a_offset));
-#endif
 	kernel.SetArgument(7, static_cast<int>(a_ld));
 	kernel.SetArgument(8, static_cast<int>(a_stride));
-#if VULKAN_API
-	kernel.SetArgument(9, b_buffer()->view(b_offset*sizeof(T)));
-	kernel.SetArgument(10, static_cast<int>(0));
-#else
 	kernel.SetArgument(9, b_buffer());
 	kernel.SetArgument(10, static_cast<int>(b_offset));
-#endif
 	kernel.SetArgument(11, static_cast<int>(b_ld));
 	kernel.SetArgument(12, static_cast<int>(b_stride));
-#if VULKAN_API
-	kernel.SetArgument(13, c_buffer()->view(c_offset*sizeof(T)));
-	kernel.SetArgument(14, static_cast<int>(0));
-#else
 	kernel.SetArgument(13, c_buffer());
 	kernel.SetArgument(14, static_cast<int>(c_offset));
-#endif
 	kernel.SetArgument(15, static_cast<int>(c_ld));
 	kernel.SetArgument(16, static_cast<int>(c_stride));
 	kernel.SetArgument(17, static_cast<int>(c_do_transpose));
@@ -328,8 +317,8 @@ void XgemmStridedBatched<T>::BatchedGemmDirect(
 	
 #if VULKAN_API
 	// for workaround to no pointer casting allowed
-	kernel.SetArgument(17, a_buffer());
-	kernel.SetArgument(18, b_buffer());
+	kernel.SetArgument(20, a_buffer());
+	kernel.SetArgument(21, b_buffer());
 #endif
 
 	// Computes the global and local thread sizes

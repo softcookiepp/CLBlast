@@ -96,6 +96,33 @@ XgemmStridedBatched<T>::XgemmStridedBatched(Queue& queue, EventPointer event, co
 
 // =================================================================================================
 
+// borrowing these functions from the test suite just to make it work
+static size_t PerBatchSizeA(const Layout layout, const Transpose a_transpose,
+	const size_t m, const size_t n, const size_t k, const size_t a_ld)
+{
+	auto a_rotated = (layout == Layout::kColMajor && a_transpose != Transpose::kNo) ||
+									 (layout == Layout::kRowMajor && a_transpose == Transpose::kNo);
+	auto a_two = (a_rotated) ? m : k;
+	return a_two * a_ld;
+}
+
+static size_t PerBatchSizeB(const Layout layout, const Transpose b_transpose,
+	const size_t m, const size_t n, const size_t k, const size_t b_ld)
+{
+	auto b_rotated = (layout == Layout::kColMajor && b_transpose != Transpose::kNo) ||
+									 (layout == Layout::kRowMajor && b_transpose == Transpose::kNo);
+	auto b_two = (b_rotated) ? k : n;
+	return b_two * args.b_ld;
+}
+
+static size_t PerBatchSizeC(const Layout layout, const Transpose c_transpose,
+	const size_t m, const size_t n, const size_t k, const size_t c_ld)
+{
+	auto c_rotated = (layout == Layout::kRowMajor);
+	auto c_two = (c_rotated) ? m : n;
+	return c_two * c_ld;
+}
+
 // The main routine
 template <typename T>
 void XgemmStridedBatched<T>::DoGemmStridedBatched(const Layout layout, const Transpose a_transpose,
@@ -115,8 +142,23 @@ void XgemmStridedBatched<T>::DoGemmStridedBatched(const Layout layout, const Tra
 	if (c_stride == 0) {
 		throw BLASError(StatusCode::kInvalidDimension);
 	}
-	
 #if 0
+	Xgemm<T> xgemm(queue_, event_);
+	
+	static StatusCode RunReference2(const Arguments<T>& args, BuffersHost<T>& buffers_host, Queue&)
+	{
+		for (auto batch = size_t{0}; batch < args.batch_count; ++batch)
+		{
+			const auto a_batch_offset = args.a_offset + PerBatchSizeA(layout, a_transpose, m, n, k, a_ld) * batch;
+			const auto b_batch_offset = args.c_offset + PerBatchSizeB(layout, b_transpose, m, n, k, b_ld) * batch;
+			const auto c_batch_offset = args.b_offset + PerBatchSizeC(layout, c_transpose, m, n, k, c_ld) * batch;
+			xgemm.DoGemm(convertToCBLAS(args.layout), convertToCBLAS(args.a_transpose), convertToCBLAS(args.b_transpose),
+								 args.m, args.n, args.k, args.alpha, buffers_host.a_mat, a_batch_offset, args.a_ld, buffers_host.b_mat,
+								 b_batch_offset, args.b_ld, args.beta, buffers_host.c_mat, c_batch_offset, args.c_ld);
+		}
+		return StatusCode::kSuccess;
+	}
+#elif 1
 	// will this work? just maybe!
 	size_t a_offset_batch;
 	size_t b_offset_batch;

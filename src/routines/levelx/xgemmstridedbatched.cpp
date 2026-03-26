@@ -152,7 +152,7 @@ void XgemmStridedBatched<T>::DoGemmStridedBatched(const Layout layout, const Tra
 			const auto a_batch_offset = args.a_offset + PerBatchSizeA(layout, a_transpose, m, n, k, a_ld) * batch;
 			const auto b_batch_offset = args.c_offset + PerBatchSizeB(layout, b_transpose, m, n, k, b_ld) * batch;
 			const auto c_batch_offset = args.b_offset + PerBatchSizeC(layout, c_transpose, m, n, k, c_ld) * batch;
-			xgemm.DoGemm(convertToCBLAS(args.layout), convertToCBLAS(args.a_transpose), convertToCBLAS(args.b_transpose),
+			xgemm.DoGemm(args.layout, args.a_transpose, args.b_transpose,
 								 args.m, args.n, args.k, args.alpha, buffers_host.a_mat, a_batch_offset, args.a_ld, buffers_host.b_mat,
 								 b_batch_offset, args.b_ld, args.beta, buffers_host.c_mat, c_batch_offset, args.c_ld);
 		}

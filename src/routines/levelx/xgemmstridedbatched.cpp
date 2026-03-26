@@ -115,7 +115,7 @@ static size_t PerBatchSizeB(const Layout layout, const Transpose b_transpose,
 	return b_two * b_ld;
 }
 
-static size_t PerBatchSizeC(const Layout layout, const Transpose c_transpose,
+static size_t PerBatchSizeC(const Layout layout,
 	const size_t m, const size_t n, const size_t k, const size_t c_ld)
 {
 	auto c_rotated = (layout == Layout::kRowMajor);
@@ -142,37 +142,18 @@ void XgemmStridedBatched<T>::DoGemmStridedBatched(const Layout layout, const Tra
 	if (c_stride == 0) {
 		throw BLASError(StatusCode::kInvalidDimension);
 	}
-#if 0
+#if 1
+	// just a temporary hack until I can figure out how to port the actual kernel without breaking anything
 	Xgemm<T> xgemm(queue_, event_);
 	
-	static StatusCode RunReference2(const Arguments<T>& args, BuffersHost<T>& buffers_host, Queue&)
+	for (auto batch = size_t{0}; batch < batch_count; ++batch)
 	{
-		for (auto batch = size_t{0}; batch < args.batch_count; ++batch)
-		{
-			const auto a_batch_offset = args.a_offset + PerBatchSizeA(layout, a_transpose, m, n, k, a_ld) * batch;
-			const auto b_batch_offset = args.c_offset + PerBatchSizeB(layout, b_transpose, m, n, k, b_ld) * batch;
-			const auto c_batch_offset = args.b_offset + PerBatchSizeC(layout, c_transpose, m, n, k, c_ld) * batch;
-			xgemm.DoGemm(args.layout, args.a_transpose, args.b_transpose,
-								 args.m, args.n, args.k, args.alpha, buffers_host.a_mat, a_batch_offset, args.a_ld, buffers_host.b_mat,
-								 b_batch_offset, args.b_ld, args.beta, buffers_host.c_mat, c_batch_offset, args.c_ld);
-		}
-		return StatusCode::kSuccess;
-	}
-#elif 1
-	// will this work? just maybe!
-	size_t a_offset_batch;
-	size_t b_offset_batch;
-	size_t c_offset_batch;
-	Xgemm<T> xgemm(queue_, event_);
-	for (size_t batch = 0; batch < batch_count; batch += 1)
-	{
-		a_offset_batch = a_offset + (a_stride * batch);
-		b_offset_batch = b_offset + (b_stride * batch);
-		c_offset_batch = c_offset + (c_stride * batch);
-		xgemm.DoGemm(layout, a_transpose, b_transpose, m,
-			n, k, alpha, a_buffer, a_offset_batch,
-			a_ld, b_buffer, b_offset_batch, b_ld,
-			beta, c_buffer, c_offset_batch, c_ld);
+		const auto a_batch_offset = a_offset + PerBatchSizeA(layout, a_transpose, m, n, k, a_ld) * batch;
+		const auto b_batch_offset = c_offset + PerBatchSizeB(layout, b_transpose, m, n, k, b_ld) * batch;
+		const auto c_batch_offset = b_offset + PerBatchSizeC(layout, m, n, k, c_ld) * batch;
+		xgemm.DoGemm(layout, a_transpose, b_transpose,
+			m, n, k, alpha, a_buffer, a_batch_offset, a_ld, b_buffer,
+			b_batch_offset, b_ld, beta, c_buffer, c_batch_offset, c_ld);
 	}
 #else
 #if VULKAN_API

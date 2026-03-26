@@ -112,7 +112,7 @@ static size_t PerBatchSizeB(const Layout layout, const Transpose b_transpose,
 	auto b_rotated = (layout == Layout::kColMajor && b_transpose != Transpose::kNo) ||
 									 (layout == Layout::kRowMajor && b_transpose == Transpose::kNo);
 	auto b_two = (b_rotated) ? k : n;
-	return b_two * args.b_ld;
+	return b_two * b_ld;
 }
 
 static size_t PerBatchSizeC(const Layout layout, const Transpose c_transpose,

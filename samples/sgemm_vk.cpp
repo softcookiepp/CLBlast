@@ -52,7 +52,7 @@ int main() {
 	auto platform = platforms[platform_id];
 #endif
 #if 1
-	auto device = instance.createDevice(device_id);
+	auto device = instance.getDevice(device_id);
 #else
 	// Initializes the OpenCL device
 	auto devices = std::vector<cl::Device>();

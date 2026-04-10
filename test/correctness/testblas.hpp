@@ -134,9 +134,9 @@ const std::vector<size_t> TestBlas<T, U>::kVectorDims = {7, 93, 144, 4096};
 template <typename T, typename U>
 const std::vector<size_t> TestBlas<T, U>::kIncrements = {1, 2, 7};
 template <typename T, typename U>
-const std::vector<size_t> TestBlas<T, U>::kMatrixDims = {7, 64};
+const std::vector<size_t> TestBlas<T, U>::kMatrixDims = {1, 1, 7, 64};
 template <typename T, typename U>
-const std::vector<size_t> TestBlas<T, U>::kMatrixVectorDims = {61, 256};
+const std::vector<size_t> TestBlas<T, U>::kMatrixVectorDims = {1, 61, 256};
 template <typename T, typename U>
 const std::vector<size_t> TestBlas<T, U>::kBandSizes = {4, 19};
 template <typename T, typename U>

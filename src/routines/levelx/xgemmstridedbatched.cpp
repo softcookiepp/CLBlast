@@ -142,24 +142,24 @@ void XgemmStridedBatched<T>::DoGemmStridedBatched(const Layout layout, const Tra
 	if (c_stride == 0) {
 		throw BLASError(StatusCode::kInvalidDimension);
 	}
-#if 1
-	// just a temporary hack until I can figure out how to port the actual kernel without breaking anything
-	Xgemm<T> xgemm(queue_, event_);
-	
-	for (auto batch = size_t{0}; batch < batch_count; ++batch)
-	{
-		const auto a_batch_offset = a_offset + PerBatchSizeA(layout, a_transpose, m, n, k, a_ld) * batch;
-		const auto b_batch_offset = c_offset + PerBatchSizeB(layout, b_transpose, m, n, k, b_ld) * batch;
-		const auto c_batch_offset = b_offset + PerBatchSizeC(layout, m, n, k, c_ld) * batch;
-		xgemm.DoGemm(layout, a_transpose, b_transpose,
-			m, n, k, alpha, a_buffer, a_batch_offset, a_ld, b_buffer,
-			b_batch_offset, b_ld, beta, c_buffer, c_batch_offset, c_ld);
-	}
-#else
+
 #if VULKAN_API
 	// right now, using any sort of offset is broken for the Vulkan version of the kernels :c
-	//if (a_offset || b_offset || c_offset)
-	//	throw std::invalid_argument("Offsets with the vulkan kernels are not supported right now");
+	// so this is a workaround
+	if (a_offset || b_offset || c_offset)
+	{
+		Xgemm<T> xgemm(queue_, event_);
+		for (auto batch = size_t{0}; batch < batch_count; ++batch)
+		{
+			const auto a_batch_offset = a_offset + PerBatchSizeA(layout, a_transpose, m, n, k, a_ld) * batch;
+			const auto b_batch_offset = c_offset + PerBatchSizeB(layout, b_transpose, m, n, k, b_ld) * batch;
+			const auto c_batch_offset = b_offset + PerBatchSizeC(layout, m, n, k, c_ld) * batch;
+			xgemm.DoGemm(layout, a_transpose, b_transpose,
+				m, n, k, alpha, a_buffer, a_batch_offset, a_ld, b_buffer,
+				b_batch_offset, b_ld, beta, c_buffer, c_batch_offset, c_ld);
+		}
+		return;
+	}
 #endif
 
 	// Two methods to choose from, select which one to run
@@ -191,7 +191,6 @@ void XgemmStridedBatched<T>::DoGemmStridedBatched(const Layout layout, const Tra
 												c_buffer, c_offset, c_ld, c_stride, a_do_transpose, b_do_transpose, c_do_transpose, a_conjugate,
 												b_conjugate, a_one, a_two, b_one, b_two, c_one, c_two, batch_count);
 	}
-#endif
 }
 
 // =================================================================================================

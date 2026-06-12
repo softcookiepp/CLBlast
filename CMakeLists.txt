@@ -204,7 +204,7 @@ elseif(CUDA)
 elseif(VULKAN)
   # we need Tart, the vulkan frontend thingy
   add_subdirectory(${PROJECT_SOURCE_DIR}/tart)
-  set(API_LIBRARIES tart tart_vulkan subprocess)
+  set(API_LIBRARIES tart tart_vulkan subprocess glslang glslang-default-resource-limits)
   set(API_INCLUDE_DIRS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tart/include>  
     $<INSTALL_INTERFACE:tart/include>  # <prefix>/include/mylib
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tart/include>  
@@ -395,7 +395,7 @@ endif()
 include(GNUInstallDirs)
 
 if(VULKAN)
-install(TARGETS clblast tart tart_vulkan subprocess EXPORT CLBlast
+install(TARGETS clblast tart tart_vulkan subprocess glslang glslang-default-resource-limits EXPORT CLBlast
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

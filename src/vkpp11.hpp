@@ -820,6 +820,28 @@ public:
 		const std::vector<Event> dummyWaitlist;
 		Launch(queue, global, local, event, dummyWaitlist);
 	}
+	
+	void Record(const tart::command_sequence_ptr& sequence, const Queue& queue, const std::vector<size_t>& global, const std::vector<size_t>& local)
+	{
+		if (global.size() != local.size() ) throw LogicError("local and global size must be same length");
+		std::vector<uint32_t> adjusted_global(global.size());
+		for (size_t i = 0; i < global.size(); i += 1 )
+		{
+			if (global[i] % local[i] > 0) throw LogicError("global size must be divisible by local size");
+			adjusted_global[i] = global[i] / local[i];
+		}
+		
+		// convert local to uint32_t
+		std::vector<uint32_t> local32(local.size());
+		for (size_t i = 0; i < local.size(); i += 1)
+		{
+			local32[i] = local[i];
+		}
+		// ensure size is correct
+		local32.resize(mKernel->getSpecConstantSize()/sizeof(uint32_t));
+		
+		mKernel->record(sequence, adjusted_global, local32);
+	}
 
 	// As above, but with an event waiting list
 	void Launch(const Queue& queue, const std::vector<size_t>& global, const std::vector<size_t>& local,

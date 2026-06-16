@@ -247,37 +247,44 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	// Events of all kernels (including pre/post processing kernels)
 	auto eventWaitList = std::vector<Event>();
 	auto emptyEventList = std::vector<Event>();
+	
+	// make a command sequence. This is a higher-level abstraction of Vulkan's command buffers,
+	// which will allow us to submit multiple commands in one batch without external synchronization
+	tart::command_sequence_ptr sequence = queue_()->createSequence();
 
 	// Runs the pre-processing kernel for matrix A. This transposes the matrix, but also pads zeros
 	// to fill it up until it reaches a certain multiple of size (kernel parameter dependent). In
 	// case nothing has to be done, these kernels can be skipped.
 	if (!a_no_temp)
 	{
-		auto eventProcessA = Event();
-		PadCopyTransposeMatrix(queue_, device_, db_, eventProcessA.pointer(), emptyEventList, a_one, a_two, a_ld, a_offset,
-													 a_buffer, a_one_i, a_two_i, a_one_i, 0, a_temp, ConstantOne<T>(), program_, true,
-													 a_do_transpose, a_conjugate);
-		eventWaitList.push_back(eventProcessA);
+		//auto eventProcessA = Event();
+		PadCopyTransposeMatrix(queue_, device_, db_, nullptr, emptyEventList, a_one, a_two, a_ld, a_offset,
+			a_buffer, a_one_i, a_two_i, a_one_i, 0, a_temp, ConstantOne<T>(), program_, true,
+			a_do_transpose, a_conjugate, false, false, false, sequence);
+		sequence->recordBarrier(a_temp());
+		//eventWaitList.push_back(eventProcessA);
 	}
 
 	// As above, but now for matrix B
 	if (!b_no_temp)
 	{
-		auto eventProcessB = Event();
-		PadCopyTransposeMatrix(queue_, device_, db_, eventProcessB.pointer(), emptyEventList, b_one, b_two, b_ld, b_offset,
-													 b_buffer, b_one_i, b_two_i, b_one_i, b_temp_offset, b_temp, ConstantOne<T>(), program_, true,
-													 b_do_transpose, b_conjugate);
-		eventWaitList.push_back(eventProcessB);
+		//auto eventProcessB = Event();
+		PadCopyTransposeMatrix(queue_, device_, db_, nullptr, emptyEventList, b_one, b_two, b_ld, b_offset,
+			b_buffer, b_one_i, b_two_i, b_one_i, b_temp_offset, b_temp, ConstantOne<T>(), program_, true,
+			b_do_transpose, b_conjugate, false, false, false, sequence);
+		sequence->recordBarrier(b_temp());
+		//eventWaitList.push_back(eventProcessB);
 	}
 
 	// As above, but now for matrix C. This is only necessary if C is used both as input and output.
 	if (!c_no_temp && beta != static_cast<T>(0))
 	{
-		auto eventProcessC = Event();
-		PadCopyTransposeMatrix(queue_, device_, db_, eventProcessC.pointer(), emptyEventList, c_one, c_two, c_ld, c_offset,
-													 c_buffer, c_one_i, c_two_i, c_one_i, c_temp_offset, c_temp, ConstantOne<T>(), program_, true,
-													 c_do_transpose, false);
-		eventWaitList.push_back(eventProcessC);
+		//auto eventProcessC = Event();
+		PadCopyTransposeMatrix(queue_, device_, db_, nullptr, emptyEventList, c_one, c_two, c_ld, c_offset,
+			c_buffer, c_one_i, c_two_i, c_one_i, c_temp_offset, c_temp, ConstantOne<T>(), program_, true,
+			c_do_transpose, false, false, false, false, sequence);
+		sequence->recordBarrier(c_temp());
+		//eventWaitList.push_back(eventProcessC);
 	}
 
 	// Retrieves the Xgemm kernel from the compiled binary
@@ -302,15 +309,19 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	// Launches the kernel
 	auto eventKernel = Event();
 	auto eventPointer = (!c_no_temp) ? eventKernel.pointer() : event_;
-	RunKernel(kernel, queue_, device_, global, local, eventPointer, eventWaitList);
+	RunKernel(kernel, queue_, device_, global, local, eventPointer, eventWaitList, sequence);
 
 	// Runs the post-processing kernel if needed
-	if (!c_no_temp) {
-		eventWaitList.push_back(eventKernel);
+	if (!c_no_temp)
+	{
+		//eventWaitList.push_back(eventKernel);
+		sequence->recordBarrier(c_temp());
 		PadCopyTransposeMatrix(queue_, device_, db_, event_, eventWaitList, c_one_i, c_two_i, c_one_i, c_temp_offset,
-													 c_temp, c_one, c_two, c_ld, c_offset, c_buffer, ConstantOne<T>(), program_, false,
-													 c_do_transpose, false);
+			c_temp, c_one, c_two, c_ld, c_offset, c_buffer, ConstantOne<T>(), program_, false,
+			c_do_transpose, false, false, false, false, sequence);
 	}
+	std::vector<tart::event_ptr> dummy;
+	queue_()->submitSequence(sequence, dummy, event_);
 }
 
 // =================================================================================================

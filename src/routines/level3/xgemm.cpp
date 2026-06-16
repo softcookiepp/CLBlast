@@ -255,14 +255,15 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	// Runs the pre-processing kernel for matrix A. This transposes the matrix, but also pads zeros
 	// to fill it up until it reaches a certain multiple of size (kernel parameter dependent). In
 	// case nothing has to be done, these kernels can be skipped.
+	bool recordTempBarrier = false;
 	if (!a_no_temp)
 	{
 		//auto eventProcessA = Event();
 		PadCopyTransposeMatrix(queue_, device_, db_, nullptr, emptyEventList, a_one, a_two, a_ld, a_offset,
 			a_buffer, a_one_i, a_two_i, a_one_i, 0, a_temp, ConstantOne<T>(), program_, true,
 			a_do_transpose, a_conjugate, false, false, false, sequence);
-		sequence->recordBarrier(a_temp());
 		//eventWaitList.push_back(eventProcessA);
+		recordTempBarrier = true;
 	}
 
 	// As above, but now for matrix B
@@ -272,8 +273,8 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 		PadCopyTransposeMatrix(queue_, device_, db_, nullptr, emptyEventList, b_one, b_two, b_ld, b_offset,
 			b_buffer, b_one_i, b_two_i, b_one_i, b_temp_offset, b_temp, ConstantOne<T>(), program_, true,
 			b_do_transpose, b_conjugate, false, false, false, sequence);
-		sequence->recordBarrier(b_temp());
 		//eventWaitList.push_back(eventProcessB);
+		recordTempBarrier = true;
 	}
 
 	// As above, but now for matrix C. This is only necessary if C is used both as input and output.
@@ -283,8 +284,14 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 		PadCopyTransposeMatrix(queue_, device_, db_, nullptr, emptyEventList, c_one, c_two, c_ld, c_offset,
 			c_buffer, c_one_i, c_two_i, c_one_i, c_temp_offset, c_temp, ConstantOne<T>(), program_, true,
 			c_do_transpose, false, false, false, false, sequence);
-		sequence->recordBarrier(c_temp());
 		//eventWaitList.push_back(eventProcessC);
+		recordTempBarrier = true;
+	}
+	
+	if (recordTempBarrier)
+	{
+		// just record a single barrier, no need for multiple!
+		sequence->recordBarrier(temp_buffer_all());
 	}
 
 	// Retrieves the Xgemm kernel from the compiled binary

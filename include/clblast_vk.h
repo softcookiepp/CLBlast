@@ -168,7 +168,7 @@ StatusCode Scal(const size_t n, const T alpha, tart::buffer_ptr x_buffer, const 
 // Vector copy: SCOPY/DCOPY/CCOPY/ZCOPY/HCOPY
 template <typename T>
 StatusCode Copy(const size_t n, const tart::buffer_ptr x_buffer, const size_t x_offset, const size_t x_inc, tart::buffer_ptr y_buffer,
-                const size_t y_offset, const size_t y_inc, tart::device_ptr queue, tart::event_ptr event = nullptr);
+                const size_t y_offset, const size_t y_inc, tart::device_ptr queue, const tart::event_ptr& event = nullptr, const tart::command_sequence_ptr& sequence = nullptr);
 
 // Vector-times-constant plus vector: SAXPY/DAXPY/CAXPY/ZAXPY/HAXPY
 template <typename T>

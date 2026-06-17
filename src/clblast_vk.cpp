@@ -151,26 +151,27 @@ template StatusCode PUBLIC_API Scal<half>(const size_t, const half, tart::buffer
 // Vector copy: SCOPY/DCOPY/CCOPY/ZCOPY/HCOPY
 template <typename T>
 StatusCode Copy(const size_t n, const tart::buffer_ptr x_buffer, const size_t x_offset, const size_t x_inc, tart::buffer_ptr y_buffer,
-								const size_t y_offset, const size_t y_inc, tart::device_ptr queue, EventPointer event) {
+                const size_t y_offset, const size_t y_inc, tart::device_ptr queue, const tart::event_ptr& event, const tart::command_sequence_ptr& sequence)
+{
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = Xcopy<T>(queue_cpp, event);
-		routine.DoCopy(n, Buffer<T>(x_buffer), x_offset, x_inc, Buffer<T>(y_buffer), y_offset, y_inc);
+		routine.DoCopy(n, Buffer<T>(x_buffer), x_offset, x_inc, Buffer<T>(y_buffer), y_offset, y_inc, sequence);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
 	}
 }
-template StatusCode PUBLIC_API Copy<float>(const size_t, const tart::buffer_ptr, const size_t, const size_t, tart::buffer_ptr, const size_t,
-																					 const size_t, tart::device_ptr, EventPointer);
-template StatusCode PUBLIC_API Copy<double>(const size_t, const tart::buffer_ptr, const size_t, const size_t, tart::buffer_ptr,
-																						const size_t, const size_t, tart::device_ptr, EventPointer);
-template StatusCode PUBLIC_API Copy<float2>(const size_t, const tart::buffer_ptr, const size_t, const size_t, tart::buffer_ptr,
-																						const size_t, const size_t, tart::device_ptr, EventPointer);
-template StatusCode PUBLIC_API Copy<double2>(const size_t, const tart::buffer_ptr, const size_t, const size_t, tart::buffer_ptr,
-																						 const size_t, const size_t, tart::device_ptr, EventPointer);
-template StatusCode PUBLIC_API Copy<half>(const size_t, const tart::buffer_ptr, const size_t, const size_t, tart::buffer_ptr, const size_t,
-																					const size_t, tart::device_ptr, EventPointer);
+template StatusCode PUBLIC_API Copy<float>(const size_t n, const tart::buffer_ptr x_buffer, const size_t x_offset, const size_t x_inc, tart::buffer_ptr y_buffer,
+                const size_t y_offset, const size_t y_inc, tart::device_ptr queue, const tart::event_ptr& event, const tart::command_sequence_ptr& sequence);
+template StatusCode PUBLIC_API Copy<double>(const size_t n, const tart::buffer_ptr x_buffer, const size_t x_offset, const size_t x_inc, tart::buffer_ptr y_buffer,
+                const size_t y_offset, const size_t y_inc, tart::device_ptr queue, const tart::event_ptr& event, const tart::command_sequence_ptr& sequence);
+template StatusCode PUBLIC_API Copy<float2>(const size_t n, const tart::buffer_ptr x_buffer, const size_t x_offset, const size_t x_inc, tart::buffer_ptr y_buffer,
+                const size_t y_offset, const size_t y_inc, tart::device_ptr queue, const tart::event_ptr& event, const tart::command_sequence_ptr& sequence);
+template StatusCode PUBLIC_API Copy<double2>(const size_t n, const tart::buffer_ptr x_buffer, const size_t x_offset, const size_t x_inc, tart::buffer_ptr y_buffer,
+                const size_t y_offset, const size_t y_inc, tart::device_ptr queue, const tart::event_ptr& event, const tart::command_sequence_ptr& sequence);
+template StatusCode PUBLIC_API Copy<half>(const size_t n, const tart::buffer_ptr x_buffer, const size_t x_offset, const size_t x_inc, tart::buffer_ptr y_buffer,
+                const size_t y_offset, const size_t y_inc, tart::device_ptr queue, const tart::event_ptr& event, const tart::command_sequence_ptr& sequence);
 
 // Vector-times-constant plus vector: SAXPY/DAXPY/CAXPY/ZAXPY/HAXPY
 template <typename T>

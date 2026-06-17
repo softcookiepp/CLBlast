@@ -16,19 +16,21 @@
 #include "xgemm_direct_part2.glsl"
 // =================================================================================================
 
-// global and shared memory declarations go here, since they are shared across all kernels c:
-// *gm and *gms both bind to the same underlying memory
-layout(binding = 0, std430) buffer arg_alphas_buf { real_arg arg_alphas[]; };
-layout(binding = 1, std430) buffer arg_betas_buf { real_arg arg_betas[]; };
-layout(binding = 2) buffer agm_buf { realMD agm[]; };
-layout(binding = 3) buffer a_offsets_buf { int a_offsets[]; };
-layout(binding = 4) buffer bgm_buf { realND bgm[]; };
-layout(binding = 5) buffer b_offsets_buf { int b_offsets[]; };
-layout(binding = 6) buffer cgm_buf { real cgm[]; };
-layout(binding = 7) buffer c_offsets_buf { int c_offsets[]; };
+#if USE_BDA == 0
+	// global and shared memory declarations go here, since they are shared across all kernels c:
+	// *gm and *gms both bind to the same underlying memory
+	layout(binding = 0, std430) buffer arg_alphas_buf { real_arg arg_alphas[]; };
+	layout(binding = 1, std430) buffer arg_betas_buf { real_arg arg_betas[]; };
+	layout(binding = 2) buffer agm_buf { realMD agm[]; };
+	layout(binding = 3) buffer a_offsets_buf { int a_offsets[]; };
+	layout(binding = 4) buffer bgm_buf { realND bgm[]; };
+	layout(binding = 5) buffer b_offsets_buf { int b_offsets[]; };
+	layout(binding = 6) buffer cgm_buf { real cgm[]; };
+	layout(binding = 7) buffer c_offsets_buf { int c_offsets[]; };
 
-layout(binding = 8) buffer agms_buf { real agms[]; };
-layout(binding = 9) buffer bgms_buf { real bgms[]; };
+	layout(binding = 8) buffer agms_buf { real agms[]; };
+	layout(binding = 9) buffer bgms_buf { real bgms[]; };
+#endif
 
 shared real alm[WGD * (WGD + PADA)];
 shared real blm[WGD * (WGD + PADB)];

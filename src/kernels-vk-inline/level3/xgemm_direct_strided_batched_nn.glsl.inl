@@ -20,9 +20,8 @@ R"(
 // =================================================================================================
 
 // literal). Comment-out this line for syntax-highlighting when developing.
-#ifndef XGEMM_DIRECT_PART3_STRIDED_BATCHED_GLSL
-#define XGEMM_DIRECT_PART3_STRIDED_BATCHED_GLSL
-
+#ifndef XGEMM_DIRECT_PART3_GLSL
+#define XGEMM_DIRECT_PART3_GLSL
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
@@ -1004,14 +1003,16 @@ ivec2 getIndexForGlobalToLocalN()
 
 // =================================================================================================
 
-// global and shared memory declarations go here, since they are shared across all kernels c:
-// *gm and *gms both bind to the same underlying memory
-layout(binding = 0) buffer agm_buf { realMD agm[]; };
-layout(binding = 1) buffer bgm_buf { realND bgm[]; };
-layout(binding = 2) buffer cgm_buf { real cgm[]; };
+#if USE_BDA == 0
+	// global and shared memory declarations go here, since they are shared across all kernels c:
+	// *gm and *gms both bind to the same underlying memory
+	layout(binding = 0) buffer agm_buf { realMD agm[]; };
+	layout(binding = 1) buffer bgm_buf { realND bgm[]; };
+	layout(binding = 2) buffer cgm_buf { real cgm[]; };
 
-layout(binding = 3) buffer agms_buf { real agms[]; };
-layout(binding = 4) buffer bgms_buf { real bgms[]; };
+	layout(binding = 3) buffer agms_buf { real agms[]; };
+	layout(binding = 4) buffer bgms_buf { real bgms[]; };
+#endif
 
 shared real alm[WGD * (WGD + PADA)];
 shared real blm[WGD * (WGD + PADB)];

@@ -136,10 +136,11 @@ Xgemm<T>::Xgemm(Queue& queue, EventPointer event, const std::string& name)
 // The main routine
 template <typename T>
 void Xgemm<T>::DoGemm(const Layout layout, const Transpose a_transpose, const Transpose b_transpose, const size_t m,
-											const size_t n, const size_t k, const T alpha, const Buffer<T>& a_buffer, const size_t a_offset,
-											const size_t a_ld, const Buffer<T>& b_buffer, const size_t b_offset, const size_t b_ld,
-											const T beta, const Buffer<T>& c_buffer, const size_t c_offset, const size_t c_ld,
-											const Buffer<T>& temp_buffer, const bool temp_buffer_provided) {	// optional arguments
+					const size_t n, const size_t k, const T alpha, const Buffer<T>& a_buffer, const size_t a_offset,
+					const size_t a_ld, const Buffer<T>& b_buffer, const size_t b_offset, const size_t b_ld,
+					const T beta, const Buffer<T>& c_buffer, const size_t c_offset, const size_t c_ld,
+					const Buffer<T>& temp_buffer, const bool temp_buffer_provided, const tart::command_sequence_ptr& sequence)
+{
 
 	// Two methods to choose from, select which one to run
 	const auto do_gemm_direct = UseDirectKernel(m, n, k, db_["XGEMM_MIN_INDIRECT_SIZE"]);
@@ -165,11 +166,11 @@ void Xgemm<T>::DoGemm(const Layout layout, const Transpose a_transpose, const Tr
 	// Selects which version of GEMM to run
 	if (do_gemm_direct) {	// for small sizes (single kernel)
 		GemmDirect(m, n, k, alpha, a_buffer, a_offset, a_ld, b_buffer, b_offset, b_ld, beta, c_buffer, c_offset, c_ld,
-							 a_do_transpose, b_do_transpose, c_do_transpose, a_conjugate, b_conjugate);
+							 a_do_transpose, b_do_transpose, c_do_transpose, a_conjugate, b_conjugate, sequence);
 	} else {	// for larger sizes (pre/post-processing plus a very fast kernel)
 		GemmIndirect(m, n, k, alpha, a_buffer, a_offset, a_ld, b_buffer, b_offset, b_ld, beta, c_buffer, c_offset, c_ld,
 								 a_do_transpose, b_do_transpose, c_do_transpose, a_conjugate, b_conjugate, a_one, a_two, b_one, b_two,
-								 c_one, c_two, temp_buffer, temp_buffer_provided);
+								 c_one, c_two, temp_buffer, temp_buffer_provided, sequence);
 	}
 }
 
@@ -186,7 +187,7 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 							const bool c_do_transpose, const bool a_conjugate, const bool b_conjugate,
 							const size_t a_one, const size_t a_two, const size_t b_one, const size_t b_two,
 							const size_t c_one, const size_t c_two, const Buffer<T>& temp_buffer,
-							const bool temp_buffer_provided)
+							const bool temp_buffer_provided, const tart::command_sequence_ptr& sequence)
 {
 	// Calculates the ceiled versions of m, n, and k
 	const auto global_divider_one = c_want_rotated_(db_["GEMMK"]) ? db_["NWG"] : db_["MWG"];
@@ -247,7 +248,7 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	
 	// make a command sequence. This is a higher-level abstraction of Vulkan's command buffers,
 	// which will allow us to submit multiple commands in one batch without external synchronization
-	tart::command_sequence_ptr sequence = queue_()->createSequence();
+	tart::command_sequence_ptr workingSequence = sequence ? sequence : queue_()->createSequence();
 
 	// Runs the pre-processing kernel for matrix A. This transposes the matrix, but also pads zeros
 	// to fill it up until it reaches a certain multiple of size (kernel parameter dependent). In
@@ -258,7 +259,7 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 		//auto eventProcessA = Event();
 		PadCopyTransposeMatrix(queue_, device_, db_, nullptr, emptyEventList, a_one, a_two, a_ld, a_offset,
 			a_buffer, a_one_i, a_two_i, a_one_i, 0, a_temp, ConstantOne<T>(), program_, true,
-			a_do_transpose, a_conjugate, false, false, false, sequence);
+			a_do_transpose, a_conjugate, false, false, false, workingSequence);
 		//eventWaitList.push_back(eventProcessA);
 		recordTempBarrier = true;
 	}
@@ -269,7 +270,7 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 		//auto eventProcessB = Event();
 		PadCopyTransposeMatrix(queue_, device_, db_, nullptr, emptyEventList, b_one, b_two, b_ld, b_offset,
 			b_buffer, b_one_i, b_two_i, b_one_i, b_temp_offset, b_temp, ConstantOne<T>(), program_, true,
-			b_do_transpose, b_conjugate, false, false, false, sequence);
+			b_do_transpose, b_conjugate, false, false, false, workingSequence);
 		//eventWaitList.push_back(eventProcessB);
 		recordTempBarrier = true;
 	}
@@ -280,7 +281,7 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 		//auto eventProcessC = Event();
 		PadCopyTransposeMatrix(queue_, device_, db_, nullptr, emptyEventList, c_one, c_two, c_ld, c_offset,
 			c_buffer, c_one_i, c_two_i, c_one_i, c_temp_offset, c_temp, ConstantOne<T>(), program_, true,
-			c_do_transpose, false, false, false, false, sequence);
+			c_do_transpose, false, false, false, false, workingSequence);
 		//eventWaitList.push_back(eventProcessC);
 		recordTempBarrier = true;
 	}
@@ -288,7 +289,7 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	if (recordTempBarrier)
 	{
 		// just record a single barrier, no need for multiple!
-		sequence->recordBarrier(temp_buffer_all());
+		workingSequence->recordBarrier(temp_buffer_all());
 	}
 
 	// Retrieves the Xgemm kernel from the compiled binary
@@ -313,19 +314,24 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	// Launches the kernel
 	auto eventKernel = Event();
 	auto eventPointer = (!c_no_temp) ? eventKernel.pointer() : event_;
-	RunKernel(kernel, queue_, device_, global, local, eventPointer, eventWaitList, sequence);
+	RunKernel(kernel, queue_, device_, global, local, eventPointer, eventWaitList, workingSequence);
 
 	// Runs the post-processing kernel if needed
 	if (!c_no_temp)
 	{
 		//eventWaitList.push_back(eventKernel);
-		sequence->recordBarrier(c_temp());
+		workingSequence->recordBarrier(c_temp());
 		PadCopyTransposeMatrix(queue_, device_, db_, event_, eventWaitList, c_one_i, c_two_i, c_one_i, c_temp_offset,
 			c_temp, c_one, c_two, c_ld, c_offset, c_buffer, ConstantOne<T>(), program_, false,
-			c_do_transpose, false, false, false, false, sequence);
+			c_do_transpose, false, false, false, false, workingSequence);
 	}
-	std::vector<tart::event_ptr> dummy;
-	queue_()->submitSequence(sequence, dummy, event_);
+	
+	if (!sequence)
+	{
+		// only submit if it wasn't provided via arguments
+		std::vector<tart::event_ptr> dummy;
+		queue_()->submitSequence(workingSequence, dummy, event_);
+	}
 }
 
 // =================================================================================================
@@ -336,7 +342,8 @@ void Xgemm<T>::GemmDirect(const size_t m, const size_t n, const size_t k, const 
 													const size_t a_offset, const size_t a_ld, const Buffer<T>& b_buffer, const size_t b_offset,
 													const size_t b_ld, const T beta, const Buffer<T>& c_buffer, const size_t c_offset,
 													const size_t c_ld, const bool a_do_transpose, const bool b_do_transpose,
-													const bool c_do_transpose, const bool a_conjugate, const bool b_conjugate) {
+													const bool c_do_transpose, const bool a_conjugate, const bool b_conjugate, const tart::command_sequence_ptr& sequence)
+{
 	// Retrieves the proper XgemmDirect kernel from the compiled binary
 	const auto name = (a_do_transpose) ? (b_do_transpose ? "XgemmDirectTT" : "XgemmDirectTN")
 																		 : (b_do_transpose ? "XgemmDirectNT" : "XgemmDirectNN");

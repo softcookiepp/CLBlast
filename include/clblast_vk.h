@@ -410,7 +410,7 @@ StatusCode Gemm(const Layout layout, const Transpose a_transpose, const Transpos
                 const size_t n, const size_t k, const T alpha, const tart::buffer_ptr a_buffer, const size_t a_offset,
                 const size_t a_ld, const tart::buffer_ptr b_buffer, const size_t b_offset, const size_t b_ld, const T beta,
                 tart::buffer_ptr c_buffer, const size_t c_offset, const size_t c_ld, tart::device_ptr queue,
-                tart::event_ptr event = nullptr, tart::buffer_ptr temp_buffer = nullptr);
+                tart::event_ptr event = nullptr, tart::buffer_ptr temp_buffer = nullptr, const tart::command_sequence_ptr& sequence = nullptr);
 
 // Symmetric matrix-matrix multiplication: SSYMM/DSYMM/CSYMM/ZSYMM/HSYMM
 template <typename T>
@@ -531,7 +531,8 @@ StatusCode GemmStridedBatched(const Layout layout, const Transpose a_transpose, 
                               const size_t a_offset, const size_t a_ld, const size_t a_stride, const tart::buffer_ptr b_buffer,
                               const size_t b_offset, const size_t b_ld, const size_t b_stride, const T beta,
                               tart::buffer_ptr c_buffer, const size_t c_offset, const size_t c_ld, const size_t c_stride,
-                              const size_t batch_count, tart::device_ptr queue, tart::event_ptr event = nullptr);
+                              const size_t batch_count, tart::device_ptr queue, tart::event_ptr event = nullptr,
+                              const tart::command_sequence_ptr& sequence = nullptr);
 
 // =================================================================================================
 

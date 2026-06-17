@@ -1095,7 +1095,7 @@ StatusCode Gemm(const Layout layout, const Transpose a_transpose, const Transpos
 								const size_t n, const size_t k, const T alpha, const tart::buffer_ptr a_buffer, const size_t a_offset,
 								const size_t a_ld, const tart::buffer_ptr b_buffer, const size_t b_offset, const size_t b_ld, const T beta,
 								tart::buffer_ptr c_buffer, const size_t c_offset, const size_t c_ld, tart::device_ptr queue, EventPointer event,
-								tart::buffer_ptr temp_buffer) {
+								tart::buffer_ptr temp_buffer, const tart::command_sequence_ptr& sequence) {
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = Xgemm<T>(queue_cpp, event);
@@ -1103,7 +1103,7 @@ StatusCode Gemm(const Layout layout, const Transpose a_transpose, const Transpos
 		auto temp_buffer_cpp = temp_buffer_provided ? Buffer<T>(temp_buffer) : Buffer<T>(nullptr);
 		routine.DoGemm(layout, a_transpose, b_transpose, m, n, k, alpha, Buffer<T>(a_buffer), a_offset, a_ld,
 									 Buffer<T>(b_buffer), b_offset, b_ld, beta, Buffer<T>(c_buffer), c_offset, c_ld, temp_buffer_cpp,
-									 temp_buffer_provided);
+									 temp_buffer_provided, sequence);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1112,23 +1112,23 @@ StatusCode Gemm(const Layout layout, const Transpose a_transpose, const Transpos
 template StatusCode PUBLIC_API Gemm<float>(const Layout, const Transpose, const Transpose, const size_t, const size_t,
 																					 const size_t, const float, const tart::buffer_ptr, const size_t, const size_t,
 																					 const tart::buffer_ptr, const size_t, const size_t, const float, tart::buffer_ptr, const size_t,
-																					 const size_t, tart::device_ptr, EventPointer, tart::buffer_ptr);
+																					 const size_t, tart::device_ptr, EventPointer, tart::buffer_ptr, const tart::command_sequence_ptr&);
 template StatusCode PUBLIC_API Gemm<double>(const Layout, const Transpose, const Transpose, const size_t, const size_t,
 																						const size_t, const double, const tart::buffer_ptr, const size_t, const size_t,
 																						const tart::buffer_ptr, const size_t, const size_t, const double, tart::buffer_ptr,
-																						const size_t, const size_t, tart::device_ptr, EventPointer, tart::buffer_ptr);
+																						const size_t, const size_t, tart::device_ptr, EventPointer, tart::buffer_ptr, const tart::command_sequence_ptr&);
 template StatusCode PUBLIC_API Gemm<float2>(const Layout, const Transpose, const Transpose, const size_t, const size_t,
 																						const size_t, const float2, const tart::buffer_ptr, const size_t, const size_t,
 																						const tart::buffer_ptr, const size_t, const size_t, const float2, tart::buffer_ptr,
-																						const size_t, const size_t, tart::device_ptr, EventPointer, tart::buffer_ptr);
+																						const size_t, const size_t, tart::device_ptr, EventPointer, tart::buffer_ptr, const tart::command_sequence_ptr&);
 template StatusCode PUBLIC_API Gemm<double2>(const Layout, const Transpose, const Transpose, const size_t, const size_t,
 																						 const size_t, const double2, const tart::buffer_ptr, const size_t, const size_t,
 																						 const tart::buffer_ptr, const size_t, const size_t, const double2, tart::buffer_ptr,
-																						 const size_t, const size_t, tart::device_ptr, EventPointer, tart::buffer_ptr);
+																						 const size_t, const size_t, tart::device_ptr, EventPointer, tart::buffer_ptr, const tart::command_sequence_ptr&);
 template StatusCode PUBLIC_API Gemm<half>(const Layout, const Transpose, const Transpose, const size_t, const size_t,
 																					const size_t, const half, const tart::buffer_ptr, const size_t, const size_t,
 																					const tart::buffer_ptr, const size_t, const size_t, const half, tart::buffer_ptr, const size_t,
-																					const size_t, tart::device_ptr, EventPointer, tart::buffer_ptr);
+																					const size_t, tart::device_ptr, EventPointer, tart::buffer_ptr, const tart::command_sequence_ptr&);
 
 // Symmetric matrix-matrix multiplication: SSYMM/DSYMM/CSYMM/ZSYMM/HSYMM
 template <typename T>
@@ -1656,17 +1656,18 @@ template StatusCode PUBLIC_API GemmBatched<half>(const Layout, const Transpose, 
 // SGEMMSTRIDEDBATCHED/DGEMMSTRIDEDBATCHED/CGEMMSTRIDEDBATCHED/ZGEMMSTRIDEDBATCHED/HGEMMSTRIDEDBATCHED
 template <typename T>
 StatusCode GemmStridedBatched(const Layout layout, const Transpose a_transpose, const Transpose b_transpose,
-															const size_t m, const size_t n, const size_t k, const T alpha, const tart::buffer_ptr a_buffer,
-															const size_t a_offset, const size_t a_ld, const size_t a_stride, const tart::buffer_ptr b_buffer,
-															const size_t b_offset, const size_t b_ld, const size_t b_stride, const T beta,
-															tart::buffer_ptr c_buffer, const size_t c_offset, const size_t c_ld, const size_t c_stride,
-															const size_t batch_count, tart::device_ptr queue, EventPointer event) {
+	const size_t m, const size_t n, const size_t k, const T alpha, const tart::buffer_ptr a_buffer,
+	const size_t a_offset, const size_t a_ld, const size_t a_stride, const tart::buffer_ptr b_buffer,
+	const size_t b_offset, const size_t b_ld, const size_t b_stride, const T beta,
+	tart::buffer_ptr c_buffer, const size_t c_offset, const size_t c_ld, const size_t c_stride,
+	const size_t batch_count, tart::device_ptr queue, EventPointer event, const tart::command_sequence_ptr& sequence)
+{
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = XgemmStridedBatched<T>(queue_cpp, event);
 		routine.DoGemmStridedBatched(layout, a_transpose, b_transpose, m, n, k, alpha, Buffer<T>(a_buffer), a_offset, a_ld,
 																 a_stride, Buffer<T>(b_buffer), b_offset, b_ld, b_stride, beta, Buffer<T>(c_buffer),
-																 c_offset, c_ld, c_stride, batch_count);
+																 c_offset, c_ld, c_stride, batch_count, sequence);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1677,31 +1678,31 @@ template StatusCode PUBLIC_API GemmStridedBatched<float>(const Layout, const Tra
 																												 const size_t, const size_t, const size_t, const tart::buffer_ptr,
 																												 const size_t, const size_t, const size_t, const float, tart::buffer_ptr,
 																												 const size_t, const size_t, const size_t, const size_t,
-																												 tart::device_ptr, EventPointer);
+																												 tart::device_ptr, EventPointer, const tart::command_sequence_ptr&);
 template StatusCode PUBLIC_API GemmStridedBatched<double>(const Layout, const Transpose, const Transpose, const size_t,
 																													const size_t, const size_t, const double, const tart::buffer_ptr,
 																													const size_t, const size_t, const size_t, const tart::buffer_ptr,
 																													const size_t, const size_t, const size_t, const double,
 																													tart::buffer_ptr, const size_t, const size_t, const size_t,
-																													const size_t, tart::device_ptr, EventPointer);
+																													const size_t, tart::device_ptr, EventPointer, const tart::command_sequence_ptr&);
 template StatusCode PUBLIC_API GemmStridedBatched<float2>(const Layout, const Transpose, const Transpose, const size_t,
 																													const size_t, const size_t, const float2, const tart::buffer_ptr,
 																													const size_t, const size_t, const size_t, const tart::buffer_ptr,
 																													const size_t, const size_t, const size_t, const float2,
 																													tart::buffer_ptr, const size_t, const size_t, const size_t,
-																													const size_t, tart::device_ptr, EventPointer);
+																													const size_t, tart::device_ptr, EventPointer, const tart::command_sequence_ptr&);
 template StatusCode PUBLIC_API GemmStridedBatched<double2>(const Layout, const Transpose, const Transpose, const size_t,
 																													 const size_t, const size_t, const double2, const tart::buffer_ptr,
 																													 const size_t, const size_t, const size_t, const tart::buffer_ptr,
 																													 const size_t, const size_t, const size_t, const double2,
 																													 tart::buffer_ptr, const size_t, const size_t, const size_t,
-																													 const size_t, tart::device_ptr, EventPointer);
+																													 const size_t, tart::device_ptr, EventPointer, const tart::command_sequence_ptr&);
 template StatusCode PUBLIC_API GemmStridedBatched<half>(const Layout, const Transpose, const Transpose, const size_t,
 																												const size_t, const size_t, const half, const tart::buffer_ptr,
 																												const size_t, const size_t, const size_t, const tart::buffer_ptr,
 																												const size_t, const size_t, const size_t, const half, tart::buffer_ptr,
 																												const size_t, const size_t, const size_t, const size_t,
-																												tart::device_ptr, EventPointer);
+																												tart::device_ptr, EventPointer, const tart::command_sequence_ptr&);
 
 // =================================================================================================
 

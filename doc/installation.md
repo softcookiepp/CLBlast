@@ -50,6 +50,12 @@ For OS X / macOS, CLBlast is available through [Homebrew](https://github.com/Hom
 
 For Windows, binaries are provided in a .zip file on Github as part of the [CLBlast release page](https://github.com/CNugteren/CLBlast/releases).
 
+Cloning repo
+-------------
+
+    git clone https://github.com/softcookiepp/CLBlast.git
+    cd CLBlast
+    git submodule update --init --remote --recursive
 
 Linux / macOS compilation from source
 -------------

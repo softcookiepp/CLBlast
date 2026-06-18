@@ -54,6 +54,9 @@ Getting started
 
 CLBlast can be compiled with minimal dependencies (apart from OpenCL) in the usual CMake-way, e.g.:
 
+    git clone https://github.com/softcookiepp/CLBlast.git
+    cd CLBlast
+    git submodule update --init --remote --recursive
     mkdir build && cd build
     cmake ..
     make

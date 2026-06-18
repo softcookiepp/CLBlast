@@ -1,59 +1,22 @@
 
-CLBlast: The tuned OpenCL BLAS library
+~~CLBlast~~: The tuned ~~OpenCL~~ Vulkan BLAS library (I am not sure what to rename it yet)
 ================
 
-| Platform | Build status |
-|-----|-----|
-| Windows | [![Build Status](https://ci.appveyor.com/api/projects/status/github/cnugteren/clblast?branch=master&svg=true)](https://ci.appveyor.com/project/CNugteren/clblast) |
-| Linux/macOS | [![Build Status](https://github.com/cnugteren/clblast/actions/workflows/build_and_test.yml/badge.svg?branch=master)](https://github.com/CNugteren/CLBlast/actions/workflows/build_and_test.yml) |
+This project is a port of [CLBlast](https://github.com/CNugteren/CLBlast) to run on Vulkan using the [Tart Vulkan library](https://codeberg.org/softcookiepp/tart)
+It is a work in progress (tuners haven't been tested at all yet), so do not expect optimal performance on all hardware out of the box.
 
-
-| Test machine (thanks to [ArrayFire](https://ci.arrayfire.org:8010/#/builders)) | Test status |
-|-----|-----|
-| clblast-linux-nvidia-a100 | [![Test Status](http://ci.arrayfire.org:8010/badges/clblast-linux-nvidia-a100.svg)](http://ci.arrayfire.org:8010/#/builders/clblast-linux-nvidia-a100) |
-| clblast-linux-nvidia-k80 | [![Test Status](http://ci.arrayfire.org:8010/badges/clblast-linux-nvidia-k80.svg)](http://ci.arrayfire.org:8010/#/builders/clblast-linux-nvidia-k80) |
-| clblast-linux-nvidia-p100 | [![Test Status](http://ci.arrayfire.org:8010/badges/clblast-linux-nvidia-p100.svg)](http://ci.arrayfire.org:8010/#/builders/clblast-linux-nvidia-p100) |
-| clblast-linux-nvidia-t4 | [![Test Status](http://ci.arrayfire.org:8010/badges/clblast-linux-nvidia-t4.svg)](http://ci.arrayfire.org:8010/#/builders/clblast-linux-nvidia-t4) |
-| clblast-linux-nvidia-v100 | [![Test Status](http://ci.arrayfire.org:8010/badges/clblast-linux-nvidia-v100.svg)](http://ci.arrayfire.org:8010/#/builders/clblast-linux-nvidia-v100) |
-| clblast-windows-amd-r9 | [![Test Status](http://ci.arrayfire.org:8010/badges/clblast-windows-amd-r9.svg)](http://ci.arrayfire.org:8010/#/builders/clblast-windows-amd-r9) |
-| clblast-windows-nvidia-m6000 | [![Test Status](http://ci.arrayfire.org:8010/badges/clblast-windows-nvidia-m6000.svg)](http://ci.arrayfire.org:8010/#/builders/clblast-windows-nvidia-m6000) |
-
+Original description:
+---------------------
 CLBlast is a lightweight, performant and tunable OpenCL BLAS library written in C++11. It is designed to leverage the full performance potential of a wide variety of OpenCL devices from different vendors, including desktop and laptop GPUs, embedded GPUs, and other accelerators. CLBlast implements BLAS routines: basic linear algebra subprograms operating on vectors and matrices. See [the CLBlast website](https://cnugteren.github.io/clblast) for performance reports on some devices.
 
 The library is not tuned for all possible OpenCL devices: __if out-of-the-box performance is poor, please run the tuners first__. See [the docs for a list of already tuned devices](doc/tuning.md#already-tuned-for-devices) and [instructions on how to tune yourself](doc/tuning.md) and contribute to future releases of the CLBlast library.
 
 
-Why CLBlast and not clBLAS or cuBLAS?
--------------
-
-Use CLBlast instead of clBLAS:
-
-* When you care about achieving maximum performance.
-* When you want to be able to inspect the BLAS kernels or easily customize them to your needs.
-* When you run on exotic OpenCL devices for which you need to tune yourself.
-* When you are still running on OpenCL 1.1 hardware.
-* When you prefer a C++ API over a C API (C API also available in CLBlast).
-* When you value an organized and modern C++ codebase.
-* When you target Intel CPUs and GPUs or embedded devices.
-* When you can benefit from the increased performance of half-precision fp16 data-types.
-
-Use CLBlast instead of cuBLAS:
-
-* When you want your code to run on devices other than NVIDIA CUDA-enabled GPUs.
-* When you want to tune for a specific configuration (e.g. rectangular matrix-sizes).
-* When you sleep better if you know that the library you use is open-source.
-* When you are using OpenCL rather than CUDA.
-
-When not to use CLBlast:
-
-* When you run on NVIDIA's CUDA-enabled GPUs only and can benefit from cuBLAS's assembly-level tuned kernels.
-
-
 Getting started
 -------------
 
-CLBlast can be compiled with minimal dependencies (apart from OpenCL) in the usual CMake-way, e.g.:
-
+CLBlast can be compiled with minimal dependencies (apart from Vulkan headers) in the usual CMake-way, e.g.:
+	git submodule update --init --remote --recursive
     mkdir build && cd build
     cmake ..
     make

@@ -16,43 +16,24 @@ The pre-requisites for compilation of CLBlast are kept as minimal as possible. A
   - AppleClang 5.0 or newer
   - ICC 14.0 or newer
   - MSVC (Visual Studio) 2013 or newer
-* An OpenCL 1.1 or newer library, for example:
-  - Apple OpenCL
-  - NVIDIA CUDA SDK
-  - AMD APP SDK
-  - Intel OpenCL
-  - Beignet
-  - Mesa Clover
-  - ARM Mali OpenCL
-  - Vivante OpenCL
-  - POCL
+* Vulkan development headers or SDK
+  - Follow the installation instructions [here](https://vulkan.lunarg.com/)
 
 
 Using pre-built packages
 -------------
 
-There are pre-built binaries available for Ubuntu, Debian, macOS, and Windows.
-
-CLBlast is in Ubuntu 21.04 (Hirsute Hippo) and Debian 11 (Bullseye) and later, and can be installed with:
-
-    sudo apt install libclblast-dev
-
-This may not be the latest version of CLBlast. The latest should be available in [Debian unstable](https://tracker.debian.org/pkg/clblast), or can be built from source as described below.
-
-Users of older versions of Ubuntu can use [this PPA](https://launchpad.net/~cnugteren/+archive/ubuntu/clblast).
-
-For Arch Linux and Manjaro, CLBlast is available as a [package](https://aur.archlinux.org/packages/clblast-git) maintained by a 3rd party.
-
-For OS X / macOS, CLBlast is available through [Homebrew](https://github.com/Homebrew/homebrew-core/blob/master/Formula/clblast.rb). It can be installed as follows:
-
-    brew update
-    brew install clblast
-
-For Windows, binaries are provided in a .zip file on Github as part of the [CLBlast release page](https://github.com/CNugteren/CLBlast/releases).
+Unlike the original CLBlast, you are out of luck here :c
+You will have to build from source.
 
 
 Linux / macOS compilation from source
 -------------
+
+Before building, the submodule dependencies must be updated.
+```
+git submodule update --init --remote --recursive
+```
 
 Configuration can be done using CMake. On Linux and macOS systems with make, building is straightforward. Here's an example of an out-of-source build using a command-line compiler and make (starting from the root of the CLBlast folder):
 
@@ -80,44 +61,11 @@ In case you run into segfaults with OpenCL programs (known to happen with the AM
 Windows compilation from source
 -------------
 
-When using Visual Studio 2015, the project-files can be generated as follows:
+~~When using Visual Studio 2015, the project-files can be generated as follows:~~
 
-    mkdir build
-    cd build
-    cmake -G "Visual Studio 14 Win64" ..
+    ~~mkdir build~~
+    ~~cd build~~
+    ~~cmake -G "Visual Studio 14 Win64" ..~~
 
-For another version, replace 14 with the appropriate version (12 for VS 2013, 15 for VS 2017). To generate a static version of the library instead of a .dll, specify `-DBUILD_SHARED_LIBS=OFF` when running cmake.
-
-
-Android compilation from source
--------------
-
-For deployment on Android, there are three options to consider.
-
-First of all, you can use Google's recommended route of installing Android Studio with the NDK, and then use the JNI to interface to the CLBlast library. For this, we refer to the official Android Studio documentation and the online tutorials.
-
-Alternatively, you can cross-compile the library and the test/client/tuner executables directly. To do so, first install the NDK, then find your vendor's OpenCL library (e.g. in `/system/vendor/lib`), get OpenCL headers from the Khronos registry, and invoke CMake as follows:
-
-    cmake .. \
-     -DCMAKE_SYSTEM_NAME=Android \
-     -DCMAKE_SYSTEM_VERSION=19 \             # Set the appropriate Android API level
-     -DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a \  # Set the appropriate device architecture (e.g. armeabi-v7a or arm64-v8a)
-     -DCMAKE_ANDROID_NDK=$ANDROID_NDK_PATH \ # Assumes $ANDROID_NDK_PATH points to your NDK installation
-     -DCMAKE_ANDROID_STL_TYPE=gnustl_static \
-     -DOPENCL_ROOT=/path/to/vendor/OpenCL/lib/folder/   # Should contain libOpenCL.so and CL/cl.h
-
-For any potential issues, first check [cmath 'has not been declared' errors](https://stackoverflow.com/questions/45183525/compilation-error-with-ndk-using-cstatic/46433625). Also, if you are encountering errors such as `#error Bionic header ctype.h does not define either _U nor _CTYPE_U`, make sure CMake is not including system paths.
-
-Finally, a third option is to use the [Collective Knowledge framework](https://github.com/ctuning/ck) in combination with the NDK, e.g. as follows:
-
-    sudo pip install ck
-    ck pull repo:ck-math
-    ck install package:lib-clblast-master-universal --target_os=android21-arm64
-
-
-Compiling CLBlast with a CUDA back-end
--------------
-
-There is also a CUDA API of CLBlast available. Enabling this compiles the whole library for CUDA and thus replaces the OpenCL API. It is based upon the CUDA runtime and NVRTC APIs, requiring NVIDIA CUDA 7.5 or higher. The CUDA version of the library can be used as follows after providing the `-DCUDA=ON -DOPENCL=OFF` flags to CMake:
-
-    #include <clblast_cuda.h>
+~~For another version, replace 14 with the appropriate version (12 for VS 2013, 15 for VS 2017). To generate a static version of the library instead of a .dll, specify `-DBUILD_SHARED_LIBS=OFF` when running cmake.~~
+Building on Windows has not been tested at all. If somebody more familiar with the process would help, that would be very much appreciated!

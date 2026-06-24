@@ -15,11 +15,6 @@
 
 #include "clpp11.hpp"  // IWYU pragma: export
 
-#elif CUDA_API
-#include <clblast_cuda.h>  // IWYU pragma: export
-
-#include "cupp11.hpp"  // IWYU pragma: export
-
 #elif VULKAN_API
 #include <clblast_vk.h>
 #include "vkpp11.hpp"

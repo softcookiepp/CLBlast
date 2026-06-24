@@ -21,9 +21,6 @@
 #define CL_TARGET_OPENCL_VERSION 110
 #include "clblast.h"
 
-#elif CUDA_API
-#include "clblast_cuda.h"
-
 #elif VULKAN_API
 #include "clblast_vk.h"
 #endif

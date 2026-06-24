@@ -107,12 +107,6 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 	}
 #endif
 
-// Optionally adds a translation header from OpenCL kernels to CUDA kernels
-#ifdef CUDA_API
-	header_string +=
-#include "kernels/opencl_to_cuda.h"
-			;
-#endif
 #if VULKAN_API
 	if (isGLSL)
 	{

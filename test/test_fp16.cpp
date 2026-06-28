@@ -2,6 +2,7 @@
 #include <clblast_half.h>
 #include <limits>
 #include <cmath>
+#include <iostream>
 
 int main(int argc, char** argv)
 {

@@ -189,7 +189,7 @@ elseif(VULKAN)
 	# we need Tart, the vulkan frontend thingy
 	add_subdirectory(${PROJECT_SOURCE_DIR}/tart)
 	if(TART_ENABLE_SHADER_COMPILERS)
-		set(API_LIBRARIES tart tart_vulkan subprocess glslang glslang-default-resource-limits)
+		set(API_LIBRARIES tart tart_vulkan subprocess ${GLSLANG_LIBS})
 	else()
 		set(API_LIBRARIES tart tart_vulkan subprocess)
 	endif()

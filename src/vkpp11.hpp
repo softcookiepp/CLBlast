@@ -45,6 +45,7 @@
 #include <string>		 // std::string
 #include <vector>		 // std::vector
 #include <map>
+#include <iostream>
 
 
 // Android support (missing C++11 functions to_string, stod, and stoi)

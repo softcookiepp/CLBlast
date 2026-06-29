@@ -27,7 +27,7 @@ class Xdotc : public Xdot<T> {
   using Xdot<T>::DoDot;
 
   // Constructor
-  Xdotc(Queue& queue, EventPointer event, const std::string& name = "DOTC");
+  Xdotc(Queue& queue, EventPointer event, const tart::command_sequence_ptr& sequence = nullptr, const std::string& name = "DOTC");
 
   // Templated-precision implementation of the routine
   void DoDotc(const size_t n, const Buffer<T>& dot_buffer, const size_t dot_offset, const Buffer<T>& x_buffer,

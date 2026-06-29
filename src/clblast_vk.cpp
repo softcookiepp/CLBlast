@@ -204,7 +204,7 @@ StatusCode Dot(const size_t n, tart::buffer_ptr dot_buffer, const size_t dot_off
 							 tart::device_ptr queue, const EventPointer& event, const tart::command_sequence_ptr& sequence) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xdot<T>(queue_cpp, event);
+		auto routine = Xdot<T>(queue_cpp, event, sequence);
 		routine.DoDot(n, Buffer<T>(dot_buffer), dot_offset, Buffer<T>(x_buffer), x_offset, x_inc, Buffer<T>(y_buffer),
 									y_offset, y_inc);
 		return StatusCode::kSuccess;
@@ -226,7 +226,7 @@ StatusCode Dotu(const size_t n, tart::buffer_ptr dot_buffer, const size_t dot_of
 								const size_t y_inc, tart::device_ptr queue, const EventPointer& event, const tart::command_sequence_ptr& sequence) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xdotu<T>(queue_cpp, event);
+		auto routine = Xdotu<T>(queue_cpp, event, sequence);
 		routine.DoDotu(n, Buffer<T>(dot_buffer), dot_offset, Buffer<T>(x_buffer), x_offset, x_inc, Buffer<T>(y_buffer),
 									 y_offset, y_inc);
 		return StatusCode::kSuccess;
@@ -248,7 +248,7 @@ StatusCode Dotc(const size_t n, tart::buffer_ptr dot_buffer, const size_t dot_of
 								const size_t y_inc, tart::device_ptr queue, const EventPointer& event, const tart::command_sequence_ptr& sequence) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xdotc<T>(queue_cpp, event);
+		auto routine = Xdotc<T>(queue_cpp, event, sequence);
 		routine.DoDotc(n, Buffer<T>(dot_buffer), dot_offset, Buffer<T>(x_buffer), x_offset, x_inc, Buffer<T>(y_buffer),
 									 y_offset, y_inc);
 		return StatusCode::kSuccess;
@@ -293,7 +293,7 @@ StatusCode Asum(const size_t n, tart::buffer_ptr asum_buffer, const size_t asum_
 								const size_t x_offset, const size_t x_inc, tart::device_ptr queue, const EventPointer& event, const tart::command_sequence_ptr& sequence) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xasum<T>(queue_cpp, event);
+		auto routine = Xasum<T>(queue_cpp, event, sequence);
 		routine.DoAsum(n, Buffer<T>(asum_buffer), asum_offset, Buffer<T>(x_buffer), x_offset, x_inc);
 		return StatusCode::kSuccess;
 	} catch (...) {

@@ -21,7 +21,7 @@ namespace clblast {
 
 // Constructor: forwards to base class constructor
 template <typename T>
-Xdotu<T>::Xdotu(Queue& queue, EventPointer event, const std::string& name) : Xdot<T>(queue, event, name) {}
+Xdotu<T>::Xdotu(Queue& queue, EventPointer event, const tart::command_sequence_ptr& sequence, const std::string& name) : Xdot<T>(queue, event, sequence, name) {}
 
 // =================================================================================================
 

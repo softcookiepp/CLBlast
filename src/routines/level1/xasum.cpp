@@ -25,7 +25,7 @@ namespace clblast {
 
 // Constructor: forwards to base class constructor
 template <typename T>
-Xasum<T>::Xasum(Queue& queue, EventPointer event, const std::string& name)
+Xasum<T>::Xasum(Queue& queue, EventPointer event, const tart::command_sequence_ptr& sequence, const std::string& name)
 		: Routine(queue, event, name, {"Xdot"}, PrecisionValue<T>(), {},
 							{
 #if VULKAN_API
@@ -39,7 +39,7 @@ Xasum<T>::Xasum(Queue& queue, EventPointer event, const std::string& name)
 #if VULKAN_API
 ,
 		
-			{"Xasum", "XasumEpilogue"}
+			{"Xasum", "XasumEpilogue"}, sequence
 #endif
 			)							
 {
@@ -103,8 +103,8 @@ void Xasum<T>::DoAsum(const size_t n, const Buffer<T>& asum_buffer, const size_t
 #endif
 
 	auto kernelEvent = Event();
-	RunKernel(kernel1, queue_, device_, global1, local1, kernelEvent.pointer());
-	eventWaitList.push_back(kernelEvent);
+	RunKernel(kernel1, queue_, device_, global1, local1, kernelEvent.pointer(), {}, mSequence);
+	//eventWaitList.push_back(kernelEvent);
 
 	// Sets the arguments for the epilogue kernel
 #if VULKAN_USE_BDA
@@ -128,7 +128,9 @@ void Xasum<T>::DoAsum(const size_t n, const Buffer<T>& asum_buffer, const size_t
 	// Launches the epilogue kernel
 	auto global2 = std::vector<size_t>{db_["WGS2"]};
 	auto local2 = std::vector<size_t>{db_["WGS2"]};
-	RunKernel(kernel2, queue_, device_, global2, local2, event_, eventWaitList);
+	RunKernel(kernel2, queue_, device_, global2, local2, event_, eventWaitList, mSequence);
+	
+	submitIfNeeded(eventWaitList, event_);
 }
 
 // =================================================================================================

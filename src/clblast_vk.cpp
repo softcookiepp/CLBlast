@@ -341,7 +341,7 @@ StatusCode Amax(const size_t n, tart::buffer_ptr imax_buffer, const size_t imax_
 								const size_t x_offset, const size_t x_inc, tart::device_ptr queue, const EventPointer& event, const tart::command_sequence_ptr& sequence) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xamax<T>(queue_cpp, event);
+		auto routine = Xamax<T>(queue_cpp, event, sequence);
 		routine.DoAmax(n, Buffer<unsigned int>(imax_buffer), imax_offset, Buffer<T>(x_buffer), x_offset, x_inc);
 		return StatusCode::kSuccess;
 	} catch (...) {

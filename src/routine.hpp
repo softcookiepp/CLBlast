@@ -64,7 +64,7 @@ class Routine {
 									 std::initializer_list<const char*> source
 #if VULKAN_API
 					, std::vector<std::string> entryPointNames = {},
-					std::vector<std::string> defineKeys = {}
+					const tart::command_sequence_ptr& sequence = nullptr
 #endif
 									 );
 
@@ -103,9 +103,14 @@ class Routine {
 	Databases db_;
 	
 #if VULKAN_API
-	// whether or not this is a GLSL compute shader module
 	std::vector<std::string> mEntryPointNames;
-	std::vector<std::string> mDefineKeys;
+	
+	//
+	const bool mSequenceProvided;
+	tart::command_sequence_ptr mSequence;
+	
+	// submit if sequence was not provided; otherwise, do nothing
+	void submitIfNeeded(const std::vector<Event>& waitForEvents, const tart::event_ptr& signalEvent);
 #endif
 };
 

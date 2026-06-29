@@ -27,7 +27,7 @@ class Xamin : public Xamax<T> {
   using Xamax<T>::DoAmax;
 
   // Constructor
-  Xamin(Queue& queue, EventPointer event, const std::string& name = "AMIN") : Xamax<T>(queue, event, name) {}
+  Xamin(Queue& queue, EventPointer event, const tart::command_sequence_ptr& sequence = nullptr, const std::string& name = "AMIN") : Xamax<T>(queue, event, sequence, name) {}
 
   // Forwards to the regular max-absolute version. The implementation difference is realised in the
   // kernel through a pre-processor macro based on the name of the routine.

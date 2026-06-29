@@ -26,7 +26,7 @@ namespace clblast {
 
 // Enqueues a kernel, waits for completion, and checks for errors
 void RunKernel(Kernel& kernel, Queue& queue, const Device& device, std::vector<size_t> global,
-               const std::vector<size_t>& local, EventPointer event, const std::vector<Event>& waitForEvents = {});
+               const std::vector<size_t>& local, EventPointer event, const std::vector<Event>& waitForEvents = {}, const tart::command_sequence_ptr& sequence = nullptr);
 
 // =================================================================================================
 

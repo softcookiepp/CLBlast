@@ -25,7 +25,7 @@ namespace clblast {
 
 // Constructor: forwards to base class constructor
 template <typename T>
-Xamax<T>::Xamax(Queue& queue, EventPointer event, const std::string& name)
+Xamax<T>::Xamax(Queue& queue, EventPointer event, const tart::command_sequence_ptr& sequence, const std::string& name)
 		: Routine(queue, event, name, {"Xdot"}, PrecisionValue<T>(), {},
 							{
 #if VULKAN_API
@@ -39,7 +39,7 @@ Xamax<T>::Xamax(Queue& queue, EventPointer event, const std::string& name)
 #if VULKAN_API
 ,
 						
-							{"Xamax", "XamaxEpilogue"}
+							{"Xamax", "XamaxEpilogue"}, sequence
 #endif
 						) {
 }
@@ -72,9 +72,8 @@ void Xamax<T>::DoAmax(const size_t n, const Buffer<unsigned int>& imax_buffer, c
 	std::vector<Event> eventWaitList;
 
 	// Sets the kernel arguments
-#if VULKAN_API
-	#if VULKAN_USE_BDA
-	tart::DeviceMetadata meta = device_()->getMetadata();
+#if VULKAN_USE_BDA
+	const tart::DeviceMetadata meta& = device_()->getMetadata();
 	if (meta.bda)
 	{
 		kernel1.SetArgument(0, static_cast<int>(n));
@@ -85,7 +84,7 @@ void Xamax<T>::DoAmax(const size_t n, const Buffer<unsigned int>& imax_buffer, c
 		kernel1.SetArgument(5, temp_buffer2()->getAddress());
 	}
 	else
-	#endif
+#endif
 	{
 		kernel1.SetArgument(0, static_cast<int>(n));
 		kernel1.SetArgument(1, x_buffer());
@@ -94,27 +93,18 @@ void Xamax<T>::DoAmax(const size_t n, const Buffer<unsigned int>& imax_buffer, c
 		kernel1.SetArgument(4, temp_buffer1());
 		kernel1.SetArgument(5, temp_buffer2());
 	}
-#else
-	kernel1.SetArgument(0, static_cast<int>(n));
-	kernel1.SetArgument(1, x_buffer());
-	kernel1.SetArgument(2, static_cast<int>(x_offset));
-	kernel1.SetArgument(3, static_cast<int>(x_inc));
-	kernel1.SetArgument(4, temp_buffer1());
-	kernel1.SetArgument(5, temp_buffer2());
-#endif
 
 	// Launches the main kernel
 	auto global1 = std::vector<size_t>{db_["WGS1"] * temp_size};
 	auto local1 = std::vector<size_t>{db_["WGS1"]};
 	auto kernelEvent = Event();
 	
-#if VULKAN_API
 	// the number of workgroups in the X dimension
 	int num_groups_0 = static_cast<int>(global1[0]/local1[0]);
 	kernel1.SetArgument(6, num_groups_0);
-#endif
-	RunKernel(kernel1, queue_, device_, global1, local1, kernelEvent.pointer());
-	eventWaitList.push_back(kernelEvent);
+
+	RunKernel(kernel1, queue_, device_, global1, local1, kernelEvent.pointer(), {}, mSequence);
+	// eventWaitList.push_back(kernelEvent);
 
 	// Sets the arguments for the epilogue kernel
 #if VULKAN_USE_BDA
@@ -132,7 +122,9 @@ void Xamax<T>::DoAmax(const size_t n, const Buffer<unsigned int>& imax_buffer, c
 	// Launches the epilogue kernel
 	auto global2 = std::vector<size_t>{db_["WGS2"]};
 	auto local2 = std::vector<size_t>{db_["WGS2"]};
-	RunKernel(kernel2, queue_, device_, global2, local2, event_, eventWaitList);
+	RunKernel(kernel2, queue_, device_, global2, local2, event_, eventWaitList, mSequence);
+	
+	submitIfNeeded(eventWaitList, event_);
 }
 
 // =================================================================================================

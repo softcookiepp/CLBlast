@@ -815,16 +815,9 @@ public:
 		return mEntryPoint;
 	}
 
-	// Launches a kernel onto the specified queue
-	void Launch(const Queue& queue, const std::vector<size_t>& global, const std::vector<size_t>& local,
-							EventPointer event) {
-		const std::vector<Event> dummyWaitlist;
-		Launch(queue, global, local, event, dummyWaitlist);
-	}
-
 	// As above, but with an event waiting list
 	void Launch(const Queue& queue, const std::vector<size_t>& global, const std::vector<size_t>& local,
-							EventPointer event, const std::vector<Event>& waitForEvents)
+							EventPointer event, const std::vector<Event>& waitForEvents = {}, const tart::command_sequence_ptr& sequence = nullptr)
 	{
 		if (global.size() != local.size() ) throw LogicError("local and global size must be same length");
 		std::vector<uint32_t> adjusted_global(global.size());
@@ -843,16 +836,21 @@ public:
 		// ensure size is correct
 		local32.resize(mKernel->getSpecConstantSize()/sizeof(uint32_t));
 		
-		std::vector<tart::event_ptr> wait(waitForEvents.size(), nullptr);
-		for (size_t i = 0; i < waitForEvents.size(); i += 1)
+		if (sequence)
 		{
-			wait[i] = waitForEvents[i].pointer();
+			// record to sequence and submit later
+			mKernel->record(sequence, adjusted_global, local32);
 		}
-#if 1
-		mKernel->enqueue(adjusted_global, local32, wait, event);
-#else
-		mKernel->run(adjusted_global, local32);
-#endif
+		else
+		{
+			std::vector<tart::event_ptr> wait(waitForEvents.size(), nullptr);
+			for (size_t i = 0; i < waitForEvents.size(); i += 1)
+			{
+				wait[i] = waitForEvents[i].pointer();
+			}
+			
+			mKernel->enqueue(adjusted_global, local32, wait, event);
+		}
 	}
 
 	// Accessor to the private data-member

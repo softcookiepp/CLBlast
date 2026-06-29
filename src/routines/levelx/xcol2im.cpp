@@ -36,7 +36,8 @@ Xcol2im<T>::Xcol2im(Queue& queue, EventPointer event, const std::string& name)
 #endif
               }
 #if VULKAN_API
-	, true, {"Xcol2imKernelNormal", "Xcol2imKernelFlip"}
+,
+ {"Xcol2imKernelNormal", "Xcol2imKernelFlip"}
 #endif
 	  ) {
 }

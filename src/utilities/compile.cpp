@@ -27,7 +27,7 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 		const size_t run_preprocessor,	// 0: platform dependent, 1: always, 2: never
 		const bool silent
 #if VULKAN_API
-		, bool isGLSL,
+,
 		std::map<std::string, std::string>& kernelSources
 #endif
 		)
@@ -108,7 +108,7 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 #endif
 
 #if VULKAN_API
-	if (isGLSL)
+	if (true)
 	{
 		header_string +=
 #include "kernels-vk-inline/common.glsl.inl"
@@ -146,7 +146,7 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 	// Compiles the kernel
 	std::shared_ptr<Program> program = nullptr;
 #if VULKAN_API
-	if (isGLSL)
+	if (true)
 	{
 		// append the header to everything
 		for (auto& pair : kernelSources)
@@ -188,7 +188,7 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 	return CompileFromSource(source_string, precision, routine_name, device,
                                            context, options,
                                            run_preprocessor,
-                                            silent, false, dummyMap);
+                                            silent, dummyMap);
 }
 #endif
 // =================================================================================================

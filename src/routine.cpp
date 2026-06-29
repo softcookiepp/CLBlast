@@ -62,7 +62,7 @@ Routine::Routine(Queue& queue, EventPointer event, const std::string& name,
 	const std::vector<std::string>& kernel_names, const Precision precision,
 	const std::vector<database::DatabaseEntry>& userDatabase, std::initializer_list<const char*> source
 #if VULKAN_API
-	, bool isGLSL, std::vector<std::string> entryPointNames, std::vector<std::string> defineKeys
+	, std::vector<std::string> entryPointNames, std::vector<std::string> defineKeys
 #endif
 	)
 		: precision_(precision),
@@ -74,7 +74,7 @@ Routine::Routine(Queue& queue, EventPointer event, const std::string& name,
 			device_(queue_.GetDevice()),
 			db_(kernel_names)
 #if VULKAN_API
-			, mIsGLSL(isGLSL), mEntryPointNames(entryPointNames)//, mDefineKeys(defineKeys)
+			, mEntryPointNames(entryPointNames)//, mDefineKeys(defineKeys)
 #endif
 {
 	InitDatabase(device_, kernel_names, precision, userDatabase, db_);
@@ -116,7 +116,7 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 	const auto platform_id = device_.PlatformID();
 	bool has_binary = false;
 #if VULKAN_API
-	if (!mIsGLSL)
+	if (false)// (!mIsGLSL)
 #endif
 	{
 		auto binary =
@@ -145,99 +145,37 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 		throw RuntimeErrorCode(StatusCode::kNoHalfPrecision);
 	}
 
-#if VULKAN_API
-	if (mIsGLSL)
+	// the kernel names *must* have the same order as the underlying compute shaders they represent
+	std::vector<std::string>& kernelNames = mEntryPointNames;
+	if (mEntryPointNames.size() == 0) kernelNames = kernel_names_;
+
+	std::vector<std::string> defines;
 	{
-		// the kernel names *must* have the same order as the underlying compute shaders they represent
-		std::vector<std::string>& kernelNames = mEntryPointNames;
-		if (mEntryPointNames.size() == 0) kernelNames = kernel_names_;
-
-		std::vector<std::string> defines;
-#if 0
-		if (mDefineKeys.size() > 0)
+		// one define set per kernel name...
+		for (auto& kn : kernel_names_)
 		{
-			if (mDefineKeys.size() != mEntryPointNames.size())
-				throw std::runtime_error("define keys must be same size as entry points");
-			for (auto& key : mDefineKeys)
-				defines.push_back(db_(key).GetDefines());
+			defines.push_back(db_(kn).GetDefines());
 		}
-		else if (source.size() > kernel_names_.size() && kernel_names_.size() == 1)
-		{
-			// just duplicate the definitions, holy crap.
-			for (size_t i = 0; i < source.size(); i += 1)
-			{
-				defines.push_back(db_(kernel_names_[0]).GetDefines());
-			}
-		}
-		else if (source.size() != kernelNames.size())
-		{
-			throw std::invalid_argument("length of kernel name list must be same size as source list!");
-		}
-		else
-#endif
-		{
-#if 1
-			// one define set per kernel name...
-			for (auto& kn : kernel_names_)
-			{
-				defines.push_back(db_(kn).GetDefines());
-			}
-#else
-			// one define set per kernel name...
-			for (size_t i = 0; i < source.size(); i += 1)
-			{
-				defines.push_back(db_(kernel_names_[i]).GetDefines());
-			}
-#endif
-		}
-
-		// create a map of kernel names and sources
-		std::map<std::string, std::string> kernelSources;
-		std::vector<std::string> preSources;
-		for (auto& str : source) preSources.push_back(str);
-		std::string allDefines;
-		for (auto& str : defines) allDefines += (str + "\n");
-		for (size_t i = 0; i < source.size(); i += 1)
-		{
-#if 1
-			if (kernelNames.size() == i) throw std::runtime_error("not enough kernel names!");
-			if (preSources.size() == i) throw std::runtime_error("not enough presources!");
-			kernelSources.emplace(kernelNames[i], allDefines+preSources[i]);
-#else
-			kernelSources.emplace(kernelNames[i], defines[i]+preSources[i]);
-#endif
-		}
-		std::string dummy("");
-
-		program_ = CompileFromSource(dummy, precision_, routine_name_, device_, context_, options, 0, false, true, kernelSources);
-		
-		ProgramCache::Instance().Store(ProgramKey{context_(), device_(), precision_, routine_info},
-																	 std::shared_ptr<Program>{program_});
 	}
-	else
-#endif
+
+	// create a map of kernel names and sources
+	std::map<std::string, std::string> kernelSources;
+	std::vector<std::string> preSources;
+	for (auto& str : source) preSources.push_back(str);
+	std::string allDefines;
+	for (auto& str : defines) allDefines += (str + "\n");
+	for (size_t i = 0; i < source.size(); i += 1)
 	{
-		// Collects the parameters for this device in the form of defines
-		auto source_string = std::string{""};
-		for (const auto& kernel_name : kernel_names_) {
-			source_string += db_(kernel_name).GetDefines();
-		}
-		
-		// Adds routine-specific code to the constructed source string
-		for (const char* s : source) {
-			source_string += s;
-		}
-		
-		// Completes the source and compiles the kernel
-		std::map<std::string, std::string> dummyMap;
-		program_ = CompileFromSource(source_string, precision_, routine_name_, device_, context_, options, 0, false, false, dummyMap);
-
-		// Store the compiled binary and program in the cache
-		BinaryCache::Instance().Store(BinaryKey{platform_id, precision_, routine_info, device_name}, program_->GetIR());
-
-		ProgramCache::Instance().Store(ProgramKey{context_(), device_(), precision_, routine_info},
-																	 std::shared_ptr<Program>{program_});
+		if (kernelNames.size() == i) throw std::runtime_error("not enough kernel names!");
+		if (preSources.size() == i) throw std::runtime_error("not enough presources!");
+		kernelSources.emplace(kernelNames[i], allDefines+preSources[i]);
 	}
+	std::string dummy("");
+
+	program_ = CompileFromSource(dummy, precision_, routine_name_, device_, context_, options, 0, false, kernelSources);
+	
+	ProgramCache::Instance().Store(ProgramKey{context_(), device_(), precision_, routine_info},
+																 std::shared_ptr<Program>{program_});
 }
 
 // =================================================================================================

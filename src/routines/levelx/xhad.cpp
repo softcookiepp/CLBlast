@@ -41,7 +41,8 @@ Xhad<T>::Xhad(Queue& queue, EventPointer event, const std::string& name)
 #endif
 							}
 #if VULKAN_API
-	, true, {"Xhad", "XhadFaster", "XhadFastest"}
+,
+ {"Xhad", "XhadFaster", "XhadFastest"}
 #endif
 	) {
 }

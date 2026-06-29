@@ -54,7 +54,8 @@ Xconvgemm<T>::Xconvgemm(Queue& queue, EventPointer event, const std::string& nam
 							}
 							
 #if VULKAN_API
-			, true,
+,
+		
 			{
 				"Xconvgemm",
 				"XconvgemmNormal",

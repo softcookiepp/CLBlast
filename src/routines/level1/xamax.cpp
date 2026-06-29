@@ -37,7 +37,8 @@ Xamax<T>::Xamax(Queue& queue, EventPointer event, const std::string& name)
 #endif
 							}
 #if VULKAN_API
-							, true,
+,
+						
 							{"Xamax", "XamaxEpilogue"}
 #endif
 						) {

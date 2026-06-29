@@ -77,7 +77,8 @@ XgemmStridedBatched<T>::XgemmStridedBatched(Queue& queue, EventPointer event, co
 #endif
 							}
 #if VULKAN_API
-	, true,
+,
+
 	{
 		"CopyMatrixStridedBatched",
 		"CopyPadMatrixStridedBatched",

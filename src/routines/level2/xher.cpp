@@ -37,7 +37,8 @@ Xher<T, U>::Xher(Queue& queue, EventPointer event, const std::string& name)
 #endif
               }
 #if VULKAN_API
-	, true, {"Xher"}, {"Xger"}
+,
+ {"Xher"}, {"Xger"}
 #endif
 	  ) {
 }

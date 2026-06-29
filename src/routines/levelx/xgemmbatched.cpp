@@ -77,7 +77,8 @@ XgemmBatched<T>::XgemmBatched(Queue& queue, EventPointer event, const std::strin
 #endif
 							}
 #if VULKAN_API
-	, true,
+,
+
 	{
 		"CopyMatrixBatched",
 		"CopyPadMatrixBatched",

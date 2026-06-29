@@ -41,7 +41,7 @@ Xaxpy<T>::Xaxpy(Queue& queue, EventPointer event, const std::string& name)
 #endif
 							}
 #if VULKAN_API
-	, true, {"Xaxpy", "XaxpyFaster", "XaxpyFastest"}
+ ,{"Xaxpy", "XaxpyFaster", "XaxpyFastest"}
 #endif
 				) {
 }

@@ -63,7 +63,7 @@ class Routine {
 									 const Precision precision, const std::vector<database::DatabaseEntry>& userDatabase,
 									 std::initializer_list<const char*> source
 #if VULKAN_API
-					, bool isGLSL = false, std::vector<std::string> entryPointNames = {},
+					, std::vector<std::string> entryPointNames = {},
 					std::vector<std::string> defineKeys = {}
 #endif
 									 );
@@ -104,7 +104,6 @@ class Routine {
 	
 #if VULKAN_API
 	// whether or not this is a GLSL compute shader module
-	bool mIsGLSL = false;
 	std::vector<std::string> mEntryPointNames;
 	std::vector<std::string> mDefineKeys;
 #endif

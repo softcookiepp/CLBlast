@@ -37,7 +37,8 @@ XaxpyBatched<T>::XaxpyBatched(Queue& queue, EventPointer event, const std::strin
 #endif
 							}
 #if VULKAN_API
-	, true, {"XaxpyBatched"}
+,
+ {"XaxpyBatched"}
 #endif
 			) {
 }

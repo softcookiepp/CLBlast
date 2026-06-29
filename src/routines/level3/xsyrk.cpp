@@ -79,7 +79,8 @@ Xsyrk<T>::Xsyrk(Queue& queue, EventPointer event, const std::string& name)
 #endif
               }
 #if VULKAN_API
-	, true,
+,
+
 	{
 		"CopyMatrixFast",
 		"CopyMatrix",

@@ -37,7 +37,8 @@ Xasum<T>::Xasum(Queue& queue, EventPointer event, const std::string& name)
 #endif
 							}
 #if VULKAN_API
-			, true,
+,
+		
 			{"Xasum", "XasumEpilogue"}
 #endif
 			)							

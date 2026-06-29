@@ -36,7 +36,8 @@ Xim2col<T>::Xim2col(Queue& queue, EventPointer event, const std::string& name)
 #endif
               }
 #if VULKAN_API
-		, true, {"Xim2colKernelFlip", "Xim2colKernelNormal"}
+,
+	 {"Xim2colKernelFlip", "Xim2colKernelNormal"}
 #endif
 		  ) {
 }

@@ -28,7 +28,7 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
                                            const size_t run_preprocessor,  // 0: platform dependent, 1: always, 2: never
                                            const bool silent
 #if VULKAN_API
-										, bool isGLSL,
+,
 											std::map<std::string, std::string>& kernelSources
 #endif
                                            );

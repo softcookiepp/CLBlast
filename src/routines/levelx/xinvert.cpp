@@ -76,7 +76,7 @@ Xinvert<T>::Xinvert(Queue& queue, EventPointer event, const std::string& name)
 #endif
               }
 #if VULKAN_API
-		, true,
+		,
 		{
 			"FillMatrix",
 			"InvertDiagonalBlock",

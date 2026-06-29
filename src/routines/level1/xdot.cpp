@@ -37,7 +37,8 @@ Xdot<T>::Xdot(Queue& queue, EventPointer event, const std::string& name)
 #endif
 							}
 #if VULKAN_API
-		, true, {"Xdot", "XdotEpilogue"}
+,
+	 {"Xdot", "XdotEpilogue"}
 #endif
 			) {
 }

@@ -37,7 +37,8 @@ Xnrm2<T>::Xnrm2(Queue& queue, EventPointer event, const std::string& name)
 #endif
 							}
 #if VULKAN_API
-	, true, {"Xnrm2", "Xnrm2Epilogue"}
+,
+ {"Xnrm2", "Xnrm2Epilogue"}
 #endif
 		) {
 }

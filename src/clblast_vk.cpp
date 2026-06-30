@@ -1666,7 +1666,7 @@ StatusCode GemmStridedBatched(const Layout layout, const Transpose a_transpose, 
 		auto routine = XgemmStridedBatched<T>(queue_cpp, event);
 		routine.DoGemmStridedBatched(layout, a_transpose, b_transpose, m, n, k, alpha, Buffer<T>(a_buffer), a_offset, a_ld,
 																 a_stride, Buffer<T>(b_buffer), b_offset, b_ld, b_stride, beta, Buffer<T>(c_buffer),
-																 c_offset, c_ld, c_stride, batch_count);
+																 c_offset, c_ld, c_stride, batch_count, sequence);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();

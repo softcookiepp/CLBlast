@@ -51,7 +51,8 @@ Xaxpy<T>::Xaxpy(Queue& queue, EventPointer event, const std::string& name)
 // The main routine
 template <typename T>
 void Xaxpy<T>::DoAxpy(const size_t n, const T alpha, const Buffer<T>& x_buffer, const size_t x_offset,
-											const size_t x_inc, const Buffer<T>& y_buffer, const size_t y_offset, const size_t y_inc) {
+											const size_t x_inc, const Buffer<T>& y_buffer, const size_t y_offset, const size_t y_inc, const tart::command_sequence_ptr& sequence)
+{
 	// Makes sure all dimensions are larger than zero
 	if (n == 0) {
 		throw BLASError(StatusCode::kInvalidDimension);
@@ -137,22 +138,26 @@ void Xaxpy<T>::DoAxpy(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 		kernel.SetArgument(7, static_cast<int>(y_inc));
 	}
 #endif
+	
+	// get working sequence
+	tart::command_sequence_ptr workingSequence = getWorkingSequence(sequence);
 
 	// Launches the kernel
 	if (use_fastest_kernel) {
 		auto global = std::vector<size_t>{CeilDiv(n, db_["WPT"] * db_["VW"])};
 		auto local = std::vector<size_t>{db_["WGS"]};
-		RunKernel(kernel, queue_, device_, global, local, event_);
+		RunKernel(kernel, queue_, device_, global, local, event_, {}, workingSequence);
 	} else if (use_faster_kernel) {
 		auto global = std::vector<size_t>{Ceil(CeilDiv(n, db_["WPT"] * db_["VW"]), db_["WGS"])};
 		auto local = std::vector<size_t>{db_["WGS"]};
-		RunKernel(kernel, queue_, device_, global, local, event_);
+		RunKernel(kernel, queue_, device_, global, local, event_, {}, workingSequence);
 	} else {
 		const auto n_ceiled = Ceil(n, db_["WGS"] * db_["WPT"]);
 		auto global = std::vector<size_t>{n_ceiled / db_["WPT"]};
 		auto local = std::vector<size_t>{db_["WGS"]};
-		RunKernel(kernel, queue_, device_, global, local, event_);
+		RunKernel(kernel, queue_, device_, global, local, event_, {}, workingSequence);
 	}
+	submitIfNeeded(sequence, workingSequence, {}, event_);
 }
 
 // =================================================================================================

@@ -28,7 +28,7 @@ class Xamax : public Routine {
 
   // Templated-precision implementation of the routine
   void DoAmax(const size_t n, const Buffer<unsigned int>& imax_buffer, const size_t imax_offset,
-              const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc, const tart::command_sequence_ptr& sequence = nullptr);
+              const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc, const tart::command_sequence_ptr& sequence);
 };
 
 // =================================================================================================

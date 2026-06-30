@@ -93,7 +93,7 @@ StatusCode Swap(
 	auto queue_cpp = Queue(queue);
 	// using float for now so it compiles, but this will have to be changed later.
 	auto routine = Xswap<float>(queue_cpp, nullptr); // no events for now
-	routine.DoSwap(n, Buffer<float>(x_buffer), x_offset, x_inc, Buffer<float>(y_buffer), y_offset, y_inc);
+	routine.DoSwap(n, Buffer<float>(x_buffer), x_offset, x_inc, Buffer<float>(y_buffer), y_offset, y_inc, sequence);
 	return StatusCode::kSuccess;
 }
 
@@ -106,7 +106,7 @@ StatusCode Swap(const size_t n, tart::buffer_ptr x_buffer, const size_t x_offset
 	{
 		auto queue_cpp = Queue(queue);
 		auto routine = Xswap<T>(queue_cpp, event);
-		routine.DoSwap(n, Buffer<T>(x_buffer), x_offset, x_inc, Buffer<T>(y_buffer), y_offset, y_inc);
+		routine.DoSwap(n, Buffer<T>(x_buffer), x_offset, x_inc, Buffer<T>(y_buffer), y_offset, y_inc, sequence);
 		return StatusCode::kSuccess;
 	}
 	catch (...)
@@ -132,7 +132,7 @@ StatusCode Scal(const size_t n, const T alpha, tart::buffer_ptr x_buffer, const 
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = Xscal<T>(queue_cpp, event);
-		routine.DoScal(n, alpha, Buffer<T>(x_buffer), x_offset, x_inc);
+		routine.DoScal(n, alpha, Buffer<T>(x_buffer), x_offset, x_inc, sequence);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -156,7 +156,7 @@ StatusCode Copy(const size_t n, const tart::buffer_ptr x_buffer, const size_t x_
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = Xcopy<T>(queue_cpp, event);
-		routine.DoCopy(n, Buffer<T>(x_buffer), x_offset, x_inc, Buffer<T>(y_buffer), y_offset, y_inc);
+		routine.DoCopy(n, Buffer<T>(x_buffer), x_offset, x_inc, Buffer<T>(y_buffer), y_offset, y_inc, sequence);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -180,7 +180,7 @@ StatusCode Axpy(const size_t n, const T alpha, const tart::buffer_ptr x_buffer, 
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = Xaxpy<T>(queue_cpp, event);
-		routine.DoAxpy(n, alpha, Buffer<T>(x_buffer), x_offset, x_inc, Buffer<T>(y_buffer), y_offset, y_inc);
+		routine.DoAxpy(n, alpha, Buffer<T>(x_buffer), x_offset, x_inc, Buffer<T>(y_buffer), y_offset, y_inc, sequence);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -270,7 +270,7 @@ StatusCode Nrm2(const size_t n, tart::buffer_ptr nrm2_buffer, const size_t nrm2_
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = Xnrm2<T>(queue_cpp, event);
-		routine.DoNrm2(n, Buffer<T>(nrm2_buffer), nrm2_offset, Buffer<T>(x_buffer), x_offset, x_inc);
+		routine.DoNrm2(n, Buffer<T>(nrm2_buffer), nrm2_offset, Buffer<T>(x_buffer), x_offset, x_inc, sequence);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -318,7 +318,7 @@ StatusCode Sum(const size_t n, tart::buffer_ptr sum_buffer, const size_t sum_off
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = Xsum<T>(queue_cpp, event);
-		routine.DoSum(n, Buffer<T>(sum_buffer), sum_offset, Buffer<T>(x_buffer), x_offset, x_inc);
+		routine.DoSum(n, Buffer<T>(sum_buffer), sum_offset, Buffer<T>(x_buffer), x_offset, x_inc, sequence);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -366,7 +366,7 @@ StatusCode Amin(const size_t n, tart::buffer_ptr imin_buffer, const size_t imin_
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = Xamin<T>(queue_cpp, event);
-		routine.DoAmin(n, Buffer<unsigned int>(imin_buffer), imin_offset, Buffer<T>(x_buffer), x_offset, x_inc);
+		routine.DoAmin(n, Buffer<unsigned int>(imin_buffer), imin_offset, Buffer<T>(x_buffer), x_offset, x_inc, sequence);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -390,7 +390,7 @@ StatusCode Max(const size_t n, tart::buffer_ptr imax_buffer, const size_t imax_o
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = Xmax<T>(queue_cpp, event);
-		routine.DoMax(n, Buffer<unsigned int>(imax_buffer), imax_offset, Buffer<T>(x_buffer), x_offset, x_inc);
+		routine.DoMax(n, Buffer<unsigned int>(imax_buffer), imax_offset, Buffer<T>(x_buffer), x_offset, x_inc, sequence);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();

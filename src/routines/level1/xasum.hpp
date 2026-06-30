@@ -28,7 +28,7 @@ class Xasum : public Routine {
 
   // Templated-precision implementation of the routine
   void DoAsum(const size_t n, const Buffer<T>& asum_buffer, const size_t asum_offset, const Buffer<T>& x_buffer,
-              const size_t x_offset, const size_t x_inc, const tart::command_sequence_ptr& sequence = nullptr);
+              const size_t x_offset, const size_t x_inc, const tart::command_sequence_ptr& sequence);
 };
 
 // =================================================================================================

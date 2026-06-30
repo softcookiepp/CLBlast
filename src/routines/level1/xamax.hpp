@@ -24,11 +24,11 @@ template <typename T>
 class Xamax : public Routine {
  public:
   // Constructor
-  Xamax(Queue& queue, EventPointer event, const tart::command_sequence_ptr& sequence = nullptr, const std::string& name = "AMAX");
+  Xamax(Queue& queue, EventPointer event, const std::string& name = "AMAX");
 
   // Templated-precision implementation of the routine
   void DoAmax(const size_t n, const Buffer<unsigned int>& imax_buffer, const size_t imax_offset,
-              const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc);
+              const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc, const tart::command_sequence_ptr& sequence = nullptr);
 };
 
 // =================================================================================================

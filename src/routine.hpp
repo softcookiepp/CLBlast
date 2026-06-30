@@ -63,8 +63,7 @@ class Routine {
 									 const Precision precision, const std::vector<database::DatabaseEntry>& userDatabase,
 									 std::initializer_list<const char*> source
 #if VULKAN_API
-					, std::vector<std::string> entryPointNames = {},
-					const tart::command_sequence_ptr& sequence = nullptr
+					, std::vector<std::string> entryPointNames = {}
 #endif
 									 );
 
@@ -105,12 +104,10 @@ class Routine {
 #if VULKAN_API
 	std::vector<std::string> mEntryPointNames;
 	
-	//
-	const bool mSequenceProvided;
-	tart::command_sequence_ptr mSequence;
-	
 	// submit if sequence was not provided; otherwise, do nothing
-	void submitIfNeeded(const std::vector<Event>& waitForEvents, const tart::event_ptr& signalEvent);
+	tart::command_sequence_ptr getWorkingSequence(const tart::command_sequence_ptr& sequence);
+	void submitIfNeeded(const tart::command_sequence_ptr& sequence, const tart::command_sequence_ptr& workingSequence,
+		const std::vector<Event>& waitForEvents, const tart::event_ptr& signalEvent);
 #endif
 };
 

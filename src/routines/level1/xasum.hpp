@@ -24,11 +24,11 @@ template <typename T>
 class Xasum : public Routine {
  public:
   // Constructor
-  Xasum(Queue& queue, EventPointer event, const tart::command_sequence_ptr& sequence = nullptr, const std::string& name = "ASUM");
+  Xasum(Queue& queue, EventPointer event, const std::string& name = "ASUM");
 
   // Templated-precision implementation of the routine
   void DoAsum(const size_t n, const Buffer<T>& asum_buffer, const size_t asum_offset, const Buffer<T>& x_buffer,
-              const size_t x_offset, const size_t x_inc);
+              const size_t x_offset, const size_t x_inc, const tart::command_sequence_ptr& sequence = nullptr);
 };
 
 // =================================================================================================

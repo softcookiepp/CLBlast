@@ -40,7 +40,7 @@ class Xhemm : public Xgemm<T> {
   void DoHemm(const Layout layout, const Side side, const Triangle triangle, const size_t m, const size_t n,
               const T alpha, const Buffer<T>& a_buffer, const size_t a_offset, const size_t a_ld,
               const Buffer<T>& b_buffer, const size_t b_offset, const size_t b_ld, const T beta,
-              const Buffer<T>& c_buffer, const size_t c_offset, const size_t c_ld);
+              const Buffer<T>& c_buffer, const size_t c_offset, const size_t c_ld, const tart::command_sequence_ptr& sequence);
 };
 
 // =================================================================================================

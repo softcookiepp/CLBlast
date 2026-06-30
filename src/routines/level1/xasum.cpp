@@ -25,7 +25,7 @@ namespace clblast {
 
 // Constructor: forwards to base class constructor
 template <typename T>
-Xasum<T>::Xasum(Queue& queue, EventPointer event, const tart::command_sequence_ptr& sequence, const std::string& name)
+Xasum<T>::Xasum(Queue& queue, EventPointer event, const std::string& name)
 		: Routine(queue, event, name, {"Xdot"}, PrecisionValue<T>(), {},
 							{
 #if VULKAN_API
@@ -36,11 +36,9 @@ Xasum<T>::Xasum(Queue& queue, EventPointer event, const tart::command_sequence_p
 	#include "../../kernels/level1/xasum.opencl"
 #endif
 							}
-#if VULKAN_API
 ,
 		
-			{"Xasum", "XasumEpilogue"}, sequence
-#endif
+			{"Xasum", "XasumEpilogue"}
 			)							
 {
 }
@@ -50,7 +48,8 @@ Xasum<T>::Xasum(Queue& queue, EventPointer event, const tart::command_sequence_p
 // The main routine
 template <typename T>
 void Xasum<T>::DoAsum(const size_t n, const Buffer<T>& asum_buffer, const size_t asum_offset, const Buffer<T>& x_buffer,
-											const size_t x_offset, const size_t x_inc) {
+											const size_t x_offset, const size_t x_inc, const tart::command_sequence_ptr& sequence)
+{
 	// Makes sure all dimensions are larger than zero
 	if (n == 0) {
 		throw BLASError(StatusCode::kInvalidDimension);
@@ -67,6 +66,9 @@ void Xasum<T>::DoAsum(const size_t n, const Buffer<T>& asum_buffer, const size_t
 	// Creates the buffer for intermediate values
 	auto temp_size = 2 * db_["WGS2"];
 	auto temp_buffer = Buffer<T>(context_, temp_size);
+	
+	// get working sequence
+	tart::command_sequence_ptr workingSequence = getWorkingSequence(sequence);
 
 	// Sets the kernel arguments
 #if VULKAN_USE_BDA
@@ -97,13 +99,11 @@ void Xasum<T>::DoAsum(const size_t n, const Buffer<T>& asum_buffer, const size_t
 	auto global1 = std::vector<size_t>{db_["WGS1"] * temp_size};
 	auto local1 = std::vector<size_t>{db_["WGS1"]};
 
-#if VULKAN_API
 	// the number of workgroups in the X dimension
 	kernel1.SetArgument(6, static_cast<int>(global1[0]/local1[0]));
-#endif
 
 	auto kernelEvent = Event();
-	RunKernel(kernel1, queue_, device_, global1, local1, kernelEvent.pointer(), {}, mSequence);
+	RunKernel(kernel1, queue_, device_, global1, local1, kernelEvent.pointer(), {}, workingSequence);
 	//eventWaitList.push_back(kernelEvent);
 
 	// Sets the arguments for the epilogue kernel
@@ -128,9 +128,9 @@ void Xasum<T>::DoAsum(const size_t n, const Buffer<T>& asum_buffer, const size_t
 	// Launches the epilogue kernel
 	auto global2 = std::vector<size_t>{db_["WGS2"]};
 	auto local2 = std::vector<size_t>{db_["WGS2"]};
-	RunKernel(kernel2, queue_, device_, global2, local2, event_, eventWaitList, mSequence);
+	RunKernel(kernel2, queue_, device_, global2, local2, event_, eventWaitList, workingSequence);
 	
-	submitIfNeeded(eventWaitList, event_);
+	submitIfNeeded(sequence, workingSequence, eventWaitList, event_);
 }
 
 // =================================================================================================

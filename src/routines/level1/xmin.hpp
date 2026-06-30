@@ -27,13 +27,13 @@ class Xmin : public Xamax<T> {
   using Xamax<T>::DoAmax;
 
   // Constructor
-  Xmin(Queue& queue, EventPointer event, const tart::command_sequence_ptr& sequence = nullptr, const std::string& name = "MIN") : Xamax<T>(queue, event, sequence, name) {}
+  Xmin(Queue& queue, EventPointer event, const std::string& name = "MIN") : Xamax<T>(queue, event, name) {}
 
   // Forwards to the regular max-absolute version. The implementation difference is realised in the
   // kernel through a pre-processor macro based on the name of the routine.
   void DoMin(const size_t n, const Buffer<unsigned int>& imin_buffer, const size_t imin_offset,
-             const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc) {
-    DoAmax(n, imin_buffer, imin_offset, x_buffer, x_offset, x_inc);
+             const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc, const tart::command_sequence_ptr& sequence = nullptr) {
+    DoAmax(n, imin_buffer, imin_offset, x_buffer, x_offset, x_inc, sequence);
   }
 };
 

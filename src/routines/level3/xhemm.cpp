@@ -34,7 +34,7 @@ template <typename T>
 void Xhemm<T>::DoHemm(const Layout layout, const Side side, const Triangle triangle, const size_t m, const size_t n,
 											const T alpha, const Buffer<T>& a_buffer, const size_t a_offset, const size_t a_ld,
 											const Buffer<T>& b_buffer, const size_t b_offset, const size_t b_ld, const T beta,
-											const Buffer<T>& c_buffer, const size_t c_offset, const size_t c_ld) {
+											const Buffer<T>& c_buffer, const size_t c_offset, const size_t c_ld, const tart::command_sequence_ptr& sequence) {
 	// Makes sure all dimensions are larger than zero
 	if ((m == 0) || (n == 0)) {
 		throw BLASError(StatusCode::kInvalidDimension);
@@ -77,22 +77,26 @@ void Xhemm<T>::DoHemm(const Layout layout, const Side side, const Triangle trian
 	auto local = std::vector<size_t>{db_["PAD_DIMX"], db_["PAD_DIMY"]};
 	auto kernelEvent = Event();
 	
-	RunKernel(kernel, queue_, device_, global, local, kernelEvent.pointer());
+	// get working sequence
+	tart::command_sequence_ptr workingSequence = this->getWorkingSequence(sequence);
+	
+	RunKernel(kernel, queue_, device_, global, local, kernelEvent.pointer(), {}, workingSequence);
+	workingSequence->recordBarrier(temp_herm());
 
 	// Synchronize now: 'DoGemm' does not accept a list of events to wait for
-	kernelEvent.WaitForCompletion();
+	//kernelEvent.WaitForCompletion();
 
 	// Runs the regular Xgemm code with either "C := AB+C" or ...
 	if (side == Side::kLeft) {
 		DoGemm(layout, Transpose::kNo, Transpose::kNo, m, n, k, alpha, temp_herm, 0, k, b_buffer, b_offset, b_ld, beta,
-					 c_buffer, c_offset, c_ld);
+					 c_buffer, c_offset, c_ld, Buffer<T>(0), false, workingSequence);
 	}
 
 	// ... with "C := BA+C". Note that A and B are now reversed.
 	else {
 		try {
 			DoGemm(layout, Transpose::kNo, Transpose::kNo, m, n, k, alpha, b_buffer, b_offset, b_ld, temp_herm, 0, k, beta,
-						 c_buffer, c_offset, c_ld);
+						 c_buffer, c_offset, c_ld, Buffer<T>(0), false, workingSequence);
 		} catch (BLASError& e) {
 			// A and B are now reversed, so also reverse the error codes returned from the Xgemm routine
 			switch (e.status()) {
@@ -113,6 +117,7 @@ void Xhemm<T>::DoHemm(const Layout layout, const Side side, const Triangle trian
 			}
 		}
 	}
+	this->submitIfNeeded(sequence, workingSequence, {}, nullptr);
 }
 
 // =================================================================================================

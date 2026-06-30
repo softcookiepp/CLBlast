@@ -25,7 +25,7 @@ namespace clblast {
 
 // Constructor: forwards to base class constructor
 template <typename T>
-Xdot<T>::Xdot(Queue& queue, EventPointer event, const tart::command_sequence_ptr& sequence, const std::string& name)
+Xdot<T>::Xdot(Queue& queue, EventPointer event, const std::string& name)
 		: Routine(queue, event, name, {"Xdot"}, PrecisionValue<T>(), {},
 							{
 #if VULKAN_API
@@ -38,7 +38,7 @@ Xdot<T>::Xdot(Queue& queue, EventPointer event, const tart::command_sequence_ptr
 							}
 #if VULKAN_API
 ,
-	 {"Xdot", "XdotEpilogue"}, sequence
+	 {"Xdot", "XdotEpilogue"}
 #endif
 			) {
 }
@@ -49,7 +49,7 @@ Xdot<T>::Xdot(Queue& queue, EventPointer event, const tart::command_sequence_ptr
 template <typename T>
 void Xdot<T>::DoDot(const size_t n, const Buffer<T>& dot_buffer, const size_t dot_offset, const Buffer<T>& x_buffer,
 										const size_t x_offset, const size_t x_inc, const Buffer<T>& y_buffer, const size_t y_offset,
-										const size_t y_inc, const bool do_conjugate) {
+										const size_t y_inc, const bool do_conjugate, const tart::command_sequence_ptr& sequence) {
 	// Makes sure all dimensions are larger than zero
 	if (n == 0) {
 		throw BLASError(StatusCode::kInvalidDimension);
@@ -67,7 +67,10 @@ void Xdot<T>::DoDot(const size_t n, const Buffer<T>& dot_buffer, const size_t do
 	// Creates the buffer for intermediate values
 	auto temp_size = 2 * db_["WGS2"];
 	auto temp_buffer = Buffer<T>(context_, temp_size);
-
+	
+	// get working sequence
+	tart::command_sequence_ptr workingSequence = getWorkingSequence(sequence);
+	
 	// Sets the kernel arguments
 #if VULKAN_USE_BDA
 	tart::DeviceMetadata meta = device_()->getMetadata();
@@ -107,7 +110,7 @@ void Xdot<T>::DoDot(const size_t n, const Buffer<T>& dot_buffer, const size_t do
 	kernel1.SetArgument(9, static_cast<int>(global1[0]/local1[0]));
 #endif
 	auto kernelEvent = Event();
-	RunKernel(kernel1, queue_, device_, global1, local1, kernelEvent.pointer(), {}, mSequence);
+	RunKernel(kernel1, queue_, device_, global1, local1, kernelEvent.pointer(), {}, workingSequence);
 	//eventWaitList.push_back(kernelEvent);
 
 	// Sets the arguments for the epilogue kernel
@@ -129,9 +132,9 @@ void Xdot<T>::DoDot(const size_t n, const Buffer<T>& dot_buffer, const size_t do
 	// Launches the epilogue kernel
 	auto global2 = std::vector<size_t>{db_["WGS2"]};
 	auto local2 = std::vector<size_t>{db_["WGS2"]};
-	RunKernel(kernel2, queue_, device_, global2, local2, event_, eventWaitList, mSequence);
+	RunKernel(kernel2, queue_, device_, global2, local2, event_, eventWaitList, workingSequence);
 	
-	submitIfNeeded(eventWaitList, event_);
+	submitIfNeeded(sequence, workingSequence, eventWaitList, event_);
 }
 
 // =================================================================================================

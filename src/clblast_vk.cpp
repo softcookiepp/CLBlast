@@ -204,9 +204,9 @@ StatusCode Dot(const size_t n, tart::buffer_ptr dot_buffer, const size_t dot_off
 							 tart::device_ptr queue, const EventPointer& event, const tart::command_sequence_ptr& sequence) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xdot<T>(queue_cpp, event, sequence);
+		auto routine = Xdot<T>(queue_cpp, event);
 		routine.DoDot(n, Buffer<T>(dot_buffer), dot_offset, Buffer<T>(x_buffer), x_offset, x_inc, Buffer<T>(y_buffer),
-									y_offset, y_inc);
+									y_offset, y_inc, false, sequence);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -226,9 +226,9 @@ StatusCode Dotu(const size_t n, tart::buffer_ptr dot_buffer, const size_t dot_of
 								const size_t y_inc, tart::device_ptr queue, const EventPointer& event, const tart::command_sequence_ptr& sequence) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xdotu<T>(queue_cpp, event, sequence);
+		auto routine = Xdotu<T>(queue_cpp, event);
 		routine.DoDotu(n, Buffer<T>(dot_buffer), dot_offset, Buffer<T>(x_buffer), x_offset, x_inc, Buffer<T>(y_buffer),
-									 y_offset, y_inc);
+									 y_offset, y_inc, sequence);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -248,9 +248,9 @@ StatusCode Dotc(const size_t n, tart::buffer_ptr dot_buffer, const size_t dot_of
 								const size_t y_inc, tart::device_ptr queue, const EventPointer& event, const tart::command_sequence_ptr& sequence) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xdotc<T>(queue_cpp, event, sequence);
+		auto routine = Xdotc<T>(queue_cpp, event);
 		routine.DoDotc(n, Buffer<T>(dot_buffer), dot_offset, Buffer<T>(x_buffer), x_offset, x_inc, Buffer<T>(y_buffer),
-									 y_offset, y_inc);
+									 y_offset, y_inc, sequence);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -293,8 +293,8 @@ StatusCode Asum(const size_t n, tart::buffer_ptr asum_buffer, const size_t asum_
 								const size_t x_offset, const size_t x_inc, tart::device_ptr queue, const EventPointer& event, const tart::command_sequence_ptr& sequence) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xasum<T>(queue_cpp, event, sequence);
-		routine.DoAsum(n, Buffer<T>(asum_buffer), asum_offset, Buffer<T>(x_buffer), x_offset, x_inc);
+		auto routine = Xasum<T>(queue_cpp, event);
+		routine.DoAsum(n, Buffer<T>(asum_buffer), asum_offset, Buffer<T>(x_buffer), x_offset, x_inc, sequence);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -341,8 +341,8 @@ StatusCode Amax(const size_t n, tart::buffer_ptr imax_buffer, const size_t imax_
 								const size_t x_offset, const size_t x_inc, tart::device_ptr queue, const EventPointer& event, const tart::command_sequence_ptr& sequence) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xamax<T>(queue_cpp, event, sequence);
-		routine.DoAmax(n, Buffer<unsigned int>(imax_buffer), imax_offset, Buffer<T>(x_buffer), x_offset, x_inc);
+		auto routine = Xamax<T>(queue_cpp, event);
+		routine.DoAmax(n, Buffer<unsigned int>(imax_buffer), imax_offset, Buffer<T>(x_buffer), x_offset, x_inc, sequence);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -414,7 +414,7 @@ StatusCode Min(const size_t n, tart::buffer_ptr imin_buffer, const size_t imin_o
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = Xmin<T>(queue_cpp, event);
-		routine.DoMin(n, Buffer<unsigned int>(imin_buffer), imin_offset, Buffer<T>(x_buffer), x_offset, x_inc);
+		routine.DoMin(n, Buffer<unsigned int>(imin_buffer), imin_offset, Buffer<T>(x_buffer), x_offset, x_inc, sequence);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1103,7 +1103,7 @@ StatusCode Gemm(const Layout layout, const Transpose a_transpose, const Transpos
 		auto temp_buffer_cpp = temp_buffer_provided ? Buffer<T>(temp_buffer) : Buffer<T>(nullptr);
 		routine.DoGemm(layout, a_transpose, b_transpose, m, n, k, alpha, Buffer<T>(a_buffer), a_offset, a_ld,
 									 Buffer<T>(b_buffer), b_offset, b_ld, beta, Buffer<T>(c_buffer), c_offset, c_ld, temp_buffer_cpp,
-									 temp_buffer_provided);
+									 temp_buffer_provided, sequence);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1177,7 +1177,7 @@ StatusCode Hemm(const Layout layout, const Side side, const Triangle triangle, c
 		auto queue_cpp = Queue(queue);
 		auto routine = Xhemm<T>(queue_cpp, event);
 		routine.DoHemm(layout, side, triangle, m, n, alpha, Buffer<T>(a_buffer), a_offset, a_ld, Buffer<T>(b_buffer),
-									 b_offset, b_ld, beta, Buffer<T>(c_buffer), c_offset, c_ld);
+									 b_offset, b_ld, beta, Buffer<T>(c_buffer), c_offset, c_ld, sequence);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1620,7 +1620,7 @@ StatusCode GemmBatched(const Layout layout, const Transpose a_transpose, const T
 		}
 		routine.DoGemmBatched(layout, a_transpose, b_transpose, m, n, k, alphas_cpp, Buffer<T>(a_buffer), a_offsets_cpp,
 													a_ld, Buffer<T>(b_buffer), b_offsets_cpp, b_ld, betas_cpp, Buffer<T>(c_buffer), c_offsets_cpp,
-													c_ld, batch_count);
+													c_ld, batch_count, sequence);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();

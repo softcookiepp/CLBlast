@@ -159,7 +159,7 @@ class Xgemm : public Routine {
               const size_t n, const size_t k, const T alpha, const Buffer<T>& a_buffer, const size_t a_offset,
               const size_t a_ld, const Buffer<T>& b_buffer, const size_t b_offset, const size_t b_ld, const T beta,
               const Buffer<T>& c_buffer, const size_t c_offset, const size_t c_ld,
-              const Buffer<T>& temp_buffer = Buffer<T>(0), const bool temp_buffer_provided = false);
+              const Buffer<T>& temp_buffer = Buffer<T>(0), const bool temp_buffer_provided = false, const tart::command_sequence_ptr& sequence = nullptr);
 
   // Indirect version of GEMM (with pre and post-processing kernels)
   void GemmIndirect(const size_t m, const size_t n, const size_t k, const T alpha, const Buffer<T>& a_buffer,
@@ -168,14 +168,14 @@ class Xgemm : public Routine {
                     const size_t c_ld, const bool a_do_transpose, const bool b_do_transpose, const bool c_do_transpose,
                     const bool a_conjugate, const bool b_conjugate, const size_t a_one, const size_t a_two,
                     const size_t b_one, const size_t b_two, const size_t c_one, const size_t c_two,
-                    const Buffer<T>& temp_buffer, const bool temp_buffer_provided);
+                    const Buffer<T>& temp_buffer, const bool temp_buffer_provided, const tart::command_sequence_ptr& sequence);
 
   // Direct version of GEMM (no pre and post-processing kernels)
   void GemmDirect(const size_t m, const size_t n, const size_t k, const T alpha, const Buffer<T>& a_buffer,
                   const size_t a_offset, const size_t a_ld, const Buffer<T>& b_buffer, const size_t b_offset,
                   const size_t b_ld, const T beta, const Buffer<T>& c_buffer, const size_t c_offset, const size_t c_ld,
                   const bool a_do_transpose, const bool b_do_transpose, const bool c_do_transpose,
-                  const bool a_conjugate, const bool b_conjugate);
+                  const bool a_conjugate, const bool b_conjugate, const tart::command_sequence_ptr& sequence);
 };
 
 // =================================================================================================

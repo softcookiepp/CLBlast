@@ -33,7 +33,7 @@ class XgemmBatched : public Routine {
                      const std::vector<size_t>& a_offsets, const size_t a_ld, const Buffer<T>& b_buffer,
                      const std::vector<size_t>& b_offsets, const size_t b_ld, const std::vector<T>& betas,
                      const Buffer<T>& c_buffer, const std::vector<size_t>& c_offsets, const size_t c_ld,
-                     const size_t batch_count);
+                     const size_t batch_count, const tart::command_sequence_ptr& sequence);
 
   // Indirect version of batched GEMM (with pre and post-processing kernels)
   void BatchedGemmIndirect(const size_t m, const size_t n, const size_t k, const Buffer<T>& alphas,
@@ -43,7 +43,7 @@ class XgemmBatched : public Routine {
                            const size_t c_ld, const bool a_do_transpose, const bool b_do_transpose,
                            const bool c_do_transpose, const bool a_conjugate, const bool b_conjugate,
                            const size_t a_one, const size_t a_two, const size_t b_one, const size_t b_two,
-                           const size_t c_one, const size_t c_two, const size_t batch_count);
+                           const size_t c_one, const size_t c_two, const size_t batch_count, const tart::command_sequence_ptr& sequence);
 
   // Direct version of batched GEMM (no pre and post-processing kernels)
   void BatchedGemmDirect(const size_t m, const size_t n, const size_t k, const Buffer<T>& alphas,
@@ -52,7 +52,7 @@ class XgemmBatched : public Routine {
                          const Buffer<T>& betas, const Buffer<T>& c_buffer, const std::vector<int>& c_offsets,
                          const size_t c_ld, const bool a_do_transpose, const bool b_do_transpose,
                          const bool c_do_transpose, const bool a_conjugate, const bool b_conjugate,
-                         const size_t batch_count);
+                         const size_t batch_count, const tart::command_sequence_ptr& sequence);
 };
 
 // =================================================================================================

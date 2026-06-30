@@ -24,12 +24,12 @@ template <typename T>
 class Xdot : public Routine {
  public:
   // Constructor
-  Xdot(Queue& queue, EventPointer event, const tart::command_sequence_ptr& sequence = nullptr, const std::string& name = "DOT");
+  Xdot(Queue& queue, EventPointer event, const std::string& name = "DOT");
 
   // Templated-precision implementation of the routine
   void DoDot(const size_t n, const Buffer<T>& dot_buffer, const size_t dot_offset, const Buffer<T>& x_buffer,
              const size_t x_offset, const size_t x_inc, const Buffer<T>& y_buffer, const size_t y_offset,
-             const size_t y_inc, const bool do_conjugate = false);
+             const size_t y_inc, const bool do_conjugate = false, const tart::command_sequence_ptr& sequence = nullptr);
 };
 
 // =================================================================================================

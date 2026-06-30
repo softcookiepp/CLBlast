@@ -160,7 +160,7 @@ void XgemmStridedBatched<T>::DoGemmStridedBatched(const Layout layout, const Tra
 			const auto c_batch_offset = b_offset + PerBatchSizeC(layout, m, n, k, c_ld) * batch;
 			xgemm.DoGemm(layout, a_transpose, b_transpose,
 				m, n, k, alpha, a_buffer, a_batch_offset, a_ld, b_buffer,
-				b_batch_offset, b_ld, beta, c_buffer, c_batch_offset, c_ld);
+				b_batch_offset, b_ld, beta, c_buffer, c_batch_offset, c_ld, Buffer<T>(0), false, workingSequence);
 		}
 		submitIfNeeded(sequence, workingSequence, {}, event_);
 		return;
@@ -360,7 +360,7 @@ void XgemmStridedBatched<T>::BatchedGemmDirect(
 	const auto local = std::vector<size_t>{db_["MDIMCD"], db_["NDIMCD"], 1};
 
 	// Launches the kernel
-	RunKernel(kernel, queue_, device_, global, local, event_);
+	RunKernel(kernel, queue_, device_, global, local, event_, {}, sequence);
 }
 
 // =================================================================================================

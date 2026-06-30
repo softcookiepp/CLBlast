@@ -34,13 +34,13 @@ void RunKernel(Kernel& kernel, Queue& queue, const Device& device, std::vector<s
 template <typename T>
 void FillMatrix(Queue& queue, const Device& device, const std::shared_ptr<Program> program, EventPointer event,
 								const std::vector<Event>& waitForEvents, const size_t m, const size_t n, const size_t ld,
-								const size_t offset, const Buffer<T>& dest, const T constant_value, const size_t local_size);
+								const size_t offset, const Buffer<T>& dest, const T constant_value, const size_t local_size, const tart::command_sequence_ptr& sequence);
 
 // Sets all elements of a vector to a constant value
 template <typename T>
 void FillVector(Queue& queue, const Device& device, const std::shared_ptr<Program> program, EventPointer event,
 								const std::vector<Event>& waitForEvents, const size_t n, const size_t inc, const size_t offset,
-								const Buffer<T>& dest, const T constant_value, const size_t local_size);
+								const Buffer<T>& dest, const T constant_value, const size_t local_size, const tart::command_sequence_ptr& sequence);
 
 // =================================================================================================
 

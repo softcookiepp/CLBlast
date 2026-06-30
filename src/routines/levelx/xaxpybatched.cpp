@@ -48,9 +48,10 @@ XaxpyBatched<T>::XaxpyBatched(Queue& queue, EventPointer event, const std::strin
 // The main routine
 template <typename T>
 void XaxpyBatched<T>::DoAxpyBatched(const size_t n, const std::vector<T>& alphas, const Buffer<T>& x_buffer,
-																		const std::vector<size_t>& x_offsets, const size_t x_inc, const Buffer<T>& y_buffer,
-																		const std::vector<size_t>& y_offsets, const size_t y_inc,
-																		const size_t batch_count) {
+	const std::vector<size_t>& x_offsets, const size_t x_inc, const Buffer<T>& y_buffer,
+	const std::vector<size_t>& y_offsets, const size_t y_inc,
+	const size_t batch_count, const tart::command_sequence_ptr& sequence)
+{
 	// Tests for a valid batch count
 	if ((batch_count < 1) || (alphas.size() != batch_count) || (x_offsets.size() != batch_count) ||
 			(y_offsets.size() != batch_count)) {

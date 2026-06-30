@@ -90,7 +90,7 @@ void RunKernel(Kernel& kernel, Queue& queue, const Device& device, std::vector<s
 template <typename T>
 void FillMatrix(Queue& queue, const Device& device, const std::shared_ptr<Program> program, EventPointer event,
 								const std::vector<Event>& waitForEvents, const size_t m, const size_t n, const size_t ld,
-								const size_t offset, const Buffer<T>& dest, const T constant_value, const size_t local_size) {
+								const size_t offset, const Buffer<T>& dest, const T constant_value, const size_t local_size, const tart::command_sequence_ptr& sequence) {
 	auto kernel = Kernel(program, "FillMatrix");
 	kernel.SetArgument(0, static_cast<int>(m));
 	kernel.SetArgument(1, static_cast<int>(n));
@@ -100,31 +100,32 @@ void FillMatrix(Queue& queue, const Device& device, const std::shared_ptr<Progra
 	kernel.SetArgument(5, GetRealArg(constant_value));
 	auto local = std::vector<size_t>{local_size, 1};
 	auto global = std::vector<size_t>{Ceil(m, local_size), n};
-	RunKernel(kernel, queue, device, global, local, event, waitForEvents);
+	RunKernel(kernel, queue, device, global, local, event, waitForEvents, sequence);
 }
 
 // Compiles the above function
 template void FillMatrix<half>(Queue&, const Device&, const std::shared_ptr<Program>, EventPointer,
-															 const std::vector<Event>&, const size_t, const size_t, const size_t, const size_t,
-															 const Buffer<half>&, const half, const size_t);
+	const std::vector<Event>&, const size_t, const size_t, const size_t, const size_t,
+	const Buffer<half>&, const half, const size_t, const tart::command_sequence_ptr&);
 template void FillMatrix<float>(Queue&, const Device&, const std::shared_ptr<Program>, EventPointer,
-																const std::vector<Event>&, const size_t, const size_t, const size_t, const size_t,
-																const Buffer<float>&, const float, const size_t);
+	const std::vector<Event>&, const size_t, const size_t, const size_t, const size_t,
+	const Buffer<float>&, const float, const size_t, const tart::command_sequence_ptr&);
 template void FillMatrix<double>(Queue&, const Device&, const std::shared_ptr<Program>, EventPointer,
-																 const std::vector<Event>&, const size_t, const size_t, const size_t, const size_t,
-																 const Buffer<double>&, const double, const size_t);
+	const std::vector<Event>&, const size_t, const size_t, const size_t, const size_t,
+	const Buffer<double>&, const double, const size_t, const tart::command_sequence_ptr&);
 template void FillMatrix<float2>(Queue&, const Device&, const std::shared_ptr<Program>, EventPointer,
-																 const std::vector<Event>&, const size_t, const size_t, const size_t, const size_t,
-																 const Buffer<float2>&, const float2, const size_t);
+	const std::vector<Event>&, const size_t, const size_t, const size_t, const size_t,
+	const Buffer<float2>&, const float2, const size_t, const tart::command_sequence_ptr&);
 template void FillMatrix<double2>(Queue&, const Device&, const std::shared_ptr<Program>, EventPointer,
-																	const std::vector<Event>&, const size_t, const size_t, const size_t, const size_t,
-																	const Buffer<double2>&, const double2, const size_t);
+	const std::vector<Event>&, const size_t, const size_t, const size_t, const size_t,
+	const Buffer<double2>&, const double2, const size_t, const tart::command_sequence_ptr&);
 
 // Sets all elements of a vector to a constant value
 template <typename T>
 void FillVector(Queue& queue, const Device& device, const std::shared_ptr<Program> program, EventPointer event,
 								const std::vector<Event>& waitForEvents, const size_t n, const size_t inc, const size_t offset,
-								const Buffer<T>& dest, const T constant_value, const size_t local_size) {
+								const Buffer<T>& dest, const T constant_value, const size_t local_size,
+								const tart::command_sequence_ptr& sequence) {
 	auto kernel = Kernel(program, "FillVector");
 	kernel.SetArgument(0, static_cast<int>(n));
 	kernel.SetArgument(1, static_cast<int>(inc));
@@ -133,25 +134,25 @@ void FillVector(Queue& queue, const Device& device, const std::shared_ptr<Progra
 	kernel.SetArgument(4, GetRealArg(constant_value));
 	auto local = std::vector<size_t>{local_size};
 	auto global = std::vector<size_t>{Ceil(n, local_size)};
-	RunKernel(kernel, queue, device, global, local, event, waitForEvents);
+	RunKernel(kernel, queue, device, global, local, event, waitForEvents, sequence);
 }
 
 // Compiles the above function
 template void FillVector<half>(Queue&, const Device&, const std::shared_ptr<Program>, EventPointer,
-															 const std::vector<Event>&, const size_t, const size_t, const size_t, const Buffer<half>&,
-															 const half, const size_t);
+	const std::vector<Event>&, const size_t, const size_t, const size_t, const Buffer<half>&,
+	const half, const size_t, const tart::command_sequence_ptr&);
 template void FillVector<float>(Queue&, const Device&, const std::shared_ptr<Program>, EventPointer,
-																const std::vector<Event>&, const size_t, const size_t, const size_t,
-																const Buffer<float>&, const float, const size_t);
+	const std::vector<Event>&, const size_t, const size_t, const size_t,
+	const Buffer<float>&, const float, const size_t, const tart::command_sequence_ptr&);
 template void FillVector<double>(Queue&, const Device&, const std::shared_ptr<Program>, EventPointer,
-																 const std::vector<Event>&, const size_t, const size_t, const size_t,
-																 const Buffer<double>&, const double, const size_t);
+	const std::vector<Event>&, const size_t, const size_t, const size_t,
+	const Buffer<double>&, const double, const size_t, const tart::command_sequence_ptr&);
 template void FillVector<float2>(Queue&, const Device&, const std::shared_ptr<Program>, EventPointer,
-																 const std::vector<Event>&, const size_t, const size_t, const size_t,
-																 const Buffer<float2>&, const float2, const size_t);
+	const std::vector<Event>&, const size_t, const size_t, const size_t,
+	const Buffer<float2>&, const float2, const size_t, const tart::command_sequence_ptr&);
 template void FillVector<double2>(Queue&, const Device&, const std::shared_ptr<Program>, EventPointer,
-																	const std::vector<Event>&, const size_t, const size_t, const size_t,
-																	const Buffer<double2>&, const double2, const size_t);
+	const std::vector<Event>&, const size_t, const size_t, const size_t,
+	const Buffer<double2>&, const double2, const size_t, const tart::command_sequence_ptr&);
 
 // =================================================================================================
 }	// namespace clblast

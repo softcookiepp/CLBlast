@@ -99,11 +99,12 @@ XgemmBatched<T>::XgemmBatched(Queue& queue, EventPointer event, const std::strin
 // The main routine
 template <typename T>
 void XgemmBatched<T>::DoGemmBatched(const Layout layout, const Transpose a_transpose, const Transpose b_transpose,
-																		const size_t m, const size_t n, const size_t k, const std::vector<T>& alphas,
-																		const Buffer<T>& a_buffer, const std::vector<size_t>& a_offsets, const size_t a_ld,
-																		const Buffer<T>& b_buffer, const std::vector<size_t>& b_offsets, const size_t b_ld,
-																		const std::vector<T>& betas, const Buffer<T>& c_buffer,
-																		const std::vector<size_t>& c_offsets, const size_t c_ld, const size_t batch_count, const tart::command_sequence_ptr& sequence) {
+	const size_t m, const size_t n, const size_t k, const std::vector<T>& alphas,
+	const Buffer<T>& a_buffer, const std::vector<size_t>& a_offsets, const size_t a_ld,
+	const Buffer<T>& b_buffer, const std::vector<size_t>& b_offsets, const size_t b_ld,
+	const std::vector<T>& betas, const Buffer<T>& c_buffer,
+	const std::vector<size_t>& c_offsets, const size_t c_ld, const size_t batch_count, const tart::command_sequence_ptr& sequence)
+{
 	// Tests for a valid batch count
 	if ((batch_count < 1) || (alphas.size() != batch_count) || (betas.size() != batch_count) ||
 			(a_offsets.size() != batch_count) || (b_offsets.size() != batch_count) || (c_offsets.size() != batch_count)) {

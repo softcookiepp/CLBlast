@@ -30,14 +30,14 @@ class Xgemv : public Routine {
   void DoGemv(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const T alpha,
               const Buffer<T>& a_buffer, const size_t a_offset, const size_t a_ld, const Buffer<T>& x_buffer,
               const size_t x_offset, const size_t x_inc, const T beta, const Buffer<T>& y_buffer, const size_t y_offset,
-              const size_t y_inc);
+              const size_t y_inc, const tart::command_sequence_ptr& sequence);
 
   // Generic version used also for other matrix-vector multiplications
   void MatVec(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const T alpha,
               const Buffer<T>& a_buffer, const size_t a_offset, const size_t a_ld, const Buffer<T>& x_buffer,
               const size_t x_offset, const size_t x_inc, const T beta, const Buffer<T>& y_buffer, const size_t y_offset,
               const size_t y_inc, bool fast_kernel, bool fast_kernel_rot, const size_t parameter, const bool packed,
-              const size_t kl, const size_t ku);
+              const size_t kl, const size_t ku, const tart::command_sequence_ptr& sequence);
 };
 
 // =================================================================================================

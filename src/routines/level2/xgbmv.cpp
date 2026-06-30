@@ -1,7 +1,7 @@
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
-//   Cedric Nugteren <www.cedricnugteren.nl>
+//	 Cedric Nugteren <www.cedricnugteren.nl>
 //
 // This file implements the Xgbmv class (see the header for information about the class).
 //
@@ -28,20 +28,22 @@ Xgbmv<T>::Xgbmv(Queue& queue, EventPointer event, const std::string& name) : Xge
 // The main routine
 template <typename T>
 void Xgbmv<T>::DoGbmv(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const size_t kl,
-                      const size_t ku, const T alpha, const Buffer<T>& a_buffer, const size_t a_offset,
-                      const size_t a_ld, const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc,
-                      const T beta, const Buffer<T>& y_buffer, const size_t y_offset, const size_t y_inc) {
-  // Reverses the upper and lower band count
-  auto rotated = (layout == Layout::kRowMajor);
-  auto kl_real = (rotated) ? ku : kl;
-  auto ku_real = (rotated) ? kl : ku;
+											const size_t ku, const T alpha, const Buffer<T>& a_buffer, const size_t a_offset,
+											const size_t a_ld, const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc,
+											const T beta, const Buffer<T>& y_buffer, const size_t y_offset, const size_t y_inc,
+											const tart::command_sequence_ptr& sequence)
+{
+	// Reverses the upper and lower band count
+	auto rotated = (layout == Layout::kRowMajor);
+	auto kl_real = (rotated) ? ku : kl;
+	auto ku_real = (rotated) ? kl : ku;
 
-  // Runs the generic matrix-vector multiplication, disabling the use of fast vectorized kernels.
-  // The specific hermitian matrix-accesses are implemented in the kernel guarded by the
-  // ROUTINE_GBMV define.
-  bool fast_kernels = false;
-  MatVec(layout, a_transpose, m, n, alpha, a_buffer, a_offset, a_ld, x_buffer, x_offset, x_inc, beta, y_buffer,
-         y_offset, y_inc, fast_kernels, fast_kernels, 0, false, kl_real, ku_real);
+	// Runs the generic matrix-vector multiplication, disabling the use of fast vectorized kernels.
+	// The specific hermitian matrix-accesses are implemented in the kernel guarded by the
+	// ROUTINE_GBMV define.
+	bool fast_kernels = false;
+	MatVec(layout, a_transpose, m, n, alpha, a_buffer, a_offset, a_ld, x_buffer, x_offset, x_inc, beta, y_buffer,
+				 y_offset, y_inc, fast_kernels, fast_kernels, 0, false, kl_real, ku_real, sequence);
 }
 
 // =================================================================================================
@@ -54,4 +56,4 @@ template class Xgbmv<float2>;
 template class Xgbmv<double2>;
 
 // =================================================================================================
-}  // namespace clblast
+}	// namespace clblast

@@ -70,11 +70,12 @@ Xconvgemm<T>::Xconvgemm(Queue& queue, EventPointer event, const std::string& nam
 
 template <typename T>
 void Xconvgemm<T>::DoConvgemm(const KernelMode kernel_mode, const size_t channels, const size_t height,
-															const size_t width, const size_t kernel_h, const size_t kernel_w, const size_t pad_h,
-															const size_t pad_w, const size_t stride_h, const size_t stride_w, const size_t dilation_h,
-															const size_t dilation_w, const size_t num_kernels, const size_t batch_count,
-															const Buffer<T>& im_buffer, const size_t im_offset, const Buffer<T>& kernel_buffer,
-															const size_t kernel_offset, const Buffer<T>& result_buffer, const size_t result_offset) {
+	const size_t width, const size_t kernel_h, const size_t kernel_w, const size_t pad_h,
+	const size_t pad_w, const size_t stride_h, const size_t stride_w, const size_t dilation_h,
+	const size_t dilation_w, const size_t num_kernels, const size_t batch_count,
+	const Buffer<T>& im_buffer, const size_t im_offset, const Buffer<T>& kernel_buffer,
+	const size_t kernel_offset, const Buffer<T>& result_buffer, const size_t result_offset, const tart::command_sequence_ptr& sequence)
+{
 	// Tests for a valid batch count
 	if (batch_count == 0) {
 		throw BLASError(StatusCode::kInvalidBatchCount);
@@ -96,6 +97,9 @@ void Xconvgemm<T>::DoConvgemm(const KernelMode kernel_mode, const size_t channel
 	// Sets other useful variables
 	const auto patch_size = kernel_h * kernel_w * channels;
 	const auto num_patches = output_h * output_w;
+	
+	// regardless of approach, we need this
+	tart::command_sequence_ptr workingSequence = this->getWorkingSequence(sequence);
 
 	// Possible approach: im2col + GEMM
 	//			result = GEMM(im2col(image), kernel)
@@ -113,8 +117,9 @@ void Xconvgemm<T>::DoConvgemm(const KernelMode kernel_mode, const size_t channel
 			auto im2col_event = Event();
 			auto im2col = Xim2col<T>(queue_, im2col_event.pointer());
 			im2col.DoIm2col(kernel_mode, channels, height, width, kernel_h, kernel_w, pad_h, pad_w, stride_h, stride_w,
-											dilation_h, dilation_w, im_buffer, im_batch_offset, col_buffer, col_batch_offset);
-			im2col_event.WaitForCompletion();
+											dilation_h, dilation_w, im_buffer, im_batch_offset, col_buffer, col_batch_offset, workingSequence);
+			//im2col_event.WaitForCompletion();
+			workingSequence->recordBarrier(col_buffer());
 		}
 	}
 
@@ -191,7 +196,8 @@ void Xconvgemm<T>::DoConvgemm(const KernelMode kernel_mode, const size_t channel
 	const auto local = std::vector<size_t>{db_["MDIMCD"], db_["NDIMCD"], 1};
 
 	// Launches the kernel
-	RunKernel(kernel, queue_, device_, global, local, event_);
+	RunKernel(kernel, queue_, device_, global, local, event_, {}, workingSequence);
+	this->submitIfNeeded(sequence, workingSequence, {}, event_);
 }
 
 // =================================================================================================

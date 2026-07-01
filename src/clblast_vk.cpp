@@ -948,7 +948,7 @@ StatusCode Her2(const Layout layout, const Triangle triangle, const size_t n, co
 		auto queue_cpp = Queue(queue);
 		auto routine = Xher2<T>(queue_cpp, event);
 		routine.DoHer2(layout, triangle, n, alpha, Buffer<T>(x_buffer), x_offset, x_inc, Buffer<T>(y_buffer), y_offset,
-									 y_inc, Buffer<T>(a_buffer), a_offset, a_ld);
+									 y_inc, Buffer<T>(a_buffer), a_offset, a_ld, false, sequence);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();

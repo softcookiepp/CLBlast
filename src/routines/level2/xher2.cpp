@@ -50,7 +50,8 @@ template <typename T>
 void Xher2<T>::DoHer2(const Layout layout, const Triangle triangle, const size_t n, const T alpha,
 											const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc, const Buffer<T>& y_buffer,
 											const size_t y_offset, const size_t y_inc, const Buffer<T>& a_buffer, const size_t a_offset,
-											const size_t a_ld, const bool packed) {
+											const size_t a_ld, const bool packed, const tart::command_sequence_ptr& sequence)
+{
 	// Makes sure the dimensions are larger than zero
 	if (n == 0) {
 		throw BLASError(StatusCode::kInvalidDimension);
@@ -93,7 +94,7 @@ void Xher2<T>::DoHer2(const Layout layout, const Triangle triangle, const size_t
 	auto global_two = Ceil(CeilDiv(n, db_["WPT"]), db_["WGS2"]);
 	auto global = std::vector<size_t>{global_one, global_two};
 	auto local = std::vector<size_t>{db_["WGS1"], db_["WGS2"]};
-	RunKernel(kernel, queue_, device_, global, local, event_);
+	RunKernel(kernel, queue_, device_, global, local, event_, {}, sequence);
 }
 
 // =================================================================================================

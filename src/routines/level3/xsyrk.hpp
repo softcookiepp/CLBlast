@@ -1,13 +1,13 @@
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
-//   Cedric Nugteren <www.cedricnugteren.nl>
+//	 Cedric Nugteren <www.cedricnugteren.nl>
 //
 // This file implements the Xsyrk routine. The precision is implemented using a template argument.
 // The implementation is based on the regular Xgemm routine and kernel, but with two main changes:
 // 1) The final unpad(transpose) kernel updates only the upper/lower triangular part.
 // 2) The main Xgemm kernel masks workgroups not contributing to usefull data. This is only for
-//    performance reasons, as the actual masking is done later (see the first point).
+//		performance reasons, as the actual masking is done later (see the first point).
 //
 // =================================================================================================
 
@@ -27,23 +27,23 @@ namespace clblast {
 template <typename T>
 class Xsyrk : public Routine {
  public:
-  // Constructor
-  Xsyrk(Queue& queue, EventPointer event, const std::string& name = "SYRK");
+	// Constructor
+	Xsyrk(Queue& queue, EventPointer event, const std::string& name = "SYRK");
 
-  // Templated-precision implementation of the routine
-  void DoSyrk(const Layout layout, const Triangle triangle, const Transpose a_transpose, const size_t n, const size_t k,
-              const T alpha, const Buffer<T>& a_buffer, const size_t a_offset, const size_t a_ld, const T beta,
-              const Buffer<T>& c_buffer, const size_t c_offset, const size_t c_ld);
+	// Templated-precision implementation of the routine
+	void DoSyrk(const Layout layout, const Triangle triangle, const Transpose a_transpose, const size_t n, const size_t k,
+							const T alpha, const Buffer<T>& a_buffer, const size_t a_offset, const size_t a_ld, const T beta,
+							const Buffer<T>& c_buffer, const size_t c_offset, const size_t c_ld, const tart::command_sequence_ptr& sequence);
 
-  // Helper function to be reused for SYR2K
-  void SyrkAB(const Layout layout, const Triangle triangle, const Transpose a_transpose, const Transpose b_transpose,
-              const size_t n, const size_t k, const T alpha, const Buffer<T>& a_buffer, const size_t a_offset,
-              const size_t a_ld, const Buffer<T>& b_buffer, const size_t b_offset, const size_t b_ld, const T beta,
-              const Buffer<T>& c_buffer, const size_t c_offset, const size_t c_ld, EventPointer final_event);
+	// Helper function to be reused for SYR2K
+	void SyrkAB(const Layout layout, const Triangle triangle, const Transpose a_transpose, const Transpose b_transpose,
+							const size_t n, const size_t k, const T alpha, const Buffer<T>& a_buffer, const size_t a_offset,
+							const size_t a_ld, const Buffer<T>& b_buffer, const size_t b_offset, const size_t b_ld, const T beta,
+							const Buffer<T>& c_buffer, const size_t c_offset, const size_t c_ld, EventPointer final_event, const tart::command_sequence_ptr& sequence);
 };
 
 // =================================================================================================
-}  // namespace clblast
+}	// namespace clblast
 
 // CLBLAST_ROUTINES_XSYRK_H_
 #endif

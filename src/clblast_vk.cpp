@@ -1202,7 +1202,7 @@ StatusCode Syrk(const Layout layout, const Triangle triangle, const Transpose a_
 		auto queue_cpp = Queue(queue);
 		auto routine = Xsyrk<T>(queue_cpp, event);
 		routine.DoSyrk(layout, triangle, a_transpose, n, k, alpha, Buffer<T>(a_buffer), a_offset, a_ld, beta,
-									 Buffer<T>(c_buffer), c_offset, c_ld);
+									 Buffer<T>(c_buffer), c_offset, c_ld, sequence);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1234,7 +1234,7 @@ StatusCode Herk(const Layout layout, const Triangle triangle, const Transpose a_
 		auto queue_cpp = Queue(queue);
 		auto routine = Xherk<std::complex<T>, T>(queue_cpp, event);
 		routine.DoHerk(layout, triangle, a_transpose, n, k, alpha, Buffer<std::complex<T>>(a_buffer), a_offset, a_ld, beta,
-									 Buffer<std::complex<T>>(c_buffer), c_offset, c_ld);
+									 Buffer<std::complex<T>>(c_buffer), c_offset, c_ld, sequence);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1257,7 +1257,7 @@ StatusCode Syr2k(const Layout layout, const Triangle triangle, const Transpose a
 		auto queue_cpp = Queue(queue);
 		auto routine = Xsyr2k<T>(queue_cpp, event);
 		routine.DoSyr2k(layout, triangle, ab_transpose, n, k, alpha, Buffer<T>(a_buffer), a_offset, a_ld,
-										Buffer<T>(b_buffer), b_offset, b_ld, beta, Buffer<T>(c_buffer), c_offset, c_ld);
+										Buffer<T>(b_buffer), b_offset, b_ld, beta, Buffer<T>(c_buffer), c_offset, c_ld, sequence);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1294,7 +1294,7 @@ StatusCode Her2k(const Layout layout, const Triangle triangle, const Transpose a
 		auto queue_cpp = Queue(queue);
 		auto routine = Xher2k<T, U>(queue_cpp, event);
 		routine.DoHer2k(layout, triangle, ab_transpose, n, k, alpha, Buffer<T>(a_buffer), a_offset, a_ld,
-										Buffer<T>(b_buffer), b_offset, b_ld, beta, Buffer<T>(c_buffer), c_offset, c_ld);
+										Buffer<T>(b_buffer), b_offset, b_ld, beta, Buffer<T>(c_buffer), c_offset, c_ld, sequence);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();

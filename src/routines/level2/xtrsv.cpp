@@ -98,6 +98,8 @@ void Xtrsv<T>::DoTrsv(const Layout layout, const Triangle triangle, const Transp
 	// Tests the matrix and vector
 	TestMatrixA(n, n, a_buffer, a_offset, a_ld);
 	TestVectorX(n, b_buffer, b_offset, b_inc);
+	
+	tart::command_sequence_ptr workingSequence = this->getWorkingSequence(sequence);
 
 	// Creates a copy of B to avoid overwriting input while computing output
 	// TODO: Make x with 0 offset and unit increment by creating custom copy-to and copy-from kernels
@@ -105,10 +107,9 @@ void Xtrsv<T>::DoTrsv(const Layout layout, const Triangle triangle, const Transp
 	const auto x_inc = b_inc;
 	const auto x_size = (1 + (n - 1) * x_inc) + x_offset;
 	auto x_buffer = Buffer<T>(context_, x_size);
-	b_buffer.CopyTo(queue_, x_size, x_buffer);
-	
-	// TODO: make the sequence record the copy operations
-	tart::command_sequence_ptr workingSequence = this->getWorkingSequence(sequence);
+	//b_buffer.CopyTo(queue_, x_size, x_buffer);
+	workingSequence->recordCopyBuffer(x_buffer(), b_buffer(), 0, 0, x_size*sizeof(T));
+	workingSequence->recordBarrier(x_buffer());
 
 	// Fills the output buffer with zeros
 	auto eventWaitList = std::vector<Event>();
@@ -147,7 +148,8 @@ void Xtrsv<T>::DoTrsv(const Layout layout, const Triangle triangle, const Transp
 			gemv.DoGemv(layout, a_transpose, gemv_m, gemv_n, ConstantOne<T>(), a_buffer, a_offset + extra_offset_a, a_ld,
 									x_buffer, x_offset + extra_offset_x, x_inc, ConstantOne<T>(), x_buffer, x_offset + extra_offset_b,
 									x_inc, workingSequence);
-			
+			workingSequence->recordBarrier(x_buffer());
+			workingSequence->recordBarrier(a_buffer());
 			//gemv_event.WaitForCompletion();
 		}
 
@@ -155,11 +157,16 @@ void Xtrsv<T>::DoTrsv(const Layout layout, const Triangle triangle, const Transp
 		auto sub_event = Event();
 		Substitution(layout, triangle, a_transpose, diagonal, block_size, a_buffer, a_offset + col + col * a_ld, a_ld,
 								 b_buffer, b_offset + col * b_inc, b_inc, x_buffer, x_offset + col * x_inc, x_inc, sub_event.pointer(), workingSequence);
-		sub_event.WaitForCompletion();
+		//sub_event.WaitForCompletion();
+		workingSequence->recordBarrier(x_buffer());
+		workingSequence->recordBarrier(b_buffer());
+		workingSequence->recordBarrier(a_buffer());
 	}
 
 	// Retrieves the results
-	x_buffer.CopyToAsync(queue_, x_size, b_buffer, event_);
+	workingSequence->recordCopyBuffer(b_buffer(), x_buffer(), 0, 0, x_size*sizeof(T));
+	//x_buffer.CopyToAsync(queue_, x_size, b_buffer, event_);
+	this->submitIfNeeded(sequence, workingSequence, {}, event_);
 }
 
 // =================================================================================================

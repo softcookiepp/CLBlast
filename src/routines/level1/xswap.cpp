@@ -60,15 +60,11 @@ void Xswap<T>::DoSwap(const size_t n, const Buffer<T>& x_buffer, const size_t x_
 	// Tests the vectors for validity
 	TestVectorX(n, x_buffer, x_offset, x_inc);
 	TestVectorY(n, y_buffer, y_offset, y_inc);
-#if VULKAN_API && 0
-	// Determines whether or not the fast-version can be used.
-	// In Vulkan, we can modify the buffer offset pre-submission, so that is no longer a criteria!
-	bool use_fast_kernel = (x_inc == 1) && (y_inc == 1) && IsMultiple(n, db_["WGS"] * db_["WPT"] * db_["VW"]);
-#else
+
 	// Determines whether or not the fast-version can be used
 	bool use_fast_kernel = (x_offset == 0) && (x_inc == 1) && (y_offset == 0) && (y_inc == 1) &&
 												 IsMultiple(n, db_["WGS"] * db_["WPT"] * db_["VW"]);
-#endif
+
 
 	// If possible, run the fast-version of the kernel
 	auto kernel_name = (use_fast_kernel) ? "XswapFast" : "Xswap";
@@ -85,8 +81,8 @@ void Xswap<T>::DoSwap(const size_t n, const Buffer<T>& x_buffer, const size_t x_
 		if (use_fast_kernel)
 		{
 			kernel.SetArgument(0, static_cast<int>(n));
-			kernel.SetArgument(1, x_buffer()->getAddress() + x_offset*sizeof(T));
-			kernel.SetArgument(2, y_buffer()->getAddress() + y_offset*sizeof(T));
+			kernel.SetArgument(1, x_buffer());
+			kernel.SetArgument(2, y_buffer());
 		}
 		else
 		{
@@ -105,8 +101,8 @@ void Xswap<T>::DoSwap(const size_t n, const Buffer<T>& x_buffer, const size_t x_
 		if (use_fast_kernel)
 		{
 			kernel.SetArgument(0, static_cast<int>(n));
-			kernel.SetArgument(1, x_buffer()->view(x_offset*sizeof(T)));
-			kernel.SetArgument(2, y_buffer()->view(y_offset*sizeof(T)));
+			kernel.SetArgument(1, x_buffer());
+			kernel.SetArgument(2, y_buffer());
 		}
 		else
 		{

@@ -69,13 +69,8 @@ void Xnrm2<T>::DoNrm2(const size_t n, const Buffer<T>& nrm2_buffer, const size_t
 
 	// Sets the kernel arguments
 	kernel1.SetArgument(0, static_cast<int>(n));
-#if VULKAN_API
-	kernel1.SetArgument(1, x_buffer()->view(x_offset*sizeof(T)));
-	kernel1.SetArgument(2, static_cast<int>(0));
-#else
 	kernel1.SetArgument(1, x_buffer());
 	kernel1.SetArgument(2, static_cast<int>(x_offset));
-#endif
 	kernel1.SetArgument(3, static_cast<int>(x_inc));
 	kernel1.SetArgument(4, temp_buffer());
 
@@ -94,13 +89,8 @@ void Xnrm2<T>::DoNrm2(const size_t n, const Buffer<T>& nrm2_buffer, const size_t
 
 	// Sets the arguments for the epilogue kernel
 	kernel2.SetArgument(0, temp_buffer());
-#if VULKAN_API
-	kernel2.SetArgument(1, nrm2_buffer()->view(nrm2_offset*sizeof(T)));
-	kernel2.SetArgument(2, static_cast<int>(0));
-#else
 	kernel2.SetArgument(1, nrm2_buffer());
 	kernel2.SetArgument(2, static_cast<int>(nrm2_offset));
-#endif
 
 	// Launches the epilogue kernel
 	auto global2 = std::vector<size_t>{db_["WGS2"]};

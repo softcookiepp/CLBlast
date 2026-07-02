@@ -61,11 +61,7 @@ void Xscal<T>::DoScal(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 	TestVectorX(n, x_buffer, x_offset, x_inc);
 
 	// Determines whether or not the fast-version can be used
-#if VULKAN_API
-	bool use_fast_kernel = (x_inc == 1) && IsMultiple(n, db_["WGS"] * db_["WPT"] * db_["VW"]);
-#else
 	bool use_fast_kernel = (x_offset == 0) && (x_inc == 1) && IsMultiple(n, db_["WGS"] * db_["WPT"] * db_["VW"]);
-#endif
 
 	// If possible, run the fast-version of the kernel
 	auto kernel_name = (use_fast_kernel) ? "XscalFast" : "Xscal";
@@ -81,7 +77,7 @@ void Xscal<T>::DoScal(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 		{
 			kernel.SetArgument(0, static_cast<int>(n));
 			kernel.SetArgument(1, GetRealArg(alpha));
-			kernel.SetArgument(2, x_buffer()->getAddress() + x_offset*sizeof(T));
+			kernel.SetArgument(2, x_buffer()->getAddress());
 		}
 		else
 		{
@@ -100,7 +96,7 @@ void Xscal<T>::DoScal(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 		{
 			kernel.SetArgument(0, static_cast<int>(n));
 			kernel.SetArgument(1, GetRealArg(alpha));
-			kernel.SetArgument(2, x_buffer()->view(x_offset*sizeof(T)));
+			kernel.SetArgument(2, x_buffer());
 		}
 		else
 		{

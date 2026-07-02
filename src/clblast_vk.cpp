@@ -955,11 +955,11 @@ StatusCode Her2(const Layout layout, const Triangle triangle, const size_t n, co
 	}
 }
 template StatusCode PUBLIC_API Her2<float2>(const Layout, const Triangle, const size_t, const float2, const tart::buffer_ptr,
-																						const size_t, const size_t, const tart::buffer_ptr, const size_t, const size_t,
-																						tart::buffer_ptr, const size_t, const size_t, tart::device_ptr, const EventPointer& event, const tart::command_sequence_ptr& sequence);
+	const size_t, const size_t, const tart::buffer_ptr, const size_t, const size_t,
+	tart::buffer_ptr, const size_t, const size_t, tart::device_ptr, const EventPointer& event, const tart::command_sequence_ptr& sequence);
 template StatusCode PUBLIC_API Her2<double2>(const Layout, const Triangle, const size_t, const double2, const tart::buffer_ptr,
-																						 const size_t, const size_t, const tart::buffer_ptr, const size_t, const size_t,
-																						 tart::buffer_ptr, const size_t, const size_t, tart::device_ptr, const EventPointer& event, const tart::command_sequence_ptr& sequence);
+	const size_t, const size_t, const tart::buffer_ptr, const size_t, const size_t,
+	tart::buffer_ptr, const size_t, const size_t, tart::device_ptr, const EventPointer& event, const tart::command_sequence_ptr& sequence);
 
 // Hermitian packed rank-2 matrix update: CHPR2/ZHPR2
 template <typename T>
@@ -978,11 +978,11 @@ StatusCode Hpr2(const Layout layout, const Triangle triangle, const size_t n, co
 	}
 }
 template StatusCode PUBLIC_API Hpr2<float2>(const Layout, const Triangle, const size_t, const float2, const tart::buffer_ptr,
-																						const size_t, const size_t, const tart::buffer_ptr, const size_t, const size_t,
-																						tart::buffer_ptr, const size_t, tart::device_ptr, const EventPointer& event, const tart::command_sequence_ptr& sequence);
+	const size_t, const size_t, const tart::buffer_ptr, const size_t, const size_t,
+	tart::buffer_ptr, const size_t, tart::device_ptr, const EventPointer& event, const tart::command_sequence_ptr& sequence);
 template StatusCode PUBLIC_API Hpr2<double2>(const Layout, const Triangle, const size_t, const double2, const tart::buffer_ptr,
-																						 const size_t, const size_t, const tart::buffer_ptr, const size_t, const size_t,
-																						 tart::buffer_ptr, const size_t, tart::device_ptr, const EventPointer& event, const tart::command_sequence_ptr& sequence);
+	const size_t, const size_t, const tart::buffer_ptr, const size_t, const size_t,
+	tart::buffer_ptr, const size_t, tart::device_ptr, const EventPointer& event, const tart::command_sequence_ptr& sequence);
 
 // Symmetric rank-1 matrix update: SSYR/DSYR/HSYR
 template <typename T>
@@ -1000,14 +1000,14 @@ StatusCode Syr(const Layout layout, const Triangle triangle, const size_t n, con
 	}
 }
 template StatusCode PUBLIC_API Syr<float>(const Layout, const Triangle, const size_t, const float, const tart::buffer_ptr,
-																					const size_t, const size_t, tart::buffer_ptr, const size_t, const size_t,
-																					tart::device_ptr, const EventPointer& event, const tart::command_sequence_ptr& sequence);
+	const size_t, const size_t, tart::buffer_ptr, const size_t, const size_t,
+	tart::device_ptr, const EventPointer& event, const tart::command_sequence_ptr& sequence);
 template StatusCode PUBLIC_API Syr<double>(const Layout, const Triangle, const size_t, const double, const tart::buffer_ptr,
-																					 const size_t, const size_t, tart::buffer_ptr, const size_t, const size_t,
-																					 tart::device_ptr, const EventPointer& event, const tart::command_sequence_ptr& sequence);
+	const size_t, const size_t, tart::buffer_ptr, const size_t, const size_t,
+	tart::device_ptr, const EventPointer& event, const tart::command_sequence_ptr& sequence);
 template StatusCode PUBLIC_API Syr<half>(const Layout, const Triangle, const size_t, const half, const tart::buffer_ptr,
-																				 const size_t, const size_t, tart::buffer_ptr, const size_t, const size_t,
-																				 tart::device_ptr, const EventPointer& event, const tart::command_sequence_ptr& sequence);
+	const size_t, const size_t, tart::buffer_ptr, const size_t, const size_t,
+	tart::device_ptr, const EventPointer& event, const tart::command_sequence_ptr& sequence);
 
 // Symmetric packed rank-1 matrix update: SSPR/DSPR/HSPR
 template <typename T>

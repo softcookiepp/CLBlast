@@ -182,7 +182,8 @@ void Xsyrk<T>::SyrkAB(const Layout layout, const Triangle triangle, const Transp
 		auto eventProcessA = Event();
 		PadCopyTransposeMatrix(queue_, device_, db_, eventProcessA.pointer(), emptyEventList, a_one, a_two, a_ld, a_offset,
 													 a_buffer, a_one_i, a_two_i, a_one_i, 0, a_temp, ConstantOne<T>(), program_, true,
-													 a_do_transpose, false);
+													 a_do_transpose, false,
+													 false, false, false, workingSequence);
 		//eventWaitList.push_back(eventProcessA);
 		workingSequence->recordBarrier(a_temp());
 	}
@@ -190,7 +191,8 @@ void Xsyrk<T>::SyrkAB(const Layout layout, const Triangle triangle, const Transp
 		auto eventProcessB = Event();
 		PadCopyTransposeMatrix(queue_, device_, db_, eventProcessB.pointer(), emptyEventList, b_one, b_two, b_ld, b_offset,
 													 b_buffer, b_one_i, b_two_i, b_one_i, 0, b_temp, ConstantOne<T>(), program_, true,
-													 b_do_transpose, false);
+													 b_do_transpose, false,
+													 false, false, false, workingSequence);
 		//eventWaitList.push_back(eventProcessB);
 		workingSequence->recordBarrier(b_temp());
 	}
@@ -200,7 +202,8 @@ void Xsyrk<T>::SyrkAB(const Layout layout, const Triangle triangle, const Transp
 	auto eventProcessC = Event();
 	PadCopyTransposeMatrix(queue_, device_, db_, eventProcessC.pointer(), emptyEventList, n, n, c_ld, c_offset, c_buffer,
 												 n_ceiled, n_ceiled, n_ceiled, 0, c_temp, ConstantOne<T>(), program_, true, c_do_transpose,
-												 false);
+												 false,
+												 false, false, false, workingSequence);
 	//eventWaitList.push_back(eventProcessC);
 	workingSequence->recordBarrier(c_temp());
 

@@ -346,7 +346,7 @@ void Tester<T, U>::TestErrorCodes(const StatusCode clblas_status, const StatusCo
 template <typename T, typename U>
 const std::vector<size_t> Tester<T, U>::GetOffsets() const {
   if (full_test_) {
-    return {0, 10};
+    return {0, 10, 7, 11, 13, 23, 29};
   } else {
     return {0};
   }

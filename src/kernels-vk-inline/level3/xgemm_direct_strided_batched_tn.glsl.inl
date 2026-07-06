@@ -20,9 +20,8 @@ R"(
 // =================================================================================================
 
 // literal). Comment-out this line for syntax-highlighting when developing.
-#ifndef XGEMM_DIRECT_PART3_STRIDED_BATCHED_GLSL
-#define XGEMM_DIRECT_PART3_STRIDED_BATCHED_GLSL
-
+#ifndef XGEMM_DIRECT_PART3_GLSL
+#define XGEMM_DIRECT_PART3_GLSL
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
@@ -1242,7 +1241,7 @@ void XgemmDirect(const int kSizeM, const int kSizeN, const int kSizeK, const rea
 
 // Direct version of the strided-batched GEMM kernel with [A, B] = [transposed, non-transposed]
 #if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
+	//layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
 #endif
 layout(push_constant) uniform XgemmDirectStridedBatchedTN
 {

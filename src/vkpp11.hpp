@@ -560,7 +560,7 @@ public:
 	}
 
 	// Synchronizes the queue
-	void Finish(Event&) const { Finish(); }
+	void Finish(Event& event) const { mDevice->sync({event.pointer()}); }
 	void Finish() const { mDevice->sync(); }
 
 	// Retrieves the corresponding context or device

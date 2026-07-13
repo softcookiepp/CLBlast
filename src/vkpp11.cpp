@@ -80,7 +80,7 @@ size_t Platform::NumDevices()
 }
 
 // Accessor to the private data-member
-const RawPlatformID& Platform::operator()() const { return platform_; }
+const size_t& Platform::operator()() const { return platform_; }
 
 
 
@@ -95,7 +95,7 @@ Device::Device(const Platform& platform, const size_t device_id) {
 
 // Methods to retrieve device information
 // (platform id is always 0)
-RawPlatformID Device::PlatformID() const { return 0; }
+size_t Device::PlatformID() const { return 0; }
 std::string Device::Version() const { return "Vulkan 1.2"; } // pretty sure this will work?
 size_t Device::VersionNumber() const {
 	return 120;

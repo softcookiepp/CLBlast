@@ -68,8 +68,8 @@ class Cache {
 
 // The key struct for the cache of compiled OpenCL binaries (device name and platform-dependent)
 // Order of fields: precision, routine_name, device_name (smaller fields first)
-typedef std::tuple<RawPlatformID, Precision, std::string, std::string> BinaryKey;
-typedef std::tuple<const RawPlatformID&, const Precision&, const std::string&, const std::string&> BinaryKeyRef;
+typedef std::tuple<size_t, Precision, std::string, std::string> BinaryKey;
+typedef std::tuple<const size_t&, const Precision&, const std::string&, const std::string&> BinaryKeyRef;
 
 typedef Cache<BinaryKey, std::string> BinaryCache;
 
@@ -94,8 +94,8 @@ class Database;
 
 // The key struct for the cache of database maps.
 // Order of fields: platform_id, device_id, precision, kernel_name (smaller fields first)
-typedef std::tuple<RawPlatformID, RawDeviceID, Precision, std::string> DatabaseKey;
-typedef std::tuple<const RawPlatformID&, const RawDeviceID&, const Precision&, const std::string&> DatabaseKeyRef;
+typedef std::tuple<size_t, RawDeviceID, Precision, std::string> DatabaseKey;
+typedef std::tuple<const size_t&, const RawDeviceID&, const Precision&, const std::string&> DatabaseKeyRef;
 
 typedef Cache<DatabaseKey, Database> DatabaseCache;
 

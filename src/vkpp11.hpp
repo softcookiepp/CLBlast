@@ -125,10 +125,6 @@ public:
 #if 1
 // =================================================================================================
 
-// Raw platform ID type
-// since Vulkan doesn't have platforms like OpenCL does, there will only be a single platform that has all the devices.
-using RawPlatformID = size_t;
-
 // Vulkan doesn't have any direct equivalent to this, just use it to encapsulate device..or maybe instance?
 class Platform {
 	std::shared_ptr<tart::Instance> mInstance = nullptr;
@@ -148,7 +144,7 @@ public:
 	size_t NumDevices();
 
 	// Accessor to the private data-member
-	const RawPlatformID& operator()() const;
+	const size_t& operator()() const;
 
 private:
 	size_t platform_ = 0;
@@ -194,7 +190,7 @@ public:
 
 	// Methods to retrieve device information
 	// (platform id is always 0)
-	RawPlatformID PlatformID() const;
+	size_t PlatformID() const;
 	std::string Version() const;
 	size_t VersionNumber() const;
 

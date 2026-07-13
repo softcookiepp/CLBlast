@@ -194,7 +194,7 @@ void Routine::submitIfNeeded(const tart::command_sequence_ptr& sequence, const t
 	{
 		wait[i] = waitForEvents[i]();
 	}
-	queue_()->submitSequence(workingSequence, wait, signalEvent);
+	queue_()->submitSequence(workingSequence, wait);
 }
 
 // =================================================================================================

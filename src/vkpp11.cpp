@@ -1,35 +1,4 @@
 
-// =================================================================================================
-// This file is part of the CLBlast project. Author(s):
-//	 Cedric Nugteren <www.cedricnugteren.nl>
-//
-// This file implements a bunch of C++11 classes that act as wrappers around OpenCL objects and API
-// calls. The main benefits are increased abstraction, automatic memory management, and portability.
-// Portability here means that a similar header exists for CUDA with the same classes and
-// interfaces. In other words, moving from the OpenCL API to the CUDA API becomes a one-line change.
-//
-// This file is taken from the CLCudaAPI project <https://github.com/CNugteren/CLCudaAPI> and
-// therefore contains the following header copyright notice:
-//
-// =================================================================================================
-//
-// Copyright 2015 SURFsara
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// =================================================================================================
-
-// IWYU pragma: private, include "utilities/backend.hpp"
 
 #ifndef CLBLAST_VKPP11_H_
 #define CLBLAST_VKPP11_H_
@@ -60,7 +29,7 @@
 #define CL_DEMP_DEFS
 #define CL_SUCCESS 0
 #endif
-#include "tart.hpp"
+#include "vkpp11.hpp"
 
 namespace clblast {
 // =================================================================================================

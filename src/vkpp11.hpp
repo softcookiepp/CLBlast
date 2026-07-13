@@ -46,6 +46,7 @@
 #include <vector>		 // std::vector
 #include <map>
 #include <iostream>
+#include <complex> // std::complex<float>, std::complex<double>
 
 
 // Android support (missing C++11 functions to_string, stod, and stoi)
@@ -68,20 +69,10 @@ namespace clblast {
 // Represents a runtime error returned by an OpenCL API function
 class CLCudaAPIError : public ErrorCode<DeviceError, int32_t> {
 public:
-	explicit CLCudaAPIError(int32_t status, const std::string& where)
-			: ErrorCode(status, where, "OpenCL error: " + where + ": " + std::to_string(static_cast<int>(status))) {}
+	explicit CLCudaAPIError(int32_t status, const std::string& where);
+	static void Check(const int32_t status, const std::string& where);
 
-	static void Check(const int32_t status, const std::string& where) {
-		if (status != CL_SUCCESS) {
-			throw CLCudaAPIError(status, where);
-		}
-	}
-
-	static void CheckDtor(const int32_t status, const std::string& where) {
-		if (status != CL_SUCCESS) {
-			fprintf(stderr, "CLBlast: %s (ignoring)\n", CLCudaAPIError(status, where).what());
-		}
-	}
+	static void CheckDtor(const int32_t status, const std::string& where);
 };
 
 // Exception returned when building a program
@@ -110,45 +101,25 @@ class Event {
 public:
 
 	// Constructor based on the regular OpenCL data-type: memory management is handled elsewhere
-	explicit Event(const tart::event_ptr event) { mEvent = event; }
+	explicit Event(const tart::event_ptr event);
 
 	// Regular constructor with memory management
-	explicit Event()
-	{
-		mEvent = std::make_shared<tart::Event>();
-	}
+	explicit Event();
 
 	// Waits for completion of this event
-	void WaitForCompletion() const
-	{
-		if (mEvent && mEvent->isActive()) mEvent->sync();
-	}
+	void WaitForCompletion() const;
 
 	// Retrieves the elapsed time of the last recorded event.
 	// (Note that there is a bug in Apple's OpenCL implementation of the 'clGetEventProfilingInfo' function:
 	//	http://stackoverflow.com/questions/26145603/clgeteventprofilinginfo-bug-in-macosx)
 	// However, in our case the reply size is fixed to be uint64_t, so we are not affected.
-	float GetElapsedTime() const {
-#if 1
-		// not implemented yet :c
-		WaitForCompletion();
-		return 1.0;
-#else
-		WaitForCompletion();
-		const auto bytes = sizeof(uint64_t);
-		auto time_start = uint64_t{0};
-		CheckError(clGetEventProfilingInfo(*event_, CL_PROFILING_COMMAND_START, bytes, &time_start, nullptr));
-		auto time_end = uint64_t{0};
-		CheckError(clGetEventProfilingInfo(*event_, CL_PROFILING_COMMAND_END, bytes, &time_end, nullptr));
-		return static_cast<float>(time_end - time_start) * 1.0e-6f;
-#endif
-	}
+	float GetElapsedTime() const;
 
 	// Accessor to the private data-member
-	tart::event_ptr operator()() { return mEvent; }
-	const tart::event_ptr operator()() const { return mEvent; }
-	tart::event_ptr  pointer() { return mEvent; }
-	const tart::event_ptr pointer() const { return mEvent; }
+	tart::event_ptr operator()();
+	const tart::event_ptr operator()() const;
+	tart::event_ptr  pointer();
+	const tart::event_ptr pointer() const;
 };
 
 #if 1
@@ -163,47 +134,24 @@ class Platform {
 	std::shared_ptr<tart::Instance> mInstance = nullptr;
 public:
 	// Initializes the platform
-	explicit Platform(const size_t platform_id)
-	{
-		// there can only be one, this is Vulkan c:
-		if (platform_id != 0) throw LogicError("Vulkan back-end requires a platform ID of 0");
-		mInstance = std::make_shared<tart::Instance>();
-	}
+	explicit Platform(const size_t platform_id);
 
 	// Methods to retrieve platform information
-	std::string Name() const {
-#if 1
-		return "not implemented";
-#else
-		return GetInfoString(CL_PLATFORM_NAME);
-#endif
-	}
-	std::string Vendor() const { return "not implemented"; }
-	std::string Version() const { return "not implemented"; }
+	std::string Name() const;
+	std::string Vendor() const;
+	std::string Version() const;
 	
 	// returns the tart::Instance
-	tart::Instance& getInstance() const
-	{
-		return *mInstance;
-	}
+	tart::Instance& getInstance() const;
 
 	// Returns the number of devices on this platform
-	size_t NumDevices()
-	{
-		return static_cast<size_t>(getInstance().getNumDevices());
-	}
+	size_t NumDevices();
 
 	// Accessor to the private data-member
-	const RawPlatformID& operator()() const { return platform_; }
+	const RawPlatformID& operator()() const;
 
 private:
 	size_t platform_ = 0;
-
-	// Private helper functions
-	std::string GetInfoString(const size_t info) const {
-		// no idea what this is supposed to do; we find out L A T E R
-		return "not implemented";
-	}
 };
 #endif
 
@@ -239,197 +187,76 @@ class Device {
 	tart::device_ptr mDevice;
 public:
 	// Constructor based on the regular thingy
-	explicit Device(const tart::device_ptr device) : mDevice(device) {}
+	explicit Device(const tart::device_ptr device);
 
 	// Initialize the device. Note that this constructor can throw exceptions!
-	explicit Device(const Platform& platform, const size_t device_id) {
-		// Use the global instance by default (this will mostly just be used for testing afaik)
-		mDevice = platform.getInstance().getDevice(device_id);
-	}
+	explicit Device(const Platform& platform, const size_t device_id);
 
 	// Methods to retrieve device information
 	// (platform id is always 0)
-	RawPlatformID PlatformID() const { return 0; }
-	std::string Version() const { return "Vulkan 1.2"; } // pretty sure this will work?
-	size_t VersionNumber() const {
-		return 120;
-	}
-	// TODO: implement some of this stuff in tart
-	std::string Vendor() const
-	{
-		switch(mDevice->getMetadata().physicalDeviceProperties.vendorID)
-		{
-		case tart::VendorID::eNVIDIA:
-			return "NVIDIA";
-		case tart::VendorID::eAMD:
-			return "AMD";
-		case tart::VendorID::eIntel:
-			return "INTEL";
-		default:
-			return "Unknown vendor";
-		}
-	}
-	std::string Name() const { return "device name not implemented"; }
-	std::string Type() const { return "GPU"; } // everything is a GPU when it comes to Vulkan! (for the most part)
-	size_t MaxWorkGroupSize() const { return 1000000; } // straight-up no idea how to even go about doing this. in Vulkan, each dimension can be different.
-	size_t MaxWorkItemDimensions() const { return 3; } // it is always 3 in vulkan
-	std::vector<size_t> MaxWorkItemSizes() const { return {1000000, 1000000, 1000000}; } // TODO: implement in Tart
-	unsigned long LocalMemSize() const
-	{
-#if 1
-		// TODO: actually implement in Tart
-		return 0;
-#else
-		return static_cast<unsigned long>(GetInfo<uint64_t>(CL_DEVICE_LOCAL_MEM_SIZE));
-#endif
-	}
+	RawPlatformID PlatformID() const;
+	std::string Version() const;
+	size_t VersionNumber() const;
+
+	std::string Vendor() const;
+	std::string Name() const;
+	std::string Type() const;
+	size_t MaxWorkGroupSize() const;
+	size_t MaxWorkItemDimensions() const;
+	std::vector<size_t> MaxWorkItemSizes() const;
+	unsigned long LocalMemSize() const;
 
 	// Not sure if Tart has a public method for querying extensions; might be a good idea to implement this.
-	std::string Capabilities() const { return "not implemented"; }
-	bool HasExtension(const std::string& extension) const
-	{
-		// yeah, this doesn't work..
-		return false;//return mDevice->supportsExtension(extension);
-	}
+	std::string Capabilities() const;
+	bool HasExtension(const std::string& extension) const;
 	
 	// Tart already has this
-	bool SupportsFP64() const { return mDevice->getMetadata().double_; }
-	bool SupportsFP16() const { return mDevice->getMetadata().half_; }
+	bool SupportsFP64() const;
+	bool SupportsFP16() const;
 	// Vulkan does not allow you to do this
-	size_t CoreClock() const { return 0; }
+	size_t CoreClock() const;
 	// or this either.
-	size_t ComputeUnits() const { return 0; }
+	size_t ComputeUnits() const;
 	
 	// Vulkan has a way to do this, but I have been too lazy to implement it completely in Tart aside from error checking.
 	// Will have to do this eventually
-	unsigned long MemorySize() const { return 0; }
+	unsigned long MemorySize() const;
 	// this can be retrieved from Tart, but may not be public
-	unsigned long MaxAllocSize() const {
-		return 0;
-	}
+	unsigned long MaxAllocSize() const;
 	
 	// neither of these can be queried in Vulkan either
-	size_t MemoryClock() const { return 0; }		 // Not exposed in OpenCL
-	size_t MemoryBusWidth() const { return 0; }	// Not exposed in OpenCL
+	size_t MemoryClock() const;
+	size_t MemoryBusWidth() const;
 
 	// Configuration-validity checks
-	bool IsLocalMemoryValid(const uint64_t local_mem_usage) const
-	{
-#if 1
-		// not yet implemented
-		return true;
-#else
-		return (local_mem_usage <= LocalMemSize());
-#endif
-	}
-	bool IsThreadConfigValid(const std::vector<size_t>& local) const {
-#if 1
-#else
-		auto local_size = size_t{1};
-		for (const auto& item : local) {
-			local_size *= item;
-		}
-		for (auto i = size_t{0}; i < local.size(); ++i) {
-			if (local[i] > MaxWorkItemSizes()[i]) {
-				return false;
-			}
-		}
-		if (local_size > MaxWorkGroupSize()) {
-			return false;
-		}
-		if (local.size() > MaxWorkItemDimensions()) {
-			return false;
-		}
-		return true;
-#endif
-	}
+	bool IsLocalMemoryValid(const uint64_t local_mem_usage) const;
+	bool IsThreadConfigValid(const std::vector<size_t>& local) const;
 
 	// Query for a specific type of device or brand
-	bool IsCPU() const { return Type() == "CPU"; }
-	bool IsGPU() const { return Type() == "GPU"; }
-	bool IsAMD() const
-	{
-		return Vendor() == "AMD";
-	}
-	bool IsNVIDIA() const
-	{
-		// ugh, stupid assumptions about subgroup this and that...
-		return false;
-		//return Vendor() == "NVIDIA";
-	}
-	bool IsIntel() const
-	{
-		return Vendor() == "INTEL";
-	}
-	bool IsARM() const
-	{
-		return Vendor() == "ARM";
-	}
-	bool IsQualcomm() const
-	{
-		return Vendor() == "Qualcomm";
-	}
+	bool IsCPU() const;
+	bool IsGPU() const;
+	bool IsAMD() const;
+	bool IsNVIDIA() const;
+	bool IsIntel() const;
+	bool IsARM() const;
+	bool IsQualcomm() const;
 
 	// Platform specific extensions
-	std::string AMDBoardName() const
-	{
-		return "not implemented";
-	}
-	std::string NVIDIAComputeCapability() const {	// check for 'cl_nv_device_attribute_query' first
-		// dummy
-		return "SM3.7";
-	}
+	std::string AMDBoardName() const;
+	std::string NVIDIAComputeCapability() const;
 
 	// Returns if the Nvidia chip is a Volta or later archicture (sm_70 or higher)
-	bool IsPostNVIDIAVolta() const
-	{
-		return false;
-	}
+	bool IsPostNVIDIAVolta() const;
 
 	// Returns the Qualcomm Adreno GPU version (i.e. a650, a730, a740, etc.)
-	std::string AdrenoVersion() const
-	{
-		return "not implemented";
-	}
+	std::string AdrenoVersion() const;
 
 	// Retrieves the above extra information (if present)
-	std::string GetExtraInfo() const
-	{
-		return "not implemented";
-	}
+	std::string GetExtraInfo() const;
 
 	// Accessor to the private data-member
-	const RawDeviceID operator()() const { return mDevice; }
+	const RawDeviceID operator()() const;
 	
-private:
-#if 0
-	// Private helper functions
-	template <typename T>
-	T GetInfo(const size_t info) const {
-		auto bytes = size_t{0};
-		CheckError(clGetDeviceInfo(device_, info, 0, nullptr, &bytes));
-		auto result = T(0);
-		CheckError(clGetDeviceInfo(device_, info, bytes, &result, nullptr));
-		return result;
-	}
-	template <typename T>
-	std::vector<T> GetInfoVector(const size_t info) const {
-		auto bytes = size_t{0};
-		CheckError(clGetDeviceInfo(device_, info, 0, nullptr, &bytes));
-		auto result = std::vector<T>(bytes / sizeof(T));
-		CheckError(clGetDeviceInfo(device_, info, bytes, result.data(), nullptr));
-		return result;
-	}
-	std::string GetInfoString(const size_t info) const {
-		auto bytes = size_t{0};
-		CheckError(clGetDeviceInfo(device_, info, 0, nullptr, &bytes));
-		auto result = std::string{};
-		result.resize(bytes);
-		CheckError(clGetDeviceInfo(device_, info, bytes, &result[0], nullptr));
-		result.resize(strlen(result.c_str()));	// Removes any trailing '\0'-characters
-		return result;
-	}
-#endif
 };
 #endif
 // =================================================================================================
@@ -446,20 +273,14 @@ class Context {
 
 public:
 	// Constructor based on tart::device_ptr
-	explicit Context(tart::device_ptr context) { mDevice = context; }
+	explicit Context(tart::device_ptr context);
 
 	// Regular constructor with memory management
-	explicit Context(const Device& device)
-	{
-		mDevice = device();
-	}
+	explicit Context(const Device& device);
 
 	// Accessor to the private data-member
-	const RawContext operator()() const { return mDevice; }
-	RawContext pointer() const { return mDevice; }
-
-//private:
-	//std::shared_ptr<cl_context> context_;
+	const RawContext operator()() const;
+	RawContext pointer() const;
 };
 #endif
 #if 1
@@ -476,65 +297,32 @@ class Program {
 	//tart::cl_program_ptr mCLProgram = nullptr;
 public:
 	// Source-based constructor with memory management
-	explicit Program(const clblast::Context& context, const std::string& source)
-	{
-		mSource = source;
-		mDevice = context.pointer();
-	}
+	explicit Program(const clblast::Context& context, const std::string& source);
 	
 	// constructor for GLSL shaders
 	// requires multiple shader sources because each file can only have one entry point :c
-	explicit Program(const clblast::Context& context, std::map<std::string, std::string>& kernelSources):
-		mDevice(context.pointer())
-	{
-		mProgramContainer = std::make_shared<tart::Program>(context.pointer(), kernelSources);
-	}
+	explicit Program(const clblast::Context& context, std::map<std::string, std::string>& kernelSources);
 
 	// Binary-based constructor with memory management
-	explicit Program(const clblast::Device& device, const clblast::Context& context, std::string& binary) {
-		mDevice = context.pointer();
-		
-		std::cout << "BINARY STRING:\n\n" << binary << "\n\n\n";
-		throw LogicError("Construction from string not implement yet; may need to reinterpret as spv or something");
-		
-		//mShaderModule = mDevice->loadShader(binary);
-		//mCLProgram = mDevice->createCLProgram(mShaderModule);
-	}
+	explicit Program(const clblast::Device& device, const clblast::Context& context, std::string& binary);
 
 	// Compiles the device program and checks whether or not there are any warnings/errors
-	void Build(const clblast::Device& device, const clblast::Context& context, std::vector<std::string>& options) {
-		Build(device, options);
-	}
+	void Build(const clblast::Device& device, const clblast::Context& context, std::vector<std::string>& options);
 	
 	// Compiles the device program and checks whether or not there are any warnings/errors
-	void Build(const clblast::Device& device, std::vector<std::string>& options) {
-		// if program container already here, don't bother
-		if (mProgramContainer) return;
-		throw std::runtime_error("who knows lool");
-		// TODO: parse options (look for dflags, etc.)
-		// compile the shader module
-		// mShaderModule = mDevice->compileCL(mSource);
-		// load it into the actual CL program handler thingy
-		// mProgramContainer = std::make_shared<tart::Program>(mDevice, mDevice->createCLProgram(mShaderModule));
-		//mCLProgram = mDevice->createCLProgram(mShaderModule);
-	}
+	void Build(const clblast::Device& device, std::vector<std::string>& options);
 
 	// Confirms whether a certain status code is an actual compilation error or warning
-	bool StatusIsCompilationWarningOrError(const int32_t status) const { return (status == -11); }
+	bool StatusIsCompilationWarningOrError(const int32_t status) const;
 
 	// Retrieves the warning/error message from the compiler (if any)
-	std::string GetBuildInfo(const clblast::Device& device) const {
-		return "not implemented yet :c";
-	}
+	std::string GetBuildInfo(const clblast::Device& device) const;
 
 	// Retrieves a binary or an intermediate representation of the compiled program
-	std::string GetIR() const {
-		// TODO: somehow convert the SPIR-V into a string?
-		return "not implemented yet :c";
-	}
+	std::string GetIR() const;
 
 	// Accessor to the private data-member
-	std::shared_ptr<tart::Program> operator()() const { return mProgramContainer; }
+	std::shared_ptr<tart::Program> operator()() const;
 };
 #endif
 
@@ -543,7 +331,7 @@ public:
 // since each device only has a single compute queue
 // Raw command-queue type
 using RawCommandQueue = tart::device_ptr;
-#if 1
+
 // no idea how to handle this, since Tart uses a single queue
 // pretty sure I will just end up scrapping it, since tart::Device handles all this already (actually I can't)
 // C++11 version of 'cl_command_queue'
@@ -551,30 +339,23 @@ class Queue {
 	tart::device_ptr mDevice = nullptr;
 public:
 	// Constructor based on the regular OpenCL data-type: memory management is handled elsewhere
-	explicit Queue(const tart::device_ptr queue) { mDevice = queue; }
+	explicit Queue(const tart::device_ptr queue);
 
 	// Regular constructor with memory management
-	explicit Queue(const Context& context, const Device& device)
-	{
-		mDevice = context.pointer();
-	}
+	explicit Queue(const Context& context, const Device& device);
 
 	// Synchronizes the queue
-	void Finish(Event& event) const { mDevice->sync({event.pointer()}); }
-	void Finish() const { mDevice->sync(); }
+	void Finish(Event& event) const;
+	void Finish() const;
 
 	// Retrieves the corresponding context or device
-	Context GetContext() const {
-		return Context(mDevice);
-	}
-	Device GetDevice() const {
-		return Device(mDevice);
-	}
+	Context GetContext() const;
+	Device GetDevice() const;
 
 	// Accessor to the private data-member
-	const RawCommandQueue& operator()() const { return mDevice; }
+	const RawCommandQueue& operator()() const;
 };
-#endif
+
 // =================================================================================================
 #if 1
 // C++11 version of host memory
@@ -614,24 +395,18 @@ class Buffer {
 public:
 
 	// Constructor based on the regular OpenCL data-type: memory management is handled elsewhere
-	explicit Buffer(const tart::buffer_ptr buffer) : access_(BufferAccess::kNotOwned) { buffer_ = buffer; }
+	explicit Buffer(const tart::buffer_ptr buffer);
 
 	// Regular constructor with memory management. If this class does not own the buffer object, then
 	// the memory will not be freed automatically afterwards. If the size is set to 0, this will
 	// become a stub containing a nullptr
-	explicit Buffer(const Context& context, const BufferAccess access, const size_t size) :
-				access_(access)
-	{
-		if (size == 0)
-			buffer_ = nullptr;
-		else
-			buffer_ = context.pointer()->allocateBuffer(size*sizeof(T));
-	}
+	explicit Buffer(const Context& context, const BufferAccess access, const size_t size);
 
 	// As above, but now with read/write access as a default
-	explicit Buffer(const Context& context, const size_t size) : Buffer<T>(context, BufferAccess::kReadWrite, size) {}
+	explicit Buffer(const Context& context, const size_t size);
 
 	// Constructs a new buffer based on an existing host-container
+	// Keep this in the header, since keeping track of what Iterator is used will be a pain
 	template <typename Iterator>
 	explicit Buffer(const Context& context, const Queue& queue, Iterator start, Iterator end)
 			: Buffer(context, BufferAccess::kReadWrite, static_cast<size_t>(end - start))
@@ -644,95 +419,35 @@ public:
 
 	// Copies from device to host: reading the device buffer a-synchronously
 	// (this is currently impossible in tart, so it will just sync for now)
-	void ReadAsync(const Queue& queue, const size_t size, T* host, const size_t offset = 0) const
-	{
-		if (access_ == BufferAccess::kWriteOnly)
-		{
-			throw LogicError("Buffer: reading from a write-only buffer");
-		}
-		
-		if (offset > 0) throw LogicError("not implemented");
-		buffer_->copyOut(host, size*sizeof(T), offset*sizeof(T));
-	}
-	void ReadAsync(const Queue& queue, const size_t size, std::vector<T>& host, const size_t offset = 0) const
-	{
-		if (host.size() < size) {
-			throw LogicError("Buffer: target host buffer is too small");
-		}
-		ReadAsync(queue, size, host.data(), offset);
-	}
-	void ReadAsync(const Queue& queue, const size_t size, BufferHost<T>& host, const size_t offset = 0) const {
-		if (host.size() < size) {
-			throw LogicError("Buffer: target host buffer is too small");
-		}
-		ReadAsync(queue, size, host.data(), offset);
-	}
+	void ReadAsync(const Queue& queue, const size_t size, T* host, const size_t offset = 0) const;
+	void ReadAsync(const Queue& queue, const size_t size, std::vector<T>& host, const size_t offset = 0) const;
+	void ReadAsync(const Queue& queue, const size_t size, BufferHost<T>& host, const size_t offset = 0) const;
 
 	// Copies from device to host: reading the device buffer
-	void Read(const Queue& queue, const size_t size, T* host, const size_t offset = 0) const {
-		ReadAsync(queue, size, host, offset);
-		queue.Finish();
-	}
-	void Read(const Queue& queue, const size_t size, std::vector<T>& host, const size_t offset = 0) const {
-		Read(queue, size, host.data(), offset);
-	}
-	void Read(const Queue& queue, const size_t size, BufferHost<T>& host, const size_t offset = 0) const {
-		Read(queue, size, host.data(), offset);
-	}
+	void Read(const Queue& queue, const size_t size, T* host, const size_t offset = 0) const;
+	void Read(const Queue& queue, const size_t size, std::vector<T>& host, const size_t offset = 0) const;
+	void Read(const Queue& queue, const size_t size, BufferHost<T>& host, const size_t offset = 0) const;
 
 	// Copies from host to device: writing the device buffer a-synchronously
-	void WriteAsync(const Queue& queue, const size_t size, const T* host, const size_t offset = 0) {
-		if (access_ == BufferAccess::kReadOnly) {
-			throw LogicError("Buffer: writing to a read-only buffer");
-		}
-		if (GetSize() < (offset + size) * sizeof(T)) {
-			throw LogicError("Buffer: target device buffer is too small");
-		}
-		if (offset > 0) throw LogicError("offsets greater than zero are not implemented :c");
-		const void* hostbufVoid = host;
-		void* hostptr = const_cast<void*>(hostbufVoid);
-		buffer_->copyIn(hostptr, size*sizeof(T), offset*sizeof(T));
-		//CheckError(clEnqueueWriteBuffer(queue(), *buffer_, CL_FALSE, offset * sizeof(T), size * sizeof(T), host, 0, nullptr,
-		//																nullptr));
-	}
-	void WriteAsync(const Queue& queue, const size_t size, const std::vector<T>& host, const size_t offset = 0) {
-		WriteAsync(queue, size, host.data(), offset);
-	}
-	void WriteAsync(const Queue& queue, const size_t size, const BufferHost<T>& host, const size_t offset = 0) {
-		WriteAsync(queue, size, host.data(), offset);
-	}
+	void WriteAsync(const Queue& queue, const size_t size, const T* host, const size_t offset = 0);
+	void WriteAsync(const Queue& queue, const size_t size, const std::vector<T>& host, const size_t offset = 0);
+	void WriteAsync(const Queue& queue, const size_t size, const BufferHost<T>& host, const size_t offset = 0);
 
 	// Copies from host to device: writing the device buffer
-	void Write(const Queue& queue, const size_t size, const T* host, const size_t offset = 0) {
-		WriteAsync(queue, size, host, offset);
-		queue.Finish();
-	}
-	void Write(const Queue& queue, const size_t size, const std::vector<T>& host, const size_t offset = 0) {
-		Write(queue, size, host.data(), offset);
-	}
-	void Write(const Queue& queue, const size_t size, const BufferHost<T>& host, const size_t offset = 0) {
-		Write(queue, size, host.data(), offset);
-	}
+	void Write(const Queue& queue, const size_t size, const T* host, const size_t offset = 0);
+	void Write(const Queue& queue, const size_t size, const std::vector<T>& host, const size_t offset = 0);
+	void Write(const Queue& queue, const size_t size, const BufferHost<T>& host, const size_t offset = 0);
 
 	// Copies the contents of this buffer into another device buffer
 	void CopyToAsync(const Queue& queue, const size_t size, const Buffer<T>& destination,
-									 EventPointer event = nullptr) const {
-		if (event != nullptr) throw LogicError("copying with events is not implemented yet");
-		buffer_->copyTo(destination(), 0, 0, size*sizeof(T));
-		//CheckError(clEnqueueCopyBuffer(queue(), *buffer_, destination(), 0, 0, size * sizeof(T), 0, nullptr, event));
-	}
-	void CopyTo(const Queue& queue, const size_t size, const Buffer<T>& destination) const {
-		CopyToAsync(queue, size, destination);
-		queue.Finish();
-	}
+									 EventPointer event = nullptr) const;
+	void CopyTo(const Queue& queue, const size_t size, const Buffer<T>& destination) const ;
 
 	// Retrieves the actual allocated size in bytes
-	size_t GetSize() const {
-		return buffer_->getSize();
-	}
+	size_t GetSize() const;
 
 	// Accessor to the private data-member
-	tart::buffer_ptr operator()() const { return buffer_; }
+	tart::buffer_ptr operator()() const;
 
 
 private:
@@ -758,22 +473,11 @@ class Kernel {
 	kernel_t kernel_;
 public:
 	// difference between Vulkan and OpenCL as far as local sizes go will influence this outcome greatly...
-	explicit Kernel(const kernel_t kernel) { kernel_ = kernel; }
-	explicit Kernel(tart::program_ptr prg) { std::string ep = "none"; kernel_ = {ep, prg}; }
+	explicit Kernel(const kernel_t kernel);
+	explicit Kernel(tart::program_ptr prg);
 	
 	// Regular constructor with memory management
-	explicit Kernel(const std::shared_ptr<Program> program, const std::string& name)
-	{
-		// this will be a bit different.
-		// OpenCL allows kernels to be created that accept a variable local size.
-		// Vulkan allows pipelines to be created where the entry point is specified,
-		// but a fixed local size is used.
-		// tart::CLProgram takes care of this, but it must be adapted to this library
-		mEntryPoint = name;
-		mProgramContainer = program->operator()();
-		mDevice = mProgramContainer->getDevice();
-		mKernel = mProgramContainer->getKernel(mEntryPoint);
-	}
+	explicit Kernel(const std::shared_ptr<Program> program, const std::string& name);
 
 	// Sets a kernel argument at the indicated position
 	template <typename T>
@@ -789,66 +493,17 @@ public:
 	}
 
 	// Retrieves the amount of local memory used per work-group for this kernel
-	unsigned long LocalMemUsage(const Device& device) const {
-#if 1
-		// It doesn't seem that Vulkan has a direct equivalent to this.
-		// More investigation will have to be done.
-		// It will likely have something to with SPIR-V reflection...
-		return 0;
-#else
-		const auto bytes = sizeof(uint64_t);
-		auto query = kernel_t_work_group_info{CL_KERNEL_LOCAL_MEM_SIZE};
-		auto result = uint64_t{0};
-		CheckError(clGetKernelWorkGroupInfo(*kernel_, device(), query, bytes, &result, nullptr));
-		return static_cast<unsigned long>(result);
-#endif
-	}
+	unsigned long LocalMemUsage(const Device& device) const;
 
 	// Retrieves the name of the kernel
-	std::string GetFunctionName() const {
-		return mEntryPoint;
-	}
+	std::string GetFunctionName() const;
 
 	// As above, but with an event waiting list
 	void Launch(const Queue& queue, const std::vector<size_t>& global, const std::vector<size_t>& local,
-							EventPointer event, const std::vector<Event>& waitForEvents = {}, const tart::command_sequence_ptr& sequence = nullptr)
-	{
-		if (global.size() != local.size() ) throw LogicError("local and global size must be same length");
-		std::vector<uint32_t> adjusted_global(global.size());
-		for (size_t i = 0; i < global.size(); i += 1 )
-		{
-			if (global[i] % local[i] > 0) throw LogicError("global size must be divisible by local size");
-			adjusted_global[i] = global[i] / local[i];
-		}
-		
-		// convert local to uint32_t
-		std::vector<uint32_t> local32(local.size());
-		for (size_t i = 0; i < local.size(); i += 1)
-		{
-			local32[i] = local[i];
-		}
-		// ensure size is correct
-		local32.resize(mKernel->getSpecConstantSize()/sizeof(uint32_t));
-		
-		if (sequence)
-		{
-			// record to sequence and submit later
-			mKernel->record(sequence, adjusted_global, local32);
-		}
-		else
-		{
-			std::vector<tart::event_ptr> wait(waitForEvents.size(), nullptr);
-			for (size_t i = 0; i < waitForEvents.size(); i += 1)
-			{
-				wait[i] = waitForEvents[i].pointer();
-			}
-			
-			mKernel->enqueue(adjusted_global, local32, wait);
-		}
-	}
+							EventPointer event, const std::vector<Event>& waitForEvents = {}, const tart::command_sequence_ptr& sequence = nullptr);
 
 	// Accessor to the private data-member
-	const kernel_t& operator()() const { return kernel_; }
+	const kernel_t& operator()() const;
 
 private:
 	// Internal implementation for the recursive SetArguments function.

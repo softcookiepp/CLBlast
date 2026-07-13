@@ -83,7 +83,7 @@ elseif(VULKAN)
 	message("-- Building CLBlast with VULKAN API (cover your butts)")
 	add_definitions(-DVULKAN_API)
 	if (VULKAN_BDA)
-	add_definitions(-DVULKAN_USE_BDA)
+		add_definitions(-DVULKAN_USE_BDA)
 	endif()
 endif()
 
@@ -277,6 +277,7 @@ set(SOURCES
 	src/routine.cpp
 	src/routines/levelx/xinvert.cpp	# only source, don't include it as a test
 	src/tuning/configurations.cpp
+	src/vkpp11.cpp
 )
 set(HEADERS	# such that they can be discovered by IDEs such as CLion and Visual Studio
 	include/clblast_half.h
@@ -478,7 +479,8 @@ if(TUNERS)
 	set(ALLKERNELS ${KERNELS})
 	foreach(KERNEL ${ALLKERNELS})
 		add_executable(clblast_tuner_${KERNEL} ${TUNERS_COMMON} src/tuning/kernels/${KERNEL}.cpp)
-		target_link_libraries(clblast_tuner_${KERNEL} ${API_LIBRARIES})
+		#target_link_libraries(clblast_tuner_${KERNEL} ${API_LIBRARIES})
+		target_link_libraries(clblast_tuner_${KERNEL} clblast)
 		target_include_directories(clblast_tuner_${KERNEL} PUBLIC $<TARGET_PROPERTY:clblast,INTERFACE_INCLUDE_DIRECTORIES> ${API_INCLUDE_DIRS})
 		if(VULKAN)
 		target_include_directories(clblast_tuner_${KERNEL} PUBLIC $<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES>)
@@ -487,7 +489,7 @@ if(TUNERS)
 	endforeach()
 	if(OPENCL)
 		foreach(ROUTINE_TUNER ${ROUTINE_TUNERS})
-			add_executable(clblast_tuner_routine_${ROUTINE_TUNER} ${TUNERS_COMMON} src/tuning/routines/${ROUTINE_TUNER}.cpp test/test_utilities.cpp)
+			add_executable(clblast_tuner_routine_${ROUTINE_TUNER} ${TUNERS_COMMON} src/tuning/routines/${ROUTINE_TUNER}.cpp test/test_utilities.cpp DEPENDS clblast)
 			target_link_libraries(clblast_tuner_routine_${ROUTINE_TUNER} clblast)
 			target_include_directories(clblast_tuner_routine_${ROUTINE_TUNER} PUBLIC $<TARGET_PROPERTY:clblast,INTERFACE_INCLUDE_DIRECTORIES> ${API_INCLUDE_DIRS} ${clblast_SOURCE_DIR})
 			install(TARGETS clblast_tuner_routine_${ROUTINE_TUNER} DESTINATION bin)
@@ -511,6 +513,7 @@ if(TUNERS)
 			set(ALLTUNERSDEPENDS clblast_tuner_routine_${ROUTINE_TUNER})
 		endforeach()
 	endif()
+	set(ALLTUNERSDEPENDS ${ALLTUNERSDEPENDS} clblast)
 	add_custom_target(alltuners ${ALLTUNERS} DEPENDS ${ALLTUNERSDEPENDS})
 
 endif()

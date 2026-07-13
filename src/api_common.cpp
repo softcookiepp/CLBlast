@@ -142,7 +142,7 @@ StatusCode RetrieveParameters(const RawDeviceID device, const std::string& kerne
   try {
     // Retrieves the device name
     const auto device_cpp = Device(device);
-    const auto platform_id = device_cpp.PlatformID();
+    const auto platform_id = 0;//device_cpp.PlatformID();
     const auto device_name = GetDeviceName(device_cpp);
 
     // Retrieves the database values
@@ -171,7 +171,7 @@ StatusCode OverrideParameters(const RawDeviceID device, const std::string& kerne
   try {
     // Retrieves the device name
     const auto device_cpp = Device(device);
-    const auto platform_id = device_cpp.PlatformID();
+    const auto platform_id = 0;//device_cpp.PlatformID();
     const auto device_name = GetDeviceName(device_cpp);
 
     // Retrieves the current database values to verify whether the new ones are complete

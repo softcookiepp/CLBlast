@@ -29,7 +29,7 @@ class Xomatcopy : public Routine {
   // Templated-precision implementation of the routine
   void DoOmatcopy(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const T alpha,
                   const Buffer<T>& a_buffer, const size_t a_offset, const size_t a_ld, const Buffer<T>& b_buffer,
-                  const size_t b_offset, const size_t b_ld, const tart::command_sequence_ptr& sequence);
+                  const size_t b_offset, const size_t b_ld);
 };
 
 // =================================================================================================

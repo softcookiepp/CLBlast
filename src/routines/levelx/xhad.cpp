@@ -53,7 +53,7 @@ Xhad<T>::Xhad(Queue& queue, EventPointer event, const std::string& name)
 template <typename T>
 void Xhad<T>::DoHad(const size_t n, const T alpha, const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc,
 										const Buffer<T>& y_buffer, const size_t y_offset, const size_t y_inc, const T beta,
-										const Buffer<T>& z_buffer, const size_t z_offset, const size_t z_inc, const tart::command_sequence_ptr& sequence)
+										const Buffer<T>& z_buffer, const size_t z_offset, const size_t z_inc)
 {
 	// Makes sure all dimensions are larger than zero
 	if (n == 0) {

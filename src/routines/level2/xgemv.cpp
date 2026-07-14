@@ -69,10 +69,10 @@ template <typename T>
 void Xgemv<T>::DoGemv(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const T alpha,
 											const Buffer<T>& a_buffer, const size_t a_offset, const size_t a_ld, const Buffer<T>& x_buffer,
 											const size_t x_offset, const size_t x_inc, const T beta, const Buffer<T>& y_buffer,
-											const size_t y_offset, const size_t y_inc, const tart::command_sequence_ptr& sequence) {
+											const size_t y_offset, const size_t y_inc) {
 	// Performs the matrix-vector multiplication
 	MatVec(layout, a_transpose, m, n, alpha, a_buffer, a_offset, a_ld, x_buffer, x_offset, x_inc, beta, y_buffer,
-				 y_offset, y_inc, true, true, 0, false, 0, 0, sequence);	// N/A for this routine
+				 y_offset, y_inc, true, true, 0, false, 0, 0);	// N/A for this routine
 }
 
 // =================================================================================================
@@ -83,7 +83,7 @@ void Xgemv<T>::MatVec(const Layout layout, const Transpose a_transpose, const si
 											const Buffer<T>& a_buffer, const size_t a_offset, const size_t a_ld, const Buffer<T>& x_buffer,
 											const size_t x_offset, const size_t x_inc, const T beta, const Buffer<T>& y_buffer,
 											const size_t y_offset, const size_t y_inc, bool fast_kernel, bool fast_kernel_rot,
-											const size_t parameter, const bool packed, const size_t kl, const size_t ku, const tart::command_sequence_ptr& sequence) {
+											const size_t parameter, const bool packed, const size_t kl, const size_t ku) {
 	// Makes sure all dimensions are larger than zero
 	if (m == 0 || n == 0) {
 		throw BLASError(StatusCode::kInvalidDimension);
@@ -196,7 +196,7 @@ void Xgemv<T>::MatVec(const Layout layout, const Transpose a_transpose, const si
 	// Launches the kernel
 	auto global = std::vector<size_t>{global_size};
 	auto local = std::vector<size_t>{local_size};
-	RunKernel(kernel, queue_, device_, global, local, event_, {}, sequence);
+	RunKernel(kernel, queue_, device_, global, local, event_, {});
 }
 
 // =================================================================================================

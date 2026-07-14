@@ -30,7 +30,7 @@ Xtpmv<T>::Xtpmv(Queue& queue, EventPointer event, const std::string& name) : Xge
 template <typename T>
 void Xtpmv<T>::DoTpmv(const Layout layout, const Triangle triangle, const Transpose a_transpose,
                       const Diagonal diagonal, const size_t n, const Buffer<T>& ap_buffer, const size_t ap_offset,
-                      const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc, const tart::command_sequence_ptr& sequence) {
+                      const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc) {
   // Creates a copy of X: a temporary scratch buffer
   const auto x_size = (1 + (n - 1) * x_inc) + x_offset;
   auto scratch_buffer = Buffer<T>(context_, x_size);
@@ -49,7 +49,7 @@ void Xtpmv<T>::DoTpmv(const Layout layout, const Triangle triangle, const Transp
   auto fast_kernels = false;
   try {
     MatVec(layout, a_transpose, n, n, ConstantOne<T>(), ap_buffer, ap_offset, n, scratch_buffer, x_offset, x_inc,
-           ConstantZero<T>(), x_buffer, x_offset, x_inc, fast_kernels, fast_kernels, parameter, true, 0, 0, sequence);
+           ConstantZero<T>(), x_buffer, x_offset, x_inc, fast_kernels, fast_kernels, parameter, true, 0, 0);
   } catch (BLASError& e) {
     // Returns the proper error code (renames vector Y to X)
     switch (e.status()) {

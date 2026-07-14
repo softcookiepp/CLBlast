@@ -28,7 +28,7 @@ class Xinvert : public Routine {
   // Inverts diagonal square blocks of a matrix
   void InvertMatrixDiagonalBlocks(const Layout layout, const Triangle triangle, const Diagonal diag, const size_t n,
                                   const size_t block_size, const Buffer<T>& src, const size_t offset,
-                                  const size_t ld_src, Buffer<T>& dest, const tart::command_sequence_ptr& sequence);
+                                  const size_t ld_src, Buffer<T>& dest);
 };
 
 // =================================================================================================

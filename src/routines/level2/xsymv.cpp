@@ -30,7 +30,7 @@ template <typename T>
 void Xsymv<T>::DoSymv(const Layout layout, const Triangle triangle, const size_t n, const T alpha,
 											const Buffer<T>& a_buffer, const size_t a_offset, const size_t a_ld, const Buffer<T>& x_buffer,
 											const size_t x_offset, const size_t x_inc, const T beta, const Buffer<T>& y_buffer,
-											const size_t y_offset, const size_t y_inc, const tart::command_sequence_ptr& sequence) {
+											const size_t y_offset, const size_t y_inc) {
 	// The data is either in the upper or lower triangle
 	size_t is_upper = ((triangle == Triangle::kUpper && layout != Layout::kRowMajor) ||
 										 (triangle == Triangle::kLower && layout == Layout::kRowMajor));
@@ -40,7 +40,7 @@ void Xsymv<T>::DoSymv(const Layout layout, const Triangle triangle, const size_t
 	// ROUTINE_SYMV define.
 	bool fast_kernels = false;
 	MatVec(layout, Transpose::kNo, n, n, alpha, a_buffer, a_offset, a_ld, x_buffer, x_offset, x_inc, beta, y_buffer,
-				 y_offset, y_inc, fast_kernels, fast_kernels, is_upper, false, 0, 0, sequence);
+				 y_offset, y_inc, fast_kernels, fast_kernels, is_upper, false, 0, 0);
 }
 
 // =================================================================================================

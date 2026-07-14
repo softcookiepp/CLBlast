@@ -84,11 +84,6 @@ class Routine {
 	
 #if VULKAN_API
 	std::vector<std::string> mEntryPointNames;
-	
-	// submit if sequence was not provided; otherwise, do nothing
-	tart::command_sequence_ptr getWorkingSequence(const tart::command_sequence_ptr& sequence);
-	void submitIfNeeded(const tart::command_sequence_ptr& sequence, const tart::command_sequence_ptr& workingSequence,
-		const std::vector<Event>& waitForEvents, const tart::event_ptr& signalEvent);
 #endif
 };
 

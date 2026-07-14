@@ -30,7 +30,7 @@ template <typename T>
 void Xhpmv<T>::DoHpmv(const Layout layout, const Triangle triangle, const size_t n, const T alpha,
 											const Buffer<T>& ap_buffer, const size_t ap_offset, const Buffer<T>& x_buffer,
 											const size_t x_offset, const size_t x_inc, const T beta, const Buffer<T>& y_buffer,
-											const size_t y_offset, const size_t y_inc, const tart::command_sequence_ptr& sequence) {
+											const size_t y_offset, const size_t y_inc) {
 	// The data is either in the upper or lower triangle
 	size_t is_upper = ((triangle == Triangle::kUpper && layout != Layout::kRowMajor) ||
 										 (triangle == Triangle::kLower && layout == Layout::kRowMajor));
@@ -40,7 +40,7 @@ void Xhpmv<T>::DoHpmv(const Layout layout, const Triangle triangle, const size_t
 	// ROUTINE_HPMV define.
 	bool fast_kernels = false;
 	MatVec(layout, Transpose::kNo, n, n, alpha, ap_buffer, ap_offset, n, x_buffer, x_offset, x_inc, beta, y_buffer,
-				 y_offset, y_inc, fast_kernels, fast_kernels, is_upper, true, 0, 0, sequence);
+				 y_offset, y_inc, fast_kernels, fast_kernels, is_upper, true, 0, 0);
 }
 
 // =================================================================================================

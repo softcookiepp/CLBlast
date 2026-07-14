@@ -36,7 +36,7 @@ class Xconvgemm : public Routine {
                   const size_t stride_h, const size_t stride_w, const size_t dilation_h, const size_t dilation_w,
                   const size_t num_kernels, const size_t batch_count, const Buffer<T>& im_buffer,
                   const size_t im_offset, const Buffer<T>& kernel_buffer, const size_t kernel_offset,
-                  const Buffer<T>& result_buffer, const size_t result_offset, const tart::command_sequence_ptr& sequence);
+                  const Buffer<T>& result_buffer, const size_t result_offset);
 
  private:
   const ConvGemmMethod method_;

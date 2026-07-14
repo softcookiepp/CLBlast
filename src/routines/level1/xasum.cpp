@@ -48,7 +48,7 @@ Xasum<T>::Xasum(Queue& queue, EventPointer event, const std::string& name)
 // The main routine
 template <typename T>
 void Xasum<T>::DoAsum(const size_t n, const Buffer<T>& asum_buffer, const size_t asum_offset, const Buffer<T>& x_buffer,
-											const size_t x_offset, const size_t x_inc, const tart::command_sequence_ptr& sequence)
+											const size_t x_offset, const size_t x_inc)
 {
 	// Makes sure all dimensions are larger than zero
 	if (n == 0) {
@@ -68,7 +68,7 @@ void Xasum<T>::DoAsum(const size_t n, const Buffer<T>& asum_buffer, const size_t
 	auto temp_buffer = Buffer<T>(context_, temp_size);
 	
 	// get working sequence
-	tart::command_sequence_ptr workingSequence = getWorkingSequence(sequence);
+	
 
 	// Sets the kernel arguments
 #if VULKAN_USE_BDA
@@ -103,7 +103,7 @@ void Xasum<T>::DoAsum(const size_t n, const Buffer<T>& asum_buffer, const size_t
 	kernel1.SetArgument(6, static_cast<int>(global1[0]/local1[0]));
 
 	auto kernelEvent = Event();
-	RunKernel(kernel1, queue_, device_, global1, local1, kernelEvent.pointer(), {}, workingSequence);
+	RunKernel(kernel1, queue_, device_, global1, local1, kernelEvent.pointer(), {});
 	//eventWaitList.push_back(kernelEvent);
 
 	// Sets the arguments for the epilogue kernel
@@ -128,9 +128,9 @@ void Xasum<T>::DoAsum(const size_t n, const Buffer<T>& asum_buffer, const size_t
 	// Launches the epilogue kernel
 	auto global2 = std::vector<size_t>{db_["WGS2"]};
 	auto local2 = std::vector<size_t>{db_["WGS2"]};
-	RunKernel(kernel2, queue_, device_, global2, local2, event_, eventWaitList, workingSequence);
+	RunKernel(kernel2, queue_, device_, global2, local2, event_, eventWaitList);
 	
-	submitIfNeeded(sequence, workingSequence, eventWaitList, event_);
+	
 }
 
 // =================================================================================================

@@ -178,25 +178,6 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 																 std::shared_ptr<Program>{program_});
 }
 
-tart::command_sequence_ptr
-Routine::getWorkingSequence(const tart::command_sequence_ptr& sequence)
-{
-	if(sequence) return sequence;
-	return queue_()->createSequence();
-}
-
-void Routine::submitIfNeeded(const tart::command_sequence_ptr& sequence, const tart::command_sequence_ptr& workingSequence,
-		const std::vector<Event>& waitForEvents, const tart::event_ptr& signalEvent)
-{
-	if(sequence) return;
-	std::vector<tart::event_ptr> wait(waitForEvents.size(), nullptr);
-	for (size_t i = 0; i < waitForEvents.size(); i += 1)
-	{
-		wait[i] = waitForEvents[i]();
-	}
-	queue_()->submitSequence(workingSequence, wait);
-}
-
 void Routine::InitDatabase(const Device& device, const std::vector<std::string>& kernel_names,
 	const Precision precision, const std::vector<database::DatabaseEntry>& userDatabase, Databases& db)
 {

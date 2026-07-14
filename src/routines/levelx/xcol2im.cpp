@@ -50,7 +50,7 @@ void Xcol2im<T>::DoCol2im(const KernelMode kernel_mode, const size_t channels, c
                           const size_t kernel_h, const size_t kernel_w, const size_t pad_h, const size_t pad_w,
                           const size_t stride_h, const size_t stride_w, const size_t dilation_h,
                           const size_t dilation_w, const Buffer<T>& col_buffer, const size_t col_offset,
-                          const Buffer<T>& im_buffer, const size_t im_offset, const tart::command_sequence_ptr& sequence)
+                          const Buffer<T>& im_buffer, const size_t im_offset)
 {
   // Flip the output along kernel_h and kernel_w, or not.
   const auto kernel_name = (kernel_mode == KernelMode::kConvolution) ? "Xcol2imKernelFlip" : "Xcol2imKernelNormal";

@@ -32,7 +32,7 @@ class Xdotu : public Xdot<T> {
   // Templated-precision implementation of the routine
   void DoDotu(const size_t n, const Buffer<T>& dot_buffer, const size_t dot_offset, const Buffer<T>& x_buffer,
               const size_t x_offset, const size_t x_inc, const Buffer<T>& y_buffer, const size_t y_offset,
-              const size_t y_inc, const tart::command_sequence_ptr& sequence);
+              const size_t y_inc);
 };
 
 // =================================================================================================

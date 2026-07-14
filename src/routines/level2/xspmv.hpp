@@ -34,7 +34,7 @@ class Xspmv : public Xgemv<T> {
   // Templated-precision implementation of the routine
   void DoSpmv(const Layout layout, const Triangle triangle, const size_t n, const T alpha, const Buffer<T>& ap_buffer,
               const size_t ap_offset, const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc,
-              const T beta, const Buffer<T>& y_buffer, const size_t y_offset, const size_t y_inc, const tart::command_sequence_ptr& sequence);
+              const T beta, const Buffer<T>& y_buffer, const size_t y_offset, const size_t y_inc);
 };
 
 // =================================================================================================

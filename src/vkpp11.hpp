@@ -496,7 +496,7 @@ public:
 
 	// As above, but with an event waiting list
 	void Launch(const Queue& queue, const std::vector<size_t>& global, const std::vector<size_t>& local,
-							EventPointer event, const std::vector<Event>& waitForEvents = {}, const tart::command_sequence_ptr& sequence = nullptr);
+							EventPointer event, const std::vector<Event>& waitForEvents = {});
 
 	// Accessor to the private data-member
 	const kernel_t& operator()() const;

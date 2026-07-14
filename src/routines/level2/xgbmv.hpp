@@ -35,7 +35,7 @@ class Xgbmv : public Xgemv<T> {
   void DoGbmv(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const size_t kl,
               const size_t ku, const T alpha, const Buffer<T>& a_buffer, const size_t a_offset, const size_t a_ld,
               const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc, const T beta,
-              const Buffer<T>& y_buffer, const size_t y_offset, const size_t y_inc, const tart::command_sequence_ptr& sequence);
+              const Buffer<T>& y_buffer, const size_t y_offset, const size_t y_inc);
 };
 
 // =================================================================================================

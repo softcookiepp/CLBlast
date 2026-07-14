@@ -30,29 +30,27 @@ template <typename T>
 void Xsyr2k<T>::DoSyr2k(const Layout layout, const Triangle triangle, const Transpose ab_transpose, const size_t n,
 												const size_t k, const T alpha, const Buffer<T>& a_buffer, const size_t a_offset,
 												const size_t a_ld, const Buffer<T>& b_buffer, const size_t b_offset, const size_t b_ld,
-												const T beta, const Buffer<T>& c_buffer, const size_t c_offset, const size_t c_ld, const tart::command_sequence_ptr& sequence)
+												const T beta, const Buffer<T>& c_buffer, const size_t c_offset, const size_t c_ld)
 {
-	auto workingSequence = this->getWorkingSequence(sequence);
+	
 	
 	// Runs the first matrix multiplication
 	auto first_syrk_event = Event();
 	const auto negated_ab_transpose = (ab_transpose != Transpose::kNo) ? Transpose::kNo : Transpose::kYes;
 	SyrkAB(layout, triangle, ab_transpose, negated_ab_transpose, n, k, alpha, a_buffer, a_offset, a_ld, b_buffer,
-				 b_offset, b_ld, beta, c_buffer, c_offset, c_ld, first_syrk_event.pointer(), workingSequence);
+				 b_offset, b_ld, beta, c_buffer, c_offset, c_ld, first_syrk_event.pointer());
 	
 	//first_syrk_event.WaitForCompletion();
 	// I have no idea which buffers actually need a barrier as of now. Will look closer after tests pass
-	workingSequence->recordBarrier(a_buffer());
-	workingSequence->recordBarrier(b_buffer());
-	workingSequence->recordBarrier(c_buffer());
+	this->device_()->enqueueBarrier({a_buffer(), b_buffer(), c_buffer()});
 	
 	
 	// Swaps the arguments for matrices A and B, and sets 'beta' to 1
 	auto one = ConstantOne<T>();
 	SyrkAB(layout, triangle, ab_transpose, negated_ab_transpose, n, k, alpha, b_buffer, b_offset, b_ld, a_buffer,
-				 a_offset, a_ld, one, c_buffer, c_offset, c_ld, event_, workingSequence);
+				 a_offset, a_ld, one, c_buffer, c_offset, c_ld, event_);
 	
-	this->submitIfNeeded(sequence, workingSequence, {}, event_);
+	
 }
 
 // =================================================================================================

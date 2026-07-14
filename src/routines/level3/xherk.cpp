@@ -111,7 +111,7 @@ template <typename T, typename U>
 void Xherk<T, U>::DoHerk(const Layout layout, const Triangle triangle, const Transpose a_transpose, const size_t n,
 												 const size_t k, const U alpha, const Buffer<T>& a_buffer, const size_t a_offset,
 												 const size_t a_ld, const U beta, const Buffer<T>& c_buffer, const size_t c_offset,
-												 const size_t c_ld, const tart::command_sequence_ptr& sequence) {
+												 const size_t c_ld) {
 	const auto b_transpose = (a_transpose != Transpose::kNo) ? Transpose::kNo : Transpose::kYes;
 	const auto& b_buffer = a_buffer;
 	const auto b_offset = a_offset;
@@ -119,7 +119,7 @@ void Xherk<T, U>::DoHerk(const Layout layout, const Triangle triangle, const Tra
 	const auto complex_alpha = T{alpha, static_cast<U>(0.0)};
 	const auto complex_beta = T{beta, static_cast<U>(0.0)};
 	HerkAB(layout, triangle, a_transpose, b_transpose, n, k, complex_alpha, a_buffer, a_offset, a_ld, b_buffer, b_offset,
-				 b_ld, complex_beta, c_buffer, c_offset, c_ld, event_, true, sequence);
+				 b_ld, complex_beta, c_buffer, c_offset, c_ld, event_, true);
 }
 
 template <typename T, typename U>
@@ -128,7 +128,7 @@ void Xherk<T, U>::HerkAB(const Layout layout, const Triangle triangle, const Tra
 	const Buffer<T>& a_buffer, const size_t a_offset, const size_t a_ld, const Buffer<T>& b_buffer,
 	const size_t b_offset, const size_t b_ld, const T complex_beta, const Buffer<T>& c_buffer,
 	const size_t c_offset, const size_t c_ld, EventPointer final_event,
-	const bool diagonal_to_zero, const tart::command_sequence_ptr& sequence)
+	const bool diagonal_to_zero)
 {
 	// Computes the transpose/conjugate options and sets the a/b/c sizes based on that
 	bool a_do_transpose, b_do_transpose, c_do_transpose, dummy1, dummy2;
@@ -180,30 +180,31 @@ void Xherk<T, U>::HerkAB(const Layout layout, const Triangle triangle, const Tra
 	auto eventWaitList = std::vector<Event>();
 	auto emptyEventList = std::vector<Event>();
 	
-	auto workingSequence = this->getWorkingSequence(sequence);
+	
 
 	// Runs the pre-processing kernel for matrix A. This transposes the matrix, but also pads zeros
 	// to fill it up until it reaches a certain multiple of size (kernel parameter dependent). In
 	// case nothing has to be done, these kernels can be skipped. Two copies are created.
+	std::vector<tart::buffer_ptr> barrierBuffers({c_buffer(), c_temp()});
 	if (!a_no_temp) {
 		auto eventProcessA = Event();
 		PadCopyTransposeMatrix(queue_, device_, db_, eventProcessA.pointer(), emptyEventList, a_one, a_two, a_ld, a_offset,
 													 a_buffer, a_one_i, a_two_i, a_one_i, 0, a_temp, ConstantOne<T>(), program_, true,
 													 a_do_transpose, a_conjugate,
-													 false, false, false, workingSequence);
+													 false, false, false);
 		//eventWaitList.push_back(eventProcessA);
-		workingSequence->recordBarrier(a_buffer());
-		workingSequence->recordBarrier(a_temp());
+		barrierBuffers.push_back(a_buffer());
+		barrierBuffers.push_back(a_temp());
 	}
 	if (!b_no_temp) {
 		auto eventProcessB = Event();
 		PadCopyTransposeMatrix(queue_, device_, db_, eventProcessB.pointer(), emptyEventList, b_one, b_two, b_ld, b_offset,
 													 b_buffer, b_one_i, b_two_i, b_one_i, 0, b_temp, ConstantOne<T>(), program_, true,
 													 b_do_transpose, b_conjugate,
-													 false, false, false, workingSequence);
+													 false, false, false);
 		//eventWaitList.push_back(eventProcessB);
-		workingSequence->recordBarrier(b_buffer());
-		workingSequence->recordBarrier(b_temp());
+		barrierBuffers.push_back(b_buffer());
+		barrierBuffers.push_back(b_temp());
 	}
 
 	// Furthermore, also creates a (possibly padded) copy of matrix C, since it is not allowed to
@@ -212,10 +213,9 @@ void Xherk<T, U>::HerkAB(const Layout layout, const Triangle triangle, const Tra
 	PadCopyTransposeMatrix(queue_, device_, db_, eventProcessC.pointer(), emptyEventList, n, n, c_ld, c_offset, c_buffer,
 												 n_ceiled, n_ceiled, n_ceiled, 0, c_temp, ConstantOne<T>(), program_, true, c_do_transpose,
 												 false,
-												 false, false, false, workingSequence);
-	//eventWaitList.push_back(eventProcessC);
-	workingSequence->recordBarrier(c_buffer());
-	workingSequence->recordBarrier(c_temp());
+												 false, false, false);
+	// now we can just use a single barrier for them all!
+	device_()->enqueueBarrier(barrierBuffers);
 
 	// Retrieves the XgemmUpper or XgemmLower kernel from the compiled binary
 	auto kernel = Kernel(program_, kernel_name);
@@ -235,11 +235,8 @@ void Xherk<T, U>::HerkAB(const Layout layout, const Triangle triangle, const Tra
 
 	// Launches the kernel
 	auto eventKernel = Event();
-	RunKernel(kernel, queue_, device_, global, local, eventKernel.pointer(), eventWaitList, workingSequence);
-	//eventWaitList.push_back(eventKernel);
-	workingSequence->recordBarrier(a_temp());
-	workingSequence->recordBarrier(b_temp());
-	workingSequence->recordBarrier(c_temp());
+	RunKernel(kernel, queue_, device_, global, local, eventKernel.pointer(), eventWaitList);
+	device_()->enqueueBarrier( {a_temp(), b_temp(), c_temp()} );
 
 	// Runs the post-processing kernel
 	const auto upper =
@@ -247,9 +244,8 @@ void Xherk<T, U>::HerkAB(const Layout layout, const Triangle triangle, const Tra
 	const auto lower = !upper;
 	PadCopyTransposeMatrix(queue_, device_, db_, final_event, eventWaitList, n_ceiled, n_ceiled, n_ceiled, 0, c_temp, n,
 												 n, c_ld, c_offset, c_buffer, ConstantOne<T>(), program_, false, c_do_transpose, false, upper,
-												 lower, diagonal_to_zero, workingSequence);
+												 lower, diagonal_to_zero);
 	
-	this->submitIfNeeded(sequence, workingSequence, {}, final_event);
 }
 
 // =================================================================================================

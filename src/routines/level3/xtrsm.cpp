@@ -40,7 +40,7 @@ template <typename T>
 void Xtrsm<T>::DoTrsm(const Layout layout, Side side, Triangle triangle, const Transpose a_transpose,
 											const Diagonal diagonal, size_t m, size_t n, const T alpha, const Buffer<T>& a_buffer,
 											const size_t a_offset, const size_t a_ld, const Buffer<T>& b_buffer, const size_t b_offset,
-											const size_t b_ld, const tart::command_sequence_ptr& sequence) {
+											const size_t b_ld) {
 	// Converts row-major to a col-major problem:
 	// The idea is that
 	//	 B = A*X
@@ -56,7 +56,7 @@ void Xtrsm<T>::DoTrsm(const Layout layout, Side side, Triangle triangle, const T
 	}
 
 	// Runs the col-major version of TRSM
-	TrsmColMajor(side, triangle, a_transpose, diagonal, m, n, alpha, a_buffer, a_offset, a_ld, b_buffer, b_offset, b_ld, sequence);
+	TrsmColMajor(side, triangle, a_transpose, diagonal, m, n, alpha, a_buffer, a_offset, a_ld, b_buffer, b_offset, b_ld);
 }
 
 // =================================================================================================
@@ -66,7 +66,7 @@ template <typename T>
 void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Transpose a_transpose,
 														const Diagonal diagonal, const size_t m, const size_t n, const T alpha,
 														const Buffer<T>& a_buffer, const size_t a_offset, const size_t a_ld,
-														const Buffer<T>& b_buffer, const size_t b_offset, const size_t b_ld, const tart::command_sequence_ptr& sequence) {
+														const Buffer<T>& b_buffer, const size_t b_offset, const size_t b_ld) {
 	// Settings
 	constexpr auto block_size = size_t{16};	// tuneable
 
@@ -91,7 +91,7 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 	TestMatrixB(m, n, b_buffer, b_offset, b_ld);
 	
 	// get the sequence if applicable
-	tart::command_sequence_ptr workingSequence = this->getWorkingSequence(sequence);
+	
 
 	// Creates a copy of B to avoid overwriting input in GEMM while computing output
 	const auto b_size = b_ld * (n - 1) + m + b_offset;
@@ -103,8 +103,8 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 	auto x_buffer = Buffer<T>(context_, x_size);
 	
 	// this will be faster, and compatible with the sequence-based API
-	workingSequence->recordCopyBuffer(x_buffer(), b_buffer(), 0, 0, x_size*sizeof(T));
-	workingSequence->recordBarrier(x_buffer());
+	device_()->enqueueCopyBuffer(x_buffer(), b_buffer(), 0, 0, x_size*sizeof(T));
+	device_()->enqueueBarrier({x_buffer()});
 	//b_buffer.CopyTo(queue_, x_size, x_buffer);
 
 	// Temporary buffer for the inverse of the A matrix
@@ -115,17 +115,17 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 	auto eventWaitList = std::vector<Event>();
 	auto fill_matrix_event = Event();
 	FillMatrix(queue_, device_, program_, fill_matrix_event.pointer(), eventWaitList, x_one, x_two, x_ld, x_offset,
-						 x_buffer, ConstantZero<T>(), 16, workingSequence);
+						 x_buffer, ConstantZero<T>(), 16);
 	//fill_matrix_event.WaitForCompletion();
-	workingSequence->recordBarrier(x_buffer());
+	device_()->enqueueBarrier({x_buffer()});
 
 	// Inverts the diagonal blocks
 	auto diagonal_invert_event = Event();
 	auto inverter = Xinvert<T>(queue_, diagonal_invert_event.pointer());
 	inverter.InvertMatrixDiagonalBlocks(Layout::kColMajor, triangle, diagonal, k, block_size, a_buffer, a_offset, a_ld,
-																			a_inv_buffer, workingSequence);
+																			a_inv_buffer);
 	//diagonal_invert_event.WaitForCompletion();
-	workingSequence->recordBarrier(a_inv_buffer());
+	device_()->enqueueBarrier({a_inv_buffer()});
 
 	// Derives properties based on the arguments
 	const auto condition = ((triangle == Triangle::kUpper && a_transpose != Transpose::kNo) ||
@@ -142,9 +142,9 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 				auto gemm1 = Xgemm<T>(queue_, gemm1_event.pointer());
 				gemm1.DoGemm(Layout::kColMajor, a_transpose, Transpose::kNo, current_block_size, n, current_block_size,
 										 gemm_alpha, a_inv_buffer, i * block_size, block_size, b_buffer, b_offset + i, b_ld,
-										 ConstantZero<T>(), x_buffer, x_offset + i, x_ld, Buffer<T>(0), false, workingSequence);
+										 ConstantZero<T>(), x_buffer, x_offset + i, x_ld, Buffer<T>(0), false);
 				//gemm1_event.WaitForCompletion();
-				workingSequence->recordBarrier(x_buffer());
+				device_()->enqueueBarrier({x_buffer()});
 				if (i + block_size >= m) {
 					break;
 				}
@@ -155,9 +155,9 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 				auto gemm2 = Xgemm<T>(queue_, gemm2_event.pointer());
 				gemm2.DoGemm(Layout::kColMajor, a_transpose, Transpose::kNo, m - i - block_size, n, block_size,
 										 ConstantNegOne<T>(), a_buffer, this_a_offset + a_offset, a_ld, x_buffer, x_offset + i, x_ld,
-										 gemm_alpha, b_buffer, b_offset + i + block_size, b_ld, Buffer<T>(0), false, workingSequence);
+										 gemm_alpha, b_buffer, b_offset + i + block_size, b_ld, Buffer<T>(0), false);
 				//gemm2_event.WaitForCompletion();
-				workingSequence->recordBarrier(b_buffer());
+				device_()->enqueueBarrier({b_buffer()});
 			}
 		}
 
@@ -172,9 +172,9 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 				auto gemm1 = Xgemm<T>(queue_, gemm1_event.pointer());
 				gemm1.DoGemm(Layout::kColMajor, a_transpose, Transpose::kNo, current_block_size, n, current_block_size,
 										 gemm_alpha, a_inv_buffer, i * block_size, block_size, b_buffer, b_offset + i, b_ld,
-										 ConstantZero<T>(), x_buffer, x_offset + i, x_ld, Buffer<T>(0), false, workingSequence);
+										 ConstantZero<T>(), x_buffer, x_offset + i, x_ld, Buffer<T>(0), false);
 				//gemm1_event.WaitForCompletion();
-				workingSequence->recordBarrier(x_buffer());
+				device_()->enqueueBarrier({x_buffer()});
 				if (i - static_cast<int>(block_size) < 0) {
 					break;
 				}
@@ -184,9 +184,9 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 				auto gemm2 = Xgemm<T>(queue_, gemm2_event.pointer());
 				gemm2.DoGemm(Layout::kColMajor, a_transpose, Transpose::kNo, i, n, current_block_size, ConstantNegOne<T>(),
 										 a_buffer, this_a_offset + a_offset, a_ld, x_buffer, x_offset + i, x_ld, gemm_alpha, b_buffer,
-										 b_offset, b_ld, Buffer<T>(0), false, workingSequence);
+										 b_offset, b_ld, Buffer<T>(0), false);
 				//gemm2_event.WaitForCompletion();
-				workingSequence->recordBarrier(b_buffer());
+				device_()->enqueueBarrier({b_buffer()});
 			}
 		}
 	}
@@ -204,9 +204,9 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 				auto gemm1 = Xgemm<T>(queue_, gemm1_event.pointer());
 				gemm1.DoGemm(Layout::kColMajor, Transpose::kNo, a_transpose, m, current_block_size, current_block_size,
 										 gemm_alpha, b_buffer, b_offset + i * b_ld, b_ld, a_inv_buffer, i * block_size, block_size,
-										 ConstantZero<T>(), x_buffer, x_offset + i * x_ld, x_ld, Buffer<T>(0), false, workingSequence);
+										 ConstantZero<T>(), x_buffer, x_offset + i * x_ld, x_ld, Buffer<T>(0), false);
 				//gemm1_event.WaitForCompletion();
-				workingSequence->recordBarrier(x_buffer());
+				device_()->enqueueBarrier({x_buffer()});
 				if (i - static_cast<int>(block_size) < 0) {
 					break;
 				}
@@ -216,9 +216,9 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 				auto gemm2 = Xgemm<T>(queue_, gemm2_event.pointer());
 				gemm2.DoGemm(Layout::kColMajor, Transpose::kNo, a_transpose, m, i, current_block_size, ConstantNegOne<T>(),
 										 x_buffer, x_offset + i * x_ld, x_ld, a_buffer, this_a_offset + a_offset, a_ld, gemm_alpha,
-										 b_buffer, b_offset, b_ld, Buffer<T>(0), false, workingSequence);
+										 b_buffer, b_offset, b_ld, Buffer<T>(0), false);
 				//gemm2_event.WaitForCompletion();
-				workingSequence->recordBarrier(b_buffer());
+				device_()->enqueueBarrier({b_buffer()});
 			}
 		}
 
@@ -231,9 +231,9 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 				auto gemm1 = Xgemm<T>(queue_, gemm1_event.pointer());
 				gemm1.DoGemm(Layout::kColMajor, Transpose::kNo, a_transpose, m, current_block_size, current_block_size,
 										 gemm_alpha, b_buffer, b_offset + i * b_ld, b_ld, a_inv_buffer, i * block_size, block_size,
-										 ConstantZero<T>(), x_buffer, x_offset + i * x_ld, x_ld, Buffer<T>(0), false, workingSequence);
+										 ConstantZero<T>(), x_buffer, x_offset + i * x_ld, x_ld, Buffer<T>(0), false);
 				//gemm1_event.WaitForCompletion();
-				workingSequence->recordBarrier(x_buffer());
+				device_()->enqueueBarrier({x_buffer()});
 				if (i + block_size >= n) {
 					break;
 				}
@@ -244,17 +244,17 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 				auto gemm2 = Xgemm<T>(queue_, gemm2_event.pointer());
 				gemm2.DoGemm(Layout::kColMajor, Transpose::kNo, a_transpose, m, n - i - block_size, block_size,
 										 ConstantNegOne<T>(), x_buffer, x_offset + i * x_ld, x_ld, a_buffer, this_a_offset + a_offset, a_ld,
-										 gemm_alpha, b_buffer, b_offset + (i + block_size) * b_ld, b_ld, Buffer<T>(0), false, workingSequence);
+										 gemm_alpha, b_buffer, b_offset + (i + block_size) * b_ld, b_ld, Buffer<T>(0), false);
 				//gemm2_event.WaitForCompletion();
-				workingSequence->recordBarrier(b_buffer());
+				device_()->enqueueBarrier({b_buffer()});
 			}
 		}
 	}
 
 	// Retrieves the results
 	//x_buffer.CopyToAsync(queue_, b_size, b_buffer, event_);
-	workingSequence->recordCopyBuffer(b_buffer(), x_buffer(), 0, 0, b_size*sizeof(T));
-	this->submitIfNeeded(sequence, workingSequence, {}, event_);
+	device_()->enqueueCopyBuffer(b_buffer(), x_buffer(), 0, 0, b_size*sizeof(T));
+	
 }
 
 // =================================================================================================

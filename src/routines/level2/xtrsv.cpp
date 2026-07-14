@@ -34,7 +34,7 @@ template <typename T>
 void Xtrsv<T>::Substitution(const Layout layout, const Triangle triangle, const Transpose a_transpose,
 	const Diagonal diagonal, const size_t n, const Buffer<T>& a_buffer, const size_t a_offset,
 	const size_t a_ld, const Buffer<T>& b_buffer, const size_t b_offset, const size_t b_inc,
-	const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc, EventPointer event, const tart::command_sequence_ptr& sequence)
+	const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc, EventPointer event)
 {
 	if (n > db_["TRSV_BLOCK_SIZE"]) {
 		throw BLASError(StatusCode::kUnexpectedError);
@@ -74,7 +74,7 @@ void Xtrsv<T>::Substitution(const Layout layout, const Triangle triangle, const 
 	// Launches the kernel
 	const auto local = std::vector<size_t>{db_["TRSV_BLOCK_SIZE"]};
 	const auto global = std::vector<size_t>{Ceil(n, db_["TRSV_BLOCK_SIZE"])};
-	RunKernel(kernel, queue_, device_, global, local, event, {}, sequence);
+	RunKernel(kernel, queue_, device_, global, local, event, {});
 }
 
 // =================================================================================================
@@ -83,7 +83,7 @@ void Xtrsv<T>::Substitution(const Layout layout, const Triangle triangle, const 
 template <typename T>
 void Xtrsv<T>::DoTrsv(const Layout layout, const Triangle triangle, const Transpose a_transpose,
 	const Diagonal diagonal, const size_t n, const Buffer<T>& a_buffer, const size_t a_offset,
-	const size_t a_ld, const Buffer<T>& b_buffer, const size_t b_offset, const size_t b_inc, const tart::command_sequence_ptr& sequence)
+	const size_t a_ld, const Buffer<T>& b_buffer, const size_t b_offset, const size_t b_inc)
 {
 	// Makes sure all dimensions are larger than zero
 	if (n == 0) {
@@ -99,7 +99,7 @@ void Xtrsv<T>::DoTrsv(const Layout layout, const Triangle triangle, const Transp
 	TestMatrixA(n, n, a_buffer, a_offset, a_ld);
 	TestVectorX(n, b_buffer, b_offset, b_inc);
 	
-	tart::command_sequence_ptr workingSequence = this->getWorkingSequence(sequence);
+	
 
 	// Creates a copy of B to avoid overwriting input while computing output
 	// TODO: Make x with 0 offset and unit increment by creating custom copy-to and copy-from kernels
@@ -108,15 +108,15 @@ void Xtrsv<T>::DoTrsv(const Layout layout, const Triangle triangle, const Transp
 	const auto x_size = (1 + (n - 1) * x_inc) + x_offset;
 	auto x_buffer = Buffer<T>(context_, x_size);
 	//b_buffer.CopyTo(queue_, x_size, x_buffer);
-	workingSequence->recordCopyBuffer(x_buffer(), b_buffer(), 0, 0, x_size*sizeof(T));
-	workingSequence->recordBarrier(x_buffer());
+	device_()->enqueueCopyBuffer(x_buffer(), b_buffer(), 0, 0, x_size*sizeof(T));
+	device_()->enqueueBarrier({x_buffer()});
 
 	// Fills the output buffer with zeros
 	auto eventWaitList = std::vector<Event>();
 	auto fill_vector_event = Event();
 	FillVector(queue_, device_, program_, fill_vector_event.pointer(), eventWaitList, n, x_inc, x_offset, x_buffer,
-						 ConstantZero<T>(), 16, workingSequence);
-	workingSequence->recordBarrier(x_buffer());
+						 ConstantZero<T>(), 16);
+	device_()->enqueueBarrier({x_buffer()});
 	//fill_vector_event.WaitForCompletion();
 
 	// Derives properties based on the arguments
@@ -147,26 +147,20 @@ void Xtrsv<T>::DoTrsv(const Layout layout, const Triangle triangle, const Transp
 			auto gemv = Xgemv<T>(queue_, gemv_event.pointer());
 			gemv.DoGemv(layout, a_transpose, gemv_m, gemv_n, ConstantOne<T>(), a_buffer, a_offset + extra_offset_a, a_ld,
 									x_buffer, x_offset + extra_offset_x, x_inc, ConstantOne<T>(), x_buffer, x_offset + extra_offset_b,
-									x_inc, workingSequence);
-			workingSequence->recordBarrier(x_buffer());
-			workingSequence->recordBarrier(a_buffer());
-			//gemv_event.WaitForCompletion();
+									x_inc);
+			device_()->enqueueBarrier({x_buffer(), a_buffer()});
 		}
 
 		// Runs the triangular substitution for the block size
 		auto sub_event = Event();
 		Substitution(layout, triangle, a_transpose, diagonal, block_size, a_buffer, a_offset + col + col * a_ld, a_ld,
-								 b_buffer, b_offset + col * b_inc, b_inc, x_buffer, x_offset + col * x_inc, x_inc, sub_event.pointer(), workingSequence);
+								 b_buffer, b_offset + col * b_inc, b_inc, x_buffer, x_offset + col * x_inc, x_inc, sub_event.pointer());
 		//sub_event.WaitForCompletion();
-		workingSequence->recordBarrier(x_buffer());
-		workingSequence->recordBarrier(b_buffer());
-		workingSequence->recordBarrier(a_buffer());
+		device_()->enqueueBarrier( {x_buffer(), b_buffer(), a_buffer()} );
 	}
 
 	// Retrieves the results
-	workingSequence->recordCopyBuffer(b_buffer(), x_buffer(), 0, 0, x_size*sizeof(T));
-	//x_buffer.CopyToAsync(queue_, x_size, b_buffer, event_);
-	this->submitIfNeeded(sequence, workingSequence, {}, event_);
+	device_()->enqueueCopyBuffer(b_buffer(), x_buffer(), 0, 0, x_size*sizeof(T));
 }
 
 // =================================================================================================

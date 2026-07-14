@@ -30,8 +30,7 @@ class XaxpyBatched : public Routine {
   // Templated-precision implementation of the routine
   void DoAxpyBatched(const size_t n, const std::vector<T>& alphas, const Buffer<T>& x_buffer,
                      const std::vector<size_t>& x_offsets, const size_t x_inc, const Buffer<T>& y_buffer,
-                     const std::vector<size_t>& y_offsets, const size_t y_inc, const size_t batch_count,
-                     const tart::command_sequence_ptr& sequence);
+                     const std::vector<size_t>& y_offsets, const size_t y_inc, const size_t batch_count);
 };
 
 // =================================================================================================

@@ -32,7 +32,7 @@ class Xcol2im : public Routine {
                 const size_t kernel_h, const size_t kernel_w, const size_t pad_h, const size_t pad_w,
                 const size_t stride_h, const size_t stride_w, const size_t dilation_h, const size_t dilation_w,
                 const Buffer<T>& col_buffer, const size_t col_offset, const Buffer<T>& im_buffer,
-                const size_t im_offset, const tart::command_sequence_ptr& sequence);
+                const size_t im_offset);
 };
 
 // =================================================================================================

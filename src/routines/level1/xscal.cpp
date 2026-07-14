@@ -50,7 +50,7 @@ Xscal<T>::Xscal(Queue& queue, EventPointer event, const std::string& name)
 // The main routine
 template <typename T>
 void Xscal<T>::DoScal(const size_t n, const T alpha, const Buffer<T>& x_buffer, const size_t x_offset,
-											const size_t x_inc, const tart::command_sequence_ptr& sequence)
+											const size_t x_inc)
 {
 	// Makes sure all dimensions are larger than zero
 	if (n == 0) {
@@ -122,21 +122,21 @@ void Xscal<T>::DoScal(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 	}
 #endif
 	
-	tart::command_sequence_ptr workingSequence = getWorkingSequence(sequence);
+	
 	
 	// Launches the kernel
 	if (use_fast_kernel) {
 		auto global = std::vector<size_t>{CeilDiv(n, db_["WPT"] * db_["VW"])};
 		auto local = std::vector<size_t>{db_["WGS"]};
-		RunKernel(kernel, queue_, device_, global, local, event_, {}, workingSequence);
+		RunKernel(kernel, queue_, device_, global, local, event_, {});
 	} else {
 		auto n_ceiled = Ceil(n, db_["WGS"] * db_["WPT"]);
 		auto global = std::vector<size_t>{n_ceiled / db_["WPT"]};
 		auto local = std::vector<size_t>{db_["WGS"]};
-		RunKernel(kernel, queue_, device_, global, local, event_, {}, workingSequence);
+		RunKernel(kernel, queue_, device_, global, local, event_, {});
 	}
 	
-	submitIfNeeded(sequence, workingSequence, {}, event_);
+	
 }
 
 // =================================================================================================

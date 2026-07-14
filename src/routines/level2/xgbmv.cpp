@@ -30,8 +30,7 @@ template <typename T>
 void Xgbmv<T>::DoGbmv(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const size_t kl,
 											const size_t ku, const T alpha, const Buffer<T>& a_buffer, const size_t a_offset,
 											const size_t a_ld, const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc,
-											const T beta, const Buffer<T>& y_buffer, const size_t y_offset, const size_t y_inc,
-											const tart::command_sequence_ptr& sequence)
+											const T beta, const Buffer<T>& y_buffer, const size_t y_offset, const size_t y_inc)
 {
 	// Reverses the upper and lower band count
 	auto rotated = (layout == Layout::kRowMajor);
@@ -43,7 +42,7 @@ void Xgbmv<T>::DoGbmv(const Layout layout, const Transpose a_transpose, const si
 	// ROUTINE_GBMV define.
 	bool fast_kernels = false;
 	MatVec(layout, a_transpose, m, n, alpha, a_buffer, a_offset, a_ld, x_buffer, x_offset, x_inc, beta, y_buffer,
-				 y_offset, y_inc, fast_kernels, fast_kernels, 0, false, kl_real, ku_real, sequence);
+				 y_offset, y_inc, fast_kernels, fast_kernels, 0, false, kl_real, ku_real);
 }
 
 // =================================================================================================

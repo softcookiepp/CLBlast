@@ -35,7 +35,7 @@ void Xher2k<T, U>::DoHer2k(const Layout layout, const Triangle triangle, const T
 	
 	
 	// Runs the first matrix multiplication
-	auto first_herk_event = Event();
+	auto first_herk_event = Event(this->device_());
 	auto complex_beta = T{beta, static_cast<U>(0.0)};
 	const auto negated_ab_transpose = (ab_transpose != Transpose::kNo) ? Transpose::kNo : Transpose::kYes;
 	HerkAB(layout, triangle, ab_transpose, negated_ab_transpose, n, k, alpha, a_buffer, a_offset, a_ld, b_buffer,

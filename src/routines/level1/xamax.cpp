@@ -100,7 +100,7 @@ void Xamax<T>::DoAmax(const size_t n, const Buffer<unsigned int>& imax_buffer, c
 	// Launches the main kernel
 	auto global1 = std::vector<size_t>{db_["WGS1"] * temp_size};
 	auto local1 = std::vector<size_t>{db_["WGS1"]};
-	auto kernelEvent = Event();
+	auto kernelEvent = Event(this->device_());
 	
 	// the number of workgroups in the X dimension
 	int num_groups_0 = static_cast<int>(global1[0]/local1[0]);

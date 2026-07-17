@@ -180,7 +180,7 @@ void Xsyrk<T>::SyrkAB(const Layout layout, const Triangle triangle, const Transp
 	// case nothing has to be done, these kernels can be skipped.
 	std::vector<tart::buffer_ptr> barrierBuffers({c_buffer(), c_temp()});
 	if (!a_no_temp) {
-		auto eventProcessA = Event();
+		auto eventProcessA = Event(this->device_());
 		PadCopyTransposeMatrix(queue_, device_, db_, eventProcessA.pointer(), emptyEventList, a_one, a_two, a_ld, a_offset,
 													 a_buffer, a_one_i, a_two_i, a_one_i, 0, a_temp, ConstantOne<T>(), program_, true,
 													 a_do_transpose, false,
@@ -189,7 +189,7 @@ void Xsyrk<T>::SyrkAB(const Layout layout, const Triangle triangle, const Transp
 		barrierBuffers.push_back(a_temp());
 	}
 	if (!b_no_temp) {
-		auto eventProcessB = Event();
+		auto eventProcessB = Event(this->device_());
 		PadCopyTransposeMatrix(queue_, device_, db_, eventProcessB.pointer(), emptyEventList, b_one, b_two, b_ld, b_offset,
 													 b_buffer, b_one_i, b_two_i, b_one_i, 0, b_temp, ConstantOne<T>(), program_, true,
 													 b_do_transpose, false,
@@ -200,7 +200,7 @@ void Xsyrk<T>::SyrkAB(const Layout layout, const Triangle triangle, const Transp
 
 	// Furthermore, also creates a (possibly padded) copy of matrix C, since it is not allowed to
 	// modify the other triangle.
-	auto eventProcessC = Event();
+	auto eventProcessC = Event(this->device_());
 	PadCopyTransposeMatrix(queue_, device_, db_, eventProcessC.pointer(), emptyEventList, n, n, c_ld, c_offset, c_buffer,
 												 n_ceiled, n_ceiled, n_ceiled, 0, c_temp, ConstantOne<T>(), program_, true, c_do_transpose,
 												 false,
@@ -226,7 +226,7 @@ void Xsyrk<T>::SyrkAB(const Layout layout, const Triangle triangle, const Transp
 	auto local = std::vector<size_t>{db_["MDIMC"], db_["NDIMC"]};
 
 	// Launches the kernel
-	auto eventKernel = Event();
+	auto eventKernel = Event(this->device_());
 	RunKernel(kernel, queue_, device_, global, local, eventKernel.pointer(), eventWaitList);
 	//eventWaitList.push_back(eventKernel);
 	device_()->enqueueBarrier({c_temp()});

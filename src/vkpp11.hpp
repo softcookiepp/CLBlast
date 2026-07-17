@@ -98,13 +98,14 @@ class Event {
 	// which means Tart must be modified to be able to get the parent device from a sequence?
 	// ugh
 	tart::event_ptr mEvent = nullptr;
+	tart::device_ptr mDevice = nullptr;
 public:
 
 	// Constructor based on the regular OpenCL data-type: memory management is handled elsewhere
-	explicit Event(const tart::event_ptr event);
+	explicit Event(const tart::event_ptr& event, const tart::device_ptr& device);
 
 	// Regular constructor with memory management
-	explicit Event();
+	explicit Event(const tart::device_ptr& device);
 
 	// Waits for completion of this event
 	void WaitForCompletion() const;

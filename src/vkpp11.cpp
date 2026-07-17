@@ -21,18 +21,23 @@ void CLCudaAPIError::CheckDtor(const int32_t status, const std::string& where)
 }
 
 	// Constructor based on the regular OpenCL data-type: memory management is handled elsewhere
-Event::Event(const tart::event_ptr event) { mEvent = event; }
+Event::Event(const tart::event_ptr& event, const tart::device_ptr& device)
+{
+	mEvent = event;
+	mDevice = device;
+}
 
 	// Regular constructor with memory management
-Event::Event()
+Event::Event(const tart::device_ptr& device)
 {
+	mDevice = device;
 	mEvent = std::make_shared<tart::Event>();
 }
 
 // Waits for completion of this event
 void Event::WaitForCompletion() const
 {
-	if (mEvent && mEvent->isActive()) mEvent->sync();
+	if (mEvent && mEvent->isActive()) mDevice->sync({mEvent});
 }
 
 // Retrieves the elapsed time of the last recorded event.

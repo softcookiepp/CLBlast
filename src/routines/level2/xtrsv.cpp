@@ -113,7 +113,7 @@ void Xtrsv<T>::DoTrsv(const Layout layout, const Triangle triangle, const Transp
 
 	// Fills the output buffer with zeros
 	auto eventWaitList = std::vector<Event>();
-	auto fill_vector_event = Event();
+	auto fill_vector_event = Event(this->device_());
 	FillVector(queue_, device_, program_, fill_vector_event.pointer(), eventWaitList, n, x_inc, x_offset, x_buffer,
 						 ConstantZero<T>(), 16);
 	device_()->enqueueBarrier({x_buffer()});
@@ -143,7 +143,7 @@ void Xtrsv<T>::DoTrsv(const Layout layout, const Triangle triangle, const Transp
 		if (i > 0) {
 			const auto gemv_m = (a_transpose == Transpose::kNo) ? block_size : i;
 			const auto gemv_n = (a_transpose == Transpose::kNo) ? i : block_size;
-			auto gemv_event = Event();
+			auto gemv_event = Event(this->device_());
 			auto gemv = Xgemv<T>(queue_, gemv_event.pointer());
 			gemv.DoGemv(layout, a_transpose, gemv_m, gemv_n, ConstantOne<T>(), a_buffer, a_offset + extra_offset_a, a_ld,
 									x_buffer, x_offset + extra_offset_x, x_inc, ConstantOne<T>(), x_buffer, x_offset + extra_offset_b,
@@ -152,7 +152,7 @@ void Xtrsv<T>::DoTrsv(const Layout layout, const Triangle triangle, const Transp
 		}
 
 		// Runs the triangular substitution for the block size
-		auto sub_event = Event();
+		auto sub_event = Event(this->device_());
 		Substitution(layout, triangle, a_transpose, diagonal, block_size, a_buffer, a_offset + col + col * a_ld, a_ld,
 								 b_buffer, b_offset + col * b_inc, b_inc, x_buffer, x_offset + col * x_inc, x_inc, sub_event.pointer());
 		//sub_event.WaitForCompletion();

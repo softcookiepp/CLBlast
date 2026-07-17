@@ -21,7 +21,7 @@ namespace clblast {
 
 double RunKernelTimed(const size_t num_runs, Kernel& kernel, Queue& queue, const Device& device,
                       std::vector<size_t> global, const std::vector<size_t>& local) {
-  auto event = Event();
+  auto event = Event(device());
 
   if (!local.empty()) {
     // Tests for validity of the local thread sizes

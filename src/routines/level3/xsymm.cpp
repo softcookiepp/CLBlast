@@ -75,7 +75,7 @@ void Xsymm<T>::DoSymm(const Layout layout, const Side side, const Triangle trian
   auto global = std::vector<size_t>{Ceil(CeilDiv(k, db_["PAD_WPTX"]), db_["PAD_DIMX"]),
                                     Ceil(CeilDiv(k, db_["PAD_WPTY"]), db_["PAD_DIMY"])};
   auto local = std::vector<size_t>{db_["PAD_DIMX"], db_["PAD_DIMY"]};
-  auto kernelEvent = Event();
+  auto kernelEvent = Event(this->device_());
   RunKernel(kernel, queue_, device_, global, local, kernelEvent.pointer());
 
   // Synchronize now: 'DoGemm' does not accept a list of events to wait for

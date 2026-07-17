@@ -35,7 +35,7 @@ void Xsyr2k<T>::DoSyr2k(const Layout layout, const Triangle triangle, const Tran
 	
 	
 	// Runs the first matrix multiplication
-	auto first_syrk_event = Event();
+	auto first_syrk_event = Event(this->device_());
 	const auto negated_ab_transpose = (ab_transpose != Transpose::kNo) ? Transpose::kNo : Transpose::kYes;
 	SyrkAB(layout, triangle, ab_transpose, negated_ab_transpose, n, k, alpha, a_buffer, a_offset, a_ld, b_buffer,
 				 b_offset, b_ld, beta, c_buffer, c_offset, c_ld, first_syrk_event.pointer());

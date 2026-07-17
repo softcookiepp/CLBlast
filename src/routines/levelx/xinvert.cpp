@@ -146,7 +146,7 @@ void Xinvert<T>::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle 
 
 	// Fills the output buffer with zeros
 	auto event_wait_list = std::vector<Event>();
-	auto fill_matrix_event = Event();
+	auto fill_matrix_event = Event(this->device_());
 	FillMatrix(queue_, device_, program_, fill_matrix_event.pointer(), event_wait_list, block_size,
 						 num_blocks * block_size, block_size, 0, dest, ConstantZero<T>(), 16);
 	//event_wait_list.push_back(fill_matrix_event);
@@ -164,7 +164,7 @@ void Xinvert<T>::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle 
 	kernel.SetArgument(7, static_cast<int>(is_upper));
 	const auto local_invert = std::vector<size_t>{internal_block_size};
 	const auto global_invert = std::vector<size_t>{num_internal_blocks * internal_block_size};
-	auto base_kernel_event = Event();
+	auto base_kernel_event = Event(this->device_());
 	auto base_kernel_event_pointer = (internal_block_size == block_size) ? event_ : base_kernel_event.pointer();
 	RunKernel(kernel, queue_, device_, global_invert, local_invert, base_kernel_event_pointer, event_wait_list);
 	if (internal_block_size == block_size) {
@@ -198,7 +198,7 @@ void Xinvert<T>::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle 
 		kernel1.SetArgument(5, static_cast<int>(current_size));
 		kernel1.SetArgument(6, static_cast<int>(npages));
 		kernel1.SetArgument(7, static_cast<int>(block_size));
-		auto kernel1_event = Event();
+		auto kernel1_event = Event(this->device_());
 		RunKernel(kernel1, queue_, device_, global, local, kernel1_event.pointer(), event_wait_list);
 		device_()->enqueueBarrier({dest()});
 		//event_wait_list.push_back(kernel1_event);
@@ -212,7 +212,7 @@ void Xinvert<T>::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle 
 		kernel2.SetArgument(2, static_cast<int>(current_size));
 		kernel2.SetArgument(3, static_cast<int>(npages));
 		kernel2.SetArgument(4, static_cast<int>(block_size));
-		auto kernel2_event = Event();
+		auto kernel2_event = Event(this->device_());
 		auto kernel2_event_pointer = (is_last_kernel) ? event_ : kernel2_event.pointer();
 		RunKernel(kernel2, queue_, device_, global, local, kernel2_event_pointer, event_wait_list);
 		if (!is_last_kernel) {

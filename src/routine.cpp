@@ -88,7 +88,7 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 		routine_info += "_" + kernel_name + db_(kernel_name).GetValuesString();
 	}
 	log_debug(routine_info);
-#if VULKAN_API
+#if 0
 	// no searchy yet
 	//if (!mIsGLSL)
 #else

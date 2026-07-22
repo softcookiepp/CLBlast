@@ -45,7 +45,7 @@ option(TUNERS "Enable compilation of the tuners" ON)
 option(CLIENTS "Enable compilation of the clients to test and compare performance" OFF)
 option(TESTS "Enable compilation of the correctness tests" OFF)
 option(CUBLAS "Enables performance comparison against cuBLAS on NVIDIA GPUs" OFF)
-option(VULKAN_BDA "Enable Vulkan support of Buffer Device Addresses" OFF)
+option(VULKAN_BDA "Enable Vulkan support of Buffer Device Addresses" OFF) # this may be eventually removed once BDA support is complete
 
 # The optional Netlib API for CLBlast
 option(NETLIB "Enable compilation of the CBLAS Netlib API" OFF)
@@ -64,16 +64,7 @@ include(CheckCXXSymbolExists)
 # Select between an OpenCL API (default) or a Vulkan API
 option(OPENCL "Build CLBlast with an OpenCL API (default)" OFF)
 option(VULKAN "Build CLBlast with a Vulkan API (you must not value your time and/or sanity)" ON)
-if(NOT OPENCL AND NOT VULKAN)
-	message(FATAL_ERROR "No API selected, choose from OpenCL (-DOPENCL=ON) or Vulkan (-DVULKAN=ON)")
-endif()
-if(OPENCL AND VULKAN)
-	message(FATAL_ERROR "don't use opencl and vulkan you dummy")
-endif()
-if(OPENCL)
-	message("-- Building CLBlast with OpenCL API (default)")
-	add_definitions(-DOPENCL_API)
-elseif(VULKAN)
+if(VULKAN)
 	message("-- Building CLBlast with VULKAN API")
 	add_definitions(-DVULKAN_API)
 	if (VULKAN_BDA)
@@ -110,11 +101,6 @@ endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FLAGS}")
 
 # C compiler settings (for the sample)
-if(MSVC)
-	set(CFLAGS "/Ot")
-else()
-	set(CFLAGS "-O2 -std=c99")
-endif()
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CFLAGS}")
 
 # ==================================================================================================
@@ -211,38 +197,11 @@ set(SOURCES
 	src/routines/level3/level3.cpp
 	src/routines/levelx/levelx.cpp
 )
-set(HEADERS	# such that they can be discovered by IDEs such as CLion and Visual Studio
-	include/clblast_half.h
-	src/database/apple_cpu_fallback.hpp
-	src/database/database.hpp
-	src/database/database_structure.hpp
-	src/routines/level1/xamin.hpp
-	src/routines/level1/xmax.hpp
-	src/routines/level1/xmin.hpp
-	src/routines/level1/xsum.hpp
-	src/routines/common.hpp
-	src/routines/routines.hpp
-	src/utilities/buffer_test.hpp
-	src/utilities/compile.hpp
-	src/utilities/clblast_exceptions.hpp
-	src/utilities/device_mapping.hpp
-	src/utilities/msvc.hpp
-	src/utilities/timing.hpp
-	src/utilities/utilities.hpp
-	src/cache.hpp
-	src/kernel_preprocessor.hpp
-	src/cxpp11_common.hpp
-	src/routine.hpp
-	src/tuning/configurations.hpp
-	src/tuning/tuning.hpp
-	src/tuning/routines/routine_tuner.hpp
-)
+
 if(OPENCL)
 	set(SOURCES ${SOURCES} src/clblast.cpp src/clblast_c.cpp src/tuning/tuning_api.cpp)
-	set(HEADERS ${HEADERS} include/clblast.h include/clblast_c.h src/clpp11.hpp)
 	if(NETLIB)
 		set(SOURCES ${SOURCES} src/clblast_netlib_c.cpp)
-		set(HEADERS ${HEADERS} include/clblast_netlib_c.h)
 	endif()
 elseif(VULKAN)
 	set(SOURCES ${SOURCES} src/clblast_vk.cpp src/tuning/tuning_api.cpp)
@@ -266,10 +225,10 @@ check_cxx_symbol_exists(clblast::Swap<float> "clblast_vk.h" HAVE_SYMBOL_THINGY)
 
 # Includes directories: CLBlast and OpenCL
 target_include_directories(clblast PUBLIC
-													 $<BUILD_INTERFACE:${clblast_SOURCE_DIR}/include>
-													 $<BUILD_INTERFACE:${clblast_SOURCE_DIR}/src>
-													 $<INSTALL_INTERFACE:include>
-													 ${API_INCLUDE_DIRS})
+	$<BUILD_INTERFACE:${clblast_SOURCE_DIR}/include>
+	$<BUILD_INTERFACE:${clblast_SOURCE_DIR}/src>
+	$<INSTALL_INTERFACE:include>
+	${API_INCLUDE_DIRS})
 
 # Sets the proper __declspec(dllexport) keyword for Visual Studio when the library is built
 if(MSVC)
@@ -281,28 +240,13 @@ endif()
 # Installs the library
 include(GNUInstallDirs)
 
-if(VULKAN)
 install(TARGETS clblast ${API_LIBRARIES} EXPORT CLBlast
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-else()
-	install(TARGETS clblast EXPORT CLBlast
-		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-endif()
 
 install(FILES include/clblast_half.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-if(OPENCL)
-	install(FILES include/clblast.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-	install(FILES include/clblast_c.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-	if(NETLIB)
-		install(FILES include/clblast_netlib_c.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-	endif()
-elseif(VULKAN)
-	install(FILES include/clblast_vk.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-endif()
+install(FILES include/clblast_vk.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # Installs the config for find_package in dependent projects
 install(EXPORT CLBlast DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/CLBlast FILE CLBlastConfig.cmake)
@@ -354,16 +298,7 @@ if(TUNERS)
 			src/tuning/configurations.cpp
 			src/tuning/tuning.cpp
 			src/kernel_preprocessor.cpp)
-	set(TUNERS_HEADERS	# such that they can be discovered by IDEs such as CLion and Visual Studio
-			src/utilities/compile.hpp
-			src/utilities/clblast_exceptions.hpp
-			src/utilities/timing.hpp
-			src/utilities/utilities.hpp
-			src/tuning/configurations.hpp
-			src/tuning/tuning.hpp
-			src/tuning/routines/routine_tuner.hpp
-			src/kernel_preprocessor.hpp)
-	set(TUNERS_COMMON ${TUNERS_COMMON} ${TUNERS_HEADERS})
+	set(TUNERS_COMMON ${TUNERS_COMMON})
 
 	# Creates a library with common sources for all tuners
 	if(MSVC)
@@ -433,36 +368,17 @@ if(CLIENTS OR TESTS)
 	# Sets the specifics for the reference BLAS libraries
 	set(REF_INCLUDES )
 	set(REF_LIBRARIES )
-	if(CLBLAS_FOUND)
-		find_package(Threads)
-		set(REF_LIBRARIES ${REF_LIBRARIES} ${CLBLAS_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-		set(REF_INCLUDES ${REF_INCLUDES} ${CLBLAS_INCLUDE_DIRS})
-		set(WRAPPERS ${WRAPPERS} test/wrapper_clblas.hpp)
-		if(MSVC)
-			add_definitions(" /DCLBLAST_REF_CLBLAS")
-		else()
-			add_definitions(" -DCLBLAST_REF_CLBLAS")
-		endif()
-	endif()
 	if(CBLAS_FOUND OR MKL_FOUND)
 		if(MKL_FOUND)	# prefers MKL over another CBLAS implementation
 			set(REF_INCLUDES ${REF_INCLUDES} ${MKL_INCLUDE_DIRS})
 			set(REF_LIBRARIES ${REF_LIBRARIES} ${MKL_LIBRARIES})
-			if(MSVC)
-				add_definitions(" /DCLBLAST_REF_CBLAS_MKL")
-			else()
-				add_definitions(" -DCLBLAST_REF_CBLAS_MKL")
-			endif()
+			add_compile_definitions(CLBLAST_REF_CBLAS_MKL)
 		else()
 			set(REF_INCLUDES ${REF_INCLUDES} ${CBLAS_INCLUDE_DIRS})
 			set(REF_LIBRARIES ${REF_LIBRARIES} ${CBLAS_LIBRARIES})
 		endif()
 		set(WRAPPERS ${WRAPPERS} test/wrapper_cblas.hpp)
-		if(MSVC)
-			add_definitions(" /DCLBLAST_REF_CBLAS")
-		else()
-			add_definitions(" -DCLBLAST_REF_CBLAS")
-		endif()
+		add_compile_definitions(CLBLAST_REF_CBLAS)
 	endif()
 endif()
 
@@ -573,9 +489,6 @@ if(TESTS)
 
 	# Miscellaneous tests
 	set(MISC_TESTS override_parameters retrieve_parameters)
-	if(NOT (VULKAN) )
-		set(MISC_TESTS ${MISC_TESTS} preprocessor)
-	endif()
 	if(MSVC)
 		set(TESTS_COMMON ${TESTS_COMMON} src/kernel_preprocessor.cpp src/utilities/compile.cpp)
 	endif()
@@ -593,9 +506,7 @@ if(TESTS)
 	target_include_directories(clblast_test_diagnostics PUBLIC
 														 $<TARGET_PROPERTY:clblast,INTERFACE_INCLUDE_DIRECTORIES>
 														 ${clblast_SOURCE_DIR} ${REF_INCLUDES})
-	if(VULKAN)
-		target_include_directories(clblast_test_diagnostics PUBLIC $<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES>)
-	endif()
+	target_include_directories(clblast_test_diagnostics PUBLIC $<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES>)
 	
 	# Adds 'alltests' target: runs all tests
 	set(ALLTESTS )
@@ -609,7 +520,7 @@ if(TESTS)
 endif()
 
 # tiny test just to see if it will even link at all
-if(VULKAN)
+if(TESTS)
 	add_executable(linktest samples/sgemm_vk.cpp)
 	target_link_libraries(linktest ${API_LIBRARIES} clblast)
 	target_include_directories(linktest PUBLIC $<TARGET_PROPERTY:clblast,INTERFACE_INCLUDE_DIRECTORIES> $<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES>)

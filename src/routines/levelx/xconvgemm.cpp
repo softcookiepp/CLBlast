@@ -163,9 +163,7 @@ void Xconvgemm<T>::DoConvgemm(const KernelMode kernel_mode, const size_t channel
 #endif
 		kernel.SetArgument(9, static_cast<int>(0));
 		kernel.SetArgument(10, static_cast<int>(col_stride));
-#if VULKAN_API
-		
-#endif
+
 	}
 	if (method_ == ConvGemmMethod::kSingleKernel) {
 #if VULKAN_API

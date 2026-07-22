@@ -62,7 +62,7 @@ std::vector<Timing> TimeRoutine(const size_t from, const size_t to, const size_t
       printf(" %9.2lf ms |\n", time_ms);
       timings.push_back({value, time_ms});
     } catch (...) {
-      const auto status_code = DispatchExceptionCatchAll(true);
+      const auto status_code = DispatchExceptionCatchAll(false);
       printf("  error %-5d |\n", static_cast<int>(status_code));
       timings.push_back({value, -1.0});  // invalid
     }

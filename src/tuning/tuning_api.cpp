@@ -405,7 +405,7 @@ StatusCode TunerAPI(Queue& queue, const Arguments<T>& args, const int V, const G
       device_buffers[id].Read(queue, buffer_sizes[id], reference_buffers[id]);
     }
   } catch (...) {
-    const auto status_code = DispatchExceptionCatchAll(true);
+    const auto status_code = DispatchExceptionCatchAll(false);
     return status_code;
   }
 

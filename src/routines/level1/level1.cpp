@@ -1,0 +1,11 @@
+// lets see if this reduces build time
+#include "xamax.cpp"
+#include "xasum.cpp"
+#include "xaxpy.cpp"
+#include "xcopy.cpp"
+#include "xdot.cpp"
+#include "xdotc.cpp"
+#include "xdotu.cpp"
+#include "xnrm2.cpp"
+#include "xscal.cpp"
+#include "xswap.cpp"

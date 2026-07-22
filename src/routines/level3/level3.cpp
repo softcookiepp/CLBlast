@@ -1,0 +1,10 @@
+// it really works!
+#include "xgemm.cpp"
+#include "xhemm.cpp"
+#include "xher2k.cpp"
+#include "xherk.cpp"
+#include "xsymm.cpp"
+#include "xsyr2k.cpp"
+#include "xsyrk.cpp"
+#include "xtrmm.cpp"
+#include "xtrsm.cpp"

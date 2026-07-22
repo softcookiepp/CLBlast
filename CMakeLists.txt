@@ -108,25 +108,18 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CFLAGS}")
 # Package scripts location
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${clblast_SOURCE_DIR}/cmake/Modules/")
 
-if(OPENCL)
-	# Requires OpenCL. It is found through the included "FindOpenCL.cmake" in CMAKE_MODULE_PATH.
-	find_package(OpenCL REQUIRED)
-	set(API_LIBRARIES ${OPENCL_LIBRARIES})
-	set(API_INCLUDE_DIRS ${OPENCL_INCLUDE_DIRS})
-elseif(VULKAN)
-	# we need Tart, the vulkan frontend thingy
-	add_subdirectory(${PROJECT_SOURCE_DIR}/tart)
-	if(TART_ENABLE_SHADER_COMPILERS)
-		set(API_LIBRARIES tart tart_vulkan subprocess ${GLSLANG_LIBS})
-	else()
-		set(API_LIBRARIES tart tart_vulkan subprocess)
-	endif()
-	set(API_INCLUDE_DIRS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tart/include>	
-		$<INSTALL_INTERFACE:tart/include>	# <prefix>/include/mylib
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tart/include>	
-		$<INSTALL_INTERFACE:tart/include>	# <prefix>/include/mylib
-	)
+# we need Tart, the vulkan frontend thingy
+add_subdirectory(${PROJECT_SOURCE_DIR}/tart)
+if(TART_ENABLE_SHADER_COMPILERS)
+	set(API_LIBRARIES tart tart_vulkan subprocess ${GLSLANG_LIBS})
+else()
+	set(API_LIBRARIES tart tart_vulkan subprocess)
 endif()
+set(API_INCLUDE_DIRS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tart/include>	
+	$<INSTALL_INTERFACE:tart/include>	# <prefix>/include/mylib
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tart/include>	
+	$<INSTALL_INTERFACE:tart/include>	# <prefix>/include/mylib
+)
 
 
 # Locates the reference BLAS libraries in case the tests need to be compiled. The "FindclBLAS.cmake",
@@ -329,7 +322,7 @@ if(TUNERS)
 		endif()
 		install(TARGETS clblast_tuner_${KERNEL} DESTINATION bin)
 	endforeach()
-	if(OPENCL)
+	if(TRUE)
 		foreach(ROUTINE_TUNER ${ROUTINE_TUNERS})
 			add_executable(clblast_tuner_routine_${ROUTINE_TUNER} ${TUNERS_COMMON} src/tuning/routines/${ROUTINE_TUNER}.cpp test/test_utilities.cpp DEPENDS clblast)
 			target_link_libraries(clblast_tuner_routine_${ROUTINE_TUNER} clblast)
@@ -347,7 +340,7 @@ if(TUNERS)
 		endforeach()
 		set(ALLTUNERSDEPENDS clblast_tuner_${KERNEL})
 	endforeach()
-	if(OPENCL)
+	if(TRUE)
 		foreach(ROUTINE_TUNER ${ROUTINE_TUNERS})
 			foreach(PRECISION ${PRECISIONS})
 				set(ALLTUNERS ${ALLTUNERS} COMMAND clblast_tuner_routine_${ROUTINE_TUNER} -precision ${PRECISION})

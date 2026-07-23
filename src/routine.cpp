@@ -24,6 +24,9 @@
 #include "utilities/utilities.hpp"
 
 namespace clblast {
+	
+bool Routine::sCreatedDatabase = false;
+DatabaseKey Routine::sFirstDatabaseKey;
 // =================================================================================================
 
 // For each kernel this map contains a list of routines it is used in
@@ -187,15 +190,23 @@ void Routine::InitDatabase(const Device& device, const std::vector<std::string>&
 		// Queries the cache to see whether or not the kernel parameter database is already there
 		bool has_db;
 		db(kernel_name) =
-				DatabaseCache::Instance().Get(DatabaseKeyRef{platform_id, device(), precision, kernel_name}, &has_db);
+				DatabaseCache::Instance().Get(DatabaseKeyRef{device()->getMetadata().deviceUUID, precision, kernel_name}, &has_db);
 		if (has_db) {
 			continue;
 		}
+#if 1
+		DatabaseKey thisKey = {device()->getMetadata().deviceUUID, precision, kernel_name};
+		
+		if (sCreatedDatabase && thisKey == sFirstDatabaseKey)
+			throw std::runtime_error("Should have created the database by now, but it was not found!");
+		sCreatedDatabase = true;
+		sFirstDatabaseKey = thisKey;
+#endif
 
 		// Builds the parameter database for this device and routine set and stores it in the cache
 		log_debug("Searching database for kernel '" + kernel_name + "'");
 		db(kernel_name) = Database(device, kernel_name, precision, userDatabase);
-		DatabaseCache::Instance().Store(DatabaseKey{platform_id, device(), precision, kernel_name},
+		DatabaseCache::Instance().Store(DatabaseKey{device()->getMetadata().deviceUUID, precision, kernel_name},
 																		Database{db(kernel_name)});
 	}
 }

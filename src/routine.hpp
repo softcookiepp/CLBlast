@@ -84,6 +84,8 @@ class Routine {
 	
 #if VULKAN_API
 	std::vector<std::string> mEntryPointNames;
+	static DatabaseKey sFirstDatabaseKey;
+	static bool sCreatedDatabase;
 #endif
 };
 

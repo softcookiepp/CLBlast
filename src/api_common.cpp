@@ -148,7 +148,7 @@ StatusCode RetrieveParameters(const RawDeviceID device, const std::string& kerne
     // Retrieves the database values
     auto in_cache = false;
     auto database =
-        DatabaseCache::Instance().Get(DatabaseKeyRef{platform_id, device, precision, kernel_name}, &in_cache);
+        DatabaseCache::Instance().Get(DatabaseKeyRef{device->getMetadata().deviceUUID, precision, kernel_name}, &in_cache);
     if (!in_cache) {
       log_debug("Searching database for kernel '" + kernel_name + "'");
       database = Database(device_cpp, kernel_name, precision, {});
@@ -177,7 +177,7 @@ StatusCode OverrideParameters(const RawDeviceID device, const std::string& kerne
     // Retrieves the current database values to verify whether the new ones are complete
     auto in_cache = false;
     auto current_database =
-        DatabaseCache::Instance().Get(DatabaseKeyRef{platform_id, device, precision, kernel_name}, &in_cache);
+        DatabaseCache::Instance().Get(DatabaseKeyRef{device->getMetadata().deviceUUID, precision, kernel_name}, &in_cache);
     if (!in_cache) {
       log_debug("Searching database for kernel '" + kernel_name + "'");
       current_database = Database(device_cpp, kernel_name, precision, {});
@@ -211,8 +211,8 @@ StatusCode OverrideParameters(const RawDeviceID device, const std::string& kerne
     const auto database = Database(device_cpp, kernel_name, precision, database_entries);
 
     // Removes the old database entry and stores the new one in the cache
-    DatabaseCache::Instance().Remove(DatabaseKey{platform_id, device, precision, kernel_name});
-    DatabaseCache::Instance().Store(DatabaseKey{platform_id, device, precision, kernel_name}, Database(database));
+    DatabaseCache::Instance().Remove(DatabaseKey{device->getMetadata().deviceUUID, precision, kernel_name});
+    DatabaseCache::Instance().Store(DatabaseKey{device->getMetadata().deviceUUID, precision, kernel_name}, Database(database));
 
   } catch (...) {
     return DispatchException();

@@ -49,16 +49,8 @@ class Cache {
 	static Cache<Key, Value>& Instance();
 
  private:
-#if __cplusplus >= 201402L
-	// The std::less<void> allows to search in cache by an object comparable with Key, without
-	// constructing a temporary Key
-	// (see http://en.cppreference.com/w/cpp/utility/functional/less_void,
-	//			http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2013/n3657.htm,
-	//			http://stackoverflow.com/questions/10536788/avoiding-key-construction-for-stdmapfind)
+	// TODO: Make this more optimized. Having one giant database for everything results in way more overhead than needs to exist.
 	std::map<Key, Value, std::less<void>> cache_;
-#else
-	std::vector<std::pair<Key, Value>> cache_;
-#endif
 	mutable std::mutex cache_mutex_;
 
 	static Cache<Key, Value> instance_;

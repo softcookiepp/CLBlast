@@ -115,11 +115,11 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 
 	// Queries the cache to see whether or not the binary (device-specific) is already there. If it
 	// is, a program is created and stored in the cache
-	const auto device_name = GetDeviceName(device_);
+	const auto device_name = device_()->getMetadata().name();
 	const auto platform_id = 0; //device_.PlatformID();
 	bool has_binary = false;
 #if VULKAN_API
-	if (false)// (!mIsGLSL)
+	if (true)// (!mIsGLSL)
 #endif
 	{
 		auto binary =

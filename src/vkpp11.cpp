@@ -29,38 +29,6 @@ void CLCudaAPIError::CheckDtor(const int32_t status, const std::string& where)
 	}
 }
 
-// Initializes the platform
-Platform::Platform(const size_t platform_id)
-{
-	// there can only be one, this is Vulkan c:
-	if (platform_id != 0) throw LogicError("Vulkan back-end requires a platform ID of 0");
-	mInstance = std::make_shared<tart::Instance>();
-}
-
-// Methods to retrieve platform information
-std::string Platform::Name() const {
-	return "not implemented";
-}
-std::string Platform::Vendor() const { return "not implemented"; }
-std::string Platform::Version() const { return "not implemented"; }
-	
-// returns the tart::Instance
-tart::Instance& Platform::getInstance() const
-{
-	return *mInstance;
-}
-
-// Returns the number of devices on this platform
-size_t Platform::NumDevices()
-{
-	return static_cast<size_t>(getInstance().getNumDevices());
-}
-
-// Accessor to the private data-member
-const size_t& Platform::operator()() const { return platform_; }
-
-
-
 // Constructor based on the regular thingy
 Device::Device(const tart::device_ptr device) : mDevice(device) {}
 
@@ -71,8 +39,6 @@ Device::Device(const size_t device_id) {
 }
 
 // Methods to retrieve device information
-// (platform id is always 0)
-size_t Device::PlatformID() const { return 0; }
 std::string Device::Version() const { return "Vulkan 1.2"; } // pretty sure this will work?
 size_t Device::VersionNumber() const {
 	return 120;
@@ -94,7 +60,10 @@ std::string Device::Vendor() const
 }
 std::string Device::Name() const { return "device name not implemented"; }
 std::string Device::Type() const { return "GPU"; } // everything is a GPU when it comes to Vulkan! (for the most part)
-size_t Device::MaxWorkGroupSize() const { return 1000000; } // straight-up no idea how to even go about doing this. in Vulkan, each dimension can be different.
+size_t Device::MaxWorkGroupSize() const
+{
+	return mDevice->getMetadata().physicalDeviceProperties.limits.maxComputeWorkGroupInvocations;
+}
 size_t Device::MaxWorkItemDimensions() const { return 3; } // it is always 3 in vulkan
 std::vector<size_t> Device::MaxWorkItemSizes() const { return {1000000, 1000000, 1000000}; } // TODO: implement in Tart
 unsigned long Device::LocalMemSize() const

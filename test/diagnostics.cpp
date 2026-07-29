@@ -71,7 +71,6 @@ void OpenCLDiagnostics(int argc, char* argv[]) {
 	printf("* device.Name()								 %.4lf ms\n", TimeFunction(kNumRuns, [&]() { device.Name(); }));
 	printf("* device.Vendor()							 %.4lf ms\n", TimeFunction(kNumRuns, [&]() { device.Vendor(); }));
 	printf("* device.Version()							%.4lf ms\n", TimeFunction(kNumRuns, [&]() { device.Version(); }));
-	//printf("* device.Platform()						 %.4lf ms\n", TimeFunction(kNumRuns, [&]() { device.PlatformID(); }));
 	printf("* Buffer<float>(context, 1024)	%.4lf ms\n", TimeFunction(kNumRuns, [&]() { Buffer<float>(context, 1024); }));
 
 	printf("\n");

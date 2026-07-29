@@ -82,58 +82,6 @@ typedef tart::event_ptr EventPointer;
 
 #if 1
 // =================================================================================================
-
-// Vulkan doesn't have any direct equivalent to this, just use it to encapsulate device..or maybe instance?
-
-// static std::shared_ptr<tart::Instance> gInstance = nullptr;
-
-class Platform {
-	std::shared_ptr<tart::Instance> mInstance = nullptr;
-public:
-	// Initializes the platform
-	explicit Platform(const size_t platform_id);
-
-	// Methods to retrieve platform information
-	std::string Name() const;
-	std::string Vendor() const;
-	std::string Version() const;
-	
-	// returns the tart::Instance
-	tart::Instance& getInstance() const;
-
-	// Returns the number of devices on this platform
-	size_t NumDevices();
-
-	// Accessor to the private data-member
-	const size_t& operator()() const;
-
-private:
-	size_t platform_ = 0;
-};
-#endif
-
-#if 1
-// not applicable for vulkan
-// Retrieves a vector with all platforms
-inline std::vector<Platform> GetAllPlatforms() {
-#if 1
-	// TODO: populate this based on single vulkan devices.
-	std::vector<Platform> platforms({Platform(0)});
-	return platforms;
-#else
-	auto num_platforms = cl_uint{0};
-	CheckError(clGetPlatformIDs(0, nullptr, &num_platforms));
-	auto all_platforms = std::vector<Platform>();
-	for (size_t platform_id = 0; platform_id < static_cast<size_t>(num_platforms); ++platform_id) {
-		all_platforms.push_back(Platform(platform_id));
-	}
-	return all_platforms;
-#endif
-}
-#endif
-
-#if 1
-// =================================================================================================
 // Raw device ID type
 using RawDeviceID = tart::device_ptr;
 
@@ -151,7 +99,6 @@ public:
 
 	// Methods to retrieve device information
 	// (platform id is always 0)
-	size_t PlatformID() const;
 	std::string Version() const;
 	size_t VersionNumber() const;
 

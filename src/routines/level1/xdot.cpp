@@ -100,18 +100,11 @@ void Xdot<T>::DoDot(const size_t n, const Buffer<T>& dot_buffer, const size_t do
 		kernel1.SetArgument(8, static_cast<int>(do_conjugate));
 	}
 
-	// Event waiting list
-	auto eventWaitList = std::vector<Event>();
-
 	// Launches the main kernel
 	auto global1 = std::vector<size_t>{db_["WGS1"] * temp_size};
 	auto local1 = std::vector<size_t>{db_["WGS1"]};
-#if VULKAN_API
 	kernel1.SetArgument(9, static_cast<int>(global1[0]/local1[0]));
-#endif
-	auto kernelEvent = Event(this->device_());
 	RunKernel(kernel1, queue_, device_, global1, local1);
-	//eventWaitList.push_back(kernelEvent);
 
 	// Sets the arguments for the epilogue kernel
 	#if VULKAN_USE_BDA

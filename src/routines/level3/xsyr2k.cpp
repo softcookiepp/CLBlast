@@ -35,10 +35,9 @@ void Xsyr2k<T>::DoSyr2k(const Layout layout, const Triangle triangle, const Tran
 	
 	
 	// Runs the first matrix multiplication
-	auto first_syrk_event = Event(this->device_());
 	const auto negated_ab_transpose = (ab_transpose != Transpose::kNo) ? Transpose::kNo : Transpose::kYes;
 	SyrkAB(layout, triangle, ab_transpose, negated_ab_transpose, n, k, alpha, a_buffer, a_offset, a_ld, b_buffer,
-				 b_offset, b_ld, beta, c_buffer, c_offset, c_ld, first_syrk_event.pointer());
+				 b_offset, b_ld, beta, c_buffer, c_offset, c_ld);
 	
 	//first_syrk_event.WaitForCompletion();
 	// I have no idea which buffers actually need a barrier as of now. Will look closer after tests pass
@@ -48,7 +47,7 @@ void Xsyr2k<T>::DoSyr2k(const Layout layout, const Triangle triangle, const Tran
 	// Swaps the arguments for matrices A and B, and sets 'beta' to 1
 	auto one = ConstantOne<T>();
 	SyrkAB(layout, triangle, ab_transpose, negated_ab_transpose, n, k, alpha, b_buffer, b_offset, b_ld, a_buffer,
-				 a_offset, a_ld, one, c_buffer, c_offset, c_ld, event_);
+				 a_offset, a_ld, one, c_buffer, c_offset, c_ld);
 	
 	
 }

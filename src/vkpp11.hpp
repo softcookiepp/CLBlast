@@ -80,38 +80,6 @@ using CLCudaAPIBuildError = CLCudaAPIError;
 // pointer to event
 typedef tart::event_ptr EventPointer;
 
-// C++11 version of 'cl_event'
-class Event {
-	// An event, in regards to Tart compatibility (for now)
-	// will just be a list of sequences that the device will away the completion of.
-	// which means Tart must be modified to be able to get the parent device from a sequence?
-	// ugh
-	tart::event_ptr mEvent = nullptr;
-	tart::device_ptr mDevice = nullptr;
-public:
-
-	// Constructor based on the regular OpenCL data-type: memory management is handled elsewhere
-	explicit Event(const tart::event_ptr& event, const tart::device_ptr& device);
-
-	// Regular constructor with memory management
-	explicit Event(const tart::device_ptr& device);
-
-	// Waits for completion of this event
-	void WaitForCompletion() const;
-
-	// Retrieves the elapsed time of the last recorded event.
-	// (Note that there is a bug in Apple's OpenCL implementation of the 'clGetEventProfilingInfo' function:
-	//	http://stackoverflow.com/questions/26145603/clgeteventprofilinginfo-bug-in-macosx)
-	// However, in our case the reply size is fixed to be uint64_t, so we are not affected.
-	float GetElapsedTime() const;
-
-	// Accessor to the private data-member
-	tart::event_ptr operator()();
-	const tart::event_ptr operator()() const;
-	tart::event_ptr  pointer();
-	const tart::event_ptr pointer() const;
-};
-
 #if 1
 // =================================================================================================
 
@@ -331,7 +299,6 @@ public:
 	explicit Queue(const Context& context, const Device& device);
 
 	// Synchronizes the queue
-	void Finish(Event& event) const;
 	void Finish() const;
 
 	// Retrieves the corresponding context or device

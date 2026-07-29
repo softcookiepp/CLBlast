@@ -20,43 +20,6 @@ void CLCudaAPIError::CheckDtor(const int32_t status, const std::string& where)
 	}
 }
 
-	// Constructor based on the regular OpenCL data-type: memory management is handled elsewhere
-Event::Event(const tart::event_ptr& event, const tart::device_ptr& device)
-{
-	mEvent = event;
-	mDevice = device;
-}
-
-	// Regular constructor with memory management
-Event::Event(const tart::device_ptr& device)
-{
-	mDevice = device;
-	mEvent = std::make_shared<tart::Event>();
-}
-
-// Waits for completion of this event
-void Event::WaitForCompletion() const
-{
-	if (mEvent && mEvent->isActive()) mDevice->sync({mEvent});
-}
-
-// Retrieves the elapsed time of the last recorded event.
-// (Note that there is a bug in Apple's OpenCL implementation of the 'clGetEventProfilingInfo' function:
-//	http://stackoverflow.com/questions/26145603/clgeteventprofilinginfo-bug-in-macosx)
-// However, in our case the reply size is fixed to be uint64_t, so we are not affected.
-float Event::GetElapsedTime() const
-{
-	// not implemented yet :c
-	WaitForCompletion();
-	return 1.0;
-}
-
-// Accessor to the private data-member
-tart::event_ptr Event::operator()() { return mEvent; }
-const tart::event_ptr Event::operator()() const { return mEvent; }
-tart::event_ptr  Event::pointer() { return mEvent; }
-const tart::event_ptr Event::pointer() const { return mEvent; }
-
 // Initializes the platform
 Platform::Platform(const size_t platform_id)
 {
@@ -312,7 +275,6 @@ Queue::Queue(const Context& context, const Device& device)
 }
 
 // Synchronizes the queue
-void Queue::Finish(Event& event) const { mDevice->sync({event.pointer()}); }
 void Queue::Finish() const { mDevice->sync(); }
 
 // Retrieves the corresponding context or device

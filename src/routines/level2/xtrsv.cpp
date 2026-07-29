@@ -34,7 +34,7 @@ template <typename T>
 void Xtrsv<T>::Substitution(const Layout layout, const Triangle triangle, const Transpose a_transpose,
 	const Diagonal diagonal, const size_t n, const Buffer<T>& a_buffer, const size_t a_offset,
 	const size_t a_ld, const Buffer<T>& b_buffer, const size_t b_offset, const size_t b_inc,
-	const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc, EventPointer event)
+	const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc)
 {
 	if (n > db_["TRSV_BLOCK_SIZE"]) {
 		throw BLASError(StatusCode::kUnexpectedError);
@@ -112,12 +112,9 @@ void Xtrsv<T>::DoTrsv(const Layout layout, const Triangle triangle, const Transp
 	device_()->enqueueBarrier({x_buffer()});
 
 	// Fills the output buffer with zeros
-	auto eventWaitList = std::vector<Event>();
-	auto fill_vector_event = Event(this->device_());
-	FillVector(queue_, device_, program_, fill_vector_event.pointer(), eventWaitList, n, x_inc, x_offset, x_buffer,
+	FillVector(queue_, device_, program_, n, x_inc, x_offset, x_buffer,
 						 ConstantZero<T>(), 16);
 	device_()->enqueueBarrier({x_buffer()});
-	//fill_vector_event.WaitForCompletion();
 
 	// Derives properties based on the arguments
 	const auto is_upper = ((triangle == Triangle::kUpper && a_transpose == Transpose::kNo) ||
@@ -143,8 +140,7 @@ void Xtrsv<T>::DoTrsv(const Layout layout, const Triangle triangle, const Transp
 		if (i > 0) {
 			const auto gemv_m = (a_transpose == Transpose::kNo) ? block_size : i;
 			const auto gemv_n = (a_transpose == Transpose::kNo) ? i : block_size;
-			auto gemv_event = Event(this->device_());
-			auto gemv = Xgemv<T>(queue_, gemv_event.pointer());
+			auto gemv = Xgemv<T>(queue_, nullptr);
 			gemv.DoGemv(layout, a_transpose, gemv_m, gemv_n, ConstantOne<T>(), a_buffer, a_offset + extra_offset_a, a_ld,
 									x_buffer, x_offset + extra_offset_x, x_inc, ConstantOne<T>(), x_buffer, x_offset + extra_offset_b,
 									x_inc);
@@ -152,9 +148,8 @@ void Xtrsv<T>::DoTrsv(const Layout layout, const Triangle triangle, const Transp
 		}
 
 		// Runs the triangular substitution for the block size
-		auto sub_event = Event(this->device_());
 		Substitution(layout, triangle, a_transpose, diagonal, block_size, a_buffer, a_offset + col + col * a_ld, a_ld,
-								 b_buffer, b_offset + col * b_inc, b_inc, x_buffer, x_offset + col * x_inc, x_inc, sub_event.pointer());
+								 b_buffer, b_offset + col * b_inc, b_inc, x_buffer, x_offset + col * x_inc, x_inc);
 		//sub_event.WaitForCompletion();
 		device_()->enqueueBarrier( {x_buffer(), b_buffer(), a_buffer()} );
 	}

@@ -74,18 +74,11 @@ void Xnrm2<T>::DoNrm2(const size_t n, const Buffer<T>& nrm2_buffer, const size_t
 	kernel1.SetArgument(3, static_cast<int>(x_inc));
 	kernel1.SetArgument(4, temp_buffer());
 
-	// Event waiting list
-	auto eventWaitList = std::vector<Event>();
-	
-	
-
 	// Launches the main kernel
 	auto global1 = std::vector<size_t>{db_["WGS1"] * temp_size};
 	auto local1 = std::vector<size_t>{db_["WGS1"]};
-	auto kernelEvent = Event(this->device_());
 	RunKernel(kernel1, queue_, device_, global1, local1);
 	device_()->enqueueBarrier({temp_buffer()});
-	//eventWaitList.push_back(kernelEvent);
 
 	// Sets the arguments for the epilogue kernel
 	kernel2.SetArgument(0, temp_buffer());

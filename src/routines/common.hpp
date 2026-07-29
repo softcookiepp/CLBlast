@@ -32,14 +32,12 @@ void RunKernel(Kernel& kernel, Queue& queue, const Device& device, std::vector<s
 
 // Sets all elements of a matrix to a constant value
 template <typename T>
-void FillMatrix(Queue& queue, const Device& device, const std::shared_ptr<Program> program, EventPointer event,
-								const std::vector<Event>& waitForEvents, const size_t m, const size_t n, const size_t ld,
+void FillMatrix(Queue& queue, const Device& device, const std::shared_ptr<Program> program, const size_t m, const size_t n, const size_t ld,
 								const size_t offset, const Buffer<T>& dest, const T constant_value, const size_t local_size);
 
 // Sets all elements of a vector to a constant value
 template <typename T>
-void FillVector(Queue& queue, const Device& device, const std::shared_ptr<Program> program, EventPointer event,
-								const std::vector<Event>& waitForEvents, const size_t n, const size_t inc, const size_t offset,
+void FillVector(Queue& queue, const Device& device, const std::shared_ptr<Program> program, const size_t n, const size_t inc, const size_t offset,
 								const Buffer<T>& dest, const T constant_value, const size_t local_size);
 
 // =================================================================================================
@@ -47,8 +45,8 @@ void FillVector(Queue& queue, const Device& device, const std::shared_ptr<Progra
 // Copies or transposes a matrix and optionally pads/unpads it with zeros. This method is also able
 // to write to symmetric and triangular matrices through optional arguments.
 template <typename T>
-void PadCopyTransposeMatrix(Queue& queue, const Device& device, const Databases& db, EventPointer event,
-														const std::vector<Event>& waitForEvents, const size_t src_one, const size_t src_two,
+void PadCopyTransposeMatrix(Queue& queue, const Device& device, const Databases& db, 
+														const size_t src_one, const size_t src_two,
 														const size_t src_ld, const size_t src_offset, const Buffer<T>& src, const size_t dest_one,
 														const size_t dest_two, const size_t dest_ld, const size_t dest_offset,
 														const Buffer<T>& dest, const T alpha, const std::shared_ptr<Program>& program,
@@ -142,8 +140,7 @@ void PadCopyTransposeMatrix(Queue& queue, const Device& device, const Databases&
 
 // Batched version of the above
 template <typename T>
-void PadCopyTransposeMatrixBatched(Queue& queue, const Device& device, const Databases& db, EventPointer event,
-																	 const std::vector<Event>& waitForEvents, const size_t src_one, const size_t src_two,
+void PadCopyTransposeMatrixBatched(Queue& queue, const Device& device, const Databases& db, const size_t src_one, const size_t src_two,
 																	 const size_t src_ld, const Buffer<int>& src_offsets, const Buffer<T>& src,
 																	 const size_t dest_one, const size_t dest_two, const size_t dest_ld,
 																	 const Buffer<int>& dest_offsets, const Buffer<T>& dest,
@@ -193,8 +190,7 @@ void PadCopyTransposeMatrixBatched(Queue& queue, const Device& device, const Dat
 
 // Batched version of the above
 template <typename T>
-void PadCopyTransposeMatrixStridedBatched(Queue& queue, const Device& device, const Databases& db, EventPointer event,
-										const std::vector<Event>& waitForEvents, const size_t src_one,
+void PadCopyTransposeMatrixStridedBatched(Queue& queue, const Device& device, const Databases& db, const size_t src_one,
 										const size_t src_two, const size_t src_ld, const size_t src_offset,
 										const size_t src_stride, const Buffer<T>& src, const size_t dest_one,
 										const size_t dest_two, const size_t dest_ld, const size_t dest_offset,

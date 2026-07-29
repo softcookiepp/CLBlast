@@ -35,11 +35,10 @@ void Xher2k<T, U>::DoHer2k(const Layout layout, const Triangle triangle, const T
 	
 	
 	// Runs the first matrix multiplication
-	auto first_herk_event = Event(this->device_());
 	auto complex_beta = T{beta, static_cast<U>(0.0)};
 	const auto negated_ab_transpose = (ab_transpose != Transpose::kNo) ? Transpose::kNo : Transpose::kYes;
 	HerkAB(layout, triangle, ab_transpose, negated_ab_transpose, n, k, alpha, a_buffer, a_offset, a_ld, b_buffer,
-				 b_offset, b_ld, complex_beta, c_buffer, c_offset, c_ld, first_herk_event.pointer(), false);
+				 b_offset, b_ld, complex_beta, c_buffer, c_offset, c_ld, false);
 	
 	//first_herk_event.WaitForCompletion();
 	this->device_()->enqueueBarrier( {a_buffer(), b_buffer(), c_buffer()} );
@@ -48,7 +47,7 @@ void Xher2k<T, U>::DoHer2k(const Layout layout, const Triangle triangle, const T
 	auto conjugate_alpha = T{alpha.real(), -alpha.imag()};
 	auto complex_one = T{static_cast<U>(1.0), static_cast<U>(0.0)};
 	HerkAB(layout, triangle, ab_transpose, negated_ab_transpose, n, k, conjugate_alpha, b_buffer, b_offset, b_ld,
-				 a_buffer, a_offset, a_ld, complex_one, c_buffer, c_offset, c_ld, event_, true);
+				 a_buffer, a_offset, a_ld, complex_one, c_buffer, c_offset, c_ld, true);
 				 
 	
 }

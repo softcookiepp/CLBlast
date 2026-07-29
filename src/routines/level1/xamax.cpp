@@ -66,12 +66,6 @@ void Xamax<T>::DoAmax(const size_t n, const Buffer<unsigned int>& imax_buffer, c
 	auto temp_size = 2 * db_["WGS2"];
 	auto temp_buffer1 = Buffer<T>(context_, temp_size);
 	auto temp_buffer2 = Buffer<unsigned int>(context_, temp_size);
-	
-	// ugh.
-	std::vector<Event> eventWaitList;
-	
-	// get working sequence
-	
 
 	// Sets the kernel arguments
 #if VULKAN_USE_BDA
@@ -99,14 +93,12 @@ void Xamax<T>::DoAmax(const size_t n, const Buffer<unsigned int>& imax_buffer, c
 	// Launches the main kernel
 	auto global1 = std::vector<size_t>{db_["WGS1"] * temp_size};
 	auto local1 = std::vector<size_t>{db_["WGS1"]};
-	auto kernelEvent = Event(this->device_());
 	
 	// the number of workgroups in the X dimension
 	int num_groups_0 = static_cast<int>(global1[0]/local1[0]);
 	kernel1.SetArgument(6, num_groups_0);
 
 	RunKernel(kernel1, queue_, device_, global1, local1);
-	// eventWaitList.push_back(kernelEvent);
 
 	// Sets the arguments for the epilogue kernel
 #if VULKAN_USE_BDA

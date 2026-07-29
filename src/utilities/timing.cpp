@@ -21,8 +21,6 @@ namespace clblast {
 
 double RunKernelTimed(const size_t num_runs, Kernel& kernel, Queue& queue, const Device& device,
 											std::vector<size_t> global, const std::vector<size_t>& local) {
-	auto event = Event(device());
-
 	if (!local.empty()) {
 		// Tests for validity of the local thread sizes
 		if (local.size() > device.MaxWorkItemDimensions()) {
@@ -55,11 +53,14 @@ double RunKernelTimed(const size_t num_runs, Kernel& kernel, Queue& queue, const
 	if (!device.IsLocalMemoryValid(local_mem_usage)) {
 		throw RuntimeErrorCode(StatusCode::kInvalidLocalMemUsage);
 	}
+	
+	// finish pre-emptively so time is accurate
+	queue.Finish();
 
 	// Times the kernel
-	const auto run_kernel_func = [&]() {
+	const auto run_kernel_func = [&]()
+	{
 		kernel.Launch(queue, global, local);
-		event.WaitForCompletion();
 		queue.Finish();
 	};
 	return TimeFunction(num_runs, run_kernel_func);

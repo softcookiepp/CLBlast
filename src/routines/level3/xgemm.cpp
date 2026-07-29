@@ -252,18 +252,13 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	const auto b_temp = (b_no_temp) ? b_buffer : temp_buffer_all;
 	const auto c_temp = (c_no_temp) ? c_buffer : temp_buffer_all;
 
-	// Events of all kernels (including pre/post processing kernels)
-	auto eventWaitList = std::vector<Event>();
-	auto emptyEventList = std::vector<Event>();
-
 	// Runs the pre-processing kernel for matrix A. This transposes the matrix, but also pads zeros
 	// to fill it up until it reaches a certain multiple of size (kernel parameter dependent). In
 	// case nothing has to be done, these kernels can be skipped.
 	bool recordTempBarrier = false;
 	if (!a_no_temp)
 	{
-		auto eventProcessA = Event(this->device_());
-		PadCopyTransposeMatrix(queue_, device_, db_, eventProcessA.pointer(), emptyEventList, a_one, a_two, a_ld, a_offset,
+		PadCopyTransposeMatrix(queue_, device_, db_, a_one, a_two, a_ld, a_offset,
 													 a_buffer, a_one_i, a_two_i, a_one_i, 0, a_temp, ConstantOne<T>(), program_, true,
 													 a_do_transpose, a_conjugate,
 													 false, false, false);
@@ -274,8 +269,7 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	// As above, but now for matrix B
 	if (!b_no_temp)
 	{
-		auto eventProcessB = Event(this->device_());
-		PadCopyTransposeMatrix(queue_, device_, db_, eventProcessB.pointer(), emptyEventList, b_one, b_two, b_ld, b_offset,
+		PadCopyTransposeMatrix(queue_, device_, db_, b_one, b_two, b_ld, b_offset,
 													 b_buffer, b_one_i, b_two_i, b_one_i, b_temp_offset, b_temp, ConstantOne<T>(), program_, true,
 													 b_do_transpose, b_conjugate,
 													 false, false, false);
@@ -286,8 +280,7 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	// As above, but now for matrix C. This is only necessary if C is used both as input and output.
 	if (!c_no_temp && beta != static_cast<T>(0))
 	{
-		auto eventProcessC = Event(this->device_());
-		PadCopyTransposeMatrix(queue_, device_, db_, eventProcessC.pointer(), emptyEventList, c_one, c_two, c_ld, c_offset,
+		PadCopyTransposeMatrix(queue_, device_, db_, c_one, c_two, c_ld, c_offset,
 													 c_buffer, c_one_i, c_two_i, c_one_i, c_temp_offset, c_temp, ConstantOne<T>(), program_, true,
 													 c_do_transpose, false,
 													 false, false, false);
@@ -320,14 +313,12 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	const auto local = std::vector<size_t>{db_["MDIMC"], db_["NDIMC"]};
 
 	// Launches the kernel
-	auto eventKernel = Event(this->device_());
-	auto eventPointer = (!c_no_temp) ? eventKernel.pointer() : event_;
 	RunKernel(kernel, queue_, device_, global, local);
 
 	// Runs the post-processing kernel if needed
 	if (!c_no_temp) {
 		// eventWaitList.push_back(eventKernel);
-		PadCopyTransposeMatrix(queue_, device_, db_, event_, eventWaitList, c_one_i, c_two_i, c_one_i, c_temp_offset,
+		PadCopyTransposeMatrix(queue_, device_, db_, c_one_i, c_two_i, c_one_i, c_temp_offset,
 													 c_temp, c_one, c_two, c_ld, c_offset, c_buffer, ConstantOne<T>(), program_, false,
 													 c_do_transpose, false, false, false, false);
 	}

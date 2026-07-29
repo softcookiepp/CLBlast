@@ -233,42 +233,32 @@ void XgemmStridedBatched<T>::BatchedGemmIndirect(
 	const auto b_temp = (b_no_temp) ? b_buffer : Buffer<T>(context_, batch_count * b_one_i * b_two_i);
 	const auto c_temp = (c_no_temp) ? c_buffer : Buffer<T>(context_, batch_count * c_one_i * c_two_i);
 
-	// Events of all kernels (including pre/post processing kernels)
-	auto eventWaitList = std::vector<Event>();
-	auto emptyEventList = std::vector<Event>();
-
 	// Runs the pre-processing kernel for matrix A. This transposes the matrix, but also pads zeros
 	// to fill it up until it reaches a certain multiple of size (kernel parameter dependent). In
 	// case nothing has to be done, these kernels can be skipped.
 	std::vector<tart::buffer_ptr> barrierBuffers;
 	if (!a_no_temp) {
-		auto eventProcessA = Event(this->device_());
-		PadCopyTransposeMatrixStridedBatched(queue_, device_, db_, eventProcessA.pointer(), emptyEventList, a_one, a_two,
+		PadCopyTransposeMatrixStridedBatched(queue_, device_, db_, a_one, a_two,
 																				 a_ld, a_offset, a_stride, a_buffer, a_one_i, a_two_i, a_one_i, 0,
 																				 a_one_i * a_two_i, a_temp, program_, true, a_do_transpose, a_conjugate,
 																				 batch_count);
-		//eventWaitList.push_back(eventProcessA);
 		barrierBuffers.push_back(a_temp());
 	}
 
 	// As above, but now for matrix B
 	if (!b_no_temp) {
-		auto eventProcessB = Event(this->device_());
-		PadCopyTransposeMatrixStridedBatched(queue_, device_, db_, eventProcessB.pointer(), emptyEventList, b_one, b_two,
+		PadCopyTransposeMatrixStridedBatched(queue_, device_, db_, b_one, b_two,
 																				 b_ld, b_offset, b_stride, b_buffer, b_one_i, b_two_i, b_one_i, 0,
 																				 b_one_i * b_two_i, b_temp, program_, true, b_do_transpose, b_conjugate,
 																				 batch_count);
-		//eventWaitList.push_back(eventProcessB);
 		barrierBuffers.push_back(b_temp());
 	}
 
 	// As above, but now for matrix C
 	if (!c_no_temp) {
-		auto eventProcessC = Event(this->device_());
-		PadCopyTransposeMatrixStridedBatched(queue_, device_, db_, eventProcessC.pointer(), emptyEventList, c_one, c_two,
+		PadCopyTransposeMatrixStridedBatched(queue_, device_, db_, c_one, c_two,
 																				 c_ld, c_offset, c_stride, c_buffer, c_one_i, c_two_i, c_one_i, 0,
 																				 c_one_i * c_two_i, c_temp, program_, true, c_do_transpose, false, batch_count);
-		//eventWaitList.push_back(eventProcessC);
 		barrierBuffers.push_back(c_temp());
 	}
 	
@@ -299,14 +289,11 @@ void XgemmStridedBatched<T>::BatchedGemmIndirect(
 	const auto local = std::vector<size_t>{db_["MDIMC"], db_["NDIMC"], 1};
 
 	// Launches the kernel
-	auto eventKernel = Event(this->device_());
-	auto eventPointer = (!c_no_temp) ? eventKernel.pointer() : event_;
 	RunKernel(kernel, queue_, device_, global, local);
 
 	// Runs the post-processing kernel if needed
 	if (!c_no_temp) {
-		this->device_()->enqueueBarrier({c_buffer()});
-		PadCopyTransposeMatrixStridedBatched(queue_, device_, db_, event_, eventWaitList, c_one_i, c_two_i, c_one_i, 0,
+		PadCopyTransposeMatrixStridedBatched(queue_, device_, db_, c_one_i, c_two_i, c_one_i, 0,
 																				 c_one_i * c_two_i, c_temp, c_one, c_two, c_ld, c_offset, c_stride, c_buffer,
 																				 program_, false, c_do_transpose, false, batch_count);
 	}

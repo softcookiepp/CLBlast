@@ -38,90 +38,33 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 
 	// Adds the name of the routine as a define
 	header_string += "#define ROUTINE_" + routine_name + "\n";
-#if 0
-	// ugh
-#else
-	// Not all OpenCL compilers support the 'inline' keyword. The keyword is only used for devices on
-	// which it is known to work with all OpenCL platforms.
-	if (device.IsNVIDIA() || device.IsARM() || device.IsQualcomm()) {
-		header_string += "#define USE_INLINE_KEYWORD 1\n";
-	}
 
-	// For specific devices, use the non-IEE754 compliant OpenCL mad() instruction. This can improve
-	// performance, but might result in a reduced accuracy.
-	if ((device.IsAMD() && device.IsGPU()) || (device.IsQualcomm() && device.IsGPU())) {
-		header_string += "#define USE_CL_MAD 1\n";
-	}
+	// Just use this on every device, no point in not doing it
+	header_string += "#define USE_CL_MAD 1\n";
 
 	// For specific devices, use staggered/shuffled workgroup indices.
-	if (device.IsAMD() && device.IsGPU()) {
+	if (device()->getMetadata().physicalDeviceProperties.vendorID == tart::VendorID::eAMD)
+	{
 		header_string += "#define USE_STAGGERED_INDICES 1\n";
 	}
 
-	// For specific devices add a global synchronisation barrier to the GEMM kernel to optimize
-	// performance through better cache behaviour
-	if ((device.IsARM() && device.IsGPU()) || (device.IsQualcomm() && device.IsGPU())) {
-		header_string += "#define GLOBAL_MEM_FENCE 1\n";
-	}
-#if VULKAN_API
 	tart::DeviceMetadata meta = device()->getMetadata();
 	if (meta.subgroupShuffle)
 	{
 		header_string += "#define USE_SUBGROUP_SHUFFLING 1\n";
 		header_string += ("#define SUBGROUP_SIZE " + std::to_string(meta.subgroupSize) + "\n");
 	}
-#if VULKAN_USE_BDA
-	if (meta.bda)
-	{
-		// buffer device address support
-		header_string += "#define USE_BDA 1\n";
-	}
-#endif
-	// just add this in here cause why not
-	header_string += "#define USE_CL_MAD 1\n";
-#else
-	// For Intel GPUs with subgroup support, use subgroup shuffling.
-	if (device.IsGPU() && device.HasExtension(kKhronosIntelSubgroups) &&
-			(precision == Precision::kSingle || precision == Precision::kHalf)) {
-		header_string += "#define USE_SUBGROUP_SHUFFLING 1\n";
-		header_string += "#define SUBGROUP_SHUFFLING_INTEL 1\n";
-	}
-
-	// For NVIDIA GPUs, inline PTX can provide subgroup support
-	if (device.IsGPU() && device.IsNVIDIA() && precision == Precision::kSingle) {
-		header_string += "#define USE_SUBGROUP_SHUFFLING 1\n";
-
-		// Nvidia needs to check pre or post volta due to new shuffle commands
-		if (device.IsPostNVIDIAVolta()) {
-			header_string += "#define SUBGROUP_SHUFFLING_NVIDIA_POST_VOLTA 1\n";
-		} else {
-			header_string += "#define SUBGROUP_SHUFFLING_NVIDIA_PRE_VOLTA 1\n";
+	#if VULKAN_USE_BDA
+		if (meta.bda)
+		{
+			// buffer device address support
+			header_string += "#define USE_BDA 1\n";
 		}
-	}
-#endif
+	#endif
 
-	// For Qualcomm devices, specifying the OpenCL kernel attribute reqd_work_group_size reduces performance.
-	// This option compiles without the workgroup size requirement and does not affect correctness.
-	if (device.IsQualcomm()) {
-		header_string += "#define RELAX_WORKGROUP_SIZE 1\n";
-	}
-#endif
-
-#if VULKAN_API
-	if (true)
-	{
-		header_string +=
+	header_string +=
 #include "kernels-vk-inline/common.glsl.inl"
-		;
-	}
-	else
-#endif
-	{
-		// Loads the common header (typedefs and defines and such)
-		header_string +=
-#include "kernels/common.opencl"
-			;
-	}
+	;
 
 // Prints details of the routine to compile in case of debugging in verbose mode
 #ifdef VERBOSE
@@ -132,12 +75,7 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 	// Runs a pre-processor to unroll loops and perform array-to-register promotion. Most OpenCL
 	// compilers do this, but some don't.
 	auto do_run_preprocessor = false;
-	if (run_preprocessor == 0) {
-		do_run_preprocessor = (device.IsARM() && device.IsGPU());
-	}
-	if (run_preprocessor == 1) {
-		do_run_preprocessor = true;
-	}
+	
 	auto kernel_string = header_string + source_string;
 	if (do_run_preprocessor) {
 		log_debug("Running built-in pre-processor");

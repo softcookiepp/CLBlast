@@ -139,15 +139,6 @@ public:
 	// Query for a specific type of device or brand
 	bool IsCPU() const;
 	bool IsGPU() const;
-	bool IsAMD() const;
-	bool IsNVIDIA() const;
-	bool IsIntel() const;
-	bool IsARM() const;
-	bool IsQualcomm() const;
-
-	// Platform specific extensions
-	std::string AMDBoardName() const;
-	std::string NVIDIAComputeCapability() const;
 
 	// Returns if the Nvidia chip is a Volta or later archicture (sm_70 or higher)
 	bool IsPostNVIDIAVolta() const;

@@ -629,14 +629,8 @@ std::string GetDeviceVendor(const Device& device) {
 // Mid-level info
 std::string GetDeviceArchitecture(const Device& device) {
 	auto device_architecture = std::string{""};
-	// TODO: replace
-	if (device.HasExtension(kKhronosAttributesNVIDIA)) {
-		device_architecture = device.NVIDIAComputeCapability();
-	} else if (device.HasExtension(kKhronosAttributesAMD)) {
-		device_architecture = device.Name();								 // Name is architecture for AMD APP and AMD ROCm
-	} else if ((device.IsQualcomm() && device.IsGPU())) {	// queries the Adreno GPU architecture version
-		device_architecture = device.AdrenoVersion();
-	}
+	// This is enough for now...
+	device_architecture = device.Name();
 	// Note: no else - 'device_architecture' might be the empty string
 
 	for (auto& find_and_replace : device_mapping::kArchitectureNames) {	// replacing to common names
@@ -649,12 +643,7 @@ std::string GetDeviceArchitecture(const Device& device) {
 
 // Lowest-level
 std::string GetDeviceName(const Device& device) {
-	auto device_name = std::string{""};
-	if (device.HasExtension(kKhronosAttributesAMD)) {
-		device_name = device.AMDBoardName();
-	} else {
-		device_name = device.Name();
-	}
+	auto device_name = device.Name();
 
 	for (auto& find_and_replace : device_mapping::kDeviceNames) {	// replacing to common names
 		if (device_name == find_and_replace.first) {

@@ -119,35 +119,6 @@ bool Device::IsThreadConfigValid(const std::vector<size_t>& local) const { retur
 // Query for a specific type of device or brand
 bool Device::IsCPU() const { return Type() == "CPU"; }
 bool Device::IsGPU() const { return Type() == "GPU"; }
-bool Device::IsAMD() const
-{
-	return Device::Vendor() == "AMD";
-}
-bool Device::IsNVIDIA() const
-{
-	return false;
-}
-bool Device::IsIntel() const
-{
-	return Vendor() == "INTEL";
-}
-bool Device::IsARM() const
-{
-	return Device::Vendor() == "ARM";
-}
-bool Device::IsQualcomm() const
-{
-	return Device::Vendor() == "Qualcomm";
-}
-
-std::string Device::AMDBoardName() const
-{
-	return "not implemented";
-}
-std::string Device::NVIDIAComputeCapability() const {	// check for 'cl_nv_device_attribute_query' first
-	// dummy
-	return "SM3.7";
-}
 
 bool Device::IsPostNVIDIAVolta() const
 {

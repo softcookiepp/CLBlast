@@ -99,9 +99,9 @@ struct TuningResult {
 	Configuration config;
 };
 
-void PrintTimingsToFileAsJSON(const std::string& filename, const Device& device, const Platform& platform,
-															const std::vector<std::pair<std::string, std::string>>& metadata,
-															const std::vector<TuningResult>& tuning_results);
+void PrintTimingsToFileAsJSON(const std::string& filename, const Device& device,
+	const std::vector<std::pair<std::string, std::string>>& metadata,
+	const std::vector<TuningResult>& tuning_results);
 
 void print_separator(const size_t parameters_size);
 

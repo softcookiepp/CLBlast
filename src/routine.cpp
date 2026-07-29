@@ -116,22 +116,18 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 	// Queries the cache to see whether or not the binary (device-specific) is already there. If it
 	// is, a program is created and stored in the cache
 	const auto device_name = device_()->getMetadata().name();
-	const auto platform_id = 0; //device_.PlatformID();
+	const auto platform_id = 0;
 	bool has_binary = false;
-#if VULKAN_API
-	if (true)// (!mIsGLSL)
-#endif
+	auto binary =
+			BinaryCache::Instance().Get(BinaryKeyRef{platform_id, precision_, routine_info, device_name}, &has_binary);
+	if (has_binary)
 	{
-		auto binary =
-				BinaryCache::Instance().Get(BinaryKeyRef{platform_id, precision_, routine_info, device_name}, &has_binary);
-		if (has_binary) {
-			program_ = std::make_shared<Program>(device_, context_, binary);
-			SetOpenCLKernelStandard(device_, options);
-			program_->Build(device_, options);
-			ProgramCache::Instance().Store(ProgramKey{context_(), device_(), precision_, routine_info},
-																		 std::shared_ptr<Program>{program_});
-			return;
-		}
+		program_ = std::make_shared<Program>(device_, context_, binary);
+		SetOpenCLKernelStandard(device_, options);
+		program_->Build(device_, options);
+		ProgramCache::Instance().Store(ProgramKey{context_(), device_(), precision_, routine_info},
+																	 std::shared_ptr<Program>{program_});
+		return;
 	}
 
 	// Otherwise, the kernel will be compiled and program will be built. Both the binary and the
@@ -184,7 +180,7 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 void Routine::InitDatabase(const Device& device, const std::vector<std::string>& kernel_names,
 	const Precision precision, const std::vector<database::DatabaseEntry>& userDatabase, Databases& db)
 {
-	const auto platform_id = 0; //device.PlatformID();
+	const auto platform_id = 0;
 	for (const auto& kernel_name : kernel_names)
 	{
 		// Queries the cache to see whether or not the kernel parameter database is already there

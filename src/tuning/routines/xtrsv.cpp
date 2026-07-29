@@ -69,7 +69,6 @@ void TuneXtrsv(int argc, char* argv[]) {
 	const auto step = size_t{8};
 
 	// OpenCL initialisation
-	const auto platform = Platform(platform_id);
 	const auto device = Device(device_id);
 	if (!PrecisionSupported<T>(device)) {
 		printf("* Unsupported precision, skipping this tuning run\n");
@@ -111,7 +110,7 @@ void TuneXtrsv(int argc, char* argv[]) {
 	auto metadata = std::vector<std::pair<std::string, std::string>>{
 			{"kernel_family", "trsv_routine"}, {"precision", precision_string},		{"arg_n", ToString(size)},
 			{"best_kernel", "trsv_routine"},	 {"best_time", ToString(best_time)}, {"best_parameters", best_string}};
-	PrintTimingsToFileAsJSON("clblast_routine_xtrsv_" + precision_string + ".json", device, platform, metadata, scores);
+	PrintTimingsToFileAsJSON("clblast_routine_xtrsv_" + precision_string + ".json", device, metadata, scores);
 
 	printf("* Completed tuning process\n");
 	printf("\n");

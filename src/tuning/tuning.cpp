@@ -36,7 +36,7 @@
 namespace clblast {
 // =================================================================================================
 
-void PrintTimingsToFileAsJSON(const std::string& filename, const Device& device, const Platform& platform,
+void PrintTimingsToFileAsJSON(const std::string& filename, const Device& device,
 															const std::vector<std::pair<std::string, std::string>>& metadata,
 															const std::vector<TuningResult>& tuning_results) {
 	auto num_results = tuning_results.size();
@@ -52,8 +52,8 @@ void PrintTimingsToFileAsJSON(const std::string& filename, const Device& device,
 	fprintf(file, "	\"clblast_device_architecture\": \"%s\",\n", GetDeviceArchitecture(device).c_str());
 	fprintf(file, "	\"clblast_device_name\": \"%s\",\n", GetDeviceName(device).c_str());
 	fprintf(file, "	\"device\": \"%s\",\n", device.Name().c_str());
-	fprintf(file, "	\"platform_vendor\": \"%s\",\n", platform.Vendor().c_str());
-	fprintf(file, "	\"platform_version\": \"%s\",\n", platform.Version().c_str());
+	//fprintf(file, "	\"platform_vendor\": \"%s\",\n", platform.Vendor().c_str());
+	//fprintf(file, "	\"platform_version\": \"%s\",\n", platform.Version().c_str());
 	fprintf(file, "	\"device_vendor\": \"%s\",\n", device.Vendor().c_str());
 	fprintf(file, "	\"device_type\": \"%s\",\n", device.Type().c_str());
 	fprintf(file, "	\"device_core_clock\": \"%zu\",\n", device.CoreClock());
@@ -303,7 +303,6 @@ void Tuner(int argc, char* argv[], const int V, GetTunerDefaultsFunc GetTunerDef
 	TestValidArguments(V, args);
 
 	// Initializes OpenCL
-	const auto platform = Platform(args.platform_id);
 	const auto device = Device(args.device_id);
 	const auto context = Context(device);
 	auto queue = Queue(context, device);
@@ -610,7 +609,7 @@ void Tuner(int argc, char* argv[], const int V, GetTunerDefaultsFunc GetTunerDef
 			metadata.push_back({"arg_num_kernels", ToString(args.num_kernels)});
 		}
 	}
-	PrintTimingsToFileAsJSON("clblast_" + settings.kernel_family + "_" + precision_string + ".json", device, platform,
+	PrintTimingsToFileAsJSON("clblast_" + settings.kernel_family + "_" + precision_string + ".json", device,
 													 metadata, results);
 
 	printf("* Completed tuning process\n");

@@ -79,7 +79,7 @@ void RunGemmStridedBatchedRoutine(const size_t value, const Queue& queue, const 
 // =================================================================================================
 
 template <typename T>
-void TuneGemmSingleSize(const Platform& platform, const Device& device, const Context& context, Queue& queue,
+void TuneGemmSingleSize(const Device& device, const Context& context, Queue& queue,
 												const size_t m, const size_t n, const size_t k, const size_t num_runs) {
 	// Buffers
 	auto buffers =
@@ -116,7 +116,7 @@ void TuneGemmSingleSize(const Platform& platform, const Device& device, const Co
 			{"arg_n", ToString(n)},
 			{"arg_k", ToString(k)},
 	};
-	PrintTimingsToFileAsJSON("clblast_gemm_routine_single_size_" + precision_string + ".json", device, platform, metadata,
+	PrintTimingsToFileAsJSON("clblast_gemm_routine_single_size_" + precision_string + ".json", device, metadata,
 													 scores);
 }
 
@@ -138,7 +138,6 @@ void TuneXgemm(int argc, char* argv[]) {
 	fprintf(stdout, "%s\n", help.c_str());
 
 	// OpenCL initialisation
-	const auto platform = Platform(platform_id);
 	const auto device = Device(device_id);
 	if (!PrecisionSupported<T>(device)) {
 		printf("* Unsupported precision, skipping this tuning run\n");
@@ -169,13 +168,13 @@ void TuneXgemm(int argc, char* argv[]) {
 			printf("* Error: If one of m/n/k specified, please specify all three\n");
 			return;
 		}
-		TuneGemmSingleSize<T>(platform, device, context, queue, static_cast<size_t>(arg_m), static_cast<size_t>(arg_n),
+		TuneGemmSingleSize<T>(device, context, queue, static_cast<size_t>(arg_m), static_cast<size_t>(arg_n),
 													static_cast<size_t>(arg_k), num_runs);
 	}
 
 	else {
 		// Run the tuners for the XGEMM routines
-		TuneKernelSelection<T>(platform, device, context, queue, precision, RunGemmRoutine<T>, 64, 2048, 64, 1, num_runs,
+		TuneKernelSelection<T>(device, context, queue, precision, RunGemmRoutine<T>, 64, 2048, 64, 1, num_runs,
 													 "gemm", "GemmRoutine", "gemm_routine", "XGEMM_MIN_INDIRECT_SIZE");
 		// TuneKernelSelection<T>(platform, device, context, queue, precision, RunGemmBatchedRoutine<T, 30>,
 		//												16, 128, 32, 30, num_runs,

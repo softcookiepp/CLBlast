@@ -30,7 +30,6 @@ void OpenCLDiagnostics(int argc, char* argv[]) {
 	fprintf(stdout, "\n* %s\n", help.c_str());
 
 	// Initializes OpenCL
-	const auto platform = Platform(platform_id);
 	const auto device = Device(device_id);
 	const auto context = Context(device);
 	auto queue = Queue(context, device);
@@ -43,8 +42,8 @@ void OpenCLDiagnostics(int argc, char* argv[]) {
 	printf("\n --- OpenCL device naming:\n");
 	printf("* Device type									 %s\n", device.Type().c_str());
 	printf("* Device name									 %s\n", device.Name().c_str());
-	printf("* Platform vendor							 %s\n", platform.Vendor().c_str());
-	printf("* Platform version							%s\n", platform.Version().c_str());
+	//printf("* Platform vendor							 %s\n", platform.Vendor().c_str());
+	//printf("* Platform version							%s\n", platform.Version().c_str());
 
 	// Prints the CLBlast specific device names
 	printf("\n --- CLBlast device naming:\n");
@@ -72,7 +71,7 @@ void OpenCLDiagnostics(int argc, char* argv[]) {
 	printf("* device.Name()								 %.4lf ms\n", TimeFunction(kNumRuns, [&]() { device.Name(); }));
 	printf("* device.Vendor()							 %.4lf ms\n", TimeFunction(kNumRuns, [&]() { device.Vendor(); }));
 	printf("* device.Version()							%.4lf ms\n", TimeFunction(kNumRuns, [&]() { device.Version(); }));
-	printf("* device.Platform()						 %.4lf ms\n", TimeFunction(kNumRuns, [&]() { device.PlatformID(); }));
+	//printf("* device.Platform()						 %.4lf ms\n", TimeFunction(kNumRuns, [&]() { device.PlatformID(); }));
 	printf("* Buffer<float>(context, 1024)	%.4lf ms\n", TimeFunction(kNumRuns, [&]() { Buffer<float>(context, 1024); }));
 
 	printf("\n");

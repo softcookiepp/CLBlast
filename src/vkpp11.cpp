@@ -3,6 +3,15 @@
 namespace clblast {
 // =================================================================================================
 
+static std::shared_ptr<tart::Instance> gInstance = nullptr;
+
+tart::Instance& getInstance()
+{
+	if (!gInstance)
+		gInstance = std::make_shared<tart::Instance>();
+	return *gInstance;
+}
+
 // Represents a runtime error returned by an OpenCL API function
 CLCudaAPIError::CLCudaAPIError(int32_t status, const std::string& where)
 			: ErrorCode(status, where, "OpenCL error: " + where + ": " + std::to_string(static_cast<int>(status))) {}
@@ -56,9 +65,9 @@ const size_t& Platform::operator()() const { return platform_; }
 Device::Device(const tart::device_ptr device) : mDevice(device) {}
 
 // Initialize the device. Note that this constructor can throw exceptions!
-Device::Device(const Platform& platform, const size_t device_id) {
+Device::Device(const size_t device_id) {
 	// Use the global instance by default (this will mostly just be used for testing afaik)
-	mDevice = platform.getInstance().getDevice(device_id);
+	mDevice = getInstance().getDevice(device_id);
 }
 
 // Methods to retrieve device information

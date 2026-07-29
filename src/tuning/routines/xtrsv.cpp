@@ -70,7 +70,7 @@ void TuneXtrsv(int argc, char* argv[]) {
 
 	// OpenCL initialisation
 	const auto platform = Platform(platform_id);
-	const auto device = Device(platform, device_id);
+	const auto device = Device(device_id);
 	if (!PrecisionSupported<T>(device)) {
 		printf("* Unsupported precision, skipping this tuning run\n");
 		return;

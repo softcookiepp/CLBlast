@@ -84,7 +84,7 @@ Tester<T, U>::Tester(const std::vector<std::string>& arguments, const bool silen
     : help_("Options given/available:\n"),
       platform_(Platform(
           GetArgument(arguments, help_, kArgPlatform, ConvertArgument(std::getenv("CLBLAST_PLATFORM"), size_t{0})))),
-      device_(Device(platform_, GetArgument(arguments, help_, kArgDevice,
+      device_(Device(GetArgument(arguments, help_, kArgDevice,
                                             ConvertArgument(std::getenv("CLBLAST_DEVICE"), size_t{0})))),
       context_(Context(device_)),
       queue_(Queue(context_, device_)),

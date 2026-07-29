@@ -304,7 +304,7 @@ void Tuner(int argc, char* argv[], const int V, GetTunerDefaultsFunc GetTunerDef
 
 	// Initializes OpenCL
 	const auto platform = Platform(args.platform_id);
-	const auto device = Device(platform, args.device_id);
+	const auto device = Device(args.device_id);
 	const auto context = Context(device);
 	auto queue = Queue(context, device);
 

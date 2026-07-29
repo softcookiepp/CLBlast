@@ -43,8 +43,7 @@ size_t RunRetrieveParametersTests(int argc, char* argv[], const bool silent, con
   }
 
   // Initializes OpenCL
-  const auto platform = Platform(platform_id);
-  const auto device = Device(platform, device_id);
+  const auto device = Device(device_id);
 
   // Retrieves the parameters
   fprintf(stdout, "* Testing RetrieveParameters for '%s'\n", routine_name.c_str());

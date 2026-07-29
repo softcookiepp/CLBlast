@@ -291,7 +291,6 @@ Arguments<U> Client<T, U>::ParseArguments(int argc, char* argv[], const size_t l
 template <typename T, typename U>
 void Client<T, U>::PerformanceTest(Arguments<U>& args, const SetMetric set_sizes) {
 	// Initializes OpenCL and the libraries
-	auto platform = Platform(args.platform_id);
 	auto device = Device(platform, args.device_id);
 	auto context = Context(device);
 	auto queue = Queue(context, device);

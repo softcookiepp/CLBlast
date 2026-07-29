@@ -84,6 +84,9 @@ typedef tart::event_ptr EventPointer;
 // =================================================================================================
 
 // Vulkan doesn't have any direct equivalent to this, just use it to encapsulate device..or maybe instance?
+
+// static std::shared_ptr<tart::Instance> gInstance = nullptr;
+
 class Platform {
 	std::shared_ptr<tart::Instance> mInstance = nullptr;
 public:
@@ -144,7 +147,7 @@ public:
 	explicit Device(const tart::device_ptr device);
 
 	// Initialize the device. Note that this constructor can throw exceptions!
-	explicit Device(const Platform& platform, const size_t device_id);
+	explicit Device(const size_t device_id);
 
 	// Methods to retrieve device information
 	// (platform id is always 0)

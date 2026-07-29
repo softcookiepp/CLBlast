@@ -302,7 +302,7 @@ void Tuner(int argc, char* argv[], const int V, GetTunerDefaultsFunc GetTunerDef
 	// Initializes OpenCL
 	const auto device = Device(args.device_id);
 	const auto context = Context(device);
-	auto queue = Queue(context, device);
+	auto queue = Queue(device);
 
 	// Tests for validity of the precision and retrieves properties
 	if (!PrecisionSupported<T>(device)) {

@@ -75,7 +75,7 @@ void TuneXtrsv(int argc, char* argv[]) {
 		return;
 	}
 	const auto context = Context(device);
-	auto queue = Queue(context, device);
+	auto queue = Queue(device);
 
 	// Buffers
 	auto buffers = std::vector<Buffer<T>>{Buffer<T>(context, size * size), Buffer<T>(context, size)};

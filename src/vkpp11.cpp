@@ -100,10 +100,6 @@ unsigned long Device::MaxAllocSize() const {
 	return 0;
 }
 
-// neither of these can be queried in Vulkan either
-size_t Device::MemoryClock() const { return 0; }		 // Not exposed in OpenCL
-size_t Device::MemoryBusWidth() const { return 0; }	// Not exposed in OpenCL
-
 // Query for a specific type of device or brand
 bool Device::IsCPU() const { return Type() == "CPU"; }
 bool Device::IsGPU() const { return Type() == "GPU"; }
@@ -191,9 +187,9 @@ std::shared_ptr<tart::Program> Program::operator()() const { return mProgramCont
 Queue::Queue(const tart::device_ptr queue) { mDevice = queue; }
 
 // Regular constructor with memory management
-Queue::Queue(const Context& context, const Device& device)
+Queue::Queue(const Device& device)
 {
-	mDevice = context.pointer();
+	mDevice = device();
 }
 
 // Synchronizes the queue
@@ -218,24 +214,19 @@ const RawCommandQueue& Queue::operator()() const { return mDevice; }
 
 // Constructor based on the regular OpenCL data-type: memory management is handled elsewhere
 template <typename T>
-Buffer<T>::Buffer(const tart::buffer_ptr buffer) : access_(BufferAccess::kNotOwned) { buffer_ = buffer; }
+Buffer<T>::Buffer(const tart::buffer_ptr buffer) { buffer_ = buffer; }
 
 // Regular constructor with memory management. If this class does not own the buffer object, then
 // the memory will not be freed automatically afterwards. If the size is set to 0, this will
 // become a stub containing a nullptr
 template <typename T>
-Buffer<T>::Buffer(const Context& context, const BufferAccess access, const size_t size) :
-			access_(access)
+Buffer<T>::Buffer(const Context& context, const size_t size)
 {
 	if (size == 0)
 		buffer_ = nullptr;
 	else
 		buffer_ = context.pointer()->allocateBuffer(size*sizeof(T));
 }
-
-// As above, but now with read/write access as a default
-template <typename T>
-Buffer<T>::Buffer(const Context& context, const size_t size) : Buffer<T>(context, BufferAccess::kReadWrite, size) {}
 
 // Copies from device to host: reading the device buffer a-synchronously
 // (this is currently impossible in tart, so it will just sync for now)

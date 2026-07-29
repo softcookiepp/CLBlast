@@ -144,7 +144,7 @@ void TuneXgemm(int argc, char* argv[]) {
 		return;
 	}
 	const auto context = Context(device);
-	auto queue = Queue(context, device);
+	auto queue = Queue(device);
 
 	// Pre-load GEMM kernel tuning results if they exist
 	printf("* The GEMM routine tuner requires already tuned kernels\n");

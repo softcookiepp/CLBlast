@@ -32,7 +32,7 @@ void OpenCLDiagnostics(int argc, char* argv[]) {
 	// Initializes OpenCL
 	const auto device = Device(device_id);
 	const auto context = Context(device);
-	auto queue = Queue(context, device);
+	auto queue = Queue(device);
 
 	// Finds device information
 	const auto device_type = GetDeviceType(device);

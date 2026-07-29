@@ -293,7 +293,7 @@ void Client<T, U>::PerformanceTest(Arguments<U>& args, const SetMetric set_sizes
 	// Initializes OpenCL and the libraries
 	auto device = Device(platform, args.device_id);
 	auto context = Context(device);
-	auto queue = Queue(context, device);
+	auto queue = Queue(device);
 #ifdef CLBLAST_REF_CLBLAS
 	if (args.compare_clblas) {
 		clblasSetup();

@@ -85,7 +85,7 @@ Tester<T, U>::Tester(const std::vector<std::string>& arguments, const bool silen
 			device_(Device(GetArgument(arguments, help_, kArgDevice,
 																						ConvertArgument(std::getenv("CLBLAST_DEVICE"), size_t{0})))),
 			context_(Context(device_)),
-			queue_(Queue(context_, device_)),
+			queue_(Queue(device_)),
 			full_test_(CheckArgument(arguments, help_, kArgFullTest)),
 			verbose_(CheckArgument(arguments, help_, kArgVerbose)),
 			error_log_{},

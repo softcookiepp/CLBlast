@@ -124,7 +124,7 @@ size_t RunOverrideTests(int argc, char* argv[], const bool silent, const std::st
 	// Initializes OpenCL
 	const auto device = Device(device_id);
 	const auto context = Context(device);
-	auto queue = Queue(context, device);
+	auto queue = Queue(device);
 
 	// Populate host matrices with some example data
 	auto host_a = std::vector<T>(args.m * args.k);

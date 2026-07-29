@@ -127,10 +127,6 @@ public:
 	unsigned long MemorySize() const;
 	// this can be retrieved from Tart, but may not be public
 	unsigned long MaxAllocSize() const;
-	
-	// neither of these can be queried in Vulkan either
-	size_t MemoryClock() const;
-	size_t MemoryBusWidth() const;
 
 	// Query for a specific type of device or brand
 	bool IsCPU() const;
@@ -224,7 +220,7 @@ public:
 	explicit Queue(const tart::device_ptr queue);
 
 	// Regular constructor with memory management
-	explicit Queue(const Context& context, const Device& device);
+	explicit Queue(const Device& device);
 
 	// Synchronizes the queue
 	void Finish() const;
@@ -265,8 +261,6 @@ private:
 #endif
 // =================================================================================================
 #if 1
-// Enumeration of buffer access types
-enum class BufferAccess { kReadOnly, kWriteOnly, kReadWrite, kNotOwned };
 
 // Tart has this all built-in (but we still need to go through this silliness
 // C++11 version of 'cl_mem'
@@ -281,16 +275,13 @@ public:
 	// Regular constructor with memory management. If this class does not own the buffer object, then
 	// the memory will not be freed automatically afterwards. If the size is set to 0, this will
 	// become a stub containing a nullptr
-	explicit Buffer(const Context& context, const BufferAccess access, const size_t size);
-
-	// As above, but now with read/write access as a default
 	explicit Buffer(const Context& context, const size_t size);
 
 	// Constructs a new buffer based on an existing host-container
 	// Keep this in the header, since keeping track of what Iterator is used will be a pain
 	template <typename Iterator>
 	explicit Buffer(const Context& context, const Queue& queue, Iterator start, Iterator end)
-			: Buffer(context, BufferAccess::kReadWrite, static_cast<size_t>(end - start))
+			: Buffer(context, static_cast<size_t>(end - start))
 	{
 		auto size = static_cast<size_t>(end - start);
 		auto pointer = &*start;
@@ -334,7 +325,6 @@ public:
 private:
 
 	tart::buffer_ptr buffer_;
-	BufferAccess access_;
 };
 #endif
 

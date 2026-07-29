@@ -134,8 +134,8 @@ void XgemmBatched<T>::DoGemmBatched(const Layout layout, const Transpose a_trans
 	TestBatchedMatrixC(c_one, c_two, c_buffer, c_offsets, c_ld);
 
 	// Upload the scalar arguments to the device
-	auto alphas_device = Buffer<T>(context_, BufferAccess::kReadWrite, batch_count);
-	auto betas_device = Buffer<T>(context_, BufferAccess::kReadWrite, batch_count);
+	auto alphas_device = Buffer<T>(context_, batch_count);
+	auto betas_device = Buffer<T>(context_, batch_count);
 	alphas_device.Write(queue_, batch_count, alphas);
 	betas_device.Write(queue_, batch_count, betas);
 
@@ -213,8 +213,8 @@ void XgemmBatched<T>::BatchedGemmIndirect(
 	// case nothing has to be done, these kernels can be skipped.
 	std::vector<tart::buffer_ptr> barrierBuffers;
 	if (!a_no_temp) {
-		auto a_offsets_device = Buffer<int>(context_, BufferAccess::kReadWrite, batch_count);
-		auto a_offsets_i_device = Buffer<int>(context_, BufferAccess::kReadWrite, batch_count);
+		auto a_offsets_device = Buffer<int>(context_, batch_count);
+		auto a_offsets_i_device = Buffer<int>(context_, batch_count);
 		a_offsets_device.Write(queue_, batch_count, a_offsets);
 		a_offsets_i_device.Write(queue_, batch_count, a_offsets_i);
 		PadCopyTransposeMatrixBatched(queue_, device_, db_, a_one, a_two, a_ld,
@@ -226,8 +226,8 @@ void XgemmBatched<T>::BatchedGemmIndirect(
 
 	// As above, but now for matrix B
 	if (!b_no_temp) {
-		auto b_offsets_device = Buffer<int>(context_, BufferAccess::kReadWrite, batch_count);
-		auto b_offsets_i_device = Buffer<int>(context_, BufferAccess::kReadWrite, batch_count);
+		auto b_offsets_device = Buffer<int>(context_, batch_count);
+		auto b_offsets_i_device = Buffer<int>(context_, batch_count);
 		b_offsets_device.Write(queue_, batch_count, b_offsets);
 		b_offsets_i_device.Write(queue_, batch_count, b_offsets_i);
 		PadCopyTransposeMatrixBatched(queue_, device_, db_, b_one, b_two, b_ld,
@@ -238,8 +238,8 @@ void XgemmBatched<T>::BatchedGemmIndirect(
 	}
 
 	// As above, but now for matrix C
-	auto c_offsets_device = Buffer<int>(context_, BufferAccess::kReadWrite, batch_count);
-	auto c_offsets_i_device = Buffer<int>(context_, BufferAccess::kReadWrite, batch_count);
+	auto c_offsets_device = Buffer<int>(context_, batch_count);
+	auto c_offsets_i_device = Buffer<int>(context_, batch_count);
 	if (!c_no_temp) {
 		c_offsets_device.Write(queue_, batch_count, c_offsets);
 		c_offsets_i_device.Write(queue_, batch_count, c_offsets_i);
@@ -301,9 +301,9 @@ void XgemmBatched<T>::BatchedGemmDirect(const size_t m, const size_t n, const si
 																				const bool b_do_transpose, const bool c_do_transpose, const bool a_conjugate,
 																				const bool b_conjugate, const size_t batch_count) {
 	// Uploads the offsets to the device
-	auto a_offsets_device = Buffer<int>(context_, BufferAccess::kReadWrite, batch_count);
-	auto b_offsets_device = Buffer<int>(context_, BufferAccess::kReadWrite, batch_count);
-	auto c_offsets_device = Buffer<int>(context_, BufferAccess::kReadWrite, batch_count);
+	auto a_offsets_device = Buffer<int>(context_, batch_count);
+	auto b_offsets_device = Buffer<int>(context_, batch_count);
+	auto c_offsets_device = Buffer<int>(context_, batch_count);
 	a_offsets_device.Write(queue_, batch_count, a_offsets);
 	b_offsets_device.Write(queue_, batch_count, b_offsets);
 	c_offsets_device.Write(queue_, batch_count, c_offsets);

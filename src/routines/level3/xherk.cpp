@@ -235,7 +235,7 @@ void Xherk<T, U>::HerkAB(const Layout layout, const Triangle triangle, const Tra
 
 	// Launches the kernel
 	auto eventKernel = Event(this->device_());
-	RunKernel(kernel, queue_, device_, global, local, eventKernel.pointer(), eventWaitList);
+	RunKernel(kernel, queue_, device_, global, local);
 	device_()->enqueueBarrier( {a_temp(), b_temp(), c_temp()} );
 
 	// Runs the post-processing kernel

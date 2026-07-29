@@ -103,7 +103,7 @@ void Xasum<T>::DoAsum(const size_t n, const Buffer<T>& asum_buffer, const size_t
 	kernel1.SetArgument(6, static_cast<int>(global1[0]/local1[0]));
 
 	auto kernelEvent = Event(this->device_());
-	RunKernel(kernel1, queue_, device_, global1, local1, kernelEvent.pointer(), {});
+	RunKernel(kernel1, queue_, device_, global1, local1);
 	//eventWaitList.push_back(kernelEvent);
 
 	// Sets the arguments for the epilogue kernel
@@ -128,7 +128,7 @@ void Xasum<T>::DoAsum(const size_t n, const Buffer<T>& asum_buffer, const size_t
 	// Launches the epilogue kernel
 	auto global2 = std::vector<size_t>{db_["WGS2"]};
 	auto local2 = std::vector<size_t>{db_["WGS2"]};
-	RunKernel(kernel2, queue_, device_, global2, local2, event_, eventWaitList);
+	RunKernel(kernel2, queue_, device_, global2, local2);
 	
 	
 }

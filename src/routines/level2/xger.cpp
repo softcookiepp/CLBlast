@@ -89,7 +89,7 @@ void Xger<T>::DoGer(const Layout layout, const size_t m, const size_t n, const T
 	auto a_two_ceiled = Ceil(CeilDiv(a_two, db_["WPT"]), db_["WGS2"]);
 	auto global = std::vector<size_t>{a_one_ceiled, a_two_ceiled};
 	auto local = std::vector<size_t>{db_["WGS1"], db_["WGS2"]};
-	RunKernel(kernel, queue_, device_, global, local, event_);
+	RunKernel(kernel, queue_, device_, global, local);
 }
 
 // =================================================================================================

@@ -166,7 +166,7 @@ void Xinvert<T>::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle 
 	const auto global_invert = std::vector<size_t>{num_internal_blocks * internal_block_size};
 	auto base_kernel_event = Event(this->device_());
 	auto base_kernel_event_pointer = (internal_block_size == block_size) ? event_ : base_kernel_event.pointer();
-	RunKernel(kernel, queue_, device_, global_invert, local_invert, base_kernel_event_pointer, event_wait_list);
+	RunKernel(kernel, queue_, device_, global_invert, local_invert);
 	if (internal_block_size == block_size) {
 		//event_wait_list.push_back(base_kernel_event);
 		device_()->enqueueBarrier({dest()});
@@ -199,7 +199,7 @@ void Xinvert<T>::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle 
 		kernel1.SetArgument(6, static_cast<int>(npages));
 		kernel1.SetArgument(7, static_cast<int>(block_size));
 		auto kernel1_event = Event(this->device_());
-		RunKernel(kernel1, queue_, device_, global, local, kernel1_event.pointer(), event_wait_list);
+		RunKernel(kernel1, queue_, device_, global, local);
 		device_()->enqueueBarrier({dest()});
 		//event_wait_list.push_back(kernel1_event);
 
@@ -214,7 +214,7 @@ void Xinvert<T>::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle 
 		kernel2.SetArgument(4, static_cast<int>(block_size));
 		auto kernel2_event = Event(this->device_());
 		auto kernel2_event_pointer = (is_last_kernel) ? event_ : kernel2_event.pointer();
-		RunKernel(kernel2, queue_, device_, global, local, kernel2_event_pointer, event_wait_list);
+		RunKernel(kernel2, queue_, device_, global, local);
 		if (!is_last_kernel) {
 			//event_wait_list.push_back(kernel2_event);
 			device_()->enqueueBarrier({dest()});

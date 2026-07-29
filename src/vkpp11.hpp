@@ -48,19 +48,8 @@
 #include <iostream>
 #include <complex> // std::complex<float>, std::complex<double>
 
-
-// Android support (missing C++11 functions to_string, stod, and stoi)
-#ifdef __ANDROID__
-#include "utilities/android.hpp"	// IWYU pragma: export
-#endif
-
 // Exception classes
 #include "cxpp11_common.hpp"
-
-#ifndef CL_TEMP_DEFS
-#define CL_DEMP_DEFS
-#define CL_SUCCESS 0
-#endif
 #include "tart.hpp"
 
 namespace clblast {
@@ -496,8 +485,7 @@ public:
 	std::string GetFunctionName() const;
 
 	// As above, but with an event waiting list
-	void Launch(const Queue& queue, const std::vector<size_t>& global, const std::vector<size_t>& local,
-							EventPointer event, const std::vector<Event>& waitForEvents = {});
+	void Launch(const Queue& queue, const std::vector<size_t>& global, const std::vector<size_t>& local);
 
 	// Accessor to the private data-member
 	const kernel_t& operator()() const;

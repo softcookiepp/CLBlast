@@ -26,7 +26,7 @@ namespace clblast {
 
 // Enqueues a kernel, waits for completion, and checks for errors
 void RunKernel(Kernel& kernel, Queue& queue, const Device& device, std::vector<size_t> global,
-							 const std::vector<size_t>& local, EventPointer event, const std::vector<Event>& waitForEvents = {});
+							 const std::vector<size_t>& local);
 
 // =================================================================================================
 
@@ -119,23 +119,23 @@ void PadCopyTransposeMatrix(Queue& queue, const Device& device, const Databases&
 		if (use_fast_kernel) {
 			const auto global = std::vector<size_t>{dest_one / db["TRA_WPT"], dest_two / db["TRA_WPT"]};
 			const auto local = std::vector<size_t>{db["TRA_DIM"], db["TRA_DIM"]};
-			RunKernel(kernel, queue, device, global, local, event, waitForEvents);
+			RunKernel(kernel, queue, device, global, local);
 		} else {
 			const auto global = std::vector<size_t>{Ceil(CeilDiv(dest_one, db["PADTRA_WPT"]), db["PADTRA_TILE"]),
 																							Ceil(CeilDiv(dest_two, db["PADTRA_WPT"]), db["PADTRA_TILE"])};
 			const auto local = std::vector<size_t>{db["PADTRA_TILE"], db["PADTRA_TILE"]};
-			RunKernel(kernel, queue, device, global, local, event, waitForEvents);
+			RunKernel(kernel, queue, device, global, local);
 		}
 	} else {
 		if (use_fast_kernel) {
 			const auto global = std::vector<size_t>{dest_one / db["COPY_VW"], dest_two / db["COPY_WPT"]};
 			const auto local = std::vector<size_t>{db["COPY_DIMX"], db["COPY_DIMY"]};
-			RunKernel(kernel, queue, device, global, local, event, waitForEvents);
+			RunKernel(kernel, queue, device, global, local);
 		} else {
 			const auto global = std::vector<size_t>{Ceil(CeilDiv(dest_one, db["PAD_WPTX"]), db["PAD_DIMX"]),
 																							Ceil(CeilDiv(dest_two, db["PAD_WPTY"]), db["PAD_DIMY"])};
 			const auto local = std::vector<size_t>{db["PAD_DIMX"], db["PAD_DIMY"]};
-			RunKernel(kernel, queue, device, global, local, event, waitForEvents);
+			RunKernel(kernel, queue, device, global, local);
 		}
 	}
 }
@@ -182,12 +182,12 @@ void PadCopyTransposeMatrixBatched(Queue& queue, const Device& device, const Dat
 		const auto global = std::vector<size_t>{Ceil(CeilDiv(dest_one, db["PADTRA_WPT"]), db["PADTRA_TILE"]),
 																						Ceil(CeilDiv(dest_two, db["PADTRA_WPT"]), db["PADTRA_TILE"]), batch_count};
 		const auto local = std::vector<size_t>{db["PADTRA_TILE"], db["PADTRA_TILE"], 1};
-		RunKernel(kernel, queue, device, global, local, event, waitForEvents);
+		RunKernel(kernel, queue, device, global, local);
 	} else {
 		const auto global = std::vector<size_t>{Ceil(CeilDiv(dest_one, db["PAD_WPTX"]), db["PAD_DIMX"]),
 																						Ceil(CeilDiv(dest_two, db["PAD_WPTY"]), db["PAD_DIMY"]), batch_count};
 		const auto local = std::vector<size_t>{db["PAD_DIMX"], db["PAD_DIMY"], 1};
-		RunKernel(kernel, queue, device, global, local, event, waitForEvents);
+		RunKernel(kernel, queue, device, global, local);
 	}
 }
 
@@ -236,12 +236,12 @@ void PadCopyTransposeMatrixStridedBatched(Queue& queue, const Device& device, co
 		const auto global = std::vector<size_t>{Ceil(CeilDiv(dest_one, db["PADTRA_WPT"]), db["PADTRA_TILE"]),
 																						Ceil(CeilDiv(dest_two, db["PADTRA_WPT"]), db["PADTRA_TILE"]), batch_count};
 		const auto local = std::vector<size_t>{db["PADTRA_TILE"], db["PADTRA_TILE"], 1};
-		RunKernel(kernel, queue, device, global, local, event, waitForEvents);
+		RunKernel(kernel, queue, device, global, local);
 	} else {
 		const auto global = std::vector<size_t>{Ceil(CeilDiv(dest_one, db["PAD_WPTX"]), db["PAD_DIMX"]),
 																						Ceil(CeilDiv(dest_two, db["PAD_WPTY"]), db["PAD_DIMY"]), batch_count};
 		const auto local = std::vector<size_t>{db["PAD_DIMX"], db["PAD_DIMY"], 1};
-		RunKernel(kernel, queue, device, global, local, event, waitForEvents);
+		RunKernel(kernel, queue, device, global, local);
 	}
 }
 

@@ -83,7 +83,7 @@ void Xnrm2<T>::DoNrm2(const size_t n, const Buffer<T>& nrm2_buffer, const size_t
 	auto global1 = std::vector<size_t>{db_["WGS1"] * temp_size};
 	auto local1 = std::vector<size_t>{db_["WGS1"]};
 	auto kernelEvent = Event(this->device_());
-	RunKernel(kernel1, queue_, device_, global1, local1, kernelEvent.pointer(), {});
+	RunKernel(kernel1, queue_, device_, global1, local1);
 	device_()->enqueueBarrier({temp_buffer()});
 	//eventWaitList.push_back(kernelEvent);
 
@@ -95,7 +95,7 @@ void Xnrm2<T>::DoNrm2(const size_t n, const Buffer<T>& nrm2_buffer, const size_t
 	// Launches the epilogue kernel
 	auto global2 = std::vector<size_t>{db_["WGS2"]};
 	auto local2 = std::vector<size_t>{db_["WGS2"]};
-	RunKernel(kernel2, queue_, device_, global2, local2, event_, eventWaitList);
+	RunKernel(kernel2, queue_, device_, global2, local2);
 	
 	
 }

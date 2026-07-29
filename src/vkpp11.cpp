@@ -8,14 +8,14 @@ CLCudaAPIError::CLCudaAPIError(int32_t status, const std::string& where)
 			: ErrorCode(status, where, "OpenCL error: " + where + ": " + std::to_string(static_cast<int>(status))) {}
 
 void CLCudaAPIError::Check(const int32_t status, const std::string& where) {
-		if (status != CL_SUCCESS) {
+		if (status != 0) {
 			throw CLCudaAPIError(status, where);
 		}
 	}
 
 void CLCudaAPIError::CheckDtor(const int32_t status, const std::string& where)
 {
-	if (status != CL_SUCCESS) {
+	if (status != 0) {
 		fprintf(stderr, "CLBlast: %s (ignoring)\n", CLCudaAPIError(status, where).what());
 	}
 }
@@ -507,8 +507,7 @@ std::string Kernel::GetFunctionName() const {
 }
 
 // As above, but with an event waiting list
-void Kernel::Launch(const Queue& queue, const std::vector<size_t>& global, const std::vector<size_t>& local,
-						EventPointer event, const std::vector<Event>& waitForEvents)
+void Kernel::Launch(const Queue& queue, const std::vector<size_t>& global, const std::vector<size_t>& local)
 {
 	if (global.size() != local.size() ) throw LogicError("local and global size must be same length");
 	std::vector<uint32_t> adjusted_global(global.size());

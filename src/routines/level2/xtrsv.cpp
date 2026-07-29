@@ -74,7 +74,7 @@ void Xtrsv<T>::Substitution(const Layout layout, const Triangle triangle, const 
 	// Launches the kernel
 	const auto local = std::vector<size_t>{db_["TRSV_BLOCK_SIZE"]};
 	const auto global = std::vector<size_t>{Ceil(n, db_["TRSV_BLOCK_SIZE"])};
-	RunKernel(kernel, queue_, device_, global, local, event, {});
+	RunKernel(kernel, queue_, device_, global, local);
 }
 
 // =================================================================================================

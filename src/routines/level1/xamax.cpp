@@ -105,7 +105,7 @@ void Xamax<T>::DoAmax(const size_t n, const Buffer<unsigned int>& imax_buffer, c
 	int num_groups_0 = static_cast<int>(global1[0]/local1[0]);
 	kernel1.SetArgument(6, num_groups_0);
 
-	RunKernel(kernel1, queue_, device_, global1, local1, kernelEvent.pointer(), {});
+	RunKernel(kernel1, queue_, device_, global1, local1);
 	// eventWaitList.push_back(kernelEvent);
 
 	// Sets the arguments for the epilogue kernel
@@ -124,7 +124,7 @@ void Xamax<T>::DoAmax(const size_t n, const Buffer<unsigned int>& imax_buffer, c
 	// Launches the epilogue kernel
 	auto global2 = std::vector<size_t>{db_["WGS2"]};
 	auto local2 = std::vector<size_t>{db_["WGS2"]};
-	RunKernel(kernel2, queue_, device_, global2, local2, event_, eventWaitList);
+	RunKernel(kernel2, queue_, device_, global2, local2);
 	
 	
 }

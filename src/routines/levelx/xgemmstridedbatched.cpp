@@ -301,7 +301,7 @@ void XgemmStridedBatched<T>::BatchedGemmIndirect(
 	// Launches the kernel
 	auto eventKernel = Event(this->device_());
 	auto eventPointer = (!c_no_temp) ? eventKernel.pointer() : event_;
-	RunKernel(kernel, queue_, device_, global, local, eventPointer, eventWaitList);
+	RunKernel(kernel, queue_, device_, global, local);
 
 	// Runs the post-processing kernel if needed
 	if (!c_no_temp) {
@@ -363,7 +363,7 @@ void XgemmStridedBatched<T>::BatchedGemmDirect(
 	const auto local = std::vector<size_t>{db_["MDIMCD"], db_["NDIMCD"], 1};
 
 	// Launches the kernel
-	RunKernel(kernel, queue_, device_, global, local, event_, {});
+	RunKernel(kernel, queue_, device_, global, local);
 }
 
 // =================================================================================================

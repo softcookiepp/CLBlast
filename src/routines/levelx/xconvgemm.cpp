@@ -194,7 +194,7 @@ void Xconvgemm<T>::DoConvgemm(const KernelMode kernel_mode, const size_t channel
 	const auto local = std::vector<size_t>{db_["MDIMCD"], db_["NDIMCD"], 1};
 
 	// Launches the kernel
-	RunKernel(kernel, queue_, device_, global, local, event_, {});
+	RunKernel(kernel, queue_, device_, global, local);
 	
 }
 

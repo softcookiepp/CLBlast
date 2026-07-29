@@ -80,7 +80,7 @@ void Xhemm<T>::DoHemm(const Layout layout, const Side side, const Triangle trian
 	// get working sequence
 	
 	
-	RunKernel(kernel, queue_, device_, global, local, kernelEvent.pointer(), {});
+	RunKernel(kernel, queue_, device_, global, local);
 	device_()->enqueueBarrier({temp_herm()});
 
 	// Synchronize now: 'DoGemm' does not accept a list of events to wait for

@@ -58,7 +58,7 @@ double RunKernelTimed(const size_t num_runs, Kernel& kernel, Queue& queue, const
 
 	// Times the kernel
 	const auto run_kernel_func = [&]() {
-		kernel.Launch(queue, global, local, event.pointer());
+		kernel.Launch(queue, global, local);
 		event.WaitForCompletion();
 		queue.Finish();
 	};

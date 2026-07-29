@@ -142,16 +142,16 @@ void Xaxpy<T>::DoAxpy(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 	if (use_fastest_kernel) {
 		auto global = std::vector<size_t>{CeilDiv(n, db_["WPT"] * db_["VW"])};
 		auto local = std::vector<size_t>{db_["WGS"]};
-		RunKernel(kernel, queue_, device_, global, local, event_, {});
+		RunKernel(kernel, queue_, device_, global, local);
 	} else if (use_faster_kernel) {
 		auto global = std::vector<size_t>{Ceil(CeilDiv(n, db_["WPT"] * db_["VW"]), db_["WGS"])};
 		auto local = std::vector<size_t>{db_["WGS"]};
-		RunKernel(kernel, queue_, device_, global, local, event_, {});
+		RunKernel(kernel, queue_, device_, global, local);
 	} else {
 		const auto n_ceiled = Ceil(n, db_["WGS"] * db_["WPT"]);
 		auto global = std::vector<size_t>{n_ceiled / db_["WPT"]};
 		auto local = std::vector<size_t>{db_["WGS"]};
-		RunKernel(kernel, queue_, device_, global, local, event_, {});
+		RunKernel(kernel, queue_, device_, global, local);
 	}
 	
 }

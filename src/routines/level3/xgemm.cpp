@@ -322,7 +322,7 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	// Launches the kernel
 	auto eventKernel = Event(this->device_());
 	auto eventPointer = (!c_no_temp) ? eventKernel.pointer() : event_;
-	RunKernel(kernel, queue_, device_, global, local, eventPointer, {});
+	RunKernel(kernel, queue_, device_, global, local);
 
 	// Runs the post-processing kernel if needed
 	if (!c_no_temp) {
@@ -383,7 +383,7 @@ void Xgemm<T>::GemmDirect(const size_t m, const size_t n, const size_t k, const 
 	const auto local = std::vector<size_t>{db_["MDIMCD"], db_["NDIMCD"]};
 
 	// Launches the kernel
-	RunKernel(kernel, queue_, device_, global, local, event_, {});
+	RunKernel(kernel, queue_, device_, global, local);
 }
 
 // =================================================================================================

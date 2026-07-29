@@ -95,7 +95,7 @@ void Xim2col<T>::DoIm2col(const KernelMode kernel_mode, const size_t channels, c
   const auto h_ceiled = Ceil(col_h, db_["COPY_DIMY"]);
   const auto global = std::vector<size_t>{w_ceiled, h_ceiled * channels};
   const auto local = std::vector<size_t>{db_["COPY_DIMX"], db_["COPY_DIMY"]};
-  RunKernel(kernel, queue_, device_, global, local, event_);
+  RunKernel(kernel, queue_, device_, global, local);
 }
 
 // =================================================================================================

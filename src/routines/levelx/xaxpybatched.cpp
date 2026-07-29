@@ -101,7 +101,7 @@ void XaxpyBatched<T>::DoAxpyBatched(const size_t n, const std::vector<T>& alphas
 	auto global = std::vector<size_t>{n_ceiled / db_["WPT"], batch_count};
 	auto local = std::vector<size_t>{db_["WGS"], 1};
 	
-	RunKernel(kernel, queue_, device_, global, local, event_);
+	RunKernel(kernel, queue_, device_, global, local);
 }
 
 // =================================================================================================

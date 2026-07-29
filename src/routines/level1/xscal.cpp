@@ -128,12 +128,12 @@ void Xscal<T>::DoScal(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 	if (use_fast_kernel) {
 		auto global = std::vector<size_t>{CeilDiv(n, db_["WPT"] * db_["VW"])};
 		auto local = std::vector<size_t>{db_["WGS"]};
-		RunKernel(kernel, queue_, device_, global, local, event_, {});
+		RunKernel(kernel, queue_, device_, global, local);
 	} else {
 		auto n_ceiled = Ceil(n, db_["WGS"] * db_["WPT"]);
 		auto global = std::vector<size_t>{n_ceiled / db_["WPT"]};
 		auto local = std::vector<size_t>{db_["WGS"]};
-		RunKernel(kernel, queue_, device_, global, local, event_, {});
+		RunKernel(kernel, queue_, device_, global, local);
 	}
 	
 	

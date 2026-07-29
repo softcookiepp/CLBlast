@@ -110,7 +110,7 @@ void Xdot<T>::DoDot(const size_t n, const Buffer<T>& dot_buffer, const size_t do
 	kernel1.SetArgument(9, static_cast<int>(global1[0]/local1[0]));
 #endif
 	auto kernelEvent = Event(this->device_());
-	RunKernel(kernel1, queue_, device_, global1, local1, kernelEvent.pointer(), {});
+	RunKernel(kernel1, queue_, device_, global1, local1);
 	//eventWaitList.push_back(kernelEvent);
 
 	// Sets the arguments for the epilogue kernel
@@ -132,7 +132,7 @@ void Xdot<T>::DoDot(const size_t n, const Buffer<T>& dot_buffer, const size_t do
 	// Launches the epilogue kernel
 	auto global2 = std::vector<size_t>{db_["WGS2"]};
 	auto local2 = std::vector<size_t>{db_["WGS2"]};
-	RunKernel(kernel2, queue_, device_, global2, local2, event_, eventWaitList);
+	RunKernel(kernel2, queue_, device_, global2, local2);
 	
 	
 }

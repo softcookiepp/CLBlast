@@ -196,7 +196,7 @@ void Xgemv<T>::MatVec(const Layout layout, const Transpose a_transpose, const si
 	// Launches the kernel
 	auto global = std::vector<size_t>{global_size};
 	auto local = std::vector<size_t>{local_size};
-	RunKernel(kernel, queue_, device_, global, local, event_, {});
+	RunKernel(kernel, queue_, device_, global, local);
 }
 
 // =================================================================================================

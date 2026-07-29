@@ -227,7 +227,7 @@ void Xsyrk<T>::SyrkAB(const Layout layout, const Triangle triangle, const Transp
 
 	// Launches the kernel
 	auto eventKernel = Event(this->device_());
-	RunKernel(kernel, queue_, device_, global, local, eventKernel.pointer(), eventWaitList);
+	RunKernel(kernel, queue_, device_, global, local);
 	//eventWaitList.push_back(eventKernel);
 	device_()->enqueueBarrier({c_temp()});
 	

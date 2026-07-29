@@ -22,7 +22,8 @@ namespace clblast {
 
 // Enqueues a kernel, waits for completion, and checks for errors
 void RunKernel(Kernel& kernel, Queue& queue, const Device& device, std::vector<size_t> global,
-							 const std::vector<size_t>& local, EventPointer event, const std::vector<Event>& waitForEvents) {
+	const std::vector<size_t>& local)
+{
 	if (!local.empty()) {
 		// Tests for validity of the local thread sizes
 		if (local.size() > device.MaxWorkItemDimensions()) {
@@ -73,7 +74,8 @@ void RunKernel(Kernel& kernel, Queue& queue, const Device& device, std::vector<s
 #endif
 
 	// Launches the kernel (and checks for launch errors)
-	kernel.Launch(queue, global, local, event, waitForEvents);
+	
+	kernel.Launch(queue, global, local);
 
 // Prints the elapsed execution time in case of debugging in verbose mode
 #ifdef VERBOSE
@@ -100,7 +102,7 @@ void FillMatrix(Queue& queue, const Device& device, const std::shared_ptr<Progra
 	kernel.SetArgument(5, GetRealArg(constant_value));
 	auto local = std::vector<size_t>{local_size, 1};
 	auto global = std::vector<size_t>{Ceil(m, local_size), n};
-	RunKernel(kernel, queue, device, global, local, event, waitForEvents);
+	RunKernel(kernel, queue, device, global, local);
 }
 
 // Compiles the above function
@@ -133,7 +135,7 @@ void FillVector(Queue& queue, const Device& device, const std::shared_ptr<Progra
 	kernel.SetArgument(4, GetRealArg(constant_value));
 	auto local = std::vector<size_t>{local_size};
 	auto global = std::vector<size_t>{Ceil(n, local_size)};
-	RunKernel(kernel, queue, device, global, local, event, waitForEvents);
+	RunKernel(kernel, queue, device, global, local);
 }
 
 // Compiles the above function

@@ -94,7 +94,7 @@ void Xher2<T>::DoHer2(const Layout layout, const Triangle triangle, const size_t
 	auto global_two = Ceil(CeilDiv(n, db_["WPT"]), db_["WGS2"]);
 	auto global = std::vector<size_t>{global_one, global_two};
 	auto local = std::vector<size_t>{db_["WGS1"], db_["WGS2"]};
-	RunKernel(kernel, queue_, device_, global, local, event_, {});
+	RunKernel(kernel, queue_, device_, global, local);
 }
 
 // =================================================================================================

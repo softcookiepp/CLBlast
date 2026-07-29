@@ -104,36 +104,9 @@ unsigned long Device::MaxAllocSize() const {
 size_t Device::MemoryClock() const { return 0; }		 // Not exposed in OpenCL
 size_t Device::MemoryBusWidth() const { return 0; }	// Not exposed in OpenCL
 
-// Configuration-validity checks
-bool Device::IsLocalMemoryValid(const uint64_t local_mem_usage) const
-{
-#if 1
-	// not yet implemented
-	return true;
-#else
-	return (local_mem_usage <= LocalMemSize());
-#endif
-}
-bool Device::IsThreadConfigValid(const std::vector<size_t>& local) const { return true; }
-
 // Query for a specific type of device or brand
 bool Device::IsCPU() const { return Type() == "CPU"; }
 bool Device::IsGPU() const { return Type() == "GPU"; }
-
-bool Device::IsPostNVIDIAVolta() const
-{
-	return false;
-}
-
-std::string Device::AdrenoVersion() const
-{
-	return "not implemented";
-}
-
-std::string Device::GetExtraInfo() const
-{
-	return "not implemented";
-}
 
 const RawDeviceID Device::operator()() const { return mDevice; }
 
@@ -402,14 +375,6 @@ Kernel::Kernel(const std::shared_ptr<Program> program, const std::string& name)
 	mProgramContainer = program->operator()();
 	mDevice = mProgramContainer->getDevice();
 	mKernel = mProgramContainer->getKernel(mEntryPoint);
-}
-
-// Retrieves the amount of local memory used per work-group for this kernel
-unsigned long Kernel::LocalMemUsage(const Device& device) const {
-	// It doesn't seem that Vulkan has a direct equivalent to this.
-	// More investigation will have to be done.
-	// It will likely have something to with SPIR-V reflection...
-	return 0;
 }
 
 // Retrieves the name of the kernel

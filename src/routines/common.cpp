@@ -60,12 +60,6 @@ void RunKernel(Kernel& kernel, Queue& queue, const Device& device, std::vector<s
 		}
 	}
 
-	// Tests for local memory usage
-	const auto local_mem_usage = kernel.LocalMemUsage(device);
-	if (!device.IsLocalMemoryValid(local_mem_usage)) {
-		throw RuntimeErrorCode(StatusCode::kInvalidLocalMemUsage);
-	}
-
 // Prints the name of the kernel to launch in case of debugging in verbose mode
 #ifdef VERBOSE
 	queue.Finish();

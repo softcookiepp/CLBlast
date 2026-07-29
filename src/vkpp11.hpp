@@ -132,22 +132,9 @@ public:
 	size_t MemoryClock() const;
 	size_t MemoryBusWidth() const;
 
-	// Configuration-validity checks
-	bool IsLocalMemoryValid(const uint64_t local_mem_usage) const;
-	bool IsThreadConfigValid(const std::vector<size_t>& local) const;
-
 	// Query for a specific type of device or brand
 	bool IsCPU() const;
 	bool IsGPU() const;
-
-	// Returns if the Nvidia chip is a Volta or later archicture (sm_70 or higher)
-	bool IsPostNVIDIAVolta() const;
-
-	// Returns the Qualcomm Adreno GPU version (i.e. a650, a730, a740, etc.)
-	std::string AdrenoVersion() const;
-
-	// Retrieves the above extra information (if present)
-	std::string GetExtraInfo() const;
 
 	// Accessor to the private data-member
 	const RawDeviceID operator()() const;
@@ -385,9 +372,6 @@ public:
 	void SetArguments(Args&... args) {
 		SetArgumentsRecursive(0, args...);
 	}
-
-	// Retrieves the amount of local memory used per work-group for this kernel
-	unsigned long LocalMemUsage(const Device& device) const;
 
 	// Retrieves the name of the kernel
 	std::string GetFunctionName() const;

@@ -47,12 +47,6 @@ double RunKernelTimed(const size_t num_runs, Kernel& kernel, Queue& queue, const
 			}
 		}
 	}
-
-	// Tests for local memory usage
-	const auto local_mem_usage = kernel.LocalMemUsage(device);
-	if (!device.IsLocalMemoryValid(local_mem_usage)) {
-		throw RuntimeErrorCode(StatusCode::kInvalidLocalMemUsage);
-	}
 	
 	// finish pre-emptively so time is accurate
 	queue.Finish();

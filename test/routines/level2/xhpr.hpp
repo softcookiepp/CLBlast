@@ -58,25 +58,10 @@ class TestXhpr {
 
 	// Describes how to run the CLBlast routine
 	static StatusCode RunRoutine(const Arguments<U>& args, Buffers<T>& buffers, Queue& queue) {
-#ifdef OPENCL_API
-		auto queue_plain = queue();
-		auto event = cl_event{};
-		auto status = Hpr(args.layout, args.triangle, args.n, args.alpha, buffers.x_vec(), args.x_offset, args.x_inc,
-											buffers.ap_mat(), args.ap_offset, &queue_plain, &event);
-		if (status == StatusCode::kSuccess) {
-			clWaitForEvents(1, &event);
-			clReleaseEvent(event);
-		}
-#elif CUDA_API
-		auto status = Hpr(args.layout, args.triangle, args.n, args.alpha, buffers.x_vec(), args.x_offset, args.x_inc,
-											buffers.ap_mat(), args.ap_offset, queue.GetContext()(), queue.GetDevice()());
-		cuStreamSynchronize(queue());
-#elif VULKAN_API
 		auto queue_plain = queue();
 		auto status = Hpr(args.layout, args.triangle, args.n, args.alpha, buffers.x_vec(), args.x_offset, args.x_inc,
 											buffers.ap_mat(), args.ap_offset, queue_plain);
 		queue_plain->sync();
-#endif
 		return status;
 	}
 

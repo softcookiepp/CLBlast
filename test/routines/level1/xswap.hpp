@@ -56,25 +56,10 @@ class TestXswap {
 
 	// Describes how to run the CLBlast routine
 	static StatusCode RunRoutine(const Arguments<T>& args, Buffers<T>& buffers, Queue& queue) {
-#ifdef OPENCL_API
-		auto queue_plain = queue();
-		auto event = cl_event{};
-		auto status = Swap<T>(args.n, buffers.x_vec(), args.x_offset, args.x_inc, buffers.y_vec(), args.y_offset,
-													args.y_inc, &queue_plain, &event);
-		if (status == StatusCode::kSuccess) {
-			clWaitForEvents(1, &event);
-			clReleaseEvent(event);
-		}
-#elif CUDA_API
-		auto status = Swap<T>(args.n, buffers.x_vec(), args.x_offset, args.x_inc, buffers.y_vec(), args.y_offset,
-													args.y_inc, queue.GetContext()(), queue.GetDevice()());
-		cuStreamSynchronize(queue());
-#elif VULKAN_API
 	auto queue_plain = queue();
 		auto status = Swap<T>(args.n, buffers.x_vec(), args.x_offset, args.x_inc, buffers.y_vec(), args.y_offset,
 		args.y_inc, queue_plain, nullptr);
 	queue_plain->sync();
-#endif
 		return status;
 	}
 

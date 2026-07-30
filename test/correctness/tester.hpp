@@ -21,11 +21,6 @@
 #include "test/test_utilities.hpp"
 #include "utilities/utilities.hpp"
 
-// The libraries
-#ifdef CLBLAST_REF_CLBLAS
-#include <clBLAS.h>
-#endif
-
 namespace clblast {
 // =================================================================================================
 

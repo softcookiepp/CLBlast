@@ -71,21 +71,10 @@ class TestXgemm {
 
 		// Sets the size of the temporary buffer (optional argument to GEMM)
 		auto temp_buffer_size = size_t{0};
-#ifdef OPENCL_API
 		auto queue_plain = queue();
 		GemmTempBufferSize<T>(args.layout, args.a_transpose, args.b_transpose, args.m, args.n, args.k, args.a_offset,
-													args.a_ld, args.b_offset, args.b_ld, args.c_offset, args.c_ld, &queue_plain,
-													temp_buffer_size);
-#elif CUDA_API
-		GemmTempBufferSize<T>(args.layout, args.a_transpose, args.b_transpose, args.m, args.n, args.k, args.a_offset,
-													args.a_ld, args.b_offset, args.b_ld, args.c_offset, args.c_ld, queue.GetDevice()(),
-													temp_buffer_size);
-#elif VULKAN_API
-		auto queue_plain = queue();
-	GemmTempBufferSize<T>(args.layout, args.a_transpose, args.b_transpose, args.m, args.n, args.k, args.a_offset,
 													args.a_ld, args.b_offset, args.b_ld, args.c_offset, args.c_ld, queue_plain,
 													temp_buffer_size);
-#endif
 		args.ap_size = (temp_buffer_size + sizeof(T)) / sizeof(T);	// + sizeof(T) to prevent zero
 	}
 
@@ -106,31 +95,12 @@ class TestXgemm {
 
 	// Describes how to run the CLBlast routine
 	static StatusCode RunRoutine(const Arguments<T>& args, Buffers<T>& buffers, Queue& queue) {
-#ifdef OPENCL_API
-		auto queue_plain = queue();
-		auto event = cl_event{};
-		auto status =
-				Gemm(args.layout, args.a_transpose, args.b_transpose, args.m, args.n, args.k, args.alpha, buffers.a_mat(),
-						 args.a_offset, args.a_ld, buffers.b_mat(), args.b_offset, args.b_ld, args.beta, buffers.c_mat(),
-						 args.c_offset, args.c_ld, &queue_plain, &event, buffers.ap_mat());	// temp buffer
-		if (status == StatusCode::kSuccess) {
-			clWaitForEvents(1, &event);
-			clReleaseEvent(event);
-		}
-#elif CUDA_API
-		auto status =
-				Gemm(args.layout, args.a_transpose, args.b_transpose, args.m, args.n, args.k, args.alpha, buffers.a_mat(),
-						 args.a_offset, args.a_ld, buffers.b_mat(), args.b_offset, args.b_ld, args.beta, buffers.c_mat(),
-						 args.c_offset, args.c_ld, queue.GetContext()(), queue.GetDevice()(), buffers.ap_mat());	// temp buffer
-		cuStreamSynchronize(queue());
-#elif VULKAN_API
 	auto queue_plain = queue();
 	auto status =
 				Gemm(args.layout, args.a_transpose, args.b_transpose, args.m, args.n, args.k, args.alpha, buffers.a_mat(),
 						 args.a_offset, args.a_ld, buffers.b_mat(), args.b_offset, args.b_ld, args.beta, buffers.c_mat(),
 						 args.c_offset, args.c_ld, queue_plain, nullptr, buffers.ap_mat());
 		queue_plain->sync();
-#endif
 		return status;
 	}
 

@@ -108,11 +108,6 @@ Cache<Key, Value> Cache<Key, Value>::instance_;
 
 // =================================================================================================
 
-template class Cache<BinaryKey, std::string>;
-template std::string BinaryCache::Get(const BinaryKeyRef&, bool*) const;
-
-// =================================================================================================
-
 template class Cache<ProgramKey, std::shared_ptr<Program>>;
 template std::shared_ptr<Program> ProgramCache::Get(const ProgramKeyRef&, bool*) const;
 template void ProgramCache::RemoveBySubset<1, 2>(const ProgramKey&);	// precision and routine name

@@ -25,7 +25,6 @@ namespace clblast {
 StatusCode ClearCache() {
 	try {
 		ProgramCache::Instance().Invalidate();
-		BinaryCache::Instance().Invalidate();
 	} catch (...) {
 		return DispatchException();
 	}

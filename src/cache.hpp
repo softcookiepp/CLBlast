@@ -58,18 +58,6 @@ class Cache {
 
 // =================================================================================================
 
-// The key struct for the cache of compiled OpenCL binaries (device name and platform-dependent)
-// Order of fields: precision, routine_name, device_name (smaller fields first)
-typedef std::tuple<size_t, Precision, std::string, std::string> BinaryKey;
-typedef std::tuple<const size_t&, const Precision&, const std::string&, const std::string&> BinaryKeyRef;
-
-typedef Cache<BinaryKey, std::string> BinaryCache;
-
-extern template class Cache<BinaryKey, std::string>;
-extern template std::string BinaryCache::Get(const BinaryKeyRef&, bool*) const;
-
-// =================================================================================================
-
 // The key struct for the cache of compiled OpenCL programs (context-dependent)
 // Order of fields: context, device_id, precision, routine_name (smaller fields first)
 typedef std::tuple<RawDeviceID, Precision, std::string> ProgramKey;

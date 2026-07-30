@@ -181,9 +181,6 @@ public:
 	// requires multiple shader sources because each file can only have one entry point :c
 	explicit Program(const clblast::Context& context, std::map<std::string, std::string>& kernelSources);
 
-	// Binary-based constructor with memory management
-	explicit Program(const clblast::Device& device, const clblast::Context& context, std::string& binary);
-
 	// Compiles the device program and checks whether or not there are any warnings/errors
 	void Build(const clblast::Device& device, const clblast::Context& context, std::vector<std::string>& options);
 	

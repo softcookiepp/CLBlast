@@ -137,17 +137,6 @@ Program::Program(const clblast::Context& context, std::map<std::string, std::str
 	mProgramContainer = std::make_shared<tart::Program>(context.pointer(), kernelSources);
 }
 
-// Binary-based constructor with memory management
-Program::Program(const clblast::Device& device, const clblast::Context& context, std::string& binary) {
-	mDevice = context.pointer();
-	
-	std::cout << "BINARY STRING:\n\n" << binary << "\n\n\n";
-	throw LogicError("Construction from string not implement yet; may need to reinterpret as spv or something");
-	
-	//mShaderModule = mDevice->loadShader(binary);
-	//mCLProgram = mDevice->createCLProgram(mShaderModule);
-}
-
 // Compiles the device program and checks whether or not there are any warnings/errors
 void Program::Build(const clblast::Device& device, const clblast::Context& context, std::vector<std::string>& options) {
 	Build(device, options);

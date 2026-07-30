@@ -220,11 +220,7 @@ Arguments<U> Client<T, U>::ParseArguments(int argc, char* argv[], const size_t l
 	args.device_id =
 			GetArgument(command_line_args, help, kArgDevice, ConvertArgument(std::getenv("CLBLAST_DEVICE"), size_t{0}));
 	args.precision = GetArgument(command_line_args, help, kArgPrecision, Precision::kSingle);
-#ifdef CLBLAST_REF_CLBLAS
-	args.compare_clblas = GetArgument(command_line_args, help, kArgCompareclblas, 1);
-#else
 	args.compare_clblas = 0;
-#endif
 #ifdef CLBLAST_REF_CBLAS
 	args.compare_cblas = GetArgument(command_line_args, help, kArgComparecblas, 1);
 #else
@@ -294,11 +290,6 @@ void Client<T, U>::PerformanceTest(Arguments<U>& args, const SetMetric set_sizes
 	auto device = Device(platform, args.device_id);
 	auto context = Context(device);
 	auto queue = Queue(device);
-#ifdef CLBLAST_REF_CLBLAS
-	if (args.compare_clblas) {
-		clblasSetup();
-	}
-#endif
 #ifdef CLBLAST_REF_CUBLAS
 	if (args.compare_cublas) {
 		cublasSetup(args);
@@ -400,11 +391,6 @@ void Client<T, U>::PerformanceTest(Arguments<U>& args, const SetMetric set_sizes
 	}
 
 // Cleans-up and returns
-#ifdef CLBLAST_REF_CLBLAS
-	if (args.compare_clblas) {
-		clblasTeardown();
-	}
-#endif
 #ifdef CLBLAST_REF_CUBLAS
 	if (args.compare_cublas) {
 		cublasTeardown(args);

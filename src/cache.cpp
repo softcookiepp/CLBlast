@@ -25,50 +25,8 @@ template <typename Key, typename Value>
 template <typename U>
 Value Cache<Key, Value>::Get(const U& key, bool* in_cache) const {
 	std::lock_guard<std::mutex> lock(cache_mutex_);
-	bool found = false;
-	std::array<bool, 3> highest = {false, false, false};
-	for (const auto& pair : cache_)
-	{
-		std::array<bool, 3> attempts = {false, false, false};
-		if (std::get<0>(pair.first) == std::get<0>(key))
-			attempts[0] = true;
-		if (std::get<1>(pair.first) == std::get<1>(key))
-			attempts[1] = true;
-		if (std::get<2>(pair.first) == std::get<2>(key))
-			attempts[2] = true;
-		
-		size_t highestCount = 0;
-		size_t thisCount = 0;
-		for (size_t i = 0; i < 3; i += 1)
-		{
-			if (highest[i]) highestCount += 1;
-			if (attempts[i]) thisCount += 1;
-		}
-		if (thisCount > highestCount)
-			highest = attempts;
-	}
-#if 0
-	if (highest[0])
-		std::cout << "	device uuids equal\n";
-	else
-		std::cout << "	device uuids NOT equal\n";
-	if (highest[1])
-		std::cout << "	precision equal\n";
-	else
-		std::cout << "	precision NOT equal\n";
-	if (highest[2])
-		std::cout << "	kernel name? equal\n";
-	else
-		std::cout << "	kernel name? equal\n";
-#endif
-#if 1 //__cplusplus >= 201402L
 	// generalized std::map::find() of C++14
 	auto it = cache_.find(key);
-#else
-	// O(n) lookup in a vector
-	auto it =
-			std::find_if(cache_.begin(), cache_.end(), [&](const std::pair<Key, Value>& pair) { return pair.first == key; });
-#endif
 	if (it == cache_.end()) {
 		if (in_cache) {
 			*in_cache = false;

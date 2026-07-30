@@ -72,8 +72,8 @@ extern template std::string BinaryCache::Get(const BinaryKeyRef&, bool*) const;
 
 // The key struct for the cache of compiled OpenCL programs (context-dependent)
 // Order of fields: context, device_id, precision, routine_name (smaller fields first)
-typedef std::tuple<RawContext, RawDeviceID, Precision, std::string> ProgramKey;
-typedef std::tuple<const RawContext&, const RawDeviceID&, const Precision&, const std::string&> ProgramKeyRef;
+typedef std::tuple<RawDeviceID, Precision, std::string> ProgramKey;
+typedef std::tuple<const RawDeviceID&, const Precision&, const std::string&> ProgramKeyRef;
 
 typedef Cache<ProgramKey, std::shared_ptr<Program>> ProgramCache;
 

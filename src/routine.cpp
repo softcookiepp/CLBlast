@@ -99,7 +99,7 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 	{
 		// Queries the cache to see whether or not the program (context-specific) is already there
 		bool has_program;
-		program_ = ProgramCache::Instance().Get(ProgramKeyRef{context_(), device_(), precision_, routine_info}, &has_program);
+		program_ = ProgramCache::Instance().Get(ProgramKeyRef{device_(), precision_, routine_info}, &has_program);
 		if (has_program) {
 			return;
 		}
@@ -125,7 +125,7 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 		program_ = std::make_shared<Program>(device_, context_, binary);
 		SetOpenCLKernelStandard(device_, options);
 		program_->Build(device_, options);
-		ProgramCache::Instance().Store(ProgramKey{context_(), device_(), precision_, routine_info},
+		ProgramCache::Instance().Store(ProgramKey{device_(), precision_, routine_info},
 																	 std::shared_ptr<Program>{program_});
 		return;
 	}
@@ -173,7 +173,7 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 
 	program_ = CompileFromSource(dummy, precision_, routine_name_, device_, context_, options, 0, false, kernelSources);
 	
-	ProgramCache::Instance().Store(ProgramKey{context_(), device_(), precision_, routine_info},
+	ProgramCache::Instance().Store(ProgramKey{device_(), precision_, routine_info},
 																 std::shared_ptr<Program>{program_});
 }
 

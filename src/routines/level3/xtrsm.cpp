@@ -100,7 +100,7 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 	const auto x_size = b_size;
 	const auto x_ld = b_ld;
 	const auto x_offset = b_offset;
-	auto x_buffer = Buffer<T>(context_, x_size);
+	auto x_buffer = Buffer<T>(queue_(), x_size);
 	
 	// this will be faster, and compatible with the sequence-based API
 	device_()->enqueueCopyBuffer(x_buffer(), b_buffer(), 0, 0, x_size*sizeof(T));
@@ -109,7 +109,7 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 
 	// Temporary buffer for the inverse of the A matrix
 	const auto a_inv_size = Ceil(k, block_size) * block_size;
-	auto a_inv_buffer = Buffer<T>(context_, a_inv_size);
+	auto a_inv_buffer = Buffer<T>(queue_(), a_inv_size);
 
 	// Fills the output buffer with zeros
 	FillMatrix(queue_, device_, program_, x_one, x_two, x_ld, x_offset,

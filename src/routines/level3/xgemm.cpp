@@ -232,7 +232,7 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	const
 #endif
 	auto temp_buffer_all =
-			(temp_buffer_provided) ? temp_buffer : ((temp_size > 0) ? Buffer<T>(context_, temp_size) : a_buffer);
+			(temp_buffer_provided) ? temp_buffer : ((temp_size > 0) ? Buffer<T>(queue_(), temp_size) : a_buffer);
 	// Verifies if the provided temporary buffer is large enough
 	if (temp_buffer_provided) {
 		const auto required_size = temp_size * sizeof(T);
@@ -240,7 +240,7 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 #if VULKAN_API
 			// temporary hack due to indirect kernel being forced on under certain circumstances
 			if (temp_size == 0) throw std::runtime_error("this probably shouldn't happen");
-			temp_buffer_all = Buffer<T>(context_, temp_size);
+			temp_buffer_all = Buffer<T>(queue_(), temp_size);
 #else
 			throw BLASError(StatusCode::kInsufficientMemoryTemp);
 #endif

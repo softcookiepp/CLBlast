@@ -130,14 +130,14 @@ void TestBlas<T, U>::TestRegular(std::vector<Arguments<U>>& test_vector, const s
 #endif
 
 		// Set-up for the CLBlast run
-		auto x_vec2 = Buffer<T>(context_, args.x_size);
-		auto y_vec2 = Buffer<T>(context_, args.y_size);
-		auto a_mat2 = Buffer<T>(context_, args.a_size);
-		auto b_mat2 = Buffer<T>(context_, args.b_size);
-		auto c_mat2 = Buffer<T>(context_, args.c_size);
-		auto ap_mat2 = Buffer<T>(context_, args.ap_size);
-		auto scalar2 = Buffer<T>(context_, args.scalar_size);
-		auto scalar_uint2 = Buffer<unsigned int>(context_, args.scalar_size);
+		auto x_vec2 = Buffer<T>(queue_(), args.x_size);
+		auto y_vec2 = Buffer<T>(queue_(), args.y_size);
+		auto a_mat2 = Buffer<T>(queue_(), args.a_size);
+		auto b_mat2 = Buffer<T>(queue_(), args.b_size);
+		auto c_mat2 = Buffer<T>(queue_(), args.c_size);
+		auto ap_mat2 = Buffer<T>(queue_(), args.ap_size);
+		auto scalar2 = Buffer<T>(queue_(), args.scalar_size);
+		auto scalar_uint2 = Buffer<unsigned int>(queue_(), args.scalar_size);
 		x_vec2.Write(queue_, args.x_size, x_source_);
 		y_vec2.Write(queue_, args.y_size, y_source_);
 		a_mat2.Write(queue_, args.a_size, a_source_);
@@ -165,13 +165,13 @@ void TestBlas<T, U>::TestRegular(std::vector<Arguments<U>>& test_vector, const s
 		}
 
 		// Set-up for the reference run
-		auto x_vec1 = Buffer<T>(context_, args.x_size);
-		auto y_vec1 = Buffer<T>(context_, args.y_size);
-		auto a_mat1 = Buffer<T>(context_, args.a_size);
-		auto b_mat1 = Buffer<T>(context_, args.b_size);
-		auto c_mat1 = Buffer<T>(context_, args.c_size);
-		auto ap_mat1 = Buffer<T>(context_, args.ap_size);
-		auto scalar1 = Buffer<T>(context_, args.scalar_size);
+		auto x_vec1 = Buffer<T>(queue_(), args.x_size);
+		auto y_vec1 = Buffer<T>(queue_(), args.y_size);
+		auto a_mat1 = Buffer<T>(queue_(), args.a_size);
+		auto b_mat1 = Buffer<T>(queue_(), args.b_size);
+		auto c_mat1 = Buffer<T>(queue_(), args.c_size);
+		auto ap_mat1 = Buffer<T>(queue_(), args.ap_size);
+		auto scalar1 = Buffer<T>(queue_(), args.scalar_size);
 		auto scalar_uint1 = Buffer<unsigned int>(context_, args.scalar_size);
 		x_vec1.Write(queue_, args.x_size, x_source_);
 		y_vec1.Write(queue_, args.y_size, y_source_);
@@ -305,22 +305,22 @@ void TestBlas<T, U>::TestInvalid(std::vector<Arguments<U>>& test_vector, const s
 
 		// Creates the buffers. Note: we are not using the cxpp11.h C++ version since we explicitly
 		// want to be able to create invalid buffers (no error checking here).
-		auto x_vec1 = CreateInvalidBuffer<T>(context_, args.x_size);
-		auto y_vec1 = CreateInvalidBuffer<T>(context_, args.y_size);
-		auto a_mat1 = CreateInvalidBuffer<T>(context_, args.a_size);
-		auto b_mat1 = CreateInvalidBuffer<T>(context_, args.b_size);
-		auto c_mat1 = CreateInvalidBuffer<T>(context_, args.c_size);
-		auto ap_mat1 = CreateInvalidBuffer<T>(context_, args.ap_size);
-		auto scalar1 = CreateInvalidBuffer<T>(context_, args.scalar_size);
-		auto scalar_uint1 = CreateInvalidBuffer<unsigned int>(context_, args.scalar_size);
-		auto x_vec2 = CreateInvalidBuffer<T>(context_, args.x_size);
-		auto y_vec2 = CreateInvalidBuffer<T>(context_, args.y_size);
-		auto a_mat2 = CreateInvalidBuffer<T>(context_, args.a_size);
-		auto b_mat2 = CreateInvalidBuffer<T>(context_, args.b_size);
-		auto c_mat2 = CreateInvalidBuffer<T>(context_, args.c_size);
-		auto ap_mat2 = CreateInvalidBuffer<T>(context_, args.ap_size);
-		auto scalar2 = CreateInvalidBuffer<T>(context_, args.scalar_size);
-		auto scalar_uint2 = CreateInvalidBuffer<unsigned int>(context_, args.scalar_size);
+		auto x_vec1 = CreateInvalidBuffer<T>(queue_(),	 args.x_size);
+		auto y_vec1 = CreateInvalidBuffer<T>(queue_(),	 args.y_size);
+		auto a_mat1 = CreateInvalidBuffer<T>(queue_(),	 args.a_size);
+		auto b_mat1 = CreateInvalidBuffer<T>(queue_(),	 args.b_size);
+		auto c_mat1 = CreateInvalidBuffer<T>(queue_(),	 args.c_size);
+		auto ap_mat1 = CreateInvalidBuffer<T>(queue_(),	 args.ap_size);
+		auto scalar1 = CreateInvalidBuffer<T>(queue_(),	 args.scalar_size);
+		auto scalar_uint1 = CreateInvalidBuffer<unsigned int>(queue_(), args.scalar_size);
+		auto x_vec2 = CreateInvalidBuffer<T>(queue_(),	 args.x_size);
+		auto y_vec2 = CreateInvalidBuffer<T>(queue_(),	 args.y_size);
+		auto a_mat2 = CreateInvalidBuffer<T>(queue_(),	 args.a_size);
+		auto b_mat2 = CreateInvalidBuffer<T>(queue_(),	 args.b_size);
+		auto c_mat2 = CreateInvalidBuffer<T>(queue_(),	 args.c_size);
+		auto ap_mat2 = CreateInvalidBuffer<T>(queue_(),	 args.ap_size);
+		auto scalar2 = CreateInvalidBuffer<T>(queue_(),	 args.scalar_size);
+		auto scalar_uint2 = CreateInvalidBuffer<unsigned int>(queue_(), args.scalar_size);
 		auto buffers1 = Buffers<T>{x_vec1, y_vec1, a_mat1, b_mat1, c_mat1, ap_mat1, scalar1, scalar_uint1};
 		auto buffers2 = Buffers<T>{x_vec2, y_vec2, a_mat2, b_mat2, c_mat2, ap_mat2, scalar2, scalar_uint2};
 

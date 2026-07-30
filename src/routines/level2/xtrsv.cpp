@@ -106,7 +106,7 @@ void Xtrsv<T>::DoTrsv(const Layout layout, const Triangle triangle, const Transp
 	const auto x_offset = b_offset;
 	const auto x_inc = b_inc;
 	const auto x_size = (1 + (n - 1) * x_inc) + x_offset;
-	auto x_buffer = Buffer<T>(context_, x_size);
+	auto x_buffer = Buffer<T>(queue_(), x_size);
 	//b_buffer.CopyTo(queue_, x_size, x_buffer);
 	device_()->enqueueCopyBuffer(x_buffer(), b_buffer(), 0, 0, x_size*sizeof(T));
 	device_()->enqueueBarrier({x_buffer()});

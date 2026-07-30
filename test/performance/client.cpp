@@ -336,14 +336,14 @@ void Client<T, U>::PerformanceTest(Arguments<U>& args, const SetMetric set_sizes
 		PopulateVector(scalar_source, mt, dist);
 
 		// Creates the matrices on the device
-		auto x_vec = Buffer<T>(context, args.x_size);
-		auto y_vec = Buffer<T>(context, args.y_size);
-		auto a_mat = Buffer<T>(context, args.a_size);
-		auto b_mat = Buffer<T>(context, args.b_size);
-		auto c_mat = Buffer<T>(context, args.c_size);
-		auto ap_mat = Buffer<T>(context, args.ap_size);
-		auto scalar = Buffer<T>(context, args.scalar_size);
-		auto scalar_uint = Buffer<unsigned int>(context, args.scalar_size);
+		auto x_vec = Buffer<T>(device(), args.x_size);
+		auto y_vec = Buffer<T>(device(), args.y_size);
+		auto a_mat = Buffer<T>(device(), args.a_size);
+		auto b_mat = Buffer<T>(device(), args.b_size);
+		auto c_mat = Buffer<T>(device(), args.c_size);
+		auto ap_mat = Buffer<T>(device(), args.ap_size);
+		auto scalar = Buffer<T>(device(), args.scalar_size);
+		auto scalar_uint = Buffer<unsigned int>(device(), args.scalar_size);
 		x_vec.Write(queue, args.x_size, x_source);
 		y_vec.Write(queue, args.y_size, y_source);
 		a_mat.Write(queue, args.a_size, a_source);

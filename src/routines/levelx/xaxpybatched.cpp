@@ -78,7 +78,7 @@ void XaxpyBatched<T>::DoAxpyBatched(const size_t n, const std::vector<T>& alphas
 	}
 	auto x_offsets_device = Buffer<int>(context_, batch_count);
 	auto y_offsets_device = Buffer<int>(context_, batch_count);
-	auto alphas_device = Buffer<T>(context_, batch_count);
+	auto alphas_device = Buffer<T>(queue_(), batch_count);
 	x_offsets_device.Write(queue_, batch_count, x_offsets_int);
 	y_offsets_device.Write(queue_, batch_count, y_offsets_int);
 	alphas_device.Write(queue_, batch_count, alphas);

@@ -229,9 +229,9 @@ void XgemmStridedBatched<T>::BatchedGemmIndirect(
 	auto c_no_temp = c_one == c_one_i && c_two == c_two_i && c_ld == c_one && !c_do_transpose;
 
 	// Creates the temporary matrices
-	const auto a_temp = (a_no_temp) ? a_buffer : Buffer<T>(context_, batch_count * a_one_i * a_two_i);
-	const auto b_temp = (b_no_temp) ? b_buffer : Buffer<T>(context_, batch_count * b_one_i * b_two_i);
-	const auto c_temp = (c_no_temp) ? c_buffer : Buffer<T>(context_, batch_count * c_one_i * c_two_i);
+	const auto a_temp = (a_no_temp) ? a_buffer : Buffer<T>(queue_(), batch_count * a_one_i * a_two_i);
+	const auto b_temp = (b_no_temp) ? b_buffer : Buffer<T>(queue_(), batch_count * b_one_i * b_two_i);
+	const auto c_temp = (c_no_temp) ? c_buffer : Buffer<T>(queue_(), batch_count * c_one_i * c_two_i);
 
 	// Runs the pre-processing kernel for matrix A. This transposes the matrix, but also pads zeros
 	// to fill it up until it reaches a certain multiple of size (kernel parameter dependent). In

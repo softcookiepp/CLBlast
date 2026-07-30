@@ -276,6 +276,8 @@ public:
 	// the memory will not be freed automatically afterwards. If the size is set to 0, this will
 	// become a stub containing a nullptr
 	explicit Buffer(const Context& context, const size_t size);
+	
+	explicit Buffer(const tart::device_ptr& device, const size_t size);
 
 	// Constructs a new buffer based on an existing host-container
 	// Keep this in the header, since keeping track of what Iterator is used will be a pain

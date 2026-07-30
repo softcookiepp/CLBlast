@@ -137,15 +137,15 @@ size_t RunOverrideTests(int argc, char* argv[], const bool silent, const std::st
 	PopulateVector(host_c, mt, dist);
 
 	// Copy the matrices to the device
-	auto device_a = Buffer<T>(context, host_a.size());
-	auto device_b = Buffer<T>(context, host_b.size());
-	auto device_c = Buffer<T>(context, host_c.size());
-	auto device_temp = Buffer<T>(context, args.m * args.n * args.k);	// just to be safe
+	auto device_a = Buffer<T>(device(), host_a.size());
+	auto device_b = Buffer<T>(device(), host_b.size());
+	auto device_c = Buffer<T>(device(), host_c.size());
+	auto device_temp = Buffer<T>(device(), args.m * args.n * args.k);	// just to be safe
 	device_a.Write(queue, host_a.size(), host_a);
 	device_b.Write(queue, host_b.size(), host_b);
 	device_c.Write(queue, host_c.size(), host_c);
-	auto dummy = Buffer<T>(context, 1);
-	auto dummy_scalar = Buffer<unsigned int>(context, 1);
+	auto dummy = Buffer<T>(device(), 1);
+	auto dummy_scalar = Buffer<unsigned int>(device(), 1);
 	auto buffers = Buffers<T>{dummy, dummy, device_a, device_b, device_c, device_temp, dummy, dummy_scalar};
 
 	// Loops over the valid combinations: run before and run afterwards

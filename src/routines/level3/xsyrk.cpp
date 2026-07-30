@@ -165,9 +165,9 @@ void Xsyrk<T>::SyrkAB(const Layout layout, const Triangle triangle, const Transp
 			Xgemm<T>::NoTempBuffer(b_one, b_one_i, b_two, b_two_i, b_ld, b_offset, b_do_transpose, b_conjugate);
 
 	// Creates the temporary matrices
-	auto a_temp = (a_no_temp) ? a_buffer : Buffer<T>(context_, a_one_i * a_two_i);
-	auto b_temp = (b_no_temp) ? b_buffer : Buffer<T>(context_, b_one_i * b_two_i);
-	auto c_temp = Buffer<T>(context_, n_ceiled * n_ceiled);
+	auto a_temp = (a_no_temp) ? a_buffer : Buffer<T>(queue_(), a_one_i * a_two_i);
+	auto b_temp = (b_no_temp) ? b_buffer : Buffer<T>(queue_(), b_one_i * b_two_i);
+	auto c_temp = Buffer<T>(queue_(), n_ceiled * n_ceiled);
 
 	// Runs the pre-processing kernel for matrix A. This transposes the matrix, but also pads zeros
 	// to fill it up until it reaches a certain multiple of size (kernel parameter dependent). In

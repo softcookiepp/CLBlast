@@ -54,7 +54,7 @@ void Xhemm<T>::DoHemm(const Layout layout, const Side side, const Triangle trian
 	auto kernel_name = (is_upper) ? "HermUpperToSquared" : "HermLowerToSquared";
 	
 	// Temporary buffer for a copy of the hermitian matrix
-	auto temp_herm = Buffer<T>(context_, k * k);
+	auto temp_herm = Buffer<T>(queue_(), k * k);
 
 	// Creates a general matrix from the hermitian matrix to be able to run the regular Xgemm
 	// routine afterwards

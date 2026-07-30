@@ -65,7 +65,7 @@ void Xasum<T>::DoAsum(const size_t n, const Buffer<T>& asum_buffer, const size_t
 
 	// Creates the buffer for intermediate values
 	auto temp_size = 2 * db_["WGS2"];
-	auto temp_buffer = Buffer<T>(context_, temp_size);
+	auto temp_buffer = Buffer<T>(queue_(), temp_size);
 	
 	// get working sequence
 	

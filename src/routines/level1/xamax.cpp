@@ -64,8 +64,8 @@ void Xamax<T>::DoAmax(const size_t n, const Buffer<unsigned int>& imax_buffer, c
 
 	// Creates the buffer for intermediate values
 	auto temp_size = 2 * db_["WGS2"];
-	auto temp_buffer1 = Buffer<T>(context_, temp_size);
-	auto temp_buffer2 = Buffer<unsigned int>(context_, temp_size);
+	auto temp_buffer1 = Buffer<T>(queue_(), temp_size);
+	auto temp_buffer2 = Buffer<unsigned int>(queue_(), temp_size);
 
 	// Sets the kernel arguments
 #if VULKAN_USE_BDA

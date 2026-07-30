@@ -31,7 +31,6 @@ void OpenCLDiagnostics(int argc, char* argv[]) {
 
 	// Initializes OpenCL
 	const auto device = Device(device_id);
-	const auto context = Context(device);
 	auto queue = Queue(device);
 
 	// Finds device information
@@ -71,7 +70,7 @@ void OpenCLDiagnostics(int argc, char* argv[]) {
 	printf("* device.Name()								 %.4lf ms\n", TimeFunction(kNumRuns, [&]() { device.Name(); }));
 	printf("* device.Vendor()							 %.4lf ms\n", TimeFunction(kNumRuns, [&]() { device.Vendor(); }));
 	printf("* device.Version()							%.4lf ms\n", TimeFunction(kNumRuns, [&]() { device.Version(); }));
-	printf("* Buffer<float>(context, 1024)	%.4lf ms\n", TimeFunction(kNumRuns, [&]() { Buffer<float>(context, 1024); }));
+	printf("* Buffer<float>(context, 1024)	%.4lf ms\n", TimeFunction(kNumRuns, [&]() { Buffer<float>(device(), 1024); }));
 
 	printf("\n");
 }

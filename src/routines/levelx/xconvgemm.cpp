@@ -103,11 +103,11 @@ void Xconvgemm<T>::DoConvgemm(const KernelMode kernel_mode, const size_t channel
 
 	// Possible approach: im2col + GEMM
 	//			result = GEMM(im2col(image), kernel)
-	auto col_buffer = Buffer<T>(context_, 0);	// nullptr, will be optionally created later
+	auto col_buffer = Buffer<T>(queue_(), 0);	// nullptr, will be optionally created later
 	if (method_ == ConvGemmMethod::kWithIm2Col) {
 		// Temporary col matrix
 		const auto col_size = (method_ == ConvGemmMethod::kWithIm2Col) ? patch_size * num_patches * batch_count : 1;
-		col_buffer = Buffer<T>(context_, col_size);
+		col_buffer = Buffer<T>(queue_(), col_size);
 
 		// Loops over each batch
 		for (auto batch_id = size_t{0}; batch_id < batch_count; ++batch_id) {

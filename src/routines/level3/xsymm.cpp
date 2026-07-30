@@ -54,7 +54,7 @@ void Xsymm<T>::DoSymm(const Layout layout, const Side side, const Triangle trian
 	auto kernel_name = (is_upper) ? "SymmUpperToSquared" : "SymmLowerToSquared";
 
 	// Temporary buffer for a copy of the symmetric matrix
-	auto temp_symm = Buffer<T>(context_, k * k);
+	auto temp_symm = Buffer<T>(queue_(), k * k);
 
 	// Creates a general matrix from the symmetric matrix to be able to run the regular Xgemm
 	// routine afterwards

@@ -54,7 +54,7 @@ void Xtrmm<T>::DoTrmm(const Layout layout, const Side side, const Triangle trian
 
 	// Creates a copy of B to avoid overwriting input in GEMM while computing output
 	const auto b_size = (b_ld * (b_two - 1) + b_one + b_offset);
-	auto b_buffer_copy = Buffer<T>(context_, b_size);
+	auto b_buffer_copy = Buffer<T>(queue_(), b_size);
 	b_buffer.CopyTo(queue_, b_size, b_buffer_copy);
 
 	// Determines which kernel to run based on the layout (the Xgemm kernel assumes column-major as
@@ -67,7 +67,7 @@ void Xtrmm<T>::DoTrmm(const Layout layout, const Side side, const Triangle trian
 	auto unit_diagonal = (diagonal == Diagonal::kUnit) ? true : false;
 
 	// Temporary buffer for a copy of the triangular matrix
-	auto temp_triangular = Buffer<T>(context_, k * k);
+	auto temp_triangular = Buffer<T>(queue_(), k * k);
 
 	// Creates a general matrix from the triangular matrix to be able to run the regular Xgemm
 	// routine afterwards

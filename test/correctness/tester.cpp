@@ -102,16 +102,11 @@ Tester<T, U>::Tester(const std::vector<std::string>& arguments, const bool silen
 #if defined(CLBLAST_REF_CBLAS)
 	auto default_cblas = 0;
 #endif
-#if defined(CLBLAST_REF_CLBLAS)
-	auto default_clblas = 0;
-#endif
 #if defined(CLBLAST_REF_CUBLAS)
 	auto default_cublas = 0;
 #endif
 #if defined(CLBLAST_REF_CBLAS)
 	default_cblas = 1;
-#elif defined(CLBLAST_REF_CLBLAS)
-	default_clblas = 1;
 #elif defined(CLBLAST_REF_CUBLAS)
 	default_cublas = 1;
 #endif
@@ -122,9 +117,6 @@ Tester<T, U>::Tester(const std::vector<std::string>& arguments, const bool silen
 	compare_cublas_ = 0;
 #if defined(CLBLAST_REF_CBLAS)
 	compare_cblas_ = GetArgument(arguments, help_, kArgComparecblas, default_cblas);
-#endif
-#if defined(CLBLAST_REF_CLBLAS)
-	compare_clblas_ = GetArgument(arguments, help_, kArgCompareclblas, default_clblas);
 #endif
 #if defined(CLBLAST_REF_CUBLAS)
 	compare_cublas_ = GetArgument(arguments, help_, kArgComparecublas, default_cublas);
@@ -175,16 +167,6 @@ Tester<T, U>::Tester(const std::vector<std::string>& arguments, const bool silen
 	if (getL2ErrorMargin<T>() != 0.0f) {
 		fprintf(stdout, "* and a combined maximum allowed L2 error of %.2e\n", getL2ErrorMargin<T>());
 	}
-
-// Initializes clBLAS
-#ifdef CLBLAST_REF_CLBLAS
-	if (compare_clblas_) {
-		auto status = clblasSetup();
-		if (status != CL_SUCCESS) {
-			throw std::runtime_error("clBLAS setup error: " + ToString(static_cast<int>(status)));
-		}
-	}
-#endif
 }
 
 // Destructor prints the summary of the test cases and cleans-up the clBLAS library
@@ -203,13 +185,6 @@ Tester<T, U>::~Tester() {
 		std::cout << "	 " << tests_failed_ << " test(s) failed" << kPrintEnd << std::endl;
 	}
 	std::cout << std::endl;
-
-// Cleans-up clBLAS
-#ifdef CLBLAST_REF_CLBLAS
-	if (compare_clblas_) {
-		clblasTeardown();
-	}
-#endif
 }
 
 // =================================================================================================

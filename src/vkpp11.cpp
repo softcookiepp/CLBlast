@@ -220,12 +220,15 @@ Buffer<T>::Buffer(const tart::buffer_ptr buffer) { buffer_ = buffer; }
 // the memory will not be freed automatically afterwards. If the size is set to 0, this will
 // become a stub containing a nullptr
 template <typename T>
-Buffer<T>::Buffer(const Context& context, const size_t size)
+Buffer<T>::Buffer(const Context& context, const size_t size) : Buffer(context.pointer(), size) {}
+
+template <typename T>
+Buffer<T>::Buffer(const tart::device_ptr& device, const size_t size)
 {
 	if (size == 0)
 		buffer_ = nullptr;
 	else
-		buffer_ = context.pointer()->allocateBuffer(size*sizeof(T));
+		buffer_ = device->allocateBuffer(size*sizeof(T));
 }
 
 // Copies from device to host: reading the device buffer a-synchronously

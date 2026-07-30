@@ -1,7 +1,7 @@
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
-//   Cedric Nugteren <www.cedricnugteren.nl>
+//	 Cedric Nugteren <www.cedricnugteren.nl>
 //
 // This file provides declarations for the common test utility functions (performance clients and
 // correctness testers).
@@ -48,25 +48,25 @@ bool IsCloseToZero(const T value);
 // Structure containing all possible buffers for test clients
 template <typename T>
 struct Buffers {
-  Buffer<T> x_vec;
-  Buffer<T> y_vec;
-  Buffer<T> a_mat;
-  Buffer<T> b_mat;
-  Buffer<T> c_mat;
-  Buffer<T> ap_mat;
-  Buffer<T> scalar;
-  Buffer<unsigned int> scalar_uint;
+	Buffer<T> x_vec;
+	Buffer<T> y_vec;
+	Buffer<T> a_mat;
+	Buffer<T> b_mat;
+	Buffer<T> c_mat;
+	Buffer<T> ap_mat;
+	Buffer<T> scalar;
+	Buffer<unsigned int> scalar_uint;
 };
 template <typename T>
 struct BuffersHost {
-  std::vector<T> x_vec;
-  std::vector<T> y_vec;
-  std::vector<T> a_mat;
-  std::vector<T> b_mat;
-  std::vector<T> c_mat;
-  std::vector<T> ap_mat;
-  std::vector<T> scalar;
-  std::vector<unsigned int> scalar_uint;
+	std::vector<T> x_vec;
+	std::vector<T> y_vec;
+	std::vector<T> a_mat;
+	std::vector<T> b_mat;
+	std::vector<T> c_mat;
+	std::vector<T> ap_mat;
+	std::vector<T> scalar;
+	std::vector<unsigned int> scalar_uint;
 };
 
 // =================================================================================================
@@ -86,12 +86,12 @@ std::string ToString(T value);
 // Copies buffers from the OpenCL device to the host
 template <typename T, typename U>
 void DeviceToHost(const Arguments<U>& args, Buffers<T>& buffers, BuffersHost<T>& buffers_host, Queue& queue,
-                  const std::vector<std::string>& names);
+									const std::vector<std::string>& names);
 
 // Copies buffers from the host to the OpenCL device
 template <typename T, typename U>
 void HostToDevice(const Arguments<U>& args, Buffers<T>& buffers, BuffersHost<T>& buffers_host, Queue& queue,
-                  const std::vector<std::string>& names);
+									const std::vector<std::string>& names);
 
 // =================================================================================================
 
@@ -110,16 +110,10 @@ void FloatToHalfBuffer(Buffer<half>& result, const Buffer<float>& source, RawCom
 // Creates a buffer but don't test for validity. That's the reason this is not using the clpp11.h or
 // cupp11.h interface.
 template <typename T>
-Buffer<T> CreateInvalidBuffer(const Context& context, const size_t size) {
-#ifdef OPENCL_API
-  auto raw_buffer = clCreateBuffer(context(), CL_MEM_READ_WRITE, size * sizeof(T), nullptr, nullptr);
-#elif CUDA_API
-  CUdeviceptr raw_buffer;
-  cuMemAlloc(&raw_buffer, size * sizeof(T));
-#elif VULKAN_API
-  tart::buffer_ptr raw_buffer = context.pointer()->allocateBuffer(size);
-#endif
-  return Buffer<T>(raw_buffer);
+Buffer<T> CreateInvalidBuffer(const tart::device_ptr& device, const size_t size)
+{
+	tart::buffer_ptr raw_buffer = device->allocateBuffer(size);
+	return Buffer<T>(raw_buffer);
 }
 
 // =================================================================================================
@@ -128,12 +122,12 @@ using BestParameters = std::unordered_map<std::string, size_t>;
 using BestParametersCollection = std::unordered_map<std::string, BestParameters>;
 
 void OverrideParametersFromJSONFiles(const std::vector<std::string>& file_names, const RawDeviceID device,
-                                     const Precision precision);
+																		 const Precision precision);
 void GetBestParametersFromJSONFile(const std::string& file_name, BestParametersCollection& all_parameters,
-                                   const Precision precision);
+																	 const Precision precision);
 
 // =================================================================================================
-}  // namespace clblast
+}	// namespace clblast
 
 // CLBLAST_TEST_UTILITIES_H_
 #endif

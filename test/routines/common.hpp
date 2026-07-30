@@ -16,9 +16,6 @@
 #include "test/test_utilities.hpp"
 #include "utilities/utilities.hpp"
 
-#ifdef CLBLAST_REF_CLBLAS
-#include "test/wrapper_clblas.hpp"
-#endif
 #ifdef CLBLAST_REF_CBLAS
 #include "test/wrapper_cblas.hpp"
 #endif

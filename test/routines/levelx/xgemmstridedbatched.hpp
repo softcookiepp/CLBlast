@@ -112,28 +112,6 @@ class TestXgemmStridedBatched {
     return status;
   }
 
-// Describes how to run the clBLAS routine (for correctness/performance comparison)
-#ifdef CLBLAST_REF_CLBLAS
-  static StatusCode RunReference1(const Arguments<T>& args, Buffers<T>& buffers, Queue& queue) {
-    auto queue_plain = queue();
-    for (auto batch = size_t{0}; batch < args.batch_count; ++batch) {
-      const auto a_batch_offset = args.a_offset + PerBatchSizeA(args) * batch;
-      const auto b_batch_offset = args.c_offset + PerBatchSizeB(args) * batch;
-      const auto c_batch_offset = args.b_offset + PerBatchSizeC(args) * batch;
-      auto event = cl_event{};
-      auto status = clblasXgemm(convertToCLBLAS(args.layout), convertToCLBLAS(args.a_transpose),
-                                convertToCLBLAS(args.b_transpose), args.m, args.n, args.k, args.alpha, buffers.a_mat,
-                                a_batch_offset, args.a_ld, buffers.b_mat, b_batch_offset, args.b_ld, args.beta,
-                                buffers.c_mat, c_batch_offset, args.c_ld, 1, &queue_plain, 0, nullptr, &event);
-      clWaitForEvents(1, &event);
-      if (static_cast<StatusCode>(status) != StatusCode::kSuccess) {
-        return static_cast<StatusCode>(status);
-      }
-    }
-    return StatusCode::kSuccess;
-  }
-#endif
-
 // Describes how to run the CPU BLAS routine (for correctness/performance comparison)
 #ifdef CLBLAST_REF_CBLAS
   static StatusCode RunReference2(const Arguments<T>& args, BuffersHost<T>& buffers_host, Queue&) {

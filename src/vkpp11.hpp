@@ -230,19 +230,6 @@ public:
 	// the memory will not be freed automatically afterwards. If the size is set to 0, this will
 	// become a stub containing a nullptr
 	explicit Buffer(const tart::device_ptr& device, const size_t size);
-#if 0
-	// Constructs a new buffer based on an existing host-container
-	// Keep this in the header, since keeping track of what Iterator is used will be a pain
-	template <typename Iterator>
-	explicit Buffer(const Context& context, const Queue& queue, Iterator start, Iterator end)
-			: Buffer(context, static_cast<size_t>(end - start))
-	{
-		auto size = static_cast<size_t>(end - start);
-		auto pointer = &*start;
-		// may be unsafe, but literally the only option here :c
-		context.pointer()->allocateBuffer(pointer, size*sizeof(T));
-	}
-#endif
 
 	// Copies from device to host: reading the device buffer a-synchronously
 	// (this is currently impossible in tart, so it will just sync for now)

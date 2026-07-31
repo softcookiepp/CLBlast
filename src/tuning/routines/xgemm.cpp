@@ -79,8 +79,9 @@ void RunGemmStridedBatchedRoutine(const size_t value, const Queue& queue, const 
 // =================================================================================================
 
 template <typename T>
-void TuneGemmSingleSize(const Device& device, const Context& context, Queue& queue,
-												const size_t m, const size_t n, const size_t k, const size_t num_runs) {
+void TuneGemmSingleSize(const Device& device,
+	Queue& queue, const size_t m, const size_t n, const size_t k, const size_t num_runs)
+{
 	// Buffers
 	auto buffers =
 			std::vector<Buffer<T>>{Buffer<T>(device(), m * k), Buffer<T>(device(), k * n), Buffer<T>(device(), m * n)};
@@ -143,7 +144,6 @@ void TuneXgemm(int argc, char* argv[]) {
 		printf("* Unsupported precision, skipping this tuning run\n");
 		return;
 	}
-	const auto context = Context(device);
 	auto queue = Queue(device);
 
 	// Pre-load GEMM kernel tuning results if they exist
@@ -168,8 +168,8 @@ void TuneXgemm(int argc, char* argv[]) {
 			printf("* Error: If one of m/n/k specified, please specify all three\n");
 			return;
 		}
-		TuneGemmSingleSize<T>(device, context, queue, static_cast<size_t>(arg_m), static_cast<size_t>(arg_n),
-													static_cast<size_t>(arg_k), num_runs);
+		TuneGemmSingleSize<T>(device, queue, static_cast<size_t>(arg_m), static_cast<size_t>(arg_n),
+			static_cast<size_t>(arg_k), num_runs);
 	}
 
 	else {

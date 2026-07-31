@@ -35,7 +35,6 @@ class TestBlas : public Tester<T, U> {
 	static const int kSeed;
 
 	// Uses several variables from the Tester class
-	using Tester<T, U>::context_;
 	using Tester<T, U>::queue_;
 	using Tester<T, U>::full_test_;
 	using Tester<T, U>::verbose_;

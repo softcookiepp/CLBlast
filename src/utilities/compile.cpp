@@ -13,7 +13,6 @@
 #include <string>
 #include <vector>
 
-#include "kernel_preprocessor.hpp"
 #include "utilities/backend.hpp"
 #include "utilities/utilities.hpp"
 
@@ -71,16 +70,9 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 	printf("[DEBUG] Compiling routine '%s-%s'\n", routine_name.c_str(), ToString(precision).c_str());
 	const auto start_time = std::chrono::steady_clock::now();
 #endif
-
-	// Runs a pre-processor to unroll loops and perform array-to-register promotion. Most OpenCL
-	// compilers do this, but some don't.
-	auto do_run_preprocessor = false;
 	
 	auto kernel_string = header_string + source_string;
-	if (do_run_preprocessor) {
-		log_debug("Running built-in pre-processor");
-		kernel_string = PreprocessKernelSource(kernel_string);
-	}
+
 	// Compiles the kernel
 	std::shared_ptr<Program> program = nullptr;
 	if (true)

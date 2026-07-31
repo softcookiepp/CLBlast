@@ -74,7 +74,6 @@ void TuneXtrsv(int argc, char* argv[]) {
 		printf("* Unsupported precision, skipping this tuning run\n");
 		return;
 	}
-	const auto context = Context(device);
 	auto queue = Queue(device);
 
 	// Buffers

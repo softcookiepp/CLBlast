@@ -180,7 +180,6 @@ set(SOURCES
 	src/utilities/utilities.cpp
 	src/api_common.cpp
 	src/cache.cpp
-	src/kernel_preprocessor.cpp
 	src/routine.cpp
 	src/routines/levelx/xinvert.cpp	# only source, don't include it as a test
 	src/tuning/configurations.cpp
@@ -289,8 +288,7 @@ if(TUNERS)
 			src/utilities/timing.cpp
 			src/utilities/utilities.cpp
 			src/tuning/configurations.cpp
-			src/tuning/tuning.cpp
-			src/kernel_preprocessor.cpp)
+			src/tuning/tuning.cpp)
 	set(TUNERS_COMMON ${TUNERS_COMMON})
 
 	# Creates a library with common sources for all tuners
@@ -479,7 +477,7 @@ if(TESTS)
 	# Miscellaneous tests
 	set(MISC_TESTS override_parameters retrieve_parameters)
 	if(MSVC)
-		set(TESTS_COMMON ${TESTS_COMMON} src/kernel_preprocessor.cpp src/utilities/compile.cpp)
+		set(TESTS_COMMON ${TESTS_COMMON} src/utilities/compile.cpp)
 	endif()
 	foreach(MISC_TEST ${MISC_TESTS})
 		add_executable(clblast_test_${MISC_TEST} ${TESTS_COMMON}

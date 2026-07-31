@@ -81,7 +81,6 @@ class Tester {
 
 	// The OpenCL objects (accessible by derived classes)
 	Device device_;
-	Context context_;
 	Queue queue_;
 
 	// Whether or not to run the full test-suite or just a smoke test

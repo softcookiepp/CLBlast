@@ -73,7 +73,6 @@ class Routine {
 	// The OpenCL objects, accessible only from derived classes
 	Queue queue_;
 	EventPointer event_;
-	const Context context_;
 	const Device device_;
 
 	// Compiled program (either retrieved from cache or compiled in slow path)

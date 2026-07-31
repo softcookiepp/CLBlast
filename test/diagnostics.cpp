@@ -65,7 +65,6 @@ void OpenCLDiagnostics(int argc, char* argv[]) {
 	// Simple OpenCL benchmarking
 	constexpr auto kNumRuns = 20;
 	printf("\n --- Some OpenCL library benchmarks (functions from clpp11.h):\n");
-	printf("* queue.GetContext()						%.4lf ms\n", TimeFunction(kNumRuns, [&]() { queue.GetContext(); }));
 	printf("* queue.GetDevice()						 %.4lf ms\n", TimeFunction(kNumRuns, [&]() { queue.GetDevice(); }));
 	printf("* device.Name()								 %.4lf ms\n", TimeFunction(kNumRuns, [&]() { device.Name(); }));
 	printf("* device.Vendor()							 %.4lf ms\n", TimeFunction(kNumRuns, [&]() { device.Vendor(); }));

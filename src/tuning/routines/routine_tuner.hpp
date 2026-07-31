@@ -48,7 +48,7 @@ TuningResult GetBestResult(const std::vector<TuningResult>& scores) {
 
 // Tunes at kernel-level
 template <typename T, typename F>
-void TuneKernelSelection(const Device& device, const Context& context, Queue& queue,
+void TuneKernelSelection(const Device& device, Queue& queue,
 												 const Precision precision, F const& routine, const size_t from, const size_t to,
 												 const size_t step, const size_t batch_count, const size_t num_runs, const std::string& name,
 												 const std::string& tuner_name, const std::string& family_name,

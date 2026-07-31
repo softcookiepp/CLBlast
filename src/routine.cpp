@@ -73,7 +73,6 @@ Routine::Routine(Queue& queue, EventPointer event, const std::string& name,
 			kernel_names_(kernel_names),
 			queue_(queue),
 			event_(event),
-			context_(queue_.GetContext()),
 			device_(queue_.GetDevice()),
 			db_(kernel_names)
 #if VULKAN_API
@@ -91,18 +90,13 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 		routine_info += "_" + kernel_name + db_(kernel_name).GetValuesString();
 	}
 	log_debug(routine_info);
-#if 0
-	// no searchy yet
-	//if (!mIsGLSL)
-#else
-#endif
+
+	// Queries the cache to see whether or not the program (context-specific) is already there
+	bool has_program;
+	program_ = ProgramCache::Instance().Get(ProgramKeyRef{device_(), precision_, routine_info}, &has_program);
+	if (has_program)
 	{
-		// Queries the cache to see whether or not the program (context-specific) is already there
-		bool has_program;
-		program_ = ProgramCache::Instance().Get(ProgramKeyRef{device_(), precision_, routine_info}, &has_program);
-		if (has_program) {
-			return;
-		}
+		return;
 	}
 
 

@@ -174,7 +174,7 @@ void TuneXgemm(int argc, char* argv[]) {
 
 	else {
 		// Run the tuners for the XGEMM routines
-		TuneKernelSelection<T>(device, context, queue, precision, RunGemmRoutine<T>, 64, 2048, 64, 1, num_runs,
+		TuneKernelSelection<T>(device, queue, precision, RunGemmRoutine<T>, 64, 2048, 64, 1, num_runs,
 													 "gemm", "GemmRoutine", "gemm_routine", "XGEMM_MIN_INDIRECT_SIZE");
 		// TuneKernelSelection<T>(platform, device, context, queue, precision, RunGemmBatchedRoutine<T, 30>,
 		//												16, 128, 32, 30, num_runs,

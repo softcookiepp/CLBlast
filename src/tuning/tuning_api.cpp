@@ -328,7 +328,6 @@ StatusCode TunerAPI(Queue& queue, const Arguments<T>& args, const int V, const G
 
 	// Retrieves OpenCL classes
 	const auto device = queue.GetDevice();
-	const auto context = queue.GetContext();
 
 	// Inspects whether or not FP64 is supported in case of double precision
 	if ((PrecisionValue<T>() == Precision::kDouble && !PrecisionSupported<double>(device)) ||

@@ -120,8 +120,8 @@ inline void addPrintInfo(std::string& str, const char* format, Args&&... args) {
 
 template <typename T>
 void kernelCompilationThread(std::vector<ThreadInfo>& infos, const std::vector<clblast::Configuration>& configurations,
-														 size_t id, const TunerSettings& settings, const Arguments<T>& args, const Device& device,
-														 const Context& context, const size_t num_threads) {
+	size_t id, const TunerSettings& settings, const Arguments<T>& args, const Device& device, const size_t num_threads)
+{
 #if defined(_WIN32)
 	const std::string kPrintError = "";
 	const std::string kPrintSuccess = "";
@@ -301,7 +301,6 @@ void Tuner(int argc, char* argv[], const int V, GetTunerDefaultsFunc GetTunerDef
 
 	// Initializes OpenCL
 	const auto device = Device(args.device_id);
-	const auto context = Context(device);
 	auto queue = Queue(device);
 
 	// Tests for validity of the precision and retrieves properties
@@ -440,7 +439,7 @@ void Tuner(int argc, char* argv[], const int V, GetTunerDefaultsFunc GetTunerDef
 	threads.reserve(args.extra_threads);
 	for (size_t i = 0; i < std::min(static_cast<size_t>(args.extra_threads), configurations.size()); ++i) {
 		threads.push_back(std::thread(&kernelCompilationThread<T>, std::ref(thread_infos), std::cref(configurations), i,
-																	std::cref(settings), std::cref(args), std::cref(device), std::cref(context),
+																	std::cref(settings), std::cref(args), std::cref(device),
 																	args.extra_threads));
 	}
 
@@ -458,7 +457,7 @@ void Tuner(int argc, char* argv[], const int V, GetTunerDefaultsFunc GetTunerDef
 			std::vector<size_t> local;
 			{
 				if (args.extra_threads == 0) {
-					kernelCompilationThread<T>(thread_infos, configurations, config_id, settings, args, device, context,
+					kernelCompilationThread<T>(thread_infos, configurations, config_id, settings, args, device,
 																		 configurations.size());
 				}
 				std::unique_lock<std::mutex> lock(thread_infos[config_id].mtx);

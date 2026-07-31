@@ -76,8 +76,8 @@ void XaxpyBatched<T>::DoAxpyBatched(const size_t n, const std::vector<T>& alphas
 		x_offsets_int[batch] = static_cast<int>(x_offsets[batch]);
 		y_offsets_int[batch] = static_cast<int>(y_offsets[batch]);
 	}
-	auto x_offsets_device = Buffer<int>(context_, batch_count);
-	auto y_offsets_device = Buffer<int>(context_, batch_count);
+	auto x_offsets_device = Buffer<int>(queue_(), batch_count);
+	auto y_offsets_device = Buffer<int>(queue_(), batch_count);
 	auto alphas_device = Buffer<T>(queue_(), batch_count);
 	x_offsets_device.Write(queue_, batch_count, x_offsets_int);
 	y_offsets_device.Write(queue_, batch_count, y_offsets_int);

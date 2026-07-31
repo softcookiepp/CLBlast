@@ -330,7 +330,7 @@ void Tuner(int argc, char* argv[], const int V, GetTunerDefaultsFunc GetTunerDef
 		source_buffers.push_back(host_buffer);
 		reference_buffers.push_back(std::vector<T>(size));
 		result_buffers.push_back(std::vector<T>(size));
-		device_buffers.push_back(Buffer<T>(context, size));
+		device_buffers.push_back(Buffer<T>(device(), size));
 	}
 
 	// Sets the tunable parameters and their possible values

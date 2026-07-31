@@ -172,7 +172,7 @@ void TestBlas<T, U>::TestRegular(std::vector<Arguments<U>>& test_vector, const s
 		auto c_mat1 = Buffer<T>(queue_(), args.c_size);
 		auto ap_mat1 = Buffer<T>(queue_(), args.ap_size);
 		auto scalar1 = Buffer<T>(queue_(), args.scalar_size);
-		auto scalar_uint1 = Buffer<unsigned int>(context_, args.scalar_size);
+		auto scalar_uint1 = Buffer<unsigned int>(queue_(), args.scalar_size);
 		x_vec1.Write(queue_, args.x_size, x_source_);
 		y_vec1.Write(queue_, args.y_size, y_source_);
 		a_mat1.Write(queue_, args.a_size, a_source_);

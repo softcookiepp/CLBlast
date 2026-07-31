@@ -55,8 +55,8 @@ void TuneKernelSelection(const Device& device, const Context& context, Queue& qu
 												 const std::string& parameter_name) {
 	// Buffers
 	auto buffers =
-			std::vector<Buffer<T>>{Buffer<T>(context, to * to * batch_count), Buffer<T>(context, to * to * batch_count),
-														 Buffer<T>(context, to * to * batch_count)};
+			std::vector<Buffer<T>>{Buffer<T>(queue(), to * to * batch_count), Buffer<T>(queue(), to * to * batch_count),
+														 Buffer<T>(queue(), to * to * batch_count)};
 
 	// In-direct version
 	printf("\n* Testing the in-direct %s routine for m=n=k\n", name.c_str());

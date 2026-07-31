@@ -83,7 +83,7 @@ void TuneGemmSingleSize(const Device& device, const Context& context, Queue& que
 												const size_t m, const size_t n, const size_t k, const size_t num_runs) {
 	// Buffers
 	auto buffers =
-			std::vector<Buffer<T>>{Buffer<T>(context, m * k), Buffer<T>(context, k * n), Buffer<T>(context, m * n)};
+			std::vector<Buffer<T>>{Buffer<T>(device(), m * k), Buffer<T>(device(), k * n), Buffer<T>(device(), m * n)};
 	const auto FunctionToTune = [&]() { RunGemmRoutineMNK(m, n, k, queue, buffers); };
 
 	// Collects the timings for two methods

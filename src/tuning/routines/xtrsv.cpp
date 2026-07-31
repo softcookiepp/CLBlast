@@ -78,7 +78,7 @@ void TuneXtrsv(int argc, char* argv[]) {
 	auto queue = Queue(device);
 
 	// Buffers
-	auto buffers = std::vector<Buffer<T>>{Buffer<T>(context, size * size), Buffer<T>(context, size)};
+	auto buffers = std::vector<Buffer<T>>{Buffer<T>(device(), size * size), Buffer<T>(device(), size)};
 
 	// Performance testing
 	const auto results = TimeRoutine(from, to, step, num_runs, queue, buffers, RunTrsvRoutine<T>);

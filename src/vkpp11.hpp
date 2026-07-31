@@ -174,27 +174,10 @@ class Program {
 	tart::shader_module_ptr mShaderModule = nullptr;
 	//tart::cl_program_ptr mCLProgram = nullptr;
 public:
-	// Source-based constructor with memory management
-	explicit Program(const clblast::Context& context, const std::string& source);
 	
 	// constructor for GLSL shaders
 	// requires multiple shader sources because each file can only have one entry point :c
 	explicit Program(const tart::device_ptr& device, std::map<std::string, std::string>& kernelSources);
-
-	// Compiles the device program and checks whether or not there are any warnings/errors
-	void Build(const clblast::Device& device, const clblast::Context& context, std::vector<std::string>& options);
-	
-	// Compiles the device program and checks whether or not there are any warnings/errors
-	void Build(const clblast::Device& device, std::vector<std::string>& options);
-
-	// Confirms whether a certain status code is an actual compilation error or warning
-	bool StatusIsCompilationWarningOrError(const int32_t status) const;
-
-	// Retrieves the warning/error message from the compiler (if any)
-	std::string GetBuildInfo(const clblast::Device& device) const;
-
-	// Retrieves a binary or an intermediate representation of the compiled program
-	std::string GetIR() const;
 
 	// Accessor to the private data-member
 	std::shared_ptr<tart::Program> operator()() const;
@@ -232,32 +215,6 @@ public:
 
 // =================================================================================================
 #if 1
-// C++11 version of host memory
-template <typename T>
-class BufferHost {
-
-public:
-	// Regular constructor with memory management
-	explicit BufferHost(const Context&, const size_t size) : buffer_(new std::vector<T>(size)) {}
-
-	// Retrieves the actual allocated size in bytes
-	size_t GetSize() const { return buffer_->size() * sizeof(T); }
-
-	// Compatibility with std::vector
-	size_t size() const { return buffer_->size(); }
-	T* begin() { return &(*buffer_)[0]; }
-	T* end() { return &(*buffer_)[buffer_->size() - 1]; }
-	T& operator[](const size_t i) { return (*buffer_)[i]; }
-	T* data() { return buffer_->data(); }
-	const T* data() const { return buffer_->data(); }
-
-private:
-	std::shared_ptr<std::vector<T>> buffer_;
-};
-
-#endif
-// =================================================================================================
-#if 1
 
 // Tart has this all built-in (but we still need to go through this silliness
 // C++11 version of 'cl_mem'
@@ -272,8 +229,6 @@ public:
 	// Regular constructor with memory management. If this class does not own the buffer object, then
 	// the memory will not be freed automatically afterwards. If the size is set to 0, this will
 	// become a stub containing a nullptr
-	explicit Buffer(const Context& context, const size_t size);
-	
 	explicit Buffer(const tart::device_ptr& device, const size_t size);
 
 	// Constructs a new buffer based on an existing host-container
@@ -292,22 +247,18 @@ public:
 	// (this is currently impossible in tart, so it will just sync for now)
 	void ReadAsync(const Queue& queue, const size_t size, T* host, const size_t offset = 0) const;
 	void ReadAsync(const Queue& queue, const size_t size, std::vector<T>& host, const size_t offset = 0) const;
-	void ReadAsync(const Queue& queue, const size_t size, BufferHost<T>& host, const size_t offset = 0) const;
 
 	// Copies from device to host: reading the device buffer
 	void Read(const Queue& queue, const size_t size, T* host, const size_t offset = 0) const;
 	void Read(const Queue& queue, const size_t size, std::vector<T>& host, const size_t offset = 0) const;
-	void Read(const Queue& queue, const size_t size, BufferHost<T>& host, const size_t offset = 0) const;
 
 	// Copies from host to device: writing the device buffer a-synchronously
 	void WriteAsync(const Queue& queue, const size_t size, const T* host, const size_t offset = 0);
 	void WriteAsync(const Queue& queue, const size_t size, const std::vector<T>& host, const size_t offset = 0);
-	void WriteAsync(const Queue& queue, const size_t size, const BufferHost<T>& host, const size_t offset = 0);
 
 	// Copies from host to device: writing the device buffer
 	void Write(const Queue& queue, const size_t size, const T* host, const size_t offset = 0);
 	void Write(const Queue& queue, const size_t size, const std::vector<T>& host, const size_t offset = 0);
-	void Write(const Queue& queue, const size_t size, const BufferHost<T>& host, const size_t offset = 0);
 
 	// Copies the contents of this buffer into another device buffer
 	void CopyToAsync(const Queue& queue, const size_t size, const Buffer<T>& destination,

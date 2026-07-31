@@ -121,51 +121,11 @@ Context::Context(const Device& device)
 const RawContext Context::operator()() const { return mDevice; }
 RawContext Context::pointer() const { return mDevice; }
 
-
-// Source-based constructor with memory management
-Program::Program(const clblast::Context& context, const std::string& source)
-{
-	mSource = source;
-	mDevice = context.pointer();
-}
-
 // constructor for GLSL shaders
 // requires multiple shader sources because each file can only have one entry point :c
 Program::Program(const tart::device_ptr& device, std::map<std::string, std::string>& kernelSources)
 {
 	mProgramContainer = std::make_shared<tart::Program>(device, kernelSources);
-}
-
-// Compiles the device program and checks whether or not there are any warnings/errors
-void Program::Build(const clblast::Device& device, const clblast::Context& context, std::vector<std::string>& options) {
-	Build(device, options);
-}
-
-// Compiles the device program and checks whether or not there are any warnings/errors
-void Program::Build(const clblast::Device& device, std::vector<std::string>& options) {
-	// if program container already here, don't bother
-	if (mProgramContainer) return;
-	throw std::runtime_error("who knows lool");
-	// TODO: parse options (look for dflags, etc.)
-	// compile the shader module
-	// mShaderModule = mDevice->compileCL(mSource);
-	// load it into the actual CL program handler thingy
-	// mProgramContainer = std::make_shared<tart::Program>(mDevice, mDevice->createCLProgram(mShaderModule));
-	//mCLProgram = mDevice->createCLProgram(mShaderModule);
-}
-
-// Confirms whether a certain status code is an actual compilation error or warning
-bool Program::StatusIsCompilationWarningOrError(const int32_t status) const { return (status == -11); }
-
-// Retrieves the warning/error message from the compiler (if any)
-std::string Program::GetBuildInfo(const clblast::Device& device) const {
-	return "not implemented yet :c";
-}
-
-// Retrieves a binary or an intermediate representation of the compiled program
-std::string Program::GetIR() const {
-	// TODO: somehow convert the SPIR-V into a string?
-	return "not implemented yet :c";
 }
 
 // Accessor to the private data-member
@@ -208,9 +168,6 @@ Buffer<T>::Buffer(const tart::buffer_ptr buffer) { buffer_ = buffer; }
 // the memory will not be freed automatically afterwards. If the size is set to 0, this will
 // become a stub containing a nullptr
 template <typename T>
-Buffer<T>::Buffer(const Context& context, const size_t size) : Buffer(context.pointer(), size) {}
-
-template <typename T>
 Buffer<T>::Buffer(const tart::device_ptr& device, const size_t size)
 {
 	if (size == 0)
@@ -235,13 +192,6 @@ void Buffer<T>::ReadAsync(const Queue& queue, const size_t size, std::vector<T>&
 	}
 	ReadAsync(queue, size, host.data(), offset);
 }
-template <typename T>
-void Buffer<T>::ReadAsync(const Queue& queue, const size_t size, BufferHost<T>& host, const size_t offset) const {
-	if (host.size() < size) {
-		throw LogicError("Buffer: target host buffer is too small");
-	}
-	ReadAsync(queue, size, host.data(), offset);
-}
 
 // Copies from device to host: reading the device buffer
 template <typename T>
@@ -251,10 +201,6 @@ void Buffer<T>::Read(const Queue& queue, const size_t size, T* host, const size_
 }
 template <typename T>
 void Buffer<T>::Read(const Queue& queue, const size_t size, std::vector<T>& host, const size_t offset) const {
-	Read(queue, size, host.data(), offset);
-}
-template <typename T>
-void Buffer<T>::Read(const Queue& queue, const size_t size, BufferHost<T>& host, const size_t offset) const {
 	Read(queue, size, host.data(), offset);
 }
 
@@ -275,10 +221,6 @@ template <typename T>
 void Buffer<T>::WriteAsync(const Queue& queue, const size_t size, const std::vector<T>& host, const size_t offset) {
 	WriteAsync(queue, size, host.data(), offset);
 }
-template <typename T>
-void Buffer<T>::WriteAsync(const Queue& queue, const size_t size, const BufferHost<T>& host, const size_t offset) {
-	WriteAsync(queue, size, host.data(), offset);
-}
 
 // Copies from host to device: writing the device buffer
 template <typename T>
@@ -288,10 +230,6 @@ void Buffer<T>::Write(const Queue& queue, const size_t size, const T* host, cons
 }
 template <typename T>
 void Buffer<T>::Write(const Queue& queue, const size_t size, const std::vector<T>& host, const size_t offset) {
-	Write(queue, size, host.data(), offset);
-}
-template <typename T>
-void Buffer<T>::Write(const Queue& queue, const size_t size, const BufferHost<T>& host, const size_t offset) {
 	Write(queue, size, host.data(), offset);
 }
 

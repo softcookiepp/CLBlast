@@ -64,17 +64,7 @@ size_t Device::MaxWorkGroupSize() const
 {
 	return mDevice->getMetadata().physicalDeviceProperties.limits.maxComputeWorkGroupInvocations;
 }
-size_t Device::MaxWorkItemDimensions() const { return 3; } // it is always 3 in vulkan
 std::vector<size_t> Device::MaxWorkItemSizes() const { return {1000000, 1000000, 1000000}; } // TODO: implement in Tart
-unsigned long Device::LocalMemSize() const
-{
-#if 1
-	// TODO: actually implement in Tart
-	return 0;
-#else
-	return static_cast<unsigned long>(GetInfo<uint64_t>(CL_DEVICE_LOCAL_MEM_SIZE));
-#endif
-}
 
 // Not sure if Tart has a public method for querying extensions; might be a good idea to implement this.
 std::string Device::Capabilities() const { return "not implemented"; }
@@ -106,20 +96,6 @@ bool Device::IsGPU() const { return Type() == "GPU"; }
 
 const RawDeviceID Device::operator()() const { return mDevice; }
 
-using RawContext = tart::device_ptr;
-
-// Constructor based on tart::device_ptr
-Context::Context(tart::device_ptr context) { mDevice = context; }
-
-// Regular constructor with memory management
-Context::Context(const Device& device)
-{
-	mDevice = device();
-}
-
-// Accessor to the private data-member
-const RawContext Context::operator()() const { return mDevice; }
-RawContext Context::pointer() const { return mDevice; }
 
 // constructor for GLSL shaders
 // requires multiple shader sources because each file can only have one entry point :c
@@ -144,9 +120,6 @@ Queue::Queue(const Device& device)
 void Queue::Finish() const { mDevice->sync(); }
 
 // Retrieves the corresponding context or device
-Context Queue::GetContext() const {
-	return Context(mDevice);
-}
 Device Queue::GetDevice() const {
 	return Device(mDevice);
 }

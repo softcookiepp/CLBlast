@@ -24,31 +24,11 @@ namespace clblast {
 void RunKernel(Kernel& kernel, Queue& queue, const Device& device, std::vector<size_t> global,
 	const std::vector<size_t>& local)
 {
-	if (!local.empty()) {
-		// Tests for validity of the local thread sizes
-		if (local.size() > device.MaxWorkItemDimensions()) {
-			throw RuntimeErrorCode(StatusCode::kInvalidLocalNumDimensions);
-		}
-		const auto max_work_item_sizes = device.MaxWorkItemSizes();
-		for (auto i = size_t{0}; i < local.size(); ++i) {
-			if (local[i] > max_work_item_sizes[i]) {
-				throw RuntimeErrorCode(StatusCode::kInvalidLocalThreadsDim);
-			}
-		}
+	if (!local.empty())
+	{
 		auto local_size = size_t{1};
 		for (auto& item : local) {
 			local_size *= item;
-		}
-		if (local_size > device.MaxWorkGroupSize()) {
-			throw RuntimeErrorCode(StatusCode::kInvalidLocalThreadsTotal,
-														 ToString(local_size) + " is larger than " + ToString(device.MaxWorkGroupSize()));
-		}
-
-		// Make sure the global thread sizes are at least equal to the local sizes
-		for (auto i = size_t{0}; i < global.size(); ++i) {
-			if (global[i] < local[i]) {
-				global[i] = local[i];
-			}
 		}
 
 		// Verify that the global thread sizes are a multiple of the local sizes

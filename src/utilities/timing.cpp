@@ -23,21 +23,9 @@ double RunKernelTimed(const size_t num_runs, Kernel& kernel, Queue& queue, const
 											std::vector<size_t> global, const std::vector<size_t>& local) {
 	if (!local.empty()) {
 		// Tests for validity of the local thread sizes
-		if (local.size() > device.MaxWorkItemDimensions()) {
-			throw RuntimeErrorCode(StatusCode::kInvalidLocalNumDimensions);
-		}
-		const auto max_work_item_sizes = device.MaxWorkItemSizes();
-		for (auto i = size_t{0}; i < local.size(); ++i) {
-			if (local[i] > max_work_item_sizes[i]) {
-				throw RuntimeErrorCode(StatusCode::kInvalidLocalThreadsDim);
-			}
-		}
 		auto local_size = size_t{1};
 		for (auto& item : local) {
 			local_size *= item;
-		}
-		if (local_size > device.MaxWorkGroupSize()) {
-			throw RuntimeErrorCode(StatusCode::kInvalidLocalThreadsTotal);
 		}
 
 		// Make sure the global thread sizes are at least equal to the local sizes

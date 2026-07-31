@@ -106,9 +106,7 @@ public:
 	std::string Name() const;
 	std::string Type() const;
 	size_t MaxWorkGroupSize() const;
-	size_t MaxWorkItemDimensions() const;
 	std::vector<size_t> MaxWorkItemSizes() const;
-	unsigned long LocalMemSize() const;
 
 	// Not sure if Tart has a public method for querying extensions; might be a good idea to implement this.
 	std::string Capabilities() const;
@@ -139,28 +137,8 @@ public:
 #endif
 // =================================================================================================
 
-// ok, so the `Device` is more like `vk::PhysicalDevice` and the `Context` is more akin to `vk::Device`
-// that makes sense.
-#if 1
 // Raw context type
 using RawContext = tart::device_ptr;
-
-// C++11 version of 'cl_context'
-class Context {
-	tart::device_ptr mDevice = nullptr;
-
-public:
-	// Constructor based on tart::device_ptr
-	explicit Context(tart::device_ptr context);
-
-	// Regular constructor with memory management
-	explicit Context(const Device& device);
-
-	// Accessor to the private data-member
-	const RawContext operator()() const;
-	RawContext pointer() const;
-};
-#endif
 #if 1
 // Pointer to an OpenCL context
 using ContextPointer = tart::device_ptr;
@@ -206,7 +184,6 @@ public:
 	void Finish() const;
 
 	// Retrieves the corresponding context or device
-	Context GetContext() const;
 	Device GetDevice() const;
 
 	// Accessor to the private data-member

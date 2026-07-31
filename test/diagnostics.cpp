@@ -54,12 +54,11 @@ void OpenCLDiagnostics(int argc, char* argv[]) {
 	// Selected OpenCL properties
 	printf("\n --- OpenCL device properties:\n");
 	printf("* Max work group size					 %zu\n", device.MaxWorkGroupSize());
-	printf("* Max work item dimensions			%zu\n", device.MaxWorkItemDimensions());
 	const auto max_work_item_sizes = device.MaxWorkItemSizes();
 	for (auto i = size_t{0}; i < max_work_item_sizes.size(); ++i) {
 		printf("* - Max work item size #%zu			 %zu\n", i, max_work_item_sizes[i]);
 	}
-	printf("* Local memory size						 %lu KB\n", device.LocalMemSize());
+	printf("* Local memory size						 %lu KB\n", device()->getMetadata().physicalDeviceProperties.limits.maxComputeSharedMemorySize);
 	printf("* Extensions:\n%s\n", device.Capabilities().c_str());
 
 	// Simple OpenCL benchmarking

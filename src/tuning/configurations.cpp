@@ -24,7 +24,7 @@ std::vector<Configuration> SetConfigurations(const Device& device, const std::ve
                                              const TransformVector& mul_local_config,
                                              const TransformVector& div_local_config, const Constraints& constraints,
                                              const LocalMemSizeInfo& local_mem_size_info) {
-  const auto local_mem_max = device.LocalMemSize();
+  const auto local_mem_max = device()->getMetadata().physicalDeviceProperties.limits.maxComputeSharedMemorySize;
   const auto max_work_item_sizes = device.MaxWorkItemSizes();
   const auto max_work_group_size = device.MaxWorkGroupSize();
   auto config = Configuration();

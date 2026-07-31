@@ -24,7 +24,7 @@ namespace clblast {
 // Compiles a program from source code
 std::shared_ptr<Program> CompileFromSource(const std::string& source_string, const Precision precision,
                                            const std::string& routine_name, const Device& device,
-                                           const Context& context, std::vector<std::string>& options,
+                                           std::vector<std::string>& options,
                                            const size_t run_preprocessor,  // 0: platform dependent, 1: always, 2: never
                                            const bool silent
 #if VULKAN_API
@@ -36,7 +36,7 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 #if VULKAN_API
 std::shared_ptr<Program> CompileFromSource(const std::string& source_string, const Precision precision,
                                            const std::string& routine_name, const Device& device,
-                                           const Context& context, std::vector<std::string>& options,
+                                           std::vector<std::string>& options,
                                            const size_t run_preprocessor,  // 0: platform dependent, 1: always, 2: never
                                            const bool silent = false);
 #endif

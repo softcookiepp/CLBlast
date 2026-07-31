@@ -23,7 +23,7 @@ namespace clblast {
 // Compiles a program from source code
 std::shared_ptr<Program> CompileFromSource(const std::string& source_string, const Precision precision,
 		const std::string& routine_name, const Device& device,
-		const Context& context, std::vector<std::string>& options,
+		std::vector<std::string>& options,
 		const size_t run_preprocessor,	// 0: platform dependent, 1: always, 2: never
 		const bool silent
 #if VULKAN_API
@@ -83,7 +83,6 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 	}
 	// Compiles the kernel
 	std::shared_ptr<Program> program = nullptr;
-#if VULKAN_API
 	if (true)
 	{
 		// append the header to everything
@@ -91,19 +90,7 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 		{
 			pair.second = "#version 450\n\n" + header_string + pair.second;
 		}
-		program = std::make_shared<Program>(context, kernelSources);
-	}
-	else
-#endif
-		program = std::make_shared<Program>(context, kernel_string);
-	try {
-		SetOpenCLKernelStandard(device, options);
-		program->Build(device, options);
-	} catch (const CLCudaAPIBuildError& e) {
-		if (program->StatusIsCompilationWarningOrError(e.status()) && !silent) {
-			fprintf(stdout, "OpenCL compiler error/warning:\n%s\n", program->GetBuildInfo(device).c_str());
-		}
-		throw;
+		program = std::make_shared<Program>(device(), kernelSources);
 	}
 
 // Prints the elapsed compilation time in case of debugging in verbose mode
@@ -118,13 +105,13 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 #if VULKAN_API
 std::shared_ptr<Program> CompileFromSource(const std::string& source_string, const Precision precision,
                                            const std::string& routine_name, const Device& device,
-                                           const Context& context, std::vector<std::string>& options,
+                                           std::vector<std::string>& options,
                                            const size_t run_preprocessor,  // 0: platform dependent, 1: always, 2: never
                                            const bool silent)
 {
 	std::map<std::string, std::string> dummyMap;
 	return CompileFromSource(source_string, precision, routine_name, device,
-                                           context, options,
+                                           options,
                                            run_preprocessor,
                                             silent, dummyMap);
 }

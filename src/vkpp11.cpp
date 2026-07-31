@@ -131,9 +131,6 @@ Program::Program(const clblast::Context& context, const std::string& source)
 
 // constructor for GLSL shaders
 // requires multiple shader sources because each file can only have one entry point :c
-Program::Program(const clblast::Context& context, std::map<std::string, std::string>& kernelSources):
-	Program(context.pointer(), kernelSources) {}
-
 Program::Program(const tart::device_ptr& device, std::map<std::string, std::string>& kernelSources)
 {
 	mProgramContainer = std::make_shared<tart::Program>(device, kernelSources);

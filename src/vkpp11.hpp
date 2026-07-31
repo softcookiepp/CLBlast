@@ -179,8 +179,6 @@ public:
 	
 	// constructor for GLSL shaders
 	// requires multiple shader sources because each file can only have one entry point :c
-	explicit Program(const clblast::Context& context, std::map<std::string, std::string>& kernelSources);
-	
 	explicit Program(const tart::device_ptr& device, std::map<std::string, std::string>& kernelSources);
 
 	// Compiles the device program and checks whether or not there are any warnings/errors

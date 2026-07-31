@@ -180,7 +180,7 @@ void kernelCompilationThread(std::vector<ThreadInfo>& infos, const std::vector<c
 			{
 				std::cout << "	source key: " << s.first << std::endl;
 			}
-			const auto program = CompileFromSource(kernel_source, args.precision, settings.kernel_name, device, context,
+			const auto program = CompileFromSource(kernel_source, args.precision, settings.kernel_name, device,
 																						 compiler_options, 0, false, sources);
 			#if 1
 				info.kernel = Kernel(program, settings.kernel_name);
@@ -405,7 +405,7 @@ void Tuner(int argc, char* argv[], const int V, GetTunerDefaultsFunc GetTunerDef
 			std::cout << "	source key: " << s.first << std::endl;
 		}
 		const auto program =
-				CompileFromSource(settings.sources, args.precision, settings.kernel_name, device, context, compiler_options, 0, false, sources);
+				CompileFromSource(settings.sources, args.precision, settings.kernel_name, device, compiler_options, 0, false, sources);
 		auto kernel = Kernel(program, settings.kernel_name);
 		SetArguments(V, kernel, args, device_buffers);
 		printf("						 %sOK%s |", kPrintSuccess.c_str(), kPrintEnd.c_str());

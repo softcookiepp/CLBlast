@@ -389,7 +389,7 @@ StatusCode TunerAPI(Queue& queue, const Arguments<T>& args, const int V, const G
     // Compiles the kernel
     auto compiler_options = std::vector<std::string>();
     const auto program =
-        CompileFromSource(settings.sources, args.precision, settings.kernel_name, device, context, compiler_options, 0);
+        CompileFromSource(settings.sources, args.precision, settings.kernel_name, device, compiler_options, 0);
     auto kernel = Kernel(program, settings.kernel_name);
     SetArguments(V, kernel, args, device_buffers);
 
@@ -435,7 +435,7 @@ StatusCode TunerAPI(Queue& queue, const Arguments<T>& args, const int V, const G
 
       // Compiles the kernel
       auto compiler_options = std::vector<std::string>();
-      const auto program = CompileFromSource(kernel_source, args.precision, settings.kernel_name, device, context,
+      const auto program = CompileFromSource(kernel_source, args.precision, settings.kernel_name, device, 
                                              compiler_options, 0, true);
       auto kernel = Kernel(program, settings.kernel_name);
 

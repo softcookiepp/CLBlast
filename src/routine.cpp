@@ -154,7 +154,7 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 	}
 	std::string dummy("");
 
-	program_ = CompileFromSource(dummy, precision_, routine_name_, device_, context_, options, 0, false, kernelSources);
+	program_ = CompileFromSource(dummy, precision_, routine_name_, device_, options, 0, false, kernelSources);
 	
 	ProgramCache::Instance().Store(ProgramKey{device_(), precision_, routine_info},
 																 std::shared_ptr<Program>{program_});

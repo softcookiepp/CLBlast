@@ -117,13 +117,7 @@ Device Queue::GetDevice() const {
 }
 
 // Accessor to the private data-member
-const RawCommandQueue& Queue::operator()() const { return mDevice; }
-
-
-
-
-
-
+const tart::device_ptr& Queue::operator()() const { return mDevice; }
 
 // Constructor based on the regular OpenCL data-type: memory management is handled elsewhere
 template <typename T>

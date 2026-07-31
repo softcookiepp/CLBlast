@@ -148,10 +148,6 @@ public:
 };
 
 // =================================================================================================
-// Tart does not expose queues (yet?)
-// since each device only has a single compute queue
-// Raw command-queue type
-using RawCommandQueue = tart::device_ptr;
 
 // no idea how to handle this, since Tart uses a single queue
 // pretty sure I will just end up scrapping it, since tart::Device handles all this already (actually I can't)
@@ -172,7 +168,7 @@ public:
 	Device GetDevice() const;
 
 	// Accessor to the private data-member
-	const RawCommandQueue& operator()() const;
+	const tart::device_ptr& operator()() const;
 };
 
 // =================================================================================================

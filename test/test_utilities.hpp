@@ -99,12 +99,6 @@ void HostToDevice(const Arguments<U>& args, Buffers<T>& buffers, BuffersHost<T>&
 std::vector<float> HalfToFloatBuffer(const std::vector<half>& source);
 void FloatToHalfBuffer(std::vector<half>& result, const std::vector<float>& source);
 
-// As above, but now for OpenCL data-types instead of std::vectors
-#ifdef OPENCL_API
-Buffer<float> HalfToFloatBuffer(const Buffer<half>& source, RawCommandQueue queue_raw);
-void FloatToHalfBuffer(Buffer<half>& result, const Buffer<float>& source, RawCommandQueue queue_raw);
-#endif
-
 // =================================================================================================
 
 // Creates a buffer but don't test for validity. That's the reason this is not using the clpp11.h or

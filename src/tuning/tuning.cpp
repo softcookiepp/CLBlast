@@ -54,8 +54,6 @@ void PrintTimingsToFileAsJSON(const std::string& filename, const Device& device,
 	fprintf(file, "	\"device\": \"%s\",\n", device.Name().c_str());
 	fprintf(file, "	\"device_vendor\": \"%s\",\n", device.Vendor().c_str());
 	fprintf(file, "	\"device_type\": \"%s\",\n", device.Type().c_str());
-	fprintf(file, "	\"device_core_clock\": \"%zu\",\n", device.CoreClock());
-	fprintf(file, "	\"device_compute_units\": \"%zu\",\n", device.ComputeUnits());
 	fprintf(file, "	\"results\": [\n");
 
 	// Loops over all results

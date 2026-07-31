@@ -112,14 +112,6 @@ public:
 	std::string Capabilities() const;
 	bool HasExtension(const std::string& extension) const;
 	
-	// Tart already has this
-	bool SupportsFP64() const;
-	bool SupportsFP16() const;
-	// Vulkan does not allow you to do this
-	size_t CoreClock() const;
-	// or this either.
-	size_t ComputeUnits() const;
-	
 	// Vulkan has a way to do this, but I have been too lazy to implement it completely in Tart aside from error checking.
 	// Will have to do this eventually
 	unsigned long MemorySize() const;
@@ -135,13 +127,7 @@ public:
 	
 };
 #endif
-// =================================================================================================
 
-// Raw context type
-using RawContext = tart::device_ptr;
-#if 1
-// Pointer to an OpenCL context
-using ContextPointer = tart::device_ptr;
 // =================================================================================================
 
 // C++11 version of 'cl_program'.
@@ -160,7 +146,6 @@ public:
 	// Accessor to the private data-member
 	std::shared_ptr<tart::Program> operator()() const;
 };
-#endif
 
 // =================================================================================================
 // Tart does not expose queues (yet?)

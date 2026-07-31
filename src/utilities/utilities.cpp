@@ -569,15 +569,15 @@ bool PrecisionSupported<float2>(const Device&) {
 }
 template <>
 bool PrecisionSupported<double>(const Device& device) {
-	return device.SupportsFP64();
+	return device()->getMetadata().double_;
 }
 template <>
 bool PrecisionSupported<double2>(const Device& device) {
-	return device.SupportsFP64();
+	return device()->getMetadata().double_;
 }
 template <>
 bool PrecisionSupported<half>(const Device& device) {
-	return device.SupportsFP16();
+	return device()->getMetadata().half_;
 }
 
 // =================================================================================================
@@ -659,19 +659,6 @@ std::string GetDeviceName(const Device& device) {
 	}
 
 	return device_name;
-}
-
-// =================================================================================================
-
-void SetOpenCLKernelStandard(const Device& device, std::vector<std::string>& options) {
-	// Inclusion of one of the following extensions needs OpenCL 1.2 kernels
-	if (device.HasExtension(kKhronosIntelSubgroups)) {
-		options.push_back("-cl-std=CL1.2");
-	}
-	// Otherwise we fall-back to the default CLBlast OpenCL 1.1
-	else {
-		options.push_back("-cl-std=CL1.1");
-	}
 }
 
 // =================================================================================================

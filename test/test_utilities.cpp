@@ -18,7 +18,6 @@
 #include <string>
 #include <vector>
 
-//#include "clblast.h"
 #include "clblast_half.h"
 #include "utilities/backend.hpp"
 #include "utilities/utilities.hpp"
@@ -172,29 +171,6 @@ void FloatToHalfBuffer(std::vector<half>& result, const std::vector<float>& sour
 		result[i] = FloatToHalf(source[i]);
 	}
 }
-
-// As above, but now for OpenCL data-types instead of std::vectors
-#ifdef OPENCL_API
-Buffer<float> HalfToFloatBuffer(const Buffer<half>& source, RawCommandQueue queue_raw) {
-	const auto size = source.GetSize() / sizeof(half);
-	auto queue = Queue(queue_raw);
-	auto source_cpu = std::vector<half>(size);
-	source.Read(queue, size, source_cpu);
-	auto result_cpu = HalfToFloatBuffer(source_cpu);
-	auto result = Buffer<float>(queue_raw, size);
-	result.Write(queue, size, result_cpu);
-	return result;
-}
-void FloatToHalfBuffer(Buffer<half>& result, const Buffer<float>& source, RawCommandQueue queue_raw) {
-	const auto size = source.GetSize() / sizeof(float);
-	auto queue = Queue(queue_raw);
-	auto source_cpu = std::vector<float>(size);
-	source.Read(queue, size, source_cpu);
-	auto result_cpu = std::vector<half>(size);
-	FloatToHalfBuffer(result_cpu, source_cpu);
-	result.Write(queue, size, result_cpu);
-}
-#endif
 
 // =================================================================================================
 

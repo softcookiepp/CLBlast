@@ -74,14 +74,6 @@ bool Device::HasExtension(const std::string& extension) const
 	return false;//return mDevice->supportsExtension(extension);
 }
 
-// Tart already has this
-bool Device::SupportsFP64() const { return mDevice->getMetadata().double_; }
-bool Device::SupportsFP16() const { return mDevice->getMetadata().half_; }
-// Vulkan does not allow you to do this
-size_t Device::CoreClock() const { return 0; }
-// or this either.
-size_t Device::ComputeUnits() const { return 0; }
-
 // Vulkan has a way to do this, but I have been too lazy to implement it completely in Tart aside from error checking.
 // Will have to do this eventually
 unsigned long Device::MemorySize() const { return 0; }

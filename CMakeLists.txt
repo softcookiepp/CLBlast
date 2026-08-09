@@ -111,7 +111,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${clblast_SOURCE_DIR}/cmake/Modules/
 # we need Tart, the vulkan frontend thingy
 add_subdirectory(${PROJECT_SOURCE_DIR}/tart)
 if(TART_ENABLE_SHADER_COMPILERS)
-	set(API_LIBRARIES tart tart_vulkan subprocess ${GLSLANG_LIBS})
+	set(API_LIBRARIES tart tart_vulkan ${GLSLANG_LIBS})
 else()
 	set(API_LIBRARIES tart tart_vulkan subprocess)
 endif()

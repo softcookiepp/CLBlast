@@ -17,6 +17,7 @@ add_custom_command(OUTPUT INLINE_GEN_OUT COMMAND "python3 scripts/inline_gen.py"
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Overrides for MSVC static runtime
 option(OVERRIDE_MSVC_FLAGS_TO_MT "Override compiler flags for MSVC to build with a static runtime (/MT instead of /MD)" ON)
@@ -111,7 +112,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${clblast_SOURCE_DIR}/cmake/Modules/
 # we need Tart, the vulkan frontend thingy
 add_subdirectory(${PROJECT_SOURCE_DIR}/tart)
 if(TART_ENABLE_SHADER_COMPILERS)
-	set(API_LIBRARIES tart tart_vulkan ${GLSLANG_LIBS})
+	set(API_LIBRARIES tart tart_vulkan subprocess ${GLSLANG_LIBS})
 else()
 	set(API_LIBRARIES tart tart_vulkan subprocess)
 endif()

@@ -16,8 +16,9 @@
 #include "xgemm_part1.glsl"
 
 // The vectorised multiply-add function
-realM MultiplyAddVector(realM cvec, const realM avec, const real bval) {
-	if (USE_VECTOR_MAD == 1)
+realM MultiplyAddVector(realM cvec, const realM avec, const real bval)
+{
+	if (USE_VECTOR_MAD == 0)
 	{
 		cvec += avec * bval;
 	}

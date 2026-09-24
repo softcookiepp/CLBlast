@@ -43,11 +43,11 @@ void main()
 
 	// Computes the matrix-multiplication and stores the result in global memory
 	XgemmBody(kSizeN, kSizeN, kSizeK,
-#if USE_BDA
-		agm, bgm, cgm,
-#else
-		0, 0, 0,
-#endif
+		#if USE_BDA
+			agm, bgm, cgm,
+		#else
+			0, 0, 0,
+		#endif
 		alpha, beta
 	);
 }

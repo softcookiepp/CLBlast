@@ -12,7 +12,8 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
-#include "xgemm_part1_batched.glsl"
+#define USE_XGEMM_BATCHED 1
+#include "xgemm_part1.glsl"
 //
 #include "xgemm_part2.glsl"
 //

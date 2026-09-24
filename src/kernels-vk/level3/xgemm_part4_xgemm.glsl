@@ -38,19 +38,19 @@ void main()
 	const real beta = GetRealArg(arg_beta);
 
 	// Adds the offsets (in case of use of a single temporary buffer for A, B, and C)
-#if USE_BDA
-	// not allowed without BDA; plus BDA use isn't yet implemented
-	bgm = &bgm[b_offset];
-	cgm = &cgm[c_offset];
-#endif
+	#if USE_BDA
+		// not allowed without BDA; plus BDA use isn't yet implemented
+		bgm = &bgm[b_offset];
+		cgm = &cgm[c_offset];
+	#endif
 
 	// Computes the matrix-multiplication and stores the result in global memory
 	XgemmBody(kSizeM, kSizeN, kSizeK,
-#if USE_BDA
-		agm, bgm, cgm,
-#else
-		0, b_offset, c_offset,
-#endif
+		#if USE_BDA
+			agm, bgm, cgm,
+		#else
+			0, b_offset, c_offset,
+		#endif
 		alpha, beta
 	);
 }

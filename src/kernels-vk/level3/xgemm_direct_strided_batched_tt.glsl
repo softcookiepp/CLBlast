@@ -24,17 +24,17 @@ layout(push_constant) uniform XgemmDirectStridedBatchedTT
 {
 	int kSizeM; int kSizeN; int kSizeK;
 	real_arg arg_alpha; real_arg arg_beta;
-#if USE_BDA
-	__global realMD* restrict agm;
-#endif
-	int a_offset; int a_ld; int a_stride;
-#if USE_BDA
-	__global realND* restrict bgm;
-#endif
-	int b_offset; int b_ld; int b_stride;
-#if USE_BDA
-	__global real* cgm;
-#endif
+	#if USE_BDA
+		__global realMD* restrict agm;
+	#endif
+		int a_offset; int a_ld; int a_stride;
+	#if USE_BDA
+		__global realND* restrict bgm;
+	#endif
+		int b_offset; int b_ld; int b_stride;
+	#if USE_BDA
+		__global real* cgm;
+	#endif
 	int c_offset; int c_ld; int c_stride;
 	int c_transpose; int a_conjugate; int b_conjugate;
 };

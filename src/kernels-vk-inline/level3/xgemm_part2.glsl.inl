@@ -759,13 +759,21 @@ realM InitAccRegisters()
 
 // =================================================================================================
 
+#ifndef USE_XGEMM_BATCHED
+	#define USE_XGEMM_BATCHED 0
+#endif
+
 // buffer definitions (to avoid having to use macros everywhere like usual)
 #if USE_BDA == 0
-	layout(binding = 0, std430) buffer agm_buf { realM agm[]; };
-	layout(binding = 1, std430) buffer bgm_buf { realN bgm[]; };
+	layout(binding = 0, std430) readonly buffer agm_buf { realM agm[]; };
+	layout(binding = 1, std430) readonly buffer bgm_buf { realN bgm[]; };
 	layout(binding = 2, std430) buffer cgm_buf { realM cgm[]; };
-	layout(binding = 3, std430) buffer agms_buf { real a_ptr[]; };
-	layout(binding = 4, std430) buffer bgms_buf { real b_ptr[]; };
+	layout(binding = 3, std430) readonly buffer agms_buf { real a_ptr[]; };
+	layout(binding = 4, std430) readonly buffer bgms_buf { real b_ptr[]; };
+	#if USE_XGEMM_BATCHED == 1
+		layout(binding = 5, std430) readonly buffer arg_alphas_buf { real_arg arg_alphas[]; };
+		layout(binding = 6, std430) readonly buffer arg_betas_buf { real_arg arg_betas[]; };
+	#endif
 #endif
 
 // Allocates workgroup-private memory (local memory)
@@ -1033,8 +1041,9 @@ realN LocalToPrivateB(
 
 
 // The vectorised multiply-add function
-realM MultiplyAddVector(realM cvec, const realM avec, const real bval) {
-	if (USE_VECTOR_MAD == 1)
+realM MultiplyAddVector(realM cvec, const realM avec, const real bval)
+{
+	if (USE_VECTOR_MAD == 0)
 	{
 		cvec += avec * bval;
 	}

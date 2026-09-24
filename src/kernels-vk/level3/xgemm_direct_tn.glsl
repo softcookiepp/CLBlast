@@ -37,17 +37,17 @@ layout(push_constant) uniform XgemmDirectTN
 void main()
 {
 	XgemmDirect(kSizeM, kSizeN, kSizeK, arg_alpha, arg_beta,
-#if USE_BDA
-		agm,
-#endif
-		a_offset, a_ld,
-#if USE_BDA
-		bgm,
-#endif
-		b_offset, b_ld,
-#if USE_BDA
-		cgm,
-#endif
+		#if USE_BDA
+			agm,
+		#endif
+			a_offset, a_ld,
+		#if USE_BDA
+			bgm,
+		#endif
+			b_offset, b_ld,
+		#if USE_BDA
+			cgm,
+		#endif
 		c_offset, c_ld,
 		//alm, blm,
 		1, 0, c_transpose, a_conjugate, b_conjugate);

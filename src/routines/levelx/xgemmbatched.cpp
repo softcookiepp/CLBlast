@@ -259,8 +259,8 @@ void XgemmBatched<T>::BatchedGemmIndirect(
 	kernel.SetArgument(0, static_cast<int>(m_ceiled));
 	kernel.SetArgument(1, static_cast<int>(n_ceiled));
 	kernel.SetArgument(2, static_cast<int>(k_ceiled));
-	kernel.SetArgument(3, alphas());
-	kernel.SetArgument(4, betas());
+	kernel.SetArgument(14, alphas());
+	kernel.SetArgument(15, betas());
 	kernel.SetArgument(5, a_temp());
 	kernel.SetArgument(6, static_cast<int>(a_one_i));
 	kernel.SetArgument(7, static_cast<int>(a_two_i));

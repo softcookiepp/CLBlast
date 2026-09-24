@@ -33,17 +33,17 @@ layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
 // Main body of the kernel. This is the direct version without pre/post processing and restrictions.
 void XgemmDirect(const int kSizeM, const int kSizeN, const int kSizeK, const real_arg arg_alpha,
 		const real_arg arg_beta,
-#if USE_BDA
-		const __global realMD* restrict agm,
-#endif
-		const int a_offset, const int a_ld,
-#if USE_BDA
-		const __global realND* restrict bgm,
-#endif
-		const int b_offset, const int b_ld,
-#if USE_BDA
-		__global real* cgm,
-#endif
+		#if USE_BDA
+			const __global realMD* restrict agm,
+		#endif
+			const int a_offset, const int a_ld,
+		#if USE_BDA
+			const __global realND* restrict bgm,
+		#endif
+			const int b_offset, const int b_ld,
+		#if USE_BDA
+			__global real* cgm,
+		#endif
 		const int c_offset, const int c_ld,
 		// no local memory args allowed :c
 		//LOCAL_PTR real* alm, LOCAL_PTR real* blm,

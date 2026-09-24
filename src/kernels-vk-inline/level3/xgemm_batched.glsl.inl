@@ -10,6 +10,7 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
+#define USE_XGEMM_BATCHED 1
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
@@ -48,8 +49,6 @@ R"(
 // =================================================================================================
 
 // literal). Comment-out this line for syntax-highlighting when developing.
-// use the same header guard as xgemm_part1.glsl because the two are mutually exclusive
-
 #ifndef XGEMM_PART1_GLSL
 #define XGEMM_PART1_GLSL
 
@@ -640,7 +639,6 @@ R"(
 
 // =================================================================================================
 
-
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library.
 #ifndef GEMMK
@@ -707,6 +705,10 @@ R"(
 	#define USE_VECTOR_MAD 0			// Unroll (0) or don't (1) unroll the vector MAD manually
 #endif
 
+#ifndef USE_SUBGROUP_SHUFFLING
+	#define USE_SUBGROUP_SHUFFLING 0		 // Optionally enables subgroup shuffling for Intel GPUs
+#endif
+
 #if NWI != SUBGROUP_SIZE || MDIMC < SUBGROUP_SIZE
 	#undef USE_SUBGROUP_SHUFFLING
 	#define USE_SUBGROUP_SHUFFLING 0		 // Disables subgroups in case the assumptions don't hold
@@ -743,7 +745,8 @@ R"(
 // =================================================================================================
 
 // Initializes the accumulation registers to zero
-realM InitAccRegisters() {
+realM InitAccRegisters()
+{
 	realM result;
 	#if VWM == 1
 		SetToZero(result);
@@ -755,19 +758,25 @@ realM InitAccRegisters() {
 
 // =================================================================================================
 
+#ifndef USE_XGEMM_BATCHED
+	#define USE_XGEMM_BATCHED 0
+#endif
+
 // buffer definitions (to avoid having to use macros everywhere like usual)
 #if USE_BDA == 0
-	layout(binding = 0, std430) buffer arg_alphas_buf { real_arg arg_alphas[]; };
-	layout(binding = 1, std430) buffer arg_betas_buf { real_arg arg_betas[]; };
-	layout(binding = 2, std430) buffer agm_buf { realM agm[]; };
-	layout(binding = 3, std430) buffer bgm_buf { realN bgm[]; };
-	layout(binding = 4, std430) buffer cgm_buf { realM cgm[]; };
-	
-	layout(binding = 5, std430) buffer agms_buf { real a_ptr[]; };
-	layout(binding = 6, std430) buffer bgms_buf { real b_ptr[]; };
+	layout(binding = 0, std430) readonly buffer agm_buf { realM agm[]; };
+	layout(binding = 1, std430) readonly buffer bgm_buf { realN bgm[]; };
+	layout(binding = 2, std430) buffer cgm_buf { realM cgm[]; };
+	layout(binding = 3, std430) readonly buffer agms_buf { real a_ptr[]; };
+	layout(binding = 4, std430) readonly buffer bgms_buf { real b_ptr[]; };
+	#if USE_XGEMM_BATCHED == 1
+		layout(binding = 5, std430) readonly buffer arg_alphas_buf { real_arg arg_alphas[]; };
+		layout(binding = 6, std430) readonly buffer arg_betas_buf { real_arg arg_betas[]; };
+	#endif
 #endif
 
 // Allocates workgroup-private memory (local memory)
+// Not always used, but is sometimes
 shared realM alm[KWG * MWG/VWM];
 shared realN blm[KWG * NWG/VWN];
 
@@ -793,11 +802,11 @@ void GlobalToLocalA(
 		for (int _kia = 0; _kia < KWA; _kia += 1)
 		{
 			// Computes the indices based on strided/non-strided access
-			#if STRM == 0
-				int mg = _mia + la0*(MWA/VWM);
-			#elif STRM == 1
-				int mg = la0 + _mia*MDIMA;
-			#endif
+			int mg;
+			if (STRM == 0)
+				mg = _mia + la0*(MWA/VWM);
+			else if (STRM == 1)
+				mg = la0 + _mia*MDIMA;
 
 			// Computes the indices for the global memory
 			int kg = _kia + la1*KWA;
@@ -829,11 +838,9 @@ void GlobalToLocalB(
 		for (int _nib = 0; _nib < NWB/VWN; _nib += 1) {
 
 			// Computes the indices based on strided/non-strided access
-			#if STRN == 0
-				int ng = _nib + lb0*(NWB/VWN);
-			#elif STRN == 1
-				int ng = lb0 + _nib*NDIMB;
-			#endif
+			int ng;
+			if (STRN == 0) ng = _nib + lb0*(NWB/VWN);
+			else if (STRN == 1) ng = lb0 + _nib*NDIMB;
 
 			// Computes the indices for the global memory
 			int kg = _kib + lb1*KWB;
@@ -860,11 +867,9 @@ realM GlobalToPrivateA(
 	const int _mi, const int kSizeM, const int idk, const int kwg)
 {
 	// Computes the indices based on strided/non-strided access
-	#if STRM == 0
-		int mg = _mi + get_local_id(0)*(MWI/VWM);
-	#elif STRM == 1
-		int mg = get_local_id(0) + _mi*MDIMC;
-	#endif
+	int mg;
+	if (STRM == 0) mg = _mi + get_local_id(0)*(MWI/VWM);
+	else if (STRM == 1) mg = get_local_id(0) + _mi*MDIMC;
 
 	// Computes the indices for the global memory
 	int idm = mg + GetGroupID0() * (MWG/VWM);
@@ -872,6 +877,7 @@ realM GlobalToPrivateA(
 	// Loads the data from global memory (not transposed) and stores into registers
 	return agm[idk*(kSizeM/VWM) + idm + a_offset];
 }
+
 
 // Same as above, but now for the B input matrix
 //#if SB == 0 && GEMMK == 0
@@ -884,11 +890,9 @@ realN GlobalToPrivateB(
 	const int _ni, const int kSizeN, const int idk)
 {
 	// Computes the indices based on strided/non-strided access
-	#if STRN == 0
-		int ng = _ni + get_local_id(1)*(NWI/VWN);
-	#elif STRN == 1
-		int ng = get_local_id(1) + _ni*NDIMC;
-	#endif
+	int ng;
+	if (STRN == 0) ng = _ni + get_local_id(1)*(NWI/VWN);
+	else if (STRN == 1) ng = get_local_id(1) + _ni*NDIMC;
 
 	// Computes the indices for the global memory
 	int idn = ng + GetGroupID1() * (NWG/VWN);
@@ -909,7 +913,7 @@ realN GlobalToPrivateA2D(
 	#endif
 	const int tid_y, const int _ni, const int kSizeK, const int idk, const int _ki)
 {
-	#if PRECISION == 3232 || PRECISION == 6464
+	#if ROUTINE_IS_COMPLEX
 		const int a_index = (tid_y * NWI + _ni) * (kSizeK / VWN) + idk / VWN + _ki;
 		#if USE_BDA
 			const __global realN* restrict agm = (const __global realN* restrict) a_ptr;
@@ -920,61 +924,9 @@ realN GlobalToPrivateA2D(
 		const int a_index = (tid_y * NWI + _ni) * kSizeK + idk + _ki * VWN + a_ptr_offset;
 		#if VWN == 1
 			return a_ptr[a_index];
-		#elif VWN == 2
+		#else
 			//return vload2(0, a_ptr + a_index);
-			return real2(a_ptr[a_index], a_ptr[a_index + 1]);
-		#elif VWN == 4
-			//return vload4(0, a_ptr + a_index);
-			return real4(
-				a_ptr[a_index],
-				a_ptr[a_index + 1]
-				a_ptr[a_index + 2]
-				a_ptr[a_index + 3]
-			);
-		#elif VWN == 8
-			//return vload8(0, a_ptr + a_index);
-			return real8(
-				real4(
-					a_ptr[a_index],
-					a_ptr[a_index + 1]
-					a_ptr[a_index + 2]
-					a_ptr[a_index + 3]
-				),
-				real4(
-					a_ptr[a_index + 4],
-					a_ptr[a_index + 5]
-					a_ptr[a_index + 6]
-					a_ptr[a_index + 7]
-				)
-			);
-		#elif VWN == 16
-			//return vload16(0, a_ptr + a_index);
-			return real16(
-				real4(
-					a_ptr[a_index],
-					a_ptr[a_index + 1]
-					a_ptr[a_index + 2]
-					a_ptr[a_index + 3]
-				),
-				real4(
-					a_ptr[a_index + 4],
-					a_ptr[a_index + 5]
-					a_ptr[a_index + 6]
-					a_ptr[a_index + 7]
-				),
-				real4(
-					a_ptr[a_index + 8],
-					a_ptr[a_index + 9]
-					a_ptr[a_index + 10]
-					a_ptr[a_index + 11]
-				),
-				real4(
-					a_ptr[a_index + 12],
-					a_ptr[a_index + 13]
-					a_ptr[a_index + 14]
-					a_ptr[a_index + 15]
-				)
-			);
+			return vloadN(a_index, a_ptr, VWN);
 		#endif
 	#endif
 }
@@ -1057,34 +1009,29 @@ realM GlobalToPrivateB2D(
 		#endif
 	#endif
 }
-// =================================================================================================
 
+// =================================================================================================
+//pp
 // Caches on-chip local memory into per-thread private memory (registers). This function is specific
 // for caching the A input matrix.
-//#if SA == 1
 realM LocalToPrivateA(
 	//LOCAL_PTR realM* alm,
 	const int _mi, const int kg)
 {
-	#if STRM == 0
-		int mg = _mi + get_local_id(0)*(MWI/VWM);
-	#elif STRM == 1
-		int mg = get_local_id(0) + _mi*MDIMC;
-	#endif
+	int mg;
+	if (STRM == 0) mg = _mi + get_local_id(0)*(MWI/VWM);
+	else if (STRM == 1) mg = get_local_id(0) + _mi*MDIMC;
 	return alm[kg*(MWG/VWM) + mg];
 }
 
 // Same as above, but now for the B input matrix
-//#if SB == 1
 realN LocalToPrivateB(
 	//LOCAL_PTR realN* blm,
 	const int _ni, const int kg)
 {
-	#if STRN == 0
-		int ng = _ni + get_local_id(1)*(NWI/VWN);
-	#elif STRN == 1
-		int ng = get_local_id(1) + _ni*NDIMC;
-	#endif
+	int ng;
+	if (STRN == 0) ng = _ni + get_local_id(1)*(NWI/VWN);
+	else if (STRN == 1) ng = get_local_id(1) + _ni*NDIMC;
 	return blm[kg*(NWG/VWN) + ng];
 }
 #endif
@@ -1852,13 +1799,21 @@ realM InitAccRegisters()
 
 // =================================================================================================
 
+#ifndef USE_XGEMM_BATCHED
+	#define USE_XGEMM_BATCHED 0
+#endif
+
 // buffer definitions (to avoid having to use macros everywhere like usual)
 #if USE_BDA == 0
-	layout(binding = 0, std430) buffer agm_buf { realM agm[]; };
-	layout(binding = 1, std430) buffer bgm_buf { realN bgm[]; };
+	layout(binding = 0, std430) readonly buffer agm_buf { realM agm[]; };
+	layout(binding = 1, std430) readonly buffer bgm_buf { realN bgm[]; };
 	layout(binding = 2, std430) buffer cgm_buf { realM cgm[]; };
-	layout(binding = 3, std430) buffer agms_buf { real a_ptr[]; };
-	layout(binding = 4, std430) buffer bgms_buf { real b_ptr[]; };
+	layout(binding = 3, std430) readonly buffer agms_buf { real a_ptr[]; };
+	layout(binding = 4, std430) readonly buffer bgms_buf { real b_ptr[]; };
+	#if USE_XGEMM_BATCHED == 1
+		layout(binding = 5, std430) readonly buffer arg_alphas_buf { real_arg arg_alphas[]; };
+		layout(binding = 6, std430) readonly buffer arg_betas_buf { real_arg arg_betas[]; };
+	#endif
 #endif
 
 // Allocates workgroup-private memory (local memory)
@@ -2126,8 +2081,9 @@ realN LocalToPrivateB(
 
 
 // The vectorised multiply-add function
-realM MultiplyAddVector(realM cvec, const realM avec, const real bval) {
-	if (USE_VECTOR_MAD == 1)
+realM MultiplyAddVector(realM cvec, const realM avec, const real bval)
+{
+	if (USE_VECTOR_MAD == 0)
 	{
 		cvec += avec * bval;
 	}
@@ -2984,13 +2940,21 @@ realM InitAccRegisters()
 
 // =================================================================================================
 
+#ifndef USE_XGEMM_BATCHED
+	#define USE_XGEMM_BATCHED 0
+#endif
+
 // buffer definitions (to avoid having to use macros everywhere like usual)
 #if USE_BDA == 0
-	layout(binding = 0, std430) buffer agm_buf { realM agm[]; };
-	layout(binding = 1, std430) buffer bgm_buf { realN bgm[]; };
+	layout(binding = 0, std430) readonly buffer agm_buf { realM agm[]; };
+	layout(binding = 1, std430) readonly buffer bgm_buf { realN bgm[]; };
 	layout(binding = 2, std430) buffer cgm_buf { realM cgm[]; };
-	layout(binding = 3, std430) buffer agms_buf { real a_ptr[]; };
-	layout(binding = 4, std430) buffer bgms_buf { real b_ptr[]; };
+	layout(binding = 3, std430) readonly buffer agms_buf { real a_ptr[]; };
+	layout(binding = 4, std430) readonly buffer bgms_buf { real b_ptr[]; };
+	#if USE_XGEMM_BATCHED == 1
+		layout(binding = 5, std430) readonly buffer arg_alphas_buf { real_arg arg_alphas[]; };
+		layout(binding = 6, std430) readonly buffer arg_betas_buf { real_arg arg_betas[]; };
+	#endif
 #endif
 
 // Allocates workgroup-private memory (local memory)
@@ -3258,8 +3222,9 @@ realN LocalToPrivateB(
 
 
 // The vectorised multiply-add function
-realM MultiplyAddVector(realM cvec, const realM avec, const real bval) {
-	if (USE_VECTOR_MAD == 1)
+realM MultiplyAddVector(realM cvec, const realM avec, const real bval)
+{
+	if (USE_VECTOR_MAD == 0)
 	{
 		cvec += avec * bval;
 	}

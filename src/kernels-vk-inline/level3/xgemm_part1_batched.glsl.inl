@@ -732,7 +732,8 @@ R"(
 // =================================================================================================
 
 // Initializes the accumulation registers to zero
-realM InitAccRegisters() {
+realM InitAccRegisters()
+{
 	realM result;
 	#if VWM == 1
 		SetToZero(result);
@@ -782,11 +783,11 @@ void GlobalToLocalA(
 		for (int _kia = 0; _kia < KWA; _kia += 1)
 		{
 			// Computes the indices based on strided/non-strided access
-			#if STRM == 0
-				int mg = _mia + la0*(MWA/VWM);
-			#elif STRM == 1
-				int mg = la0 + _mia*MDIMA;
-			#endif
+			int mg;
+			if (STRM == 0)
+				mg = _mia + la0*(MWA/VWM);
+			else if (STRM == 1)
+				mg = la0 + _mia*MDIMA;
 
 			// Computes the indices for the global memory
 			int kg = _kia + la1*KWA;
@@ -818,11 +819,11 @@ void GlobalToLocalB(
 		for (int _nib = 0; _nib < NWB/VWN; _nib += 1) {
 
 			// Computes the indices based on strided/non-strided access
-			#if STRN == 0
-				int ng = _nib + lb0*(NWB/VWN);
-			#elif STRN == 1
-				int ng = lb0 + _nib*NDIMB;
-			#endif
+			int ng;
+			if (STRN == 0)
+				ng = _nib + lb0*(NWB/VWN);
+			else if (STRN == 1)
+				ng = lb0 + _nib*NDIMB;
 
 			// Computes the indices for the global memory
 			int kg = _kib + lb1*KWB;
@@ -849,11 +850,11 @@ realM GlobalToPrivateA(
 	const int _mi, const int kSizeM, const int idk, const int kwg)
 {
 	// Computes the indices based on strided/non-strided access
-	#if STRM == 0
-		int mg = _mi + get_local_id(0)*(MWI/VWM);
-	#elif STRM == 1
-		int mg = get_local_id(0) + _mi*MDIMC;
-	#endif
+	int mg;
+	if (STRM == 0)
+		mg = _mi + get_local_id(0)*(MWI/VWM);
+	else if (STRM == 1)
+		mg = get_local_id(0) + _mi*MDIMC;
 
 	// Computes the indices for the global memory
 	int idm = mg + GetGroupID0() * (MWG/VWM);
@@ -873,11 +874,11 @@ realN GlobalToPrivateB(
 	const int _ni, const int kSizeN, const int idk)
 {
 	// Computes the indices based on strided/non-strided access
-	#if STRN == 0
-		int ng = _ni + get_local_id(1)*(NWI/VWN);
-	#elif STRN == 1
-		int ng = get_local_id(1) + _ni*NDIMC;
-	#endif
+	int ng;
+	if (STRN == 0)
+		ng = _ni + get_local_id(1)*(NWI/VWN);
+	else if (STRN == 1)
+		ng = get_local_id(1) + _ni*NDIMC;
 
 	// Computes the indices for the global memory
 	int idn = ng + GetGroupID1() * (NWG/VWN);
@@ -898,7 +899,7 @@ realN GlobalToPrivateA2D(
 	#endif
 	const int tid_y, const int _ni, const int kSizeK, const int idk, const int _ki)
 {
-	#if PRECISION == 3232 || PRECISION == 6464
+	#if ROUTINE_IS_COMPLEX
 		const int a_index = (tid_y * NWI + _ni) * (kSizeK / VWN) + idk / VWN + _ki;
 		#if USE_BDA
 			const __global realN* restrict agm = (const __global realN* restrict) a_ptr;
@@ -1055,11 +1056,11 @@ realM LocalToPrivateA(
 	//LOCAL_PTR realM* alm,
 	const int _mi, const int kg)
 {
-	#if STRM == 0
-		int mg = _mi + get_local_id(0)*(MWI/VWM);
-	#elif STRM == 1
-		int mg = get_local_id(0) + _mi*MDIMC;
-	#endif
+	int mg;
+	if (STRM == 0)
+		mg = _mi + get_local_id(0)*(MWI/VWM);
+	else if (STRM == 1)
+		mg = get_local_id(0) + _mi*MDIMC;
 	return alm[kg*(MWG/VWM) + mg];
 }
 
@@ -1069,11 +1070,11 @@ realN LocalToPrivateB(
 	//LOCAL_PTR realN* blm,
 	const int _ni, const int kg)
 {
-	#if STRN == 0
-		int ng = _ni + get_local_id(1)*(NWI/VWN);
-	#elif STRN == 1
-		int ng = get_local_id(1) + _ni*NDIMC;
-	#endif
+	int ng;
+	if (STRN == 0)
+		ng = _ni + get_local_id(1)*(NWI/VWN);
+	else if (STRN == 1)
+		ng = get_local_id(1) + _ni*NDIMC;
 	return blm[kg*(NWG/VWN) + ng];
 }
 #endif

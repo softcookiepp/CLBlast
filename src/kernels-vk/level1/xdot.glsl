@@ -28,9 +28,7 @@
 // =================================================================================================
 
 // The main reduction kernel, performing the multiplication and the majority of the sum operation
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = WGS1, local_size_y = 1, local_size_z = 1) in;
-#endif
+layout(local_size_x = WGS1, local_size_y = 1, local_size_z = 1) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) readonly buffer xgm_buffer { real xgm[]; };
@@ -41,19 +39,19 @@
 layout(push_constant) uniform Xdot
 {
 	int n;
-#if USE_BDA
-	real_ptr_t xgm;
-#endif
+	#if USE_BDA
+		real_ptr_t xgm;
+	#endif
 	int x_offset;
 	int x_inc;
-#if USE_BDA
-	real_ptr_t ygm;
-#endif
+	#if USE_BDA
+		real_ptr_t ygm;
+	#endif
 	int y_offset;
 	int y_inc;
-#if USE_BDA
-	real_ptr_t outp;
-#endif
+	#if USE_BDA
+		real_ptr_t outp;
+	#endif
 	int do_conjugate;
 	int num_groups_0;
 };
@@ -70,7 +68,8 @@ void main()
 	real acc;
 	SetToZero(acc);
 	int id = wgid*WGS1 + lid;
-	while (id < n) {
+	while (id < n)
+	{
 		real x = indexGM(xgm, id*x_inc + x_offset);
 		real y = indexGM(ygm, id*y_inc + y_offset);
 		if (bool(do_conjugate)) { COMPLEX_CONJUGATE(x); }

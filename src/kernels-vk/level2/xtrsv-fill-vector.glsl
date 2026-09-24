@@ -15,13 +15,9 @@
 #include "../common.glsl"
 
 // =================================================================================================
+layout(local_size_x = 16, local_size_y = 1, local_size_z = 1) in;
 
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = 16, local_size_y = 1, local_size_z = 1) in;
-#endif
-
-#if USE_BDA
-#else
+#if USE_BDA == 0
 	layout(binding = 0, std430) writeonly buffer dest_buf { real dest[]; };
 #endif
 
@@ -30,9 +26,9 @@ layout(push_constant) uniform FillVector
 	int n;
 	int inc;
 	int offset;
-#if USE_BDA
-	__global real* restrict dest;
-#endif
+	#if USE_BDA
+		__global real* restrict dest;
+	#endif
 	real_arg arg_value;
 };
 
@@ -40,7 +36,8 @@ void main()
 {
 	const real value = GetRealArg(arg_value);
 	const int tid = get_global_id(0);
-	if (tid < n) {
+	if (tid < n)
+	{
 		dest[tid*inc + offset] = value;
 	}
 }

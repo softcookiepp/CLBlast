@@ -35,9 +35,7 @@
 
 // Transposes and copies a matrix. Requires both matrices to be of the same dimensions and without
 // offset. A more general version is available in 'padtranspose.opencl'.
-#if RELAX_WORKGROUP_SIZE == 0
 	layout(local_size_x = TRA_DIM, local_size_y = TRA_DIM, local_size_z = 1) in;
-#endif
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) readonly buffer src_buf { realT src[]; };
@@ -71,7 +69,7 @@ void main()
 	#endif
 
 	// Loops over the work per thread
-	// #pragma unroll
+	[[unroll]]
 	for (int _w_one = 0; _w_one < TRA_WPT; _w_one += 1) {
 
 		// Computes the identifiers for the source matrix. Note that the local and global dimensions
@@ -90,7 +88,7 @@ void main()
 	// Loads transposed data from the local memory
 	// #pragma promote_to_registers
 	realT vpm[TRA_WPT];
-	// #pragma unroll
+	[[unroll]]
 	for (int _w_one = 0; _w_one < TRA_WPT; _w_one += 1) {
 		vpm[_w_one] = tile[get_local_id(1)*TRA_WPT + _w_one][get_local_id(0)];
 	}

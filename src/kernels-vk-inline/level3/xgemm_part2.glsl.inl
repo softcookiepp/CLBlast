@@ -57,6 +57,10 @@ R"(
 // literal). Comment-out this line for syntax-highlighting when developing.
 #ifndef COMMON_GLSL
 #define COMMON_GLSL
+
+// flow control
+#extension GL_EXT_control_flow_attributes : require
+
 // =================================================================================================
 
 // whether or not to use buffer device addresses instead of descriptors
@@ -80,7 +84,7 @@ R"(
 	
 // reserved for when unrolling semantics are able to be used
 #ifndef UNROLL
-	#define UNROLL(N)
+	#define UNROLL(N) [[unroll]]
 #endif
 
 // support for subgroup operations
@@ -213,6 +217,8 @@ R"(
 	#define PI double(3.14159265358979323846)
 #endif
 
+#define ROUTINE_IS_COMPLEX (PRECISION == 3232 || PRECISION == 6464)
+
 // this simplifies stuff c:
 #define real2 vec2_t
 #define real4 vec4_t
@@ -298,13 +304,10 @@ R"(
 
 // By default the workgroup size requirement is enabled. For Qualcomm devices the workgroup size 
 // requirement results in worse performance and is disabled (src/utilities/compile.cpp)
-#ifndef RELAX_WORKGROUP_SIZE
-	#define RELAX_WORKGROUP_SIZE 0
-#endif
+#define RELAX_WORKGROUP_SIZE 0
 
-// ensure all spec constants related to workgroup size are here and ready
 #if RELAX_WORKGROUP_SIZE
-	layout(local_size_x_id = 0, local_size_y_id = 1, local_size_z_id = 2) in;
+	#error "RELAX_WORKGROUP_SIZE should not be enabled, as it is being removed"
 #endif
 
 // Sets a variable to zero
@@ -559,6 +562,22 @@ R"(
 #define LEVEL3_GLSL
 // =================================================================================================
 
+// Eventually, a lot of stuff will be replaced with specialization constants.
+// But for now, the boilerplate for that has yet to be written.
+#ifndef ROUTINE_SYRK
+	#define ROUTINE_SYRK 0
+#endif
+#ifndef ROUTINE_HERK
+	#define ROUTINE_HERK 0
+#endif
+#ifndef ROUTINE_SYR2K
+	#define ROUTINE_SYR2K 0
+#endif
+#ifndef ROUTINE_HER2K
+	#define ROUTINE_HER2K 0
+#endif
+
+
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library.
 
@@ -686,9 +705,6 @@ R"(
 #ifndef USE_VECTOR_MAD
 	#define USE_VECTOR_MAD 0			// Unroll (0) or don't (1) unroll the vector MAD manually
 #endif
-#ifndef GLOBAL_MEM_FENCE
-	#define GLOBAL_MEM_FENCE 0		// Global synchronisation barrier for potential better performance
-#endif
 
 #ifndef USE_SUBGROUP_SHUFFLING
 	#define USE_SUBGROUP_SHUFFLING 0		 // Optionally enables subgroup shuffling for Intel GPUs
@@ -748,31 +764,26 @@ realM InitAccRegisters()
 	layout(binding = 0, std430) buffer agm_buf { realM agm[]; };
 	layout(binding = 1, std430) buffer bgm_buf { realN bgm[]; };
 	layout(binding = 2, std430) buffer cgm_buf { realM cgm[]; };
-	#if GEMMK == 1
-		layout(binding = 3, std430) buffer agms_buf { real a_ptr[]; };
-		layout(binding = 4, std430) buffer bgms_buf { real b_ptr[]; };
-	#endif
+	layout(binding = 3, std430) buffer agms_buf { real a_ptr[]; };
+	layout(binding = 4, std430) buffer bgms_buf { real b_ptr[]; };
 #endif
 
 // Allocates workgroup-private memory (local memory)
-#if SA == 1
-	shared realM alm[KWG * MWG/VWM];
-#endif
-#if SB == 1
-	shared realN blm[KWG * NWG/VWN];
-#endif
+// Not always used, but is sometimes
+shared realM alm[KWG * MWG/VWM];
+shared realN blm[KWG * NWG/VWN];
 
 // =================================================================================================
 
 // Caches global off-chip memory into local (shared) memory on-chip. This function is specific for
 // caching the A input matrix.
-#if SA == 1
+//#if SA == 1
 void GlobalToLocalA(
-#if USE_BDA
-	const __global realM* restrict agm,
-#else
-	int a_offset,
-#endif
+	#if USE_BDA
+		const __global realM* restrict agm,
+	#else
+		int a_offset,
+	#endif
 	//LOCAL_PTR realM* alm,
 	const int kSizeM, const int tid, const int kwg)
 {
@@ -784,11 +795,11 @@ void GlobalToLocalA(
 		for (int _kia = 0; _kia < KWA; _kia += 1)
 		{
 			// Computes the indices based on strided/non-strided access
-			#if STRM == 0
-				int mg = _mia + la0*(MWA/VWM);
-			#elif STRM == 1
-				int mg = la0 + _mia*MDIMA;
-			#endif
+			int mg;
+			if (STRM == 0)
+				mg = _mia + la0*(MWA/VWM);
+			else if (STRM == 1)
+				mg = la0 + _mia*MDIMA;
 
 			// Computes the indices for the global memory
 			int kg = _kia + la1*KWA;
@@ -800,16 +811,15 @@ void GlobalToLocalA(
 		}
 	}
 }
-#endif
 
 // Same as above, but now for the B input matrix
-#if SB == 1
+//#if SB == 1
 void GlobalToLocalB(
-#if USE_BDA
-	const __global realN* restrict bgm,
-#else
-	int b_offset,
-#endif
+	#if USE_BDA
+		const __global realN* restrict bgm,
+	#else
+		int b_offset,
+	#endif
 	// LOCAL_PTR realN* blm,
 	const int kSizeN, const int tid, const int kwg)
 {
@@ -821,11 +831,9 @@ void GlobalToLocalB(
 		for (int _nib = 0; _nib < NWB/VWN; _nib += 1) {
 
 			// Computes the indices based on strided/non-strided access
-			#if STRN == 0
-				int ng = _nib + lb0*(NWB/VWN);
-			#elif STRN == 1
-				int ng = lb0 + _nib*NDIMB;
-			#endif
+			int ng;
+			if (STRN == 0) ng = _nib + lb0*(NWB/VWN);
+			else if (STRN == 1) ng = lb0 + _nib*NDIMB;
 
 			// Computes the indices for the global memory
 			int kg = _kib + lb1*KWB;
@@ -837,27 +845,24 @@ void GlobalToLocalB(
 		}
 	}
 }
-#endif
 
 // =================================================================================================
 
 // Caches global off-chip memory directly into per-thread private memory (registers). This function
 // is specific for caching the A input matrix.
-#if SA == 0 && GEMMK == 0
+//#if SA == 0 && GEMMK == 0
 realM GlobalToPrivateA(
-#if USE_BDA
-	const __global realM* restrict agm,
-#else
-	int a_offset,
-#endif
+	#if USE_BDA
+		const __global realM* restrict agm,
+	#else
+		int a_offset,
+	#endif
 	const int _mi, const int kSizeM, const int idk, const int kwg)
 {
 	// Computes the indices based on strided/non-strided access
-	#if STRM == 0
-		int mg = _mi + get_local_id(0)*(MWI/VWM);
-	#elif STRM == 1
-		int mg = get_local_id(0) + _mi*MDIMC;
-	#endif
+	int mg;
+	if (STRM == 0) mg = _mi + get_local_id(0)*(MWI/VWM);
+	else if (STRM == 1) mg = get_local_id(0) + _mi*MDIMC;
 
 	// Computes the indices for the global memory
 	int idm = mg + GetGroupID0() * (MWG/VWM);
@@ -865,24 +870,22 @@ realM GlobalToPrivateA(
 	// Loads the data from global memory (not transposed) and stores into registers
 	return agm[idk*(kSizeM/VWM) + idm + a_offset];
 }
-#endif
+
 
 // Same as above, but now for the B input matrix
-#if SB == 0 && GEMMK == 0
+//#if SB == 0 && GEMMK == 0
 realN GlobalToPrivateB(
-#if USE_BDA
-	const __global realN* restrict bgm,
-#else
-	int b_offset,
-#endif
+	#if USE_BDA
+		const __global realN* restrict bgm,
+	#else
+		int b_offset,
+	#endif
 	const int _ni, const int kSizeN, const int idk)
 {
 	// Computes the indices based on strided/non-strided access
-	#if STRN == 0
-		int ng = _ni + get_local_id(1)*(NWI/VWN);
-	#elif STRN == 1
-		int ng = get_local_id(1) + _ni*NDIMC;
-	#endif
+	int ng;
+	if (STRN == 0) ng = _ni + get_local_id(1)*(NWI/VWN);
+	else if (STRN == 1) ng = get_local_id(1) + _ni*NDIMC;
 
 	// Computes the indices for the global memory
 	int idn = ng + GetGroupID1() * (NWG/VWN);
@@ -890,26 +893,24 @@ realN GlobalToPrivateB(
 	// Loads the data from global memory (transposed) and stores into registers
 	return bgm[idk*(kSizeN/VWN) + idn + b_offset];
 }
-#endif
 
 // =================================================================================================
-#if GEMMK == 1
 
 // Caches global off-chip memory directly into per-thread private memory (registers). This function
 // is specific for caching the A input matrix for kernel 1.
 realN GlobalToPrivateA2D(
-#if USE_BDA
-	const __global real* restrict a_ptr,
-#else
-	int a_ptr_offset,
-#endif
+	#if USE_BDA
+		const __global real* restrict a_ptr,
+	#else
+		int a_ptr_offset,
+	#endif
 	const int tid_y, const int _ni, const int kSizeK, const int idk, const int _ki)
 {
-	#if PRECISION == 3232 || PRECISION == 6464
+	#if ROUTINE_IS_COMPLEX
 		const int a_index = (tid_y * NWI + _ni) * (kSizeK / VWN) + idk / VWN + _ki;
-#if USE_BDA
-		const __global realN* restrict agm = (const __global realN* restrict) a_ptr;
-#endif
+		#if USE_BDA
+			const __global realN* restrict agm = (const __global realN* restrict) a_ptr;
+		#endif
 		// ok yeah, this is probably not going to work quite the way I thought it would...
 		return agm[a_index];
 	#else
@@ -925,18 +926,18 @@ realN GlobalToPrivateA2D(
 
 // Same as above, but now for the B input matrix
 realM GlobalToPrivateB2D(
-#if USE_BDA
-	const __global real* restrict b_ptr,
-#else
-	int b_ptr_offset,
-#endif
+	#if USE_BDA
+		const __global real* restrict b_ptr,
+	#else
+		int b_ptr_offset,
+	#endif
 	const int tid_x, const int _mi, const int kSizeN, const int idk, const int _ki)
 {
-	#if PRECISION == 3232 || PRECISION == 6464
+	#if ROUTINE_IS_COMPLEX
 		const int b_index = (idk + _ki) * (kSizeN / VWM) + tid_x * (MWI / VWM) + _mi;
-#if USE_BDA
-		const __global realM* restrict bgm = (const __global realM* restrict) b_ptr;
-#endif
+		#if USE_BDA
+			const __global realM* restrict bgm = (const __global realM* restrict) b_ptr;
+		#endif
 		// ok yeah, this is probably not going to work quite the way I thought it would...
 		return bgm[b_index + b_ptr_offset/VWM];
 	#else
@@ -1002,39 +1003,30 @@ realM GlobalToPrivateB2D(
 	#endif
 }
 
-#endif
 // =================================================================================================
-
+//pp
 // Caches on-chip local memory into per-thread private memory (registers). This function is specific
 // for caching the A input matrix.
-#if SA == 1
 realM LocalToPrivateA(
 	//LOCAL_PTR realM* alm,
 	const int _mi, const int kg)
 {
-	#if STRM == 0
-		int mg = _mi + get_local_id(0)*(MWI/VWM);
-	#elif STRM == 1
-		int mg = get_local_id(0) + _mi*MDIMC;
-	#endif
+	int mg;
+	if (STRM == 0) mg = _mi + get_local_id(0)*(MWI/VWM);
+	else if (STRM == 1) mg = get_local_id(0) + _mi*MDIMC;
 	return alm[kg*(MWG/VWM) + mg];
 }
-#endif
 
 // Same as above, but now for the B input matrix
-#if SB == 1
 realN LocalToPrivateB(
 	//LOCAL_PTR realN* blm,
 	const int _ni, const int kg)
 {
-	#if STRN == 0
-		int ng = _ni + get_local_id(1)*(NWI/VWN);
-	#elif STRN == 1
-		int ng = get_local_id(1) + _ni*NDIMC;
-	#endif
+	int ng;
+	if (STRN == 0) ng = _ni + get_local_id(1)*(NWI/VWN);
+	else if (STRN == 1) ng = get_local_id(1) + _ni*NDIMC;
 	return blm[kg*(NWG/VWN) + ng];
 }
-#endif
 #endif
 // End of the C++11 raw string literal
 // =================================================================================================
@@ -1042,15 +1034,18 @@ realN LocalToPrivateB(
 
 // The vectorised multiply-add function
 realM MultiplyAddVector(realM cvec, const realM avec, const real bval) {
-	#if USE_VECTOR_MAD == 1
+	if (USE_VECTOR_MAD == 1)
+	{
 		cvec += avec * bval;
-	#else
+	}
+	else
+	{
 		#if VWM == 1
 			MultiplyAdd(cvec, avec, bval);
 		#else
 			vsMultiplyAdd(cvec, bval, avec, VWM);
 		#endif
-	#endif
+	}
 	return cvec;
 }
 
@@ -1059,27 +1054,27 @@ realM MultiplyAddVector(realM cvec, const realM avec, const real bval) {
 // helper function since macro expressions don't like preprocessor conditions
 ivec2 get_mg_ng_for_store(const int _mi, const int _ni)
 {
-	#if STRM == 0
-		int mg = _mi + get_local_id(0)*(MWI/VWM);
-	#elif STRM == 1
-		int mg = get_local_id(0) + _mi*MDIMC;
-	#endif
-	#if STRN == 0
-		int ng = _ni + get_local_id(1)*NWI;
-	#elif STRN == 1
-		int ng = _ni%VWN + get_local_id(1)*VWN + (_ni/VWN)*VWN*NDIMC;
-	#endif
+	int mg;
+	if (STRM == 0)
+		mg = _mi + get_local_id(0)*(MWI/VWM);
+	else if (STRM == 1)
+		mg = get_local_id(0) + _mi*MDIMC;
+	int ng;
+	if (STRN == 0)
+		ng = _ni + get_local_id(1)*NWI;
+	else if (STRN == 1)
+		ng = _ni%VWN + get_local_id(1)*VWN + (_ni/VWN)*VWN*NDIMC;
 	return ivec2(mg, ng);
 }
 
 // Merges the results in Cpm with the global array in Cgm. This also performs the multiplication
 // with the constants: Cgm = alpha*A*B + beta*Cgm = alpha*Cpm + beta*Cgm
 void StoreResults(
-#if USE_BDA
-		__global realM* cgm,
-#else
-		int c_offset,
-#endif
+		#if USE_BDA
+			__global realM* cgm,
+		#else
+			int c_offset,
+		#endif
 		realM c_value, const int _mi, const int _ni,
 		const int kSizeM, const real alpha, const real beta)
 {

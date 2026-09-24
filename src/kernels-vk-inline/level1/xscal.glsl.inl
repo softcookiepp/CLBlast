@@ -16,6 +16,10 @@ R"(
 // literal). Comment-out this line for syntax-highlighting when developing.
 #ifndef COMMON_GLSL
 #define COMMON_GLSL
+
+// flow control
+#extension GL_EXT_control_flow_attributes : require
+
 // =================================================================================================
 
 // whether or not to use buffer device addresses instead of descriptors
@@ -39,7 +43,7 @@ R"(
 	
 // reserved for when unrolling semantics are able to be used
 #ifndef UNROLL
-	#define UNROLL(N)
+	#define UNROLL(N) [[unroll]]
 #endif
 
 // support for subgroup operations
@@ -172,6 +176,8 @@ R"(
 	#define PI double(3.14159265358979323846)
 #endif
 
+#define ROUTINE_IS_COMPLEX (PRECISION == 3232 || PRECISION == 6464)
+
 // this simplifies stuff c:
 #define real2 vec2_t
 #define real4 vec4_t
@@ -257,13 +263,10 @@ R"(
 
 // By default the workgroup size requirement is enabled. For Qualcomm devices the workgroup size 
 // requirement results in worse performance and is disabled (src/utilities/compile.cpp)
-#ifndef RELAX_WORKGROUP_SIZE
-	#define RELAX_WORKGROUP_SIZE 0
-#endif
+#define RELAX_WORKGROUP_SIZE 0
 
-// ensure all spec constants related to workgroup size are here and ready
 #if RELAX_WORKGROUP_SIZE
-	layout(local_size_x_id = 0, local_size_y_id = 1, local_size_z_id = 2) in;
+	#error "RELAX_WORKGROUP_SIZE should not be enabled, as it is being removed"
 #endif
 
 // Sets a variable to zero
@@ -521,6 +524,10 @@ R"(
 // literal). Comment-out this line for syntax-highlighting when developing.
 #ifndef COMMON_GLSL
 #define COMMON_GLSL
+
+// flow control
+#extension GL_EXT_control_flow_attributes : require
+
 // =================================================================================================
 
 // whether or not to use buffer device addresses instead of descriptors
@@ -544,7 +551,7 @@ R"(
 	
 // reserved for when unrolling semantics are able to be used
 #ifndef UNROLL
-	#define UNROLL(N)
+	#define UNROLL(N) [[unroll]]
 #endif
 
 // support for subgroup operations
@@ -677,6 +684,8 @@ R"(
 	#define PI double(3.14159265358979323846)
 #endif
 
+#define ROUTINE_IS_COMPLEX (PRECISION == 3232 || PRECISION == 6464)
+
 // this simplifies stuff c:
 #define real2 vec2_t
 #define real4 vec4_t
@@ -762,13 +771,10 @@ R"(
 
 // By default the workgroup size requirement is enabled. For Qualcomm devices the workgroup size 
 // requirement results in worse performance and is disabled (src/utilities/compile.cpp)
-#ifndef RELAX_WORKGROUP_SIZE
-	#define RELAX_WORKGROUP_SIZE 0
-#endif
+#define RELAX_WORKGROUP_SIZE 0
 
-// ensure all spec constants related to workgroup size are here and ready
 #if RELAX_WORKGROUP_SIZE
-	layout(local_size_x_id = 0, local_size_y_id = 1, local_size_z_id = 2) in;
+	#error "RELAX_WORKGROUP_SIZE should not be enabled, as it is being removed"
 #endif
 
 // Sets a variable to zero
@@ -1074,9 +1080,7 @@ realV MultiplyAddVector(realV cvec, const real aval, const realV bvec) {
 // =================================================================================================
 
 // Full version of the kernel with offsets and strided accesses
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = WGS, local_size_y = 1, local_size_z = 1) in;
-#endif
+layout(local_size_x = WGS, local_size_y = 1, local_size_z = 1) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) buffer xgm_buf { real xgm[]; };
@@ -1086,9 +1090,9 @@ layout(push_constant, std430) uniform Xscal
 {
 	int n;
 	real_arg arg_alpha;
-#if USE_BDA
-	real_ptr_t xgm;
-#endif
+	#if USE_BDA
+		real_ptr_t xgm;
+	#endif
 	int x_offset;
 	int x_inc;
 };

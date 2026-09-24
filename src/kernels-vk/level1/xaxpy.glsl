@@ -20,9 +20,7 @@
 // =================================================================================================
 
 // Full version of the kernel with offsets and strided accesses
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = WGS, local_size_y = 1, local_size_z = 1) in;
-#endif
+layout(local_size_x = WGS, local_size_y = 1, local_size_z = 1) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) buffer xgm_buf { real xgm[]; };

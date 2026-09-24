@@ -33,9 +33,7 @@
 
 // Fast copy kernel. Requires 'ld' and the number of threads in dimension 0 to be a multiple of
 // COPY_VW. Also requires both matrices to be of the same dimensions and without offset.
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = COPY_DIMX, local_size_y = COPY_DIMY, local_size_z = 1) in;
-#endif
+layout(local_size_x = COPY_DIMX, local_size_y = COPY_DIMY, local_size_z = 1) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) buffer src_buf { realC src[]; };

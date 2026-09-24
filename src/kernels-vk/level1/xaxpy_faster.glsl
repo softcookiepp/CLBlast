@@ -21,7 +21,7 @@
 
 // Faster version of the kernel without offsets and strided accesses but with if-statement. Also
 // assumes that 'n' is dividable by 'VW' and 'WPT'.
-#if RELAX_WORKGROUP_SIZE == 0
+#if 1
 	layout(local_size_x = WGS, local_size_y = 1, local_size_z = 1) in;
 #endif
 
@@ -46,8 +46,9 @@ void main()
 
 	const int num_usefull_threads = n / (VW * WPT);
 	if (get_global_id(0) < num_usefull_threads) {
-		//#pragma unroll
-		for (int _w = 0; _w < WPT; _w += 1) {
+		UNROLL(WPT)
+		for (int _w = 0; _w < WPT; _w += 1)
+		{
 			const int id = _w*num_usefull_threads + get_global_id(0);
 			realV xvalue = indexGM(xgm, id);
 			realV yvalue = indexGM(ygm, id);

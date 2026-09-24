@@ -19,22 +19,20 @@
 // =================================================================================================
 
 // Interface to the above function
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = PAD_DIMX, local_size_y = PAD_DIMY, local_size_z = 1) in;
-#endif
+layout(local_size_x = PAD_DIMX, local_size_y = PAD_DIMY, local_size_z = 1) in;
 
 layout(push_constant) uniform CopyMatrix
 {
 	int src_one; int src_two;
 	int src_ld; int src_offset;
-#if USE_BDA
-	__global real* restrict src;
-#endif
+	#if USE_BDA
+		__global real* restrict src;
+	#endif
 	int dest_one; int dest_two;
 	int dest_ld; int dest_offset;
-#if USE_BDA
-	__global real* dest;
-#endif
+	#if USE_BDA
+		__global real* dest;
+	#endif
 	real_arg arg_alpha;
 	int upper; int lower;
 	int diagonal_imag_zero;

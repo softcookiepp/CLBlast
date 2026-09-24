@@ -16,7 +16,7 @@
 // =================================================================================================
 
 // Symmetric version of the rank-1 matrix update kernel (HER, HPR, SYR, SPR)
-#if RELAX_WORKGROUP_SIZE == 0
+#if 1
 	layout(local_size_x = WGS1, local_size_y = WGS2, local_size_z = 1) in;
 #endif
 

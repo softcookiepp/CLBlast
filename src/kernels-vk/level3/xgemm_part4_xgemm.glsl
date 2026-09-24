@@ -13,7 +13,7 @@
 //R"(
 #include "xgemm_part3.glsl"
 // Main entry point of the kernel. This is the regular full version.
-#if RELAX_WORKGROUP_SIZE == 0
+#if 1
 	layout(local_size_x = MDIMC, local_size_y = NDIMC, local_size_z = 1) in;
 #endif
 

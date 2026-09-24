@@ -17,15 +17,18 @@
 
 // The vectorised multiply-add function
 realM MultiplyAddVector(realM cvec, const realM avec, const real bval) {
-	#if USE_VECTOR_MAD == 1
+	if (USE_VECTOR_MAD == 1)
+	{
 		cvec += avec * bval;
-	#else
+	}
+	else
+	{
 		#if VWM == 1
 			MultiplyAdd(cvec, avec, bval);
 		#else
 			vsMultiplyAdd(cvec, bval, avec, VWM);
 		#endif
-	#endif
+	}
 	return cvec;
 }
 
@@ -34,27 +37,27 @@ realM MultiplyAddVector(realM cvec, const realM avec, const real bval) {
 // helper function since macro expressions don't like preprocessor conditions
 ivec2 get_mg_ng_for_store(const int _mi, const int _ni)
 {
-	#if STRM == 0
-		int mg = _mi + get_local_id(0)*(MWI/VWM);
-	#elif STRM == 1
-		int mg = get_local_id(0) + _mi*MDIMC;
-	#endif
-	#if STRN == 0
-		int ng = _ni + get_local_id(1)*NWI;
-	#elif STRN == 1
-		int ng = _ni%VWN + get_local_id(1)*VWN + (_ni/VWN)*VWN*NDIMC;
-	#endif
+	int mg;
+	if (STRM == 0)
+		mg = _mi + get_local_id(0)*(MWI/VWM);
+	else if (STRM == 1)
+		mg = get_local_id(0) + _mi*MDIMC;
+	int ng;
+	if (STRN == 0)
+		ng = _ni + get_local_id(1)*NWI;
+	else if (STRN == 1)
+		ng = _ni%VWN + get_local_id(1)*VWN + (_ni/VWN)*VWN*NDIMC;
 	return ivec2(mg, ng);
 }
 
 // Merges the results in Cpm with the global array in Cgm. This also performs the multiplication
 // with the constants: Cgm = alpha*A*B + beta*Cgm = alpha*Cpm + beta*Cgm
 void StoreResults(
-#if USE_BDA
-		__global realM* cgm,
-#else
-		int c_offset,
-#endif
+		#if USE_BDA
+			__global realM* cgm,
+		#else
+			int c_offset,
+		#endif
 		realM c_value, const int _mi, const int _ni,
 		const int kSizeM, const real alpha, const real beta)
 {

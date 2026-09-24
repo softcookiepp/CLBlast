@@ -15,10 +15,8 @@
 #include "invert_diagonal_blocks_part1_triple_matmul.glsl"
 // =================================================================================================
 
-#if RELAX_WORKGROUP_SIZE == 0
 	// local size appears to be variable for these kernels, so that is what we will do
 	layout(local_size_x_id = 0, local_size_y_id = 1, local_size_z_id = 2) in;
-#endif
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) buffer dest_buf { real dest[]; };

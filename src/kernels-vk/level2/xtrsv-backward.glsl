@@ -13,7 +13,9 @@
 //R"(
 #include "../common.glsl"
 // =================================================================================================
-#define ROUTINE_TRSV
+#ifndef ROUTINE_TRSV
+	#define ROUTINE_TRSV 1
+#endif
 #if defined(ROUTINE_TRSV)
 
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
@@ -32,26 +34,24 @@
 
 // =================================================================================================
 
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = TRSV_BLOCK_SIZE, local_size_y = 1, local_size_z = 1) in;
-#endif
+layout(local_size_x = TRSV_BLOCK_SIZE, local_size_y = 1, local_size_z = 1) in;
 
 layout(push_constant) uniform trsv_backward
 {
 	int n;
-#if USE_BDA
-	__global real *A;
-#endif
+	#if USE_BDA
+		__global real *A;
+	#endif
 	int a_offset;
 	int a_ld;
-#if USE_BDA
-	__global real *b;
-#endif
+	#if USE_BDA
+		__global real *b;
+	#endif
 	int b_offset;
 	int b_inc;
-#if USE_BDA
-	__global real *x;
-#endif
+	#if USE_BDA
+		__global real *x;
+	#endif
 	int x_offset;
 	int x_inc;
 	int is_transposed;
@@ -88,7 +88,8 @@ void main()
 	barrier();
 
 	// Computes the result (single-threaded for now)
-	if (tid == 0) {
+	if (tid == 0)
+	{
 		for (int i = n - 1; i >= 0; --i) {
 			for (int j = i + 1; j < n; ++j) {
 				MultiplySubtract(xlm[i], alm[i][j], xlm[j]);

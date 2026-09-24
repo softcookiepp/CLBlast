@@ -111,9 +111,6 @@
 #ifndef USE_VECTOR_MAD
 	#define USE_VECTOR_MAD 0			// Unroll (0) or don't (1) unroll the vector MAD manually
 #endif
-#ifndef GLOBAL_MEM_FENCE
-	#define GLOBAL_MEM_FENCE 0		// Global synchronisation barrier for potential better performance
-#endif
 
 #if NWI != SUBGROUP_SIZE || MDIMC < SUBGROUP_SIZE
 	#undef USE_SUBGROUP_SHUFFLING
@@ -171,31 +168,25 @@ realM InitAccRegisters() {
 	layout(binding = 3, std430) buffer bgm_buf { realN bgm[]; };
 	layout(binding = 4, std430) buffer cgm_buf { realM cgm[]; };
 	
-	#if GEMMK == 1
-		layout(binding = 5, std430) buffer agms_buf { real a_ptr[]; };
-		layout(binding = 6, std430) buffer bgms_buf { real b_ptr[]; };
-	#endif
+	layout(binding = 5, std430) buffer agms_buf { real a_ptr[]; };
+	layout(binding = 6, std430) buffer bgms_buf { real b_ptr[]; };
 #endif
 
 // Allocates workgroup-private memory (local memory)
-#if SA == 1
-	shared realM alm[KWG * MWG/VWM];
-#endif
-#if SB == 1
-	shared realN blm[KWG * NWG/VWN];
-#endif
+shared realM alm[KWG * MWG/VWM];
+shared realN blm[KWG * NWG/VWN];
 
 // =================================================================================================
 
 // Caches global off-chip memory into local (shared) memory on-chip. This function is specific for
 // caching the A input matrix.
-#if SA == 1
+//#if SA == 1
 void GlobalToLocalA(
-#if USE_BDA
-	const __global realM* restrict agm,
-#else
-	int a_offset,
-#endif
+	#if USE_BDA
+		const __global realM* restrict agm,
+	#else
+		int a_offset,
+	#endif
 	//LOCAL_PTR realM* alm,
 	const int kSizeM, const int tid, const int kwg)
 {
@@ -223,16 +214,15 @@ void GlobalToLocalA(
 		}
 	}
 }
-#endif
 
 // Same as above, but now for the B input matrix
-#if SB == 1
+//#if SB == 1
 void GlobalToLocalB(
-#if USE_BDA
-	const __global realN* restrict bgm,
-#else
-	int b_offset,
-#endif
+	#if USE_BDA
+		const __global realN* restrict bgm,
+	#else
+		int b_offset,
+	#endif
 	// LOCAL_PTR realN* blm,
 	const int kSizeN, const int tid, const int kwg)
 {
@@ -260,19 +250,18 @@ void GlobalToLocalB(
 		}
 	}
 }
-#endif
 
 // =================================================================================================
 
 // Caches global off-chip memory directly into per-thread private memory (registers). This function
 // is specific for caching the A input matrix.
-#if SA == 0 && GEMMK == 0
+//#if SA == 0 && GEMMK == 0
 realM GlobalToPrivateA(
-#if USE_BDA
-	const __global realM* restrict agm,
-#else
-	int a_offset,
-#endif
+	#if USE_BDA
+		const __global realM* restrict agm,
+	#else
+		int a_offset,
+	#endif
 	const int _mi, const int kSizeM, const int idk, const int kwg)
 {
 	// Computes the indices based on strided/non-strided access
@@ -288,16 +277,15 @@ realM GlobalToPrivateA(
 	// Loads the data from global memory (not transposed) and stores into registers
 	return agm[idk*(kSizeM/VWM) + idm + a_offset];
 }
-#endif
 
 // Same as above, but now for the B input matrix
-#if SB == 0 && GEMMK == 0
+//#if SB == 0 && GEMMK == 0
 realN GlobalToPrivateB(
-#if USE_BDA
-	const __global realN* restrict bgm,
-#else
-	int b_offset,
-#endif
+	#if USE_BDA
+		const __global realN* restrict bgm,
+	#else
+		int b_offset,
+	#endif
 	const int _ni, const int kSizeN, const int idk)
 {
 	// Computes the indices based on strided/non-strided access
@@ -313,26 +301,24 @@ realN GlobalToPrivateB(
 	// Loads the data from global memory (transposed) and stores into registers
 	return bgm[idk*(kSizeN/VWN) + idn + b_offset];
 }
-#endif
 
 // =================================================================================================
-#if GEMMK == 1
 
 // Caches global off-chip memory directly into per-thread private memory (registers). This function
 // is specific for caching the A input matrix for kernel 1.
 realN GlobalToPrivateA2D(
-#if USE_BDA
-	const __global real* restrict a_ptr,
-#else
-	int a_ptr_offset,
-#endif
+	#if USE_BDA
+		const __global real* restrict a_ptr,
+	#else
+		int a_ptr_offset,
+	#endif
 	const int tid_y, const int _ni, const int kSizeK, const int idk, const int _ki)
 {
 	#if PRECISION == 3232 || PRECISION == 6464
 		const int a_index = (tid_y * NWI + _ni) * (kSizeK / VWN) + idk / VWN + _ki;
-#if USE_BDA
-		const __global realN* restrict agm = (const __global realN* restrict) a_ptr;
-#endif
+		#if USE_BDA
+			const __global realN* restrict agm = (const __global realN* restrict) a_ptr;
+		#endif
 		// ok yeah, this is probably not going to work quite the way I thought it would...
 		return agm[a_index];
 	#else
@@ -400,18 +386,18 @@ realN GlobalToPrivateA2D(
 
 // Same as above, but now for the B input matrix
 realM GlobalToPrivateB2D(
-#if USE_BDA
-	const __global real* restrict b_ptr,
-#else
-	int b_ptr_offset,
-#endif
+	#if USE_BDA
+		const __global real* restrict b_ptr,
+	#else
+		int b_ptr_offset,
+	#endif
 	const int tid_x, const int _mi, const int kSizeN, const int idk, const int _ki)
 {
-	#if PRECISION == 3232 || PRECISION == 6464
+	#if ROUTINE_IS_COMPLEX
 		const int b_index = (idk + _ki) * (kSizeN / VWM) + tid_x * (MWI / VWM) + _mi;
-#if USE_BDA
-		const __global realM* restrict bgm = (const __global realM* restrict) b_ptr;
-#endif
+		#if USE_BDA
+			const __global realM* restrict bgm = (const __global realM* restrict) b_ptr;
+		#endif
 		// ok yeah, this is probably not going to work quite the way I thought it would...
 		return bgm[b_index + b_ptr_offset/VWM];
 	#else
@@ -476,13 +462,11 @@ realM GlobalToPrivateB2D(
 		#endif
 	#endif
 }
-
-#endif
 // =================================================================================================
 
 // Caches on-chip local memory into per-thread private memory (registers). This function is specific
 // for caching the A input matrix.
-#if SA == 1
+//#if SA == 1
 realM LocalToPrivateA(
 	//LOCAL_PTR realM* alm,
 	const int _mi, const int kg)
@@ -494,10 +478,9 @@ realM LocalToPrivateA(
 	#endif
 	return alm[kg*(MWG/VWM) + mg];
 }
-#endif
 
 // Same as above, but now for the B input matrix
-#if SB == 1
+//#if SB == 1
 realN LocalToPrivateB(
 	//LOCAL_PTR realN* blm,
 	const int _ni, const int kg)
@@ -509,7 +492,6 @@ realN LocalToPrivateB(
 	#endif
 	return blm[kg*(NWG/VWN) + ng];
 }
-#endif
 #endif
 // End of the C++11 raw string literal
 //)"

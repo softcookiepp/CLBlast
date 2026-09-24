@@ -19,9 +19,8 @@
 // =================================================================================================
 
 // Interface to the above function
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = PAD_DIMX, local_size_y = PAD_DIMY, local_size_z = 1) in;
-#endif
+layout(local_size_x = PAD_DIMX, local_size_y = PAD_DIMY, local_size_z = 1) in;
+
 layout(push_constant) uniform CopyPadMatrix
 {
 	int src_one; int src_two;

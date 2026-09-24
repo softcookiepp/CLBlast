@@ -28,9 +28,7 @@
 // =================================================================================================
 
 // The main reduction kernel, performing the multiplication and the majority of the operation
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = WGS1, local_size_y = 1, local_size_z = 1) in;
-#endif
+layout(local_size_x = WGS1, local_size_y = 1, local_size_z = 1) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) buffer xgm_buf { real xgm[]; };
@@ -40,14 +38,14 @@
 layout(push_constant) uniform Xnrm2
 {
 	int n;
-#if USE_BDA
-	const __global real* restrict xgm;
-#endif
+	#if USE_BDA
+		const __global real* restrict xgm;
+	#endif
 	int x_offset;
 	int x_inc;
-#if USE_BDA
-	__global real* outp
-#endif
+	#if USE_BDA
+		__global real* outp
+	#endif
 };
 
 shared real lm[WGS1];
@@ -63,7 +61,8 @@ void main()
 	real acc;
 	SetToZero(acc);
 	int id = wgid*WGS1 + lid;
-	while (id < n) {
+	while (id < n)
+	{
 		real x1 = INDEX(xgm, id*x_inc + x_offset);
 		real x2 = x1;
 		COMPLEX_CONJUGATE(x2);

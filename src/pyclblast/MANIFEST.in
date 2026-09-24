@@ -1,3 +1,0 @@
-include README.md src/*.pyx
-include samples/*.py
-include CMakeLists.txt

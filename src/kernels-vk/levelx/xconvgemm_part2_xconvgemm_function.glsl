@@ -34,9 +34,7 @@ shared real alm[WGD * (WGD + PADA)];
 shared real blm[WGD * (WGD + PADB)];
 
 // also workgroup is the same
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
-#endif
+layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
 
 // ConvGEMM
 void Xconvgemm(const int num_patches, const int num_kernels, const int patch_size,
@@ -260,60 +258,6 @@ void Xconvgemm(const int num_patches, const int num_kernels, const int patch_siz
 		}
 	}
 }
-
-#if 0
-#if RELAX_WORKGROUP_SIZE == 1
-	__kernel
-#else
-	__kernel __attribute__((reqd_work_group_size(MDIMCD, NDIMCD, 1)))
-#endif
-void XconvgemmFlip(const int num_patches, const int num_kernels, const int patch_size,
-									 const __global realND* restrict kernelgm, const int kernel_offset,
-									 __global real* resultgm, const int result_offset, const int result_stride,
-									 const __global realMD* restrict imagegm, const int image_offset,
-									 const int input_h, const int input_w, const int channels,
-									 const int kernel_h, const int kernel_w,
-									 const int pad_h, const int pad_w,
-									 const int stride_h, const int stride_w,
-									 const int dilation_h, const int dilation_w,
-									 const int output_h, const int output_w) {
-	const bool kernel_flip = true;
-	__local real alm[WGD * (WGD + PADA)];
-	__local real blm[WGD * (WGD + PADB)];
-	Xconvgemm(num_patches, num_kernels, patch_size,
-						kernelgm, kernel_offset, resultgm, result_offset, result_stride,
-						imagegm, image_offset, input_h, input_w, channels, kernel_h, kernel_w,
-						pad_h, pad_w, stride_h, stride_w, dilation_h, dilation_w,
-						output_h, output_w, alm, blm, kernel_flip);
-}
-
-#if RELAX_WORKGROUP_SIZE == 1
-	__kernel
-#else
-	__kernel __attribute__((reqd_work_group_size(MDIMCD, NDIMCD, 1)))
-#endif
-void XconvgemmNormal(const int num_patches, const int num_kernels, const int patch_size,
-										 const __global realND* restrict kernelgm, const int kernel_offset,
-										 __global real* resultgm, const int result_offset, const int result_stride,
-										 const __global realMD* restrict imagegm, const int image_offset,
-										 const int input_h, const int input_w, const int channels,
-										 const int kernel_h, const int kernel_w,
-										 const int pad_h, const int pad_w,
-										 const int stride_h, const int stride_w,
-										 const int dilation_h, const int dilation_w,
-										 const int output_h, const int output_w) {
-	const bool kernel_flip = false;
-	__local real alm[WGD * (WGD + PADA)];
-	__local real blm[WGD * (WGD + PADB)];
-	Xconvgemm(num_patches, num_kernels, patch_size,
-						kernelgm, kernel_offset, resultgm, result_offset, result_stride,
-						imagegm, image_offset, input_h, input_w, channels, kernel_h, kernel_w,
-						pad_h, pad_w, stride_h, stride_w, dilation_h, dilation_w,
-						output_h, output_w, alm, blm, kernel_flip);
-}
-
-#endif
-
 
 // =================================================================================================
 #endif

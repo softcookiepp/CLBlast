@@ -22,9 +22,7 @@
 // Faster version of the kernel without offsets and strided accesses. Also assumes that 'n' is
 // dividable by 'VW', 'WGS' and 'WPT'.
 
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = WGS, local_size_y = 1, local_size_z = 1) in;
-#endif
+layout(local_size_x = WGS, local_size_y = 1, local_size_z = 1) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) readonly buffer xgm_buf { realV xgm[]; };
@@ -35,17 +33,18 @@ layout(push_constant) uniform XaxpyFastest
 {
 	//int n;
 	real_arg arg_alpha;
-#if USE_BDA
-	realV_ptr_t xgm;
-	realV_ptr_t ygm;
-#endif
+	#if USE_BDA
+		realV_ptr_t xgm;
+		realV_ptr_t ygm;
+	#endif
 };
 void main()
 {
 	const real alpha = GetRealArg(arg_alpha);
 
-	//#pragma unroll
-	for (int _w = 0; _w < WPT; _w += 1) {
+	[[unroll]]
+	for (int _w = 0; _w < WPT; _w += 1)
+	{
 		const int id = _w*get_global_size(0) + get_global_id(0);
 		realV xvalue = indexGM(xgm, id);
 		realV yvalue = indexGM(ygm, id);

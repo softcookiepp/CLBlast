@@ -54,6 +54,10 @@ R"(
 // literal). Comment-out this line for syntax-highlighting when developing.
 #ifndef COMMON_GLSL
 #define COMMON_GLSL
+
+// flow control
+#extension GL_EXT_control_flow_attributes : require
+
 // =================================================================================================
 
 // whether or not to use buffer device addresses instead of descriptors
@@ -77,7 +81,7 @@ R"(
 	
 // reserved for when unrolling semantics are able to be used
 #ifndef UNROLL
-	#define UNROLL(N)
+	#define UNROLL(N) [[unroll]]
 #endif
 
 // support for subgroup operations
@@ -210,6 +214,8 @@ R"(
 	#define PI double(3.14159265358979323846)
 #endif
 
+#define ROUTINE_IS_COMPLEX (PRECISION == 3232 || PRECISION == 6464)
+
 // this simplifies stuff c:
 #define real2 vec2_t
 #define real4 vec4_t
@@ -295,13 +301,10 @@ R"(
 
 // By default the workgroup size requirement is enabled. For Qualcomm devices the workgroup size 
 // requirement results in worse performance and is disabled (src/utilities/compile.cpp)
-#ifndef RELAX_WORKGROUP_SIZE
-	#define RELAX_WORKGROUP_SIZE 0
-#endif
+#define RELAX_WORKGROUP_SIZE 0
 
-// ensure all spec constants related to workgroup size are here and ready
 #if RELAX_WORKGROUP_SIZE
-	layout(local_size_x_id = 0, local_size_y_id = 1, local_size_z_id = 2) in;
+	#error "RELAX_WORKGROUP_SIZE should not be enabled, as it is being removed"
 #endif
 
 // Sets a variable to zero
@@ -555,6 +558,22 @@ R"(
 #ifndef LEVEL3_GLSL
 #define LEVEL3_GLSL
 // =================================================================================================
+
+// Eventually, a lot of stuff will be replaced with specialization constants.
+// But for now, the boilerplate for that has yet to be written.
+#ifndef ROUTINE_SYRK
+	#define ROUTINE_SYRK 0
+#endif
+#ifndef ROUTINE_HERK
+	#define ROUTINE_HERK 0
+#endif
+#ifndef ROUTINE_SYR2K
+	#define ROUTINE_SYR2K 0
+#endif
+#ifndef ROUTINE_HER2K
+	#define ROUTINE_HER2K 0
+#endif
+
 
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library.
@@ -1015,9 +1034,7 @@ layout(binding = 4) buffer bgms_buf { real bgms[]; };
 shared real alm[WGD * (WGD + PADA)];
 shared real blm[WGD * (WGD + PADB)];
 
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
-#endif
+layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
 
 // Main body of the kernel. This is the direct version without pre/post processing and restrictions.
 void XgemmDirect(const int kSizeM, const int kSizeN, const int kSizeK, const real_arg arg_alpha,
@@ -1240,9 +1257,8 @@ void XgemmDirect(const int kSizeM, const int kSizeN, const int kSizeK, const rea
 // =================================================================================================
 
 // Direct version of the strided-batched GEMM kernel with [A, B] = [transposed, transposed]
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
-#endif
+layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
+
 layout(push_constant) uniform XgemmDirectStridedBatchedTT
 {
 	int kSizeM; int kSizeN; int kSizeK;

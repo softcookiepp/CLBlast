@@ -84,9 +84,7 @@ void Xim2col(const int input_h, const int input_w, const int channels,
 // =================================================================================================
 
 // Kernel flip version of the Xim2col kernel (for convolution)
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = COPY_DIMX, local_size_y = COPY_DIMY, local_size_z = 1) in;
-#endif
+layout(local_size_x = COPY_DIMX, local_size_y = COPY_DIMY, local_size_z = 1) in;
 
 layout(push_constant) uniform Xim2colKernelFlip
 {

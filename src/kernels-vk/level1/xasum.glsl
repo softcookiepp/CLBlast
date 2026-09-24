@@ -24,12 +24,14 @@
 	#define WGS2 64		 // The local work-group size of the epilogue kernel
 #endif
 
+#ifndef ROUTINE_SUM
+	#define ROUTINE_SUM 0
+#endif
+
 // =================================================================================================
 
 // The main reduction kernel, performing the loading and the majority of the operation
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = WGS1, local_size_y = 1, local_size_z = 1) in;
-#endif
+layout(local_size_x = WGS1, local_size_y = 1, local_size_z = 1) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) readonly buffer xgm_buf { real xgm[]; };
@@ -39,15 +41,14 @@
 layout(push_constant) uniform Xasum
 {
 	uint n;
-#if USE_BDA
-	real_ptr_t xgm;
-#endif
+	#if USE_BDA
+		real_ptr_t xgm;
+	#endif
 	uint x_offset;
 	uint x_inc;
-#if USE_BDA
-	real_ptr_t outp;
-#endif
-	uint num_groups_0; // because this is not exposed in Vulkan :c
+	#if USE_BDA
+		real_ptr_t outp;
+	#endif
 };
 
 shared real lm[WGS1];
@@ -56,7 +57,7 @@ void main()
 {
 	const uint lid = gl_LocalInvocationID[0];
 	const uint wgid = gl_WorkGroupID[0];
-	const uint num_groups = num_groups_0;
+	const uint num_groups = gl_NumWorkGroups.x;
 
 	// Performs loading and the first steps of the reduction
 	real acc;
@@ -64,10 +65,8 @@ void main()
 	uint id = wgid*WGS1 + lid;
 	while (id < n) {
 		real x = indexGM(xgm, id*x_inc + x_offset);
-		#if defined(ROUTINE_SUM) // non-absolute version
-		#else
+		if (ROUTINE_SUM == 0) // if not the sum routine, take the absolute value
 			AbsoluteValue(x);
-		#endif
 		Add(acc, acc, x);
 		id += WGS1*num_groups;
 	}

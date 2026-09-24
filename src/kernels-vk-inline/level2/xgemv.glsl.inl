@@ -13,6 +13,10 @@ R"(
 // literal). Comment-out this line for syntax-highlighting when developing.
 #ifndef COMMON_GLSL
 #define COMMON_GLSL
+
+// flow control
+#extension GL_EXT_control_flow_attributes : require
+
 // =================================================================================================
 
 // whether or not to use buffer device addresses instead of descriptors
@@ -36,7 +40,7 @@ R"(
 	
 // reserved for when unrolling semantics are able to be used
 #ifndef UNROLL
-	#define UNROLL(N)
+	#define UNROLL(N) [[unroll]]
 #endif
 
 // support for subgroup operations
@@ -169,6 +173,8 @@ R"(
 	#define PI double(3.14159265358979323846)
 #endif
 
+#define ROUTINE_IS_COMPLEX (PRECISION == 3232 || PRECISION == 6464)
+
 // this simplifies stuff c:
 #define real2 vec2_t
 #define real4 vec4_t
@@ -254,13 +260,10 @@ R"(
 
 // By default the workgroup size requirement is enabled. For Qualcomm devices the workgroup size 
 // requirement results in worse performance and is disabled (src/utilities/compile.cpp)
-#ifndef RELAX_WORKGROUP_SIZE
-	#define RELAX_WORKGROUP_SIZE 0
-#endif
+#define RELAX_WORKGROUP_SIZE 0
 
-// ensure all spec constants related to workgroup size are here and ready
 #if RELAX_WORKGROUP_SIZE
-	layout(local_size_x_id = 0, local_size_y_id = 1, local_size_z_id = 2) in;
+	#error "RELAX_WORKGROUP_SIZE should not be enabled, as it is being removed"
 #endif
 
 // Sets a variable to zero
@@ -517,6 +520,37 @@ R"(
 	#define UNROLL1 32	// Unroll factor (must be a divider of WGS1)
 #endif
 
+#ifndef ROUTINE_GBMV
+	#define ROUTINE_GBMV 0
+#endif
+#ifndef ROUTINE_HEMV
+	#define ROUTINE_HEMV 0
+#endif
+#ifndef ROUTINE_SYMV
+	#define ROUTINE_SYMV 0
+#endif
+#ifndef ROUTINE_TRMV
+	#define ROUTINE_TRMV 0
+#endif
+#ifndef ROUTINE_HBMV
+	#define ROUTINE_HBMV 0
+#endif
+#ifndef ROUTINE_SBMV
+	#define ROUTINE_SBMV 0
+#endif
+#ifndef ROUTINE_TBMV
+	#define ROUTINE_TBMV 0
+#endif
+#ifndef ROUTINE_HPMV
+	#define ROUTINE_HPMV 0
+#endif
+#ifndef ROUTINE_SPMV
+	#define ROUTINE_SPMV 0
+#endif
+#ifndef ROUTINE_TPMV
+	#define ROUTINE_TPMV 0
+#endif
+
 // buffer declarations
 #if USE_BDA == 0
 	layout(binding = 0, std430) buffer agm_buf { real agm[]; };
@@ -528,36 +562,44 @@ R"(
 
 // Defines how to load the input matrix in the non-vectorized case
 real LoadMatrixA(
-#if USE_BDA
-	const __global real* restrict agm,
-#endif
+	#if USE_BDA
+		const __global real* restrict agm,
+	#endif
 	int x, int y, int a_ld, int a_offset, int parameter, int kl, int ku)
 {
 	real result;
-
+	
+	[[flatten]]
 	// For banded matrices
-	#if defined(ROUTINE_GBMV)
+	if (ROUTINE_GBMV == 1)
+	{
 		const int k = ku - y;
 		if (x >= y-ku && x < y+kl+1) { result = agm[a_ld*y + k + x + a_offset]; }
 		else { SetToZero(result); }
-
+	}
 	// For symmetric/hermitian matrices
-	#elif defined(ROUTINE_HEMV) || defined(ROUTINE_SYMV)
-		if ((parameter == 0 && y <= x) || (parameter == 1 && x <= y)) {
+	else if (ROUTINE_HEMV == 1 || ROUTINE_SYMV == 1)
+	{
+		if ((parameter == 0 && y <= x) || (parameter == 1 && x <= y))
+		{
 			result = agm[a_ld*y + x + a_offset];
-			#if defined(ROUTINE_HEMV)
-				if (x == y) { result.y = ZERO; }
+			#if ROUTINE_IS_COMPLEX
+				if (ROUTINE_HEMV == 1)
+					if (x == y) { result.y = ZERO; }
 			#endif
 		}
-		else {
+		else
+		{
 			result = agm[a_ld*x + y + a_offset];
-			#if defined(ROUTINE_HEMV)
-				COMPLEX_CONJUGATE(result);
+			#if ROUTINE_IS_COMPLEX
+				if (ROUTINE_HEMV == 1)
+					COMPLEX_CONJUGATE(result);
 			#endif
 		}
-
+	}
 	// For triangular matrices
-	#elif defined(ROUTINE_TRMV)
+	else if (ROUTINE_TRMV == 1)
+	{
 		if (((parameter == 0 || parameter == 2) && y <= x) ||
 				((parameter == 1 || parameter == 3) && x <= y)) {
 			result = agm[a_ld*y + x + a_offset];
@@ -565,51 +607,70 @@ real LoadMatrixA(
 				SetToOne(result);
 			}
 		}
-		else {
+		else
+		{
 			SetToZero(result);
 		}
-
+	}
 	// For symmetric/hermitian banded matrices
-	#elif defined(ROUTINE_HBMV) || defined(ROUTINE_SBMV)
-		if (parameter == 1) {
-			if (x <= y) {
+	else if (ROUTINE_HBMV == 1 || ROUTINE_SBMV == 1)
+	{
+		if (parameter == 1)
+		{
+			if (x <= y)
+			{
 				const int m = kl - y;
 				if (x >= y-kl && x <= y) { result = agm[a_ld*y + m + x + a_offset]; }
 				else { SetToZero(result); }
-				#if defined(ROUTINE_HBMV)
-					if (x == y) { result.y = ZERO; }
+				#if ROUTINE_IS_COMPLEX
+					if (ROUTINE_HBMV == 1)
+					{
+						if (x == y) { result.y = ZERO; }
+					}
 				#endif
 			}
-			else {
+			else
+			{
 				const int m = kl - x;
 				if (y >= x-kl && y <= x) { result = agm[a_ld*x + m + y + a_offset]; }
 				else { SetToZero(result); }
-				#if defined(ROUTINE_HBMV)
-					COMPLEX_CONJUGATE(result);
+				#if ROUTINE_IS_COMPLEX
+					if (ROUTINE_HBMV == 1)
+					{
+						COMPLEX_CONJUGATE(result);
+					}
 				#endif
 			}
 		}
-		else {
+		else
+		{
 			if (x >= y) {
 				const int m = -y;
 				if (x >= y && x < y+kl+1) { result = agm[a_ld*y + m + x + a_offset]; }
 				else { SetToZero(result); }
-				#if defined(ROUTINE_HBMV)
-					if (x == y) { result.y = ZERO; }
+				#if ROUTINE_IS_COMPLEX
+					if (ROUTINE_HBMV == 1)
+					{
+						if (x == y) { result.y = ZERO; }
+					}
 				#endif
 			}
 			else {
 				const int m = -x;
 				if (y >= x && y < x+kl+1) { result = agm[a_ld*x + m + y + a_offset]; }
 				else { SetToZero(result); }
-				#if defined(ROUTINE_HBMV)
-					COMPLEX_CONJUGATE(result);
+				#if ROUTINE_IS_COMPLEX
+					if (ROUTINE_HBMV == 1)
+					{
+						COMPLEX_CONJUGATE(result);
+					}
 				#endif
 			}
 		}
-
+	}
 	// For triangular banded matrices
-	#elif defined(ROUTINE_TBMV)
+	else if (ROUTINE_TBMV == 1)
+	{
 		if (parameter == 1 || parameter == 3) {
 			if (x <= y) {
 				const int m = kl - y;
@@ -636,41 +697,57 @@ real LoadMatrixA(
 				SetToZero(result);
 			}
 		}
-
+	}
 	// For symmetric/hermitian packed matrices
-	#elif defined(ROUTINE_HPMV) || defined(ROUTINE_SPMV)
+	else if (ROUTINE_HPMV == 1 || ROUTINE_SPMV == 1)
+	{
 		if (parameter == 1) {
 			if (x <= y) {
 				result = agm[((y+1)*y)/2 + x + a_offset];
-				#if defined(ROUTINE_HPMV)
-					if (x == y) { result.y = ZERO; }
+				#if ROUTINE_IS_COMPLEX
+					if (ROUTINE_HPMV == 1)
+					{
+						if (x == y) { result.y = ZERO; }
+					}
 				#endif
 			}
 			else {
 				result = agm[((x+1)*x)/2 + y + a_offset];
-				#if defined(ROUTINE_HPMV)
-					COMPLEX_CONJUGATE(result);
+				#if ROUTINE_IS_COMPLEX
+					if (ROUTINE_HPMV == 1)
+					{
+						COMPLEX_CONJUGATE(result);
+					}
 				#endif
 			}
 		}
 		else {
-			if (x >= y) {
+			if (x >= y)
+			{
 				result = agm[((2*a_ld-(y+1))*y)/2 + x + a_offset];
-				#if defined(ROUTINE_HPMV)
-					if (x == y) { result.y = ZERO; }
+				#if ROUTINE_IS_COMPLEX
+					if (ROUTINE_HPMV == 1)
+					{
+						if (x == y) { result.y = ZERO; }
+					}
 				#endif
 			}
 			else {
 				result = agm[((2*a_ld-(x+1))*x)/2 + y + a_offset];
-				#if defined(ROUTINE_HPMV)
-					COMPLEX_CONJUGATE(result);
+				#if ROUTINE_IS_COMPLEX
+					if (ROUTINE_HPMV == 1)
+					{
+						COMPLEX_CONJUGATE(result);
+					}
 				#endif
 			}
 		}
-
+	}
 	// For triangular packed matrices
-	#elif defined(ROUTINE_TPMV)
-		if (parameter == 1 || parameter == 3) {
+	else if (ROUTINE_TPMV == 1)
+	{
+		if (parameter == 1 || parameter == 3)
+		{
 			if (x <= y) {
 				result = agm[((y+1)*y)/2 + x + a_offset];
 				if (parameter >= 2 && y == x) {
@@ -692,11 +769,12 @@ real LoadMatrixA(
 				SetToZero(result);
 			}
 		}
-
+	}
 	// For general matrices
-	#else
+	else
+	{
 		result = agm[a_ld*y + x + a_offset];
-	#endif
+	}
 
 	return result;
 }
@@ -704,7 +782,7 @@ real LoadMatrixA(
 // =================================================================================================
 
 // Full version of the kernel
-#if RELAX_WORKGROUP_SIZE == 0
+#if 1
 	layout(local_size_x = WGS1, local_size_y = 1, local_size_z = 1) in;
 #endif
 
@@ -748,10 +826,10 @@ void main()
 	//__local real xlm[WGS1];
 
 	// Initializes the accumulation register
-	#pragma promote_to_registers
 	real acc1[WPT1];
-	#pragma unroll
-	for (int _w = 0; _w < WPT1; _w += 1) {
+	[[unroll]]
+	for (int _w = 0; _w < WPT1; _w += 1)
+	{
 		SetToZero(acc1[_w]);
 	}
 
@@ -782,9 +860,9 @@ void main()
 						for (int _kunroll = 0; _kunroll < UNROLL1; _kunroll += 1) {
 							const int k = kwg + kloop + _kunroll;
 							real value = LoadMatrixA(
-		#if USE_BDA
-								agm,
-		#endif
+								#if USE_BDA
+														agm,
+								#endif
 								gid, k, a_ld, a_offset, parameter, kl, ku);
 							if (do_conjugate == 1) { COMPLEX_CONJUGATE(value); }
 							MultiplyAdd(acc1[_w], xlm[kloop + _kunroll], value);

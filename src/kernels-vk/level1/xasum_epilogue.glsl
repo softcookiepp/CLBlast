@@ -28,9 +28,7 @@
 
 // The epilogue reduction kernel, performing the final bit of the operation. This kernel has to
 // be launched with a single workgroup only.
-#if RELAX_WORKGROUP_SIZE == 0
 	layout(local_size_x = WGS2, local_size_y = 1, local_size_z = 1) in;
-#endif
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) readonly buffer inp_buf { real inp[]; };

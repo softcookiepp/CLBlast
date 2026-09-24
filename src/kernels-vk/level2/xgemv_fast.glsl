@@ -60,7 +60,7 @@
 // --> 'a_ld' is a multiple of VW2
 // --> 'a_rotated' is 0
 // --> 'do_conjugate' is 0
-#if RELAX_WORKGROUP_SIZE == 0
+#if 1
 	layout(local_size_x = WGS2, local_size_y = 1, local_size_z = 1) in;
 #endif
 

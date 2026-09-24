@@ -14,6 +14,22 @@
 #define LEVEL3_GLSL
 // =================================================================================================
 
+// Eventually, a lot of stuff will be replaced with specialization constants.
+// But for now, the boilerplate for that has yet to be written.
+#ifndef ROUTINE_SYRK
+	#define ROUTINE_SYRK 0
+#endif
+#ifndef ROUTINE_HERK
+	#define ROUTINE_HERK 0
+#endif
+#ifndef ROUTINE_SYR2K
+	#define ROUTINE_SYR2K 0
+#endif
+#ifndef ROUTINE_HER2K
+	#define ROUTINE_HER2K 0
+#endif
+
+
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library.
 

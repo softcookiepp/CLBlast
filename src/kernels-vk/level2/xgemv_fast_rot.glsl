@@ -61,9 +61,7 @@
 // --> 'a_ld' is a multiple of VW3
 // --> 'a_rotated' is 1
 // --> 'do_conjugate' is 0
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = WGS3, local_size_y = 1, local_size_z = 1) in;
-#endif
+layout(local_size_x = WGS3, local_size_y = 1, local_size_z = 1) in;
 
 layout(push_constant) uniform XgemvFastRot
 {
@@ -93,7 +91,9 @@ layout(push_constant) uniform XgemvFastRot
 	//int ku_unused;
 };
 
+// Local memory to store a tile of the matrix (for coalescing)
 shared real tile[WPT3][WGS3];
+// Local memory for the vector X
 shared real xlm[WPT3];
 
 void main()
@@ -103,24 +103,21 @@ void main()
 	const real alpha = GetRealArg(arg_alpha);
 	const real beta = GetRealArg(arg_beta);
 
-	// Local memory to store a tile of the matrix (for coalescing)
-	//__local real tile[WPT3][WGS3];
 	const int lid = int(gl_LocalInvocationID[0]);
 	const int lid_mod = lid % (WPT3/VW3);
 	const int lid_div = lid / (WPT3/VW3);
-
-	// Local memory for the vector X
-	//__local real xlm[WPT3];
 
 	// Initializes the accumulation register
 	real acc3;
 	SetToZero(acc3);
 
 	// Loops over tile-sized portions of the work
-	for (int kwg=0; kwg<n; kwg+=WPT3) {
-
+	[[unroll]]
+	for (int kwg = 0; kwg < n; kwg += WPT3)
+	{
 		// Loads the vector X into local memory
-		if (lid < WPT3) {
+		if (lid < WPT3)
+		{
 			xlm[lid] = xgm[(kwg + lid) * x_inc + x_offset];
 		}
 

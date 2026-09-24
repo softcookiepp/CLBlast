@@ -256,13 +256,10 @@ R"(
 
 // By default the workgroup size requirement is enabled. For Qualcomm devices the workgroup size 
 // requirement results in worse performance and is disabled (src/utilities/compile.cpp)
-#ifndef RELAX_WORKGROUP_SIZE
-	#define RELAX_WORKGROUP_SIZE 0
-#endif
+#define RELAX_WORKGROUP_SIZE 0
 
-// ensure all spec constants related to workgroup size are here and ready
 #if RELAX_WORKGROUP_SIZE
-	layout(local_size_x_id = 0, local_size_y_id = 1, local_size_z_id = 2) in;
+	#error "RELAX_WORKGROUP_SIZE should not be enabled, as it is being removed"
 #endif
 
 // Sets a variable to zero

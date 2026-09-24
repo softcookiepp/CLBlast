@@ -17,9 +17,7 @@
 #if 1 //defined(ROUTINE_SYMM)
 
 // Same as above, but now the matrix' data is stored in the upper-triangle
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = PAD_DIMX, local_size_y = PAD_DIMY, local_size_z = 1) in;
-#endif
+layout(local_size_x = PAD_DIMX, local_size_y = PAD_DIMY, local_size_z = 1) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) readonly buffer src_buf { real src[]; };
@@ -43,10 +41,10 @@ layout(push_constant) uniform SymmUpperToSquared
 void main()
 {
 	// Loops over the work per thread in both dimensions
-	// #pragma unroll
+	[[unroll]]
 	for (int _w_one = 0; _w_one < PAD_WPTX; _w_one += 1) {
 		const int id_one = (get_group_id(0)*PAD_WPTX + _w_one) * PAD_DIMX + get_local_id(0);
-		// #pragma unroll
+		[[unroll]]
 		for (int _w_two = 0; _w_two < PAD_WPTY; _w_two += 1) {
 			const int id_two = (get_group_id(1)*PAD_WPTY + _w_two) * PAD_DIMY + get_local_id(1);
 			if (id_two < dest_dim && id_one < dest_dim) {

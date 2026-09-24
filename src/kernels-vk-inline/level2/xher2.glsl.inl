@@ -13,6 +13,10 @@ R"(
 // literal). Comment-out this line for syntax-highlighting when developing.
 #ifndef COMMON_GLSL
 #define COMMON_GLSL
+
+// flow control
+#extension GL_EXT_control_flow_attributes : require
+
 // =================================================================================================
 
 // whether or not to use buffer device addresses instead of descriptors
@@ -36,7 +40,7 @@ R"(
 	
 // reserved for when unrolling semantics are able to be used
 #ifndef UNROLL
-	#define UNROLL(N)
+	#define UNROLL(N) [[unroll]]
 #endif
 
 // support for subgroup operations
@@ -169,6 +173,8 @@ R"(
 	#define PI double(3.14159265358979323846)
 #endif
 
+#define ROUTINE_IS_COMPLEX (PRECISION == 3232 || PRECISION == 6464)
+
 // this simplifies stuff c:
 #define real2 vec2_t
 #define real4 vec4_t
@@ -254,13 +260,10 @@ R"(
 
 // By default the workgroup size requirement is enabled. For Qualcomm devices the workgroup size 
 // requirement results in worse performance and is disabled (src/utilities/compile.cpp)
-#ifndef RELAX_WORKGROUP_SIZE
-	#define RELAX_WORKGROUP_SIZE 0
-#endif
+#define RELAX_WORKGROUP_SIZE 0
 
-// ensure all spec constants related to workgroup size are here and ready
 #if RELAX_WORKGROUP_SIZE
-	layout(local_size_x_id = 0, local_size_y_id = 1, local_size_z_id = 2) in;
+	#error "RELAX_WORKGROUP_SIZE should not be enabled, as it is being removed"
 #endif
 
 // Sets a variable to zero
@@ -680,10 +683,15 @@ real MatrixUpdate2Impl(const int id1, const int id2, const int max1, const int m
 
 // =================================================================================================
 
-// Symmetric version of the rank-2 matrix update kernel (HER2, HPR2, SYR2, SPR2)
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = WGS1, local_size_y = WGS2, local_size_Z = 1) in;
+#ifndef ROUTINE_HER2
+	#define ROUTINE_HER2 0
 #endif
+#ifndef ROUTINE_HPR2
+	#define ROUTINE_HPR2 0
+#endif
+
+// Symmetric version of the rank-2 matrix update kernel (HER2, HPR2, SYR2, SPR2)
+layout(local_size_x = WGS1, local_size_y = WGS2, local_size_Z = 1) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) buffer xgm_buf { real xgm[]; };
@@ -751,19 +759,20 @@ void main()
 	// Sets the proper value of alpha in case conjugation is needed
 	real alpha1 = alpha;
 	real alpha2 = alpha;
-	#if defined(ROUTINE_HER2) || defined(ROUTINE_HPR2)
+	if (ROUTINE_HER2 == 1 || ROUTINE_HPR2 == 1)
+	{
 		if (bool(is_rowmajor)) {
 			COMPLEX_CONJUGATE(alpha1);
 		}
 		else {
 			COMPLEX_CONJUGATE(alpha2);
 		}
-	#endif
+	}
 
 	// Loops over the work per thread twice
-	//#pragma unroll
+	[[unroll]]
 	for (int _w1 = 0; _w1 < WPT; _w1 += 1) {
-		//#pragma unroll
+		[[unroll]]
 		for (int _w2 = 0; _w2 < WPT; _w2 += 1) {
 
 			// Global thread IDs

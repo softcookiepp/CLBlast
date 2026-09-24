@@ -15,10 +15,15 @@
 #include "level2.glsl"
 // =================================================================================================
 
-// Symmetric version of the rank-2 matrix update kernel (HER2, HPR2, SYR2, SPR2)
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = WGS1, local_size_y = WGS2, local_size_Z = 1) in;
+#ifndef ROUTINE_HER2
+	#define ROUTINE_HER2 0
 #endif
+#ifndef ROUTINE_HPR2
+	#define ROUTINE_HPR2 0
+#endif
+
+// Symmetric version of the rank-2 matrix update kernel (HER2, HPR2, SYR2, SPR2)
+layout(local_size_x = WGS1, local_size_y = WGS2, local_size_Z = 1) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) buffer xgm_buf { real xgm[]; };
@@ -86,19 +91,20 @@ void main()
 	// Sets the proper value of alpha in case conjugation is needed
 	real alpha1 = alpha;
 	real alpha2 = alpha;
-	#if defined(ROUTINE_HER2) || defined(ROUTINE_HPR2)
+	if (ROUTINE_HER2 == 1 || ROUTINE_HPR2 == 1)
+	{
 		if (bool(is_rowmajor)) {
 			COMPLEX_CONJUGATE(alpha1);
 		}
 		else {
 			COMPLEX_CONJUGATE(alpha2);
 		}
-	#endif
+	}
 
 	// Loops over the work per thread twice
-	//#pragma unroll
+	[[unroll]]
 	for (int _w1 = 0; _w1 < WPT; _w1 += 1) {
-		//#pragma unroll
+		[[unroll]]
 		for (int _w2 = 0; _w2 < WPT; _w2 += 1) {
 
 			// Global thread IDs

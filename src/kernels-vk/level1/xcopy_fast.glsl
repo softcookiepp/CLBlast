@@ -30,7 +30,6 @@
 	layout(binding = 1, std430) buffer ygm_buf { realV ygm[]; }; 
 #endif
 
-#if 1
 layout(push_constant) uniform XcopyFast
 {
 	int n;
@@ -40,16 +39,15 @@ layout(push_constant) uniform XcopyFast
 #endif
 	//int global_size_0;
 };
-#endif
 
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = WGS, local_size_y = 1, local_size_z = 1) in;
-#endif
+layout(local_size_x = WGS, local_size_y = 1, local_size_z = 1) in;
 
 void main()
 {
+	// TODO: make N a specialization constant
 	if (n % VW == 0 && n % WPT == 0 && n % WGS == 0)
 	{
+		[[unroll]]
 		for (int _w = 0; _w < WPT; _w += 1)
 		{
 			const int id = _w*get_global_size(0) + get_global_id(0);

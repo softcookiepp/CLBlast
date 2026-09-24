@@ -30,9 +30,7 @@
 
 // The epilogue reduction kernel, performing the final bit of the sum operation. This kernel has to
 // be launched with a single workgroup only.
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = WGS2, local_size_y = 1, local_size_z = 1) in;
-#endif
+layout(local_size_x = WGS2, local_size_y = 1, local_size_z = 1) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) readonly buffer inp_buffer { real inp[]; };
@@ -41,10 +39,10 @@
 
 layout(push_constant) uniform XdotEpilogue
 {
-#if USE_BDA
-	real_ptr_t inp;
-	real_ptr_t dot;
-#endif
+	#if USE_BDA
+		real_ptr_t inp;
+		real_ptr_t dot;
+	#endif
 	int dot_offset;
 };
 

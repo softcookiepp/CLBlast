@@ -18,7 +18,7 @@
 //
 #include "xgemm_part3.glsl"
 // =================================================================================================
-#if RELAX_WORKGROUP_SIZE == 0
+#if 1
 	layout(local_size_x = MDIMC, local_size_y = NDIMC, local_size_z = 1) in;
 #endif
 

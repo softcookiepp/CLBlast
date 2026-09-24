@@ -21,9 +21,7 @@
 // Faster version of the kernel without offsets and strided accesses. Also assumes that 'n' is
 // dividable by 'VW', 'WGS' and 'WPT'.
 
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = WGS, local_size_y = 1, local_size_z = 1) in;
-#endif
+layout(local_size_x = WGS, local_size_y = 1, local_size_z = 1) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) buffer xgm_buf { realV xgm[]; };
@@ -33,9 +31,9 @@ layout(push_constant, std430) uniform XscalFast
 {
 	int n;
 	real_arg arg_alpha;
-#if USE_BDA
-	realV_ptr_t xgm;
-#endif
+	#if USE_BDA
+		realV_ptr_t xgm;
+	#endif
 };
 
 // XscalFast

@@ -20,7 +20,8 @@
 // =================================================================================================
 
 // A vector-vector multiply function. See also level1.opencl for a vector-scalar version
-realV MultiplyVectorVector(realV cvec, const realV aval, const realV bvec) {
+realV MultiplyVectorVector(realV cvec, const realV aval, const realV bvec)
+{
 	#if VW == 1
 		Multiply(cvec, aval, bvec);
 	#else
@@ -29,12 +30,7 @@ realV MultiplyVectorVector(realV cvec, const realV aval, const realV bvec) {
 	return cvec;
 }
 
-// =================================================================================================
-
-// Full version of the kernel with offsets and strided accesses
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = WGS, local_size_y = 1, local_size_z = 1) in;
-#endif
+layout(local_size_x = WGS, local_size_y = 1, local_size_z = 1) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) buffer xgm_buf { realV xgm[]; };
@@ -45,11 +41,11 @@ realV MultiplyVectorVector(realV cvec, const realV aval, const realV bvec) {
 layout(push_constant) uniform XhadFaster
 {
 	int n; real_arg arg_alpha; real_arg arg_beta;
-#if USE_BDA
-	__global real* restrict xgm;
-	__global real* restrict ygm;
-	__global real* zgm;
-#endif
+	#if USE_BDA
+		__global real* restrict xgm;
+		__global real* restrict ygm;
+		__global real* zgm;
+	#endif
 };
 
 // Faster version of the kernel without offsets and strided accesses but with if-statement. Also
@@ -64,9 +60,11 @@ void main()
 
 	const int num_desired_threads = n / (VW * WPT);
 
-	if (get_global_id(0) < num_desired_threads) {
-		//#pragma unroll
-		for (int _w = 0; _w < WPT; _w += 1) {
+	if (get_global_id(0) < num_desired_threads)
+	{
+		[[unroll]]
+		for (int _w = 0; _w < WPT; _w += 1)
+		{
 			const int id = _w * num_desired_threads + get_global_id(0);
 			realV xvalue = xgm[id];
 			realV yvalue = ygm[id];

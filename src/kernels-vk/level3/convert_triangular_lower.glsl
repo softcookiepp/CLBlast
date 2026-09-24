@@ -18,9 +18,7 @@
 
 // Kernel to populate a squared triangular matrix, given that the triangle which holds the data is
 // stored as the lower-triangle of the input matrix. This uses the padding kernel's parameters.
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = PAD_DIMX, local_size_y = PAD_DIMY, local_size_z = 1) in;
-#endif
+layout(local_size_x = PAD_DIMX, local_size_y = PAD_DIMY, local_size_z = 1) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) readonly buffer src_buf { real src[]; };

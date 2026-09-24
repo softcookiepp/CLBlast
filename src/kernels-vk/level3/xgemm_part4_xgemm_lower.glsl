@@ -15,7 +15,7 @@
 // The upper-triangular and lower-triangular kernels are only used in special cases
 
 // Main entry point of the kernel. This is the lower-triangular version.
-#if RELAX_WORKGROUP_SIZE == 0
+#if 1
 	layout(local_size_x = MDIMC, local_size_y = NDIMC, local_size_z = 1) in;
 #endif
 

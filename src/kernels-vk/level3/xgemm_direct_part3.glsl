@@ -27,9 +27,7 @@ layout(binding = 4) buffer bgms_buf { real bgms[]; };
 shared real alm[WGD * (WGD + PADA)];
 shared real blm[WGD * (WGD + PADB)];
 
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
-#endif
+layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
 
 // Main body of the kernel. This is the direct version without pre/post processing and restrictions.
 void XgemmDirect(const int kSizeM, const int kSizeN, const int kSizeK, const real_arg arg_alpha,

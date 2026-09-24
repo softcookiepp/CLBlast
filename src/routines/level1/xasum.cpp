@@ -95,10 +95,6 @@ void Xasum<T>::DoAsum(const size_t n, const Buffer<T>& asum_buffer, const size_t
 	// Launches the main kernel
 	auto global1 = std::vector<size_t>{db_["WGS1"] * temp_size};
 	auto local1 = std::vector<size_t>{db_["WGS1"]};
-
-	// the number of workgroups in the X dimension
-	kernel1.SetArgument(6, static_cast<int>(global1[0]/local1[0]));
-	
 	
 	RunKernel(kernel1, queue_, device_, global1, local1);
 

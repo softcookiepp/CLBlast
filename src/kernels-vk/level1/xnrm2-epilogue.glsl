@@ -29,9 +29,7 @@
 // The epilogue reduction kernel, performing the final bit of the operation. This kernel has to
 // be launched with a single workgroup only.
 
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = WGS2, local_size_y = 1, local_size_z = 1) in;
-#endif
+layout(local_size_x = WGS2, local_size_y = 1, local_size_z = 1) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) buffer inp_buf { real inp[]; };
@@ -40,10 +38,10 @@
 
 layout(push_constant) uniform Xnrm2Epilogue
 {
-#if USE_BDA
-	const __global real* restrict inp;
-	__global real* nrm2;
-#endif
+	#if USE_BDA
+		const __global real* restrict inp;
+		__global real* nrm2;
+	#endif
 	int nrm2_offset;
 };
 
@@ -67,7 +65,8 @@ void main()
 	}
 
 	// Computes the square root and stores the final result
-	if (lid == 0) {
+	if (lid == 0)
+	{
 		#if PRECISION == 3232 || PRECISION == 6464
 			nrm2[nrm2_offset].x = sqrt(lm[0].x); // the result is a non-complex number
 		#else

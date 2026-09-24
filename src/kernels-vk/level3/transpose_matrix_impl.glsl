@@ -25,9 +25,7 @@
 // =================================================================================================
 
 // just define some shader parameters here, they are basically the same across all
-#if RELAX_WORKGROUP_SIZE == 0
 	layout(local_size_x = PADTRA_TILE, local_size_y = PADTRA_TILE, local_size_z = 1) in;
-#endif
 
 #if USE_BDA == 0
 	#ifdef ROUTINE_GEMMBATCHED
@@ -65,9 +63,9 @@ void _TransposeMatrix(
 	const int diagonal_imag_zero)
 {
 	// Loop over the work per thread
-	// #pragma unroll
+	[[unroll]]
 	for (int _w_one = 0; _w_one < PADTRA_WPT; _w_one += 1) {
-		// #pragma unroll
+		[[unroll]]
 		for (int _w_two = 0; _w_two < PADTRA_WPT; _w_two += 1) {
 
 			// Computes the identifiers for the source matrix. Note that the local and global dimensions
@@ -89,9 +87,9 @@ void _TransposeMatrix(
 	barrier();
 
 	// Loop over the work per thread
-	// #pragma unroll
+	[[unroll]]
 	for (int _w_one = 0; _w_one < PADTRA_WPT; _w_one += 1) {
-		// #pragma unroll
+		[[unroll]]
 		for (int _w_two = 0; _w_two < PADTRA_WPT; _w_two += 1) {
 
 			// Computes the identifiers for the destination matrix
@@ -100,10 +98,11 @@ void _TransposeMatrix(
 
 			// Masking in case of triangular matrices: updates only the upper or lower part
 			bool condition = true;
-			#if defined(ROUTINE_SYRK) || defined(ROUTINE_HERK) || defined(ROUTINE_SYR2K) || defined(ROUTINE_HER2K)
+			if (ROUTINE_SYRK == 1 || ROUTINE_HERK == 1 || ROUTINE_SYR2K == 1 || ROUTINE_HER2K == 1)
+			{
 				if (upper == 1) { condition = (id_dest_one >= id_dest_two); }
 				else if (lower == 1) { condition = (id_dest_one <= id_dest_two); }
-			#endif
+			}
 			if (condition) {
 
 				// Stores the transposed value in the destination matrix

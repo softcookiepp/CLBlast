@@ -20,9 +20,7 @@
 // =================================================================================================
 
 // Full version of the kernel with offsets and strided accesses: batched version
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = WGS, local_size_y = 1, local_size_z = 1) in;
-#endif
+layout(local_size_x = WGS, local_size_y = 1, local_size_z = 1) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) buffer arg_alphas_buf { real arg_alphas[]; };
@@ -35,14 +33,14 @@
 layout(push_constant) uniform XaxpyBatched
 {
 	int n;
-#if USE_BDA
-	__constant real_arg* arg_alphas;
-	__global real* restrict xgm; __constant int* x_offsets;
-#endif
+	#if USE_BDA
+		__constant real_arg* arg_alphas;
+		__global real* restrict xgm; __constant int* x_offsets;
+	#endif
 	int x_inc;
-#if USE_BDA
-	__global real* ygm; __constant int* y_offsets;
-#endif
+	#if USE_BDA
+		__global real* ygm; __constant int* y_offsets;
+	#endif
 	int y_inc;
 };
 

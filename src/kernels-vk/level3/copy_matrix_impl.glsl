@@ -53,19 +53,20 @@ void _CopyMatrix(const int src_one, const int src_two,
 		const int diagonal_imag_zero)
 {
 	// Loops over the work per thread in both dimensions
-	// #pragma unroll
+	[[unroll]]
 	for (int _w_one = 0; _w_one < PAD_WPTX; _w_one += 1) {
 		const int id_one = (get_group_id(0)*PAD_WPTX + _w_one) * PAD_DIMX + get_local_id(0);
-		// #pragma unroll
+		[[unroll]]
 		for (int _w_two = 0; _w_two < PAD_WPTY; _w_two += 1) {
 			const int id_two = (get_group_id(1)*PAD_WPTY + _w_two) * PAD_DIMY + get_local_id(1);
 
 			// Masking in case of triangular matrices: updates only the upper or lower part
 			bool condition = true;
-			#if defined(ROUTINE_SYRK) || defined(ROUTINE_HERK) || defined(ROUTINE_SYR2K) || defined(ROUTINE_HER2K)
+			if (ROUTINE_SYRK== 1 || ROUTINE_HERK == 1 || ROUTINE_SYR2K == 1 || ROUTINE_HER2K == 1)
+			{
 				if (upper == 1) { condition = (id_two >= id_one); }
 				else if (lower == 1) { condition = (id_two <= id_one); }
-			#endif
+			}
 			if (condition) {
 
 				// Copies the value into the destination matrix. This is always within bounds of the source

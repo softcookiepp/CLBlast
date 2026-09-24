@@ -103,9 +103,7 @@ void Xcol2im(const int input_h, const int input_w, const int channels,
 // =================================================================================================
 
 // Normal version of the Xcol2im kernel (for cross-correlation)
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = COPY_DIMX, local_size_y = COPY_DIMY, local_size_z = 1) in;
-#endif
+layout(local_size_x = COPY_DIMX, local_size_y = COPY_DIMY, local_size_z = 1) in;
 
 layout(push_constant) uniform Xcol2imKernelNormal
 {

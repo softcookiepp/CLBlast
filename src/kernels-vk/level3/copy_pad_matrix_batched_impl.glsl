@@ -49,10 +49,10 @@ void _CopyPadMatrix(const int src_one, const int src_two,
 	const int do_conjugate)
 {
 	// Loops over the work per thread in both dimensions
-	// #pragma unroll
+	[[unroll]]
 	for (int _w_one = 0; _w_one < PAD_WPTX; _w_one += 1) {
 		const int id_one = (get_group_id(0)*PAD_WPTX + _w_one) * PAD_DIMX + get_local_id(0);
-		// #pragma unroll
+		[[unroll]]
 		for (int _w_two = 0; _w_two < PAD_WPTY; _w_two += 1) {
 			const int id_two = (get_group_id(1)*PAD_WPTY + _w_two) * PAD_DIMY + get_local_id(1);
 			if (id_two < dest_two && id_one < dest_one) {

@@ -15,7 +15,9 @@
 #include "../common.glsl"
 
 // =================================================================================================
-#define ROUTINE_TRSV
+#ifndef ROUTINE_TRSV
+	#define ROUTINE_TRSV 1
+#endif
 #if defined(ROUTINE_TRSV)
 
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
@@ -34,9 +36,7 @@
 
 // =================================================================================================
 
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = TRSV_BLOCK_SIZE, local_size_y = 1, local_size_z = 1) in;
-#endif
+layout(local_size_x = TRSV_BLOCK_SIZE, local_size_y = 1, local_size_z = 1) in;
 
 layout(push_constant) uniform trsv_forward
 {
@@ -101,7 +101,8 @@ void main()
 	barrier();
 
 	// Stores the results
-	if (tid < n) {
+	if (tid < n)
+	{
 		x[tid*x_inc + x_offset] = xlm[tid];
 	}
 }

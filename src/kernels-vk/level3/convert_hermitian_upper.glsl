@@ -17,12 +17,9 @@
 #include "../common.glsl"
 #include "level3.glsl"
 // =================================================================================================
-#if 1
 
 // Same as above, but now the matrix' data is stored in the upper-triangle
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = PAD_DIMX, local_size_y = PAD_DIMY, local_size_z = 1) in;
-#endif
+layout(local_size_x = PAD_DIMX, local_size_y = PAD_DIMY, local_size_z = 1) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) readonly buffer src_buf { real src[]; };
@@ -77,7 +74,6 @@ void main()
 #endif
 }
 
-#endif
 // =================================================================================================
 
 // End of the C++11 raw string literal

@@ -4,7 +4,7 @@
 //R"(
 #include "xgemm_direct_part3_batched.glsl"
 // Direct version of the batched GEMM kernel with [A, B] = [non-transposed, non-transposed]
-#if RELAX_WORKGROUP_SIZE == 0
+#if 1
 	layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
 #endif
 layout(push_constant, std430) uniform XgemmDirectBatchedNN

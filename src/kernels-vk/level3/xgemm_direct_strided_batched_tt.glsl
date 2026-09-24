@@ -18,9 +18,8 @@
 // =================================================================================================
 
 // Direct version of the strided-batched GEMM kernel with [A, B] = [transposed, transposed]
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
-#endif
+layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
+
 layout(push_constant) uniform XgemmDirectStridedBatchedTT
 {
 	int kSizeM; int kSizeN; int kSizeK;

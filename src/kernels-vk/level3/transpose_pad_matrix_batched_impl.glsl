@@ -23,9 +23,8 @@
 // =================================================================================================
 
 // just define some shader parameters here, they are basically the same across all
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = PADTRA_TILE, local_size_y = PADTRA_TILE, local_size_z = 1) in;
-#endif
+layout(local_size_x = PADTRA_TILE, local_size_y = PADTRA_TILE, local_size_z = 1) in;
+
 
 #if USE_BDA == 0
 	#if 1
@@ -62,9 +61,9 @@ void _TransposePadMatrix(
 	const int do_conjugate)
 {
 	// Loop over the work per thread
-	// #pragma unroll
+	[[unroll]]
 	for (int _w_one = 0; _w_one < PADTRA_WPT; _w_one += 1) {
-		// #pragma unroll
+		[[unroll]]
 		for (int _w_two = 0; _w_two < PADTRA_WPT; _w_two += 1) {
 
 			// Computes the identifiers for the source matrix. Note that the local and global dimensions
@@ -89,9 +88,9 @@ void _TransposePadMatrix(
 	barrier();
 
 	// Loop over the work per thread
-	// #pragma unroll
+	[[unroll]]
 	for (int _w_one = 0; _w_one < PADTRA_WPT; _w_one += 1) {
-		// #pragma unroll
+		[[unroll]]
 		for (int _w_two = 0; _w_two < PADTRA_WPT; _w_two += 1) {
 
 			// Computes the identifiers for the destination matrix

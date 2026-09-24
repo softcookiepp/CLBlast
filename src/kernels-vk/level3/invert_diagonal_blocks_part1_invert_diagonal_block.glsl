@@ -80,9 +80,7 @@
 // =================================================================================================
 
 // Inverts a diagonal block of INTERNAL_BLOCK_SIZE by INTERNAL_BLOCK_SIZE elements in a larger matrix
-#if RELAX_WORKGROUP_SIZE == 0
-	layout(local_size_x = INTERNAL_BLOCK_SIZE, local_size_y = 1, local_size_z = 1) in;
-#endif
+layout(local_size_x = INTERNAL_BLOCK_SIZE, local_size_y = 1, local_size_z = 1) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) buffer src_buf { real src[]; };
@@ -200,7 +198,7 @@ void main()
 	}
 	
 	// Writes the result to global memory
-	#pragma unroll
+	[[unroll]]
 	for (int j = 0; j < INTERNAL_BLOCK_SIZE; j += 1) {
 		dest[j*outer_block_size + thread_index + dest_block_offset] = lm[thread_index][j];
 	}

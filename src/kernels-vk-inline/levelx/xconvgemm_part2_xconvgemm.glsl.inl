@@ -19,7 +19,7 @@ R"(
 
 // ConvGEMM kernel
 #if defined(CONVGEMM_WITH_IM2COL)
-#if RELAX_WORKGROUP_SIZE == 0
+#if 1
 	layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
 #endif
 void Xconvgemm(const int num_patches, const int num_kernels, const int patch_size,

@@ -1,6 +1,7 @@
 #version 450
 
 //R"(
+#define USE_XGEMM_BATCHED 1
 #include "xgemm_direct_part3_batched.glsl"
 
 // Direct version of the batched GEMM kernel with [A, B] = [non-transposed, transposed]

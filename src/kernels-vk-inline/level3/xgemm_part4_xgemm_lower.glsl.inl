@@ -9,6 +9,7 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
+#define USE_XGEMM_INDIRECT 1
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):

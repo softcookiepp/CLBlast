@@ -305,8 +305,10 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	kernel.SetArgument(5, a_temp());
 	kernel.SetArgument(6, b_temp());
 	kernel.SetArgument(7, c_temp());
-	kernel.SetArgument(8, static_cast<int>(b_temp_offset / db_["VWN"]));
-	kernel.SetArgument(9, static_cast<int>(c_temp_offset / db_["VWM"]));
+	kernel.SetArgument(8, a_temp());
+	kernel.SetArgument(9, b_temp());
+	kernel.SetArgument(10, static_cast<int>(b_temp_offset / db_["VWN"]));
+	kernel.SetArgument(11, static_cast<int>(c_temp_offset / db_["VWM"]));
 
 	// Computes the global and local thread sizes
 	const auto global = std::vector<size_t>{(c_one_i * db_["MDIMC"]) / db_["MWG"], (c_two_i * db_["NDIMC"]) / db_["NWG"]};

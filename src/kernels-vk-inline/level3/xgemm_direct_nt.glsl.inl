@@ -19,8 +19,9 @@ R"(
 // =================================================================================================
 
 // literal). Comment-out this line for syntax-highlighting when developing.
-#ifndef XGEMM_DIRECT_PART3_GLSL
-#define XGEMM_DIRECT_PART3_GLSL
+#ifndef XGEMM_DIRECT_PART3_BATCHED_GLSL
+#define XGEMM_DIRECT_PART3_BATCHED_GLSL
+
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
@@ -1021,14 +1022,34 @@ ivec2 getIndexForGlobalToLocalN()
 
 // =================================================================================================
 
+
+#ifndef USE_XGEMM_BATCHED
+	#define USE_XGEMM_BATCHED 0
+#endif
+#ifndef USE_XGEMM_INDIRECT
+	#define USE_XGEMM_INDIRECT 0
+#endif
+
 // global and shared memory declarations go here, since they are shared across all kernels c:
 // *gm and *gms both bind to the same underlying memory
-layout(binding = 0) buffer agm_buf { realMD agm[]; };
-layout(binding = 1) buffer bgm_buf { realND bgm[]; };
-layout(binding = 2) buffer cgm_buf { real cgm[]; };
-
-layout(binding = 3) buffer agms_buf { real agms[]; };
-layout(binding = 4) buffer bgms_buf { real bgms[]; };
+#if USE_BDA == 0
+	layout(binding = 0) buffer agm_buf { realMD agm[]; };
+	layout(binding = 1) buffer bgm_buf { realND bgm[]; };
+	layout(binding = 2) buffer cgm_buf { real cgm[]; };
+	
+	#if USE_XGEMM_INDIRECT == 0
+		layout(binding = 3) buffer agms_buf { real agms[]; };
+		layout(binding = 4) buffer bgms_buf { real bgms[]; };
+	#endif
+	
+	#if USE_XGEMM_BATCHED == 1
+		layout(binding = 5, std430) buffer arg_alphas_buf { real_arg arg_alphas[]; };
+		layout(binding = 6, std430) buffer arg_betas_buf { real_arg arg_betas[]; };
+		layout(binding = 7) readonly buffer a_offsets_buf { int a_offsets[]; };
+		layout(binding = 8) readonly buffer b_offsets_buf { int b_offsets[]; };
+		layout(binding = 9) readonly buffer c_offsets_buf { int c_offsets[]; };
+	#endif
+#endif
 
 shared real alm[WGD * (WGD + PADA)];
 shared real blm[WGD * (WGD + PADB)];

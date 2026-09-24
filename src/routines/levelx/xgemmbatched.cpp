@@ -317,26 +317,28 @@ void XgemmBatched<T>::BatchedGemmDirect(const size_t m, const size_t n, const si
 	kernel.SetArgument(0, static_cast<int>(m));
 	kernel.SetArgument(1, static_cast<int>(n));
 	kernel.SetArgument(2, static_cast<int>(k));
-	kernel.SetArgument(3, alphas());
-	kernel.SetArgument(4, betas());
-	kernel.SetArgument(5, a_buffer());
-	kernel.SetArgument(6, a_offsets_device());
-	kernel.SetArgument(7, static_cast<int>(a_ld));
-	kernel.SetArgument(8, b_buffer());
-	kernel.SetArgument(9, b_offsets_device());
-	kernel.SetArgument(10, static_cast<int>(b_ld));
-	kernel.SetArgument(11, c_buffer());
-	kernel.SetArgument(12, c_offsets_device());
-	kernel.SetArgument(13, static_cast<int>(c_ld));
-	kernel.SetArgument(14, static_cast<int>(c_do_transpose));
-	kernel.SetArgument(15, static_cast<int>(a_conjugate));
-	kernel.SetArgument(16, static_cast<int>(b_conjugate));
 	
-#if VULKAN_API
-	// for workaround to no pointer casting allowed
-	kernel.SetArgument(17, a_buffer());
-	kernel.SetArgument(18, b_buffer());
-#endif
+	kernel.SetArgument(3, a_buffer());
+	kernel.SetArgument(4, static_cast<int>(a_ld));
+	
+	kernel.SetArgument(5, b_buffer());
+	kernel.SetArgument(6, static_cast<int>(b_ld));
+	kernel.SetArgument(7, c_buffer());
+	kernel.SetArgument(8, static_cast<int>(c_ld));
+	
+	kernel.SetArgument(9, static_cast<int>(c_do_transpose));
+	kernel.SetArgument(10, static_cast<int>(a_conjugate));
+	kernel.SetArgument(11, static_cast<int>(b_conjugate));
+	
+	// for workaround to no pointer casting allowed. for some reason this kernel doesn't like duplicate bindings
+	kernel.SetArgument(12, a_buffer());
+	kernel.SetArgument(13, b_buffer());
+	
+	kernel.SetArgument(14, alphas());
+	kernel.SetArgument(15, betas());
+	kernel.SetArgument(16, a_offsets_device());
+	kernel.SetArgument(17, b_offsets_device());
+	kernel.SetArgument(18, c_offsets_device());
 
 	// Computes the global and local thread sizes
 	const auto m_ceiled = Ceil(m, db_["WGD"]);

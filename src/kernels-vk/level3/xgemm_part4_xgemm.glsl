@@ -11,6 +11,7 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
+#define USE_XGEMM_INDIRECT 1
 #include "xgemm_part3.glsl"
 // Main entry point of the kernel. This is the regular full version.
 #if 1

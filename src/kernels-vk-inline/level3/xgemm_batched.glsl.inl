@@ -649,7 +649,15 @@ R"(
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library.
 
-#define USE_SPECIALIZATION_CONSTANTS 1
+#ifndef USE_XGEMM_BATCHED
+	#define USE_XGEMM_BATCHED 0
+#endif
+
+#if USE_XGEMM_BATCHED
+	#define USE_SPECIALIZATION_CONSTANTS 0
+#else
+	#define USE_SPECIALIZATION_CONSTANTS 1
+#endif
 
 #if USE_SPECIALIZATION_CONSTANTS
 	#ifdef GEMMK
@@ -858,10 +866,6 @@ realM InitAccRegisters()
 }
 
 // =================================================================================================
-
-#ifndef USE_XGEMM_BATCHED
-	#define USE_XGEMM_BATCHED 0
-#endif
 
 // buffer definitions (to avoid having to use macros everywhere like usual)
 #if USE_BDA == 0
@@ -1799,7 +1803,15 @@ realN LocalToPrivateB(
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library.
 
-#define USE_SPECIALIZATION_CONSTANTS 1
+#ifndef USE_XGEMM_BATCHED
+	#define USE_XGEMM_BATCHED 0
+#endif
+
+#if USE_XGEMM_BATCHED
+	#define USE_SPECIALIZATION_CONSTANTS 0
+#else
+	#define USE_SPECIALIZATION_CONSTANTS 1
+#endif
 
 #if USE_SPECIALIZATION_CONSTANTS
 	#ifdef GEMMK
@@ -2008,10 +2020,6 @@ realM InitAccRegisters()
 }
 
 // =================================================================================================
-
-#ifndef USE_XGEMM_BATCHED
-	#define USE_XGEMM_BATCHED 0
-#endif
 
 // buffer definitions (to avoid having to use macros everywhere like usual)
 #if USE_BDA == 0
@@ -3051,7 +3059,15 @@ void StoreResults(
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library.
 
-#define USE_SPECIALIZATION_CONSTANTS 1
+#ifndef USE_XGEMM_BATCHED
+	#define USE_XGEMM_BATCHED 0
+#endif
+
+#if USE_XGEMM_BATCHED
+	#define USE_SPECIALIZATION_CONSTANTS 0
+#else
+	#define USE_SPECIALIZATION_CONSTANTS 1
+#endif
 
 #if USE_SPECIALIZATION_CONSTANTS
 	#ifdef GEMMK
@@ -3260,10 +3276,6 @@ realM InitAccRegisters()
 }
 
 // =================================================================================================
-
-#ifndef USE_XGEMM_BATCHED
-	#define USE_XGEMM_BATCHED 0
-#endif
 
 // buffer definitions (to avoid having to use macros everywhere like usual)
 #if USE_BDA == 0
@@ -3931,7 +3943,13 @@ void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
 // =================================================================================================
 
 // =================================================================================================
-#if 1
+#if USE_SPECIALIZATION_CONSTANTS
+	layout(
+		local_size_x_id = 4, // MDIMC,
+		local_size_y_id = 5, // NDIMC,
+		local_size_z = 1
+		) in;
+#else
 	layout(local_size_x = MDIMC, local_size_y = NDIMC, local_size_z = 1) in;
 #endif
 

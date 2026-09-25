@@ -9,7 +9,6 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
-#define USE_XGEMM_INDIRECT 1
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
@@ -678,11 +677,7 @@ R"(
 	#define USE_XGEMM_BATCHED 0
 #endif
 
-#if USE_XGEMM_BATCHED
-	#define USE_SPECIALIZATION_CONSTANTS 0
-#else
-	#define USE_SPECIALIZATION_CONSTANTS 1
-#endif
+#define USE_SPECIALIZATION_CONSTANTS 1
 
 #if USE_SPECIALIZATION_CONSTANTS
 	#ifdef GEMMK

@@ -147,8 +147,7 @@ void XgemmStridedBatched<T>::DoGemmStridedBatched(const Layout layout, const Tra
 	
 	// get working sequence
 	
-#if VULKAN_API
-	// right now, using any sort of offset is broken for the Vulkan version of the kernels :c
+	// right now, using any sort of offset is broken for the Vulkan version of the kernels, due to inability to cast pointers, etc.
 	// so this is a workaround
 	if (a_offset || b_offset || c_offset)
 	{
@@ -165,14 +164,9 @@ void XgemmStridedBatched<T>::DoGemmStridedBatched(const Layout layout, const Tra
 		
 		return;
 	}
-#endif
 
 	// Two methods to choose from, select which one to run
-#if VULKAN_API
-	const auto do_gemm_direct = true;
-#else
 	const auto do_gemm_direct = Xgemm<T>::UseDirectKernel(m, n, k, db_["XGEMM_MIN_INDIRECT_SIZE"]);
-#endif
 	const auto gemm_kernel_id = (do_gemm_direct) ? 0 : db_["GEMMK"];
 
 	// Computes the transpose/conjugate options and sets the a/b/c sizes based on that
@@ -311,7 +305,6 @@ void XgemmStridedBatched<T>::BatchedGemmIndirect(
 	
 	// Launches the kernel
 	kernel->enqueue(global, spec);
-	//RunKernel(kernel, queue_, device_, global, local);
 
 	// Runs the post-processing kernel if needed
 	if (!c_no_temp) {

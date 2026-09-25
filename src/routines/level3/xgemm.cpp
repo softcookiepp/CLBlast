@@ -339,44 +339,41 @@ void Xgemm<T>::GemmDirect(const size_t m, const size_t n, const size_t k, const 
 	// Retrieves the proper XgemmDirect kernel from the compiled binary
 	const auto name = (a_do_transpose) ? (b_do_transpose ? "XgemmDirectTT" : "XgemmDirectTN")
 																		 : (b_do_transpose ? "XgemmDirectNT" : "XgemmDirectNN");
-	auto kernel = Kernel(program_, name);
+	auto kernelOld = Kernel(program_, name);
+	tart::kernel_ptr kernel = kernelOld.get();
 
 	// Sets the kernel arguments
-	kernel.SetArgument(0, static_cast<int>(m));
-	kernel.SetArgument(1, static_cast<int>(n));
-	kernel.SetArgument(2, static_cast<int>(k));
-	kernel.SetArgument(3, GetRealArg(alpha));
-	kernel.SetArgument(4, GetRealArg(beta));
-	kernel.SetArgument(5, a_buffer());
-	kernel.SetArgument(6, static_cast<int>(a_offset));
-	kernel.SetArgument(7, static_cast<int>(a_ld));
-	kernel.SetArgument(8, b_buffer());
-	kernel.SetArgument(9, static_cast<int>(b_offset));
-	kernel.SetArgument(10, static_cast<int>(b_ld));
-	kernel.SetArgument(11, c_buffer());
-	kernel.SetArgument(12, static_cast<int>(c_offset));
-	kernel.SetArgument(13, static_cast<int>(c_ld));
-	kernel.SetArgument(14, static_cast<int>(c_do_transpose));
-	kernel.SetArgument(15, static_cast<int>(a_conjugate));
-	kernel.SetArgument(16, static_cast<int>(b_conjugate));
+	kernel->setArg(0, static_cast<int>(m));
+	kernel->setArg(1, static_cast<int>(n));
+	kernel->setArg(2, static_cast<int>(k));
+	kernel->setArg(3, GetRealArg(alpha));
+	kernel->setArg(4, GetRealArg(beta));
+	kernel->setArg(5, a_buffer());
+	kernel->setArg(6, static_cast<int>(a_offset));
+	kernel->setArg(7, static_cast<int>(a_ld));
+	kernel->setArg(8, b_buffer());
+	kernel->setArg(9, static_cast<int>(b_offset));
+	kernel->setArg(10, static_cast<int>(b_ld));
+	kernel->setArg(11, c_buffer());
+	kernel->setArg(12, static_cast<int>(c_offset));
+	kernel->setArg(13, static_cast<int>(c_ld));
+	kernel->setArg(14, static_cast<int>(c_do_transpose));
+	kernel->setArg(15, static_cast<int>(a_conjugate));
+	kernel->setArg(16, static_cast<int>(b_conjugate));
 	
-#if VULKAN_API
 	// provide the same buffers twice to get around GLSL's lack of pointer casting
-	kernel.SetArgument(17, a_buffer());
-	kernel.SetArgument(18, b_buffer());
-#endif
+	kernel->setArg(17, a_buffer());
+	kernel->setArg(18, b_buffer());
 
 	// Computes the global and local thread sizes
 	const auto m_ceiled = Ceil(m, db_["WGD"]);
 	const auto n_ceiled = Ceil(n, db_["WGD"]);
-	const auto global =
-			std::vector<size_t>{//	CeilDiv(m * db_["MDIMCD"], db_["WGD"]),
-													//	CeilDiv(n * db_["NDIMCD"], db_["WGD"])
-													(m_ceiled * db_["MDIMCD"]) / db_["WGD"], (n_ceiled * db_["NDIMCD"]) / db_["WGD"]};
-	const auto local = std::vector<size_t>{db_["MDIMCD"], db_["NDIMCD"]};
+	const auto global = std::vector<uint32_t>{m_ceiled / db_["WGD"], n_ceiled / db_["WGD"], 1};
+	//const auto local = std::vector<uint32_t>{db_["MDIMCD"], db_["NDIMCD"], 1};
 
 	// Launches the kernel
-	RunKernel(kernel, queue_, device_, global, local);
+	//RunKernel(kernelOld, queue_, device_, global, local);
+	kernel->enqueue(global, {});
 }
 
 // =================================================================================================

@@ -267,6 +267,8 @@ public:
 
 	// Accessor to the private data-member
 	const kernel_t& operator()() const;
+	
+	const tart::kernel_ptr& get() const { return mKernel; }
 
 private:
 	// Internal implementation for the recursive SetArguments function.

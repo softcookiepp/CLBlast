@@ -18,11 +18,13 @@
 // The vectorised multiply-add function
 realM MultiplyAddVector(realM cvec, const realM avec, const real bval)
 {
-	if (USE_VECTOR_MAD == 0)
-	{
-		cvec += avec * bval;
-	}
-	else
+	#if ROUTINE_IS_COMPLEX == 0
+		if (USE_VECTOR_MAD == 0)
+		{
+			cvec.s += avec.s * bval;
+		}
+		else
+	#endif
 	{
 		#if VWM == 1
 			MultiplyAdd(cvec, avec, bval);

@@ -489,6 +489,10 @@ R"(
 	INDEX(buf, index+13), INDEX(buf, index+14), INDEX(buf, index+15) ))
 	
 #define vloadN(index, buf, N) vload##N(index, buf)
+#define vloadN2(ret, index, buf, N) \
+{ \
+	[[unroll]] for (uint i = 0; i < N; i += 1) ret.s[i] = INDEX(buf, index + i); \
+}
 
 #define vTranspose(dst, src, vWidth) \
 { \
@@ -926,7 +930,9 @@ realN GlobalToPrivateA2D(
 			return a_ptr[a_index];
 		#else
 			//return vload2(0, a_ptr + a_index);
-			return vloadN(a_index, a_ptr, VWN);
+			realN outp;
+			vloadN2(outp, a_index, a_ptr, VWN);
+			return outp;
 		#endif
 	#endif
 }
@@ -951,61 +957,67 @@ realM GlobalToPrivateB2D(
 		const int b_index = (idk + _ki) * kSizeN + tid_x * MWI + _mi * VWM + b_ptr_offset;
 		#if VWM == 1
 			return b_ptr[b_index];
-		#elif VWM == 2
-			//return vload2(0, b_ptr + b_index);
-			return real2(b_ptr[b_index], b_ptr[b_index + 1]);
-		#elif VWM == 4
-			//return vload4(0, b_ptr + b_index);
-			return real4(
-				b_ptr[b_index],
-				b_ptr[b_index + 1]
-				b_ptr[b_index + 2]
-				b_ptr[b_index + 3]
-			);
-		#elif VWM == 8
-			//return vload8(0, b_ptr + b_index);
-			return real8(
-				real4(
+		#elif 1
+			realM ret;
+			vloadN2(ret, b_index, b_ptr, VWM);
+			return ret;
+		#else
+			#if VWM == 2
+				//return vload2(0, b_ptr + b_index);
+				return real2(b_ptr[b_index], b_ptr[b_index + 1]);
+			#elif VWM == 4
+				//return vload4(0, b_ptr + b_index);
+				return real4(
 					b_ptr[b_index],
 					b_ptr[b_index + 1]
 					b_ptr[b_index + 2]
 					b_ptr[b_index + 3]
-				),
-				real4(
-					b_ptr[b_index + 4],
-					b_ptr[b_index + 5]
-					b_ptr[b_index + 6]
-					b_ptr[b_index + 7]
-				)
-			);
-		#elif VWM == 16
-			//return vload16(0, b_ptr + b_index);
-			return real16(
-				real4(
-					b_ptr[b_index],
-					b_ptr[b_index + 1]
-					b_ptr[b_index + 2]
-					b_ptr[b_index + 3]
-				),
-				real4(
-					b_ptr[b_index + 4],
-					b_ptr[b_index + 5]
-					b_ptr[b_index + 6]
-					b_ptr[b_index + 7]
-				),
-				real4(
-					b_ptr[b_index + 8],
-					b_ptr[b_index + 9]
-					b_ptr[b_index + 10]
-					b_ptr[b_index + 11]
-				),
-				real4(
-					b_ptr[b_index + 12],
-					b_ptr[b_index + 13]
-					b_ptr[b_index + 14]
-					b_ptr[b_index + 15]
-				)
-			);
+				);
+			#elif VWM == 8
+				//return vload8(0, b_ptr + b_index);
+				return real8(
+					real4(
+						b_ptr[b_index],
+						b_ptr[b_index + 1]
+						b_ptr[b_index + 2]
+						b_ptr[b_index + 3]
+					),
+					real4(
+						b_ptr[b_index + 4],
+						b_ptr[b_index + 5]
+						b_ptr[b_index + 6]
+						b_ptr[b_index + 7]
+					)
+				);
+			#elif VWM == 16
+				//return vload16(0, b_ptr + b_index);
+				return real16(
+					real4(
+						b_ptr[b_index],
+						b_ptr[b_index + 1]
+						b_ptr[b_index + 2]
+						b_ptr[b_index + 3]
+					),
+					real4(
+						b_ptr[b_index + 4],
+						b_ptr[b_index + 5]
+						b_ptr[b_index + 6]
+						b_ptr[b_index + 7]
+					),
+					real4(
+						b_ptr[b_index + 8],
+						b_ptr[b_index + 9]
+						b_ptr[b_index + 10]
+						b_ptr[b_index + 11]
+					),
+					real4(
+						b_ptr[b_index + 12],
+						b_ptr[b_index + 13]
+						b_ptr[b_index + 14]
+						b_ptr[b_index + 15]
+					)
+				);
+			#endif
 		#endif
 	#endif
 }
@@ -1530,6 +1542,10 @@ realN LocalToPrivateB(
 	INDEX(buf, index+13), INDEX(buf, index+14), INDEX(buf, index+15) ))
 	
 #define vloadN(index, buf, N) vload##N(index, buf)
+#define vloadN2(ret, index, buf, N) \
+{ \
+	[[unroll]] for (uint i = 0; i < N; i += 1) ret.s[i] = INDEX(buf, index + i); \
+}
 
 #define vTranspose(dst, src, vWidth) \
 { \
@@ -1967,7 +1983,9 @@ realN GlobalToPrivateA2D(
 			return a_ptr[a_index];
 		#else
 			//return vload2(0, a_ptr + a_index);
-			return vloadN(a_index, a_ptr, VWN);
+			realN outp;
+			vloadN2(outp, a_index, a_ptr, VWN);
+			return outp;
 		#endif
 	#endif
 }
@@ -1992,61 +2010,67 @@ realM GlobalToPrivateB2D(
 		const int b_index = (idk + _ki) * kSizeN + tid_x * MWI + _mi * VWM + b_ptr_offset;
 		#if VWM == 1
 			return b_ptr[b_index];
-		#elif VWM == 2
-			//return vload2(0, b_ptr + b_index);
-			return real2(b_ptr[b_index], b_ptr[b_index + 1]);
-		#elif VWM == 4
-			//return vload4(0, b_ptr + b_index);
-			return real4(
-				b_ptr[b_index],
-				b_ptr[b_index + 1]
-				b_ptr[b_index + 2]
-				b_ptr[b_index + 3]
-			);
-		#elif VWM == 8
-			//return vload8(0, b_ptr + b_index);
-			return real8(
-				real4(
+		#elif 1
+			realM ret;
+			vloadN2(ret, b_index, b_ptr, VWM);
+			return ret;
+		#else
+			#if VWM == 2
+				//return vload2(0, b_ptr + b_index);
+				return real2(b_ptr[b_index], b_ptr[b_index + 1]);
+			#elif VWM == 4
+				//return vload4(0, b_ptr + b_index);
+				return real4(
 					b_ptr[b_index],
 					b_ptr[b_index + 1]
 					b_ptr[b_index + 2]
 					b_ptr[b_index + 3]
-				),
-				real4(
-					b_ptr[b_index + 4],
-					b_ptr[b_index + 5]
-					b_ptr[b_index + 6]
-					b_ptr[b_index + 7]
-				)
-			);
-		#elif VWM == 16
-			//return vload16(0, b_ptr + b_index);
-			return real16(
-				real4(
-					b_ptr[b_index],
-					b_ptr[b_index + 1]
-					b_ptr[b_index + 2]
-					b_ptr[b_index + 3]
-				),
-				real4(
-					b_ptr[b_index + 4],
-					b_ptr[b_index + 5]
-					b_ptr[b_index + 6]
-					b_ptr[b_index + 7]
-				),
-				real4(
-					b_ptr[b_index + 8],
-					b_ptr[b_index + 9]
-					b_ptr[b_index + 10]
-					b_ptr[b_index + 11]
-				),
-				real4(
-					b_ptr[b_index + 12],
-					b_ptr[b_index + 13]
-					b_ptr[b_index + 14]
-					b_ptr[b_index + 15]
-				)
-			);
+				);
+			#elif VWM == 8
+				//return vload8(0, b_ptr + b_index);
+				return real8(
+					real4(
+						b_ptr[b_index],
+						b_ptr[b_index + 1]
+						b_ptr[b_index + 2]
+						b_ptr[b_index + 3]
+					),
+					real4(
+						b_ptr[b_index + 4],
+						b_ptr[b_index + 5]
+						b_ptr[b_index + 6]
+						b_ptr[b_index + 7]
+					)
+				);
+			#elif VWM == 16
+				//return vload16(0, b_ptr + b_index);
+				return real16(
+					real4(
+						b_ptr[b_index],
+						b_ptr[b_index + 1]
+						b_ptr[b_index + 2]
+						b_ptr[b_index + 3]
+					),
+					real4(
+						b_ptr[b_index + 4],
+						b_ptr[b_index + 5]
+						b_ptr[b_index + 6]
+						b_ptr[b_index + 7]
+					),
+					real4(
+						b_ptr[b_index + 8],
+						b_ptr[b_index + 9]
+						b_ptr[b_index + 10]
+						b_ptr[b_index + 11]
+					),
+					real4(
+						b_ptr[b_index + 12],
+						b_ptr[b_index + 13]
+						b_ptr[b_index + 14]
+						b_ptr[b_index + 15]
+					)
+				);
+			#endif
 		#endif
 	#endif
 }
@@ -2083,11 +2107,13 @@ realN LocalToPrivateB(
 // The vectorised multiply-add function
 realM MultiplyAddVector(realM cvec, const realM avec, const real bval)
 {
-	if (USE_VECTOR_MAD == 0)
-	{
-		cvec += avec * bval;
-	}
-	else
+	#if ROUTINE_IS_COMPLEX == 0
+		if (USE_VECTOR_MAD == 0)
+		{
+			cvec.s += avec.s * bval;
+		}
+		else
+	#endif
 	{
 		#if VWM == 1
 			MultiplyAdd(cvec, avec, bval);
@@ -2671,6 +2697,10 @@ void StoreResults(
 	INDEX(buf, index+13), INDEX(buf, index+14), INDEX(buf, index+15) ))
 	
 #define vloadN(index, buf, N) vload##N(index, buf)
+#define vloadN2(ret, index, buf, N) \
+{ \
+	[[unroll]] for (uint i = 0; i < N; i += 1) ret.s[i] = INDEX(buf, index + i); \
+}
 
 #define vTranspose(dst, src, vWidth) \
 { \
@@ -3108,7 +3138,9 @@ realN GlobalToPrivateA2D(
 			return a_ptr[a_index];
 		#else
 			//return vload2(0, a_ptr + a_index);
-			return vloadN(a_index, a_ptr, VWN);
+			realN outp;
+			vloadN2(outp, a_index, a_ptr, VWN);
+			return outp;
 		#endif
 	#endif
 }
@@ -3133,61 +3165,67 @@ realM GlobalToPrivateB2D(
 		const int b_index = (idk + _ki) * kSizeN + tid_x * MWI + _mi * VWM + b_ptr_offset;
 		#if VWM == 1
 			return b_ptr[b_index];
-		#elif VWM == 2
-			//return vload2(0, b_ptr + b_index);
-			return real2(b_ptr[b_index], b_ptr[b_index + 1]);
-		#elif VWM == 4
-			//return vload4(0, b_ptr + b_index);
-			return real4(
-				b_ptr[b_index],
-				b_ptr[b_index + 1]
-				b_ptr[b_index + 2]
-				b_ptr[b_index + 3]
-			);
-		#elif VWM == 8
-			//return vload8(0, b_ptr + b_index);
-			return real8(
-				real4(
+		#elif 1
+			realM ret;
+			vloadN2(ret, b_index, b_ptr, VWM);
+			return ret;
+		#else
+			#if VWM == 2
+				//return vload2(0, b_ptr + b_index);
+				return real2(b_ptr[b_index], b_ptr[b_index + 1]);
+			#elif VWM == 4
+				//return vload4(0, b_ptr + b_index);
+				return real4(
 					b_ptr[b_index],
 					b_ptr[b_index + 1]
 					b_ptr[b_index + 2]
 					b_ptr[b_index + 3]
-				),
-				real4(
-					b_ptr[b_index + 4],
-					b_ptr[b_index + 5]
-					b_ptr[b_index + 6]
-					b_ptr[b_index + 7]
-				)
-			);
-		#elif VWM == 16
-			//return vload16(0, b_ptr + b_index);
-			return real16(
-				real4(
-					b_ptr[b_index],
-					b_ptr[b_index + 1]
-					b_ptr[b_index + 2]
-					b_ptr[b_index + 3]
-				),
-				real4(
-					b_ptr[b_index + 4],
-					b_ptr[b_index + 5]
-					b_ptr[b_index + 6]
-					b_ptr[b_index + 7]
-				),
-				real4(
-					b_ptr[b_index + 8],
-					b_ptr[b_index + 9]
-					b_ptr[b_index + 10]
-					b_ptr[b_index + 11]
-				),
-				real4(
-					b_ptr[b_index + 12],
-					b_ptr[b_index + 13]
-					b_ptr[b_index + 14]
-					b_ptr[b_index + 15]
-				)
-			);
+				);
+			#elif VWM == 8
+				//return vload8(0, b_ptr + b_index);
+				return real8(
+					real4(
+						b_ptr[b_index],
+						b_ptr[b_index + 1]
+						b_ptr[b_index + 2]
+						b_ptr[b_index + 3]
+					),
+					real4(
+						b_ptr[b_index + 4],
+						b_ptr[b_index + 5]
+						b_ptr[b_index + 6]
+						b_ptr[b_index + 7]
+					)
+				);
+			#elif VWM == 16
+				//return vload16(0, b_ptr + b_index);
+				return real16(
+					real4(
+						b_ptr[b_index],
+						b_ptr[b_index + 1]
+						b_ptr[b_index + 2]
+						b_ptr[b_index + 3]
+					),
+					real4(
+						b_ptr[b_index + 4],
+						b_ptr[b_index + 5]
+						b_ptr[b_index + 6]
+						b_ptr[b_index + 7]
+					),
+					real4(
+						b_ptr[b_index + 8],
+						b_ptr[b_index + 9]
+						b_ptr[b_index + 10]
+						b_ptr[b_index + 11]
+					),
+					real4(
+						b_ptr[b_index + 12],
+						b_ptr[b_index + 13]
+						b_ptr[b_index + 14]
+						b_ptr[b_index + 15]
+					)
+				);
+			#endif
 		#endif
 	#endif
 }
@@ -3224,11 +3262,13 @@ realN LocalToPrivateB(
 // The vectorised multiply-add function
 realM MultiplyAddVector(realM cvec, const realM avec, const real bval)
 {
-	if (USE_VECTOR_MAD == 0)
-	{
-		cvec += avec * bval;
-	}
-	else
+	#if ROUTINE_IS_COMPLEX == 0
+		if (USE_VECTOR_MAD == 0)
+		{
+			cvec.s += avec.s * bval;
+		}
+		else
+	#endif
 	{
 		#if VWM == 1
 			MultiplyAdd(cvec, avec, bval);
@@ -3343,11 +3383,11 @@ void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
 	#if USE_SUBGROUP_SHUFFLING == 1
 		realN apm_gk1[KREG/VWN]; // KREG (subgroup shuffling in NWI dimension)
 	#else
-		realN apm_gk1[NWI*(KREG/VWN)]; // NWI * KREG
+		realN apm_gk1[(NWI*KREG)/VWN]; // NWI * KREG
 	#endif
-	realM bpm_gk1[KREG*(MWI/VWM)]; // KREG * MWI
+	realM bpm_gk1[(KREG*MWI)/VWM]; // KREG * MWI
 	
-	realM cpm[NWI*(MWI/VWM)]; // NWI * MWI
+	realM cpm[(NWI*MWI)/VWM]; // NWI * MWI
 	
 	int tid_x, tid_y, tid;
 	int a_ptr_offset, b_ptr_offset;

@@ -330,7 +330,9 @@ realN GlobalToPrivateA2D(
 			return a_ptr[a_index];
 		#else
 			//return vload2(0, a_ptr + a_index);
-			return vloadN(a_index, a_ptr, VWN);
+			realN outp;
+			vloadN2(outp, a_index, a_ptr, VWN);
+			return outp;
 		#endif
 	#endif
 }
@@ -355,61 +357,67 @@ realM GlobalToPrivateB2D(
 		const int b_index = (idk + _ki) * kSizeN + tid_x * MWI + _mi * VWM + b_ptr_offset;
 		#if VWM == 1
 			return b_ptr[b_index];
-		#elif VWM == 2
-			//return vload2(0, b_ptr + b_index);
-			return real2(b_ptr[b_index], b_ptr[b_index + 1]);
-		#elif VWM == 4
-			//return vload4(0, b_ptr + b_index);
-			return real4(
-				b_ptr[b_index],
-				b_ptr[b_index + 1]
-				b_ptr[b_index + 2]
-				b_ptr[b_index + 3]
-			);
-		#elif VWM == 8
-			//return vload8(0, b_ptr + b_index);
-			return real8(
-				real4(
+		#elif 1
+			realM ret;
+			vloadN2(ret, b_index, b_ptr, VWM);
+			return ret;
+		#else
+			#if VWM == 2
+				//return vload2(0, b_ptr + b_index);
+				return real2(b_ptr[b_index], b_ptr[b_index + 1]);
+			#elif VWM == 4
+				//return vload4(0, b_ptr + b_index);
+				return real4(
 					b_ptr[b_index],
 					b_ptr[b_index + 1]
 					b_ptr[b_index + 2]
 					b_ptr[b_index + 3]
-				),
-				real4(
-					b_ptr[b_index + 4],
-					b_ptr[b_index + 5]
-					b_ptr[b_index + 6]
-					b_ptr[b_index + 7]
-				)
-			);
-		#elif VWM == 16
-			//return vload16(0, b_ptr + b_index);
-			return real16(
-				real4(
-					b_ptr[b_index],
-					b_ptr[b_index + 1]
-					b_ptr[b_index + 2]
-					b_ptr[b_index + 3]
-				),
-				real4(
-					b_ptr[b_index + 4],
-					b_ptr[b_index + 5]
-					b_ptr[b_index + 6]
-					b_ptr[b_index + 7]
-				),
-				real4(
-					b_ptr[b_index + 8],
-					b_ptr[b_index + 9]
-					b_ptr[b_index + 10]
-					b_ptr[b_index + 11]
-				),
-				real4(
-					b_ptr[b_index + 12],
-					b_ptr[b_index + 13]
-					b_ptr[b_index + 14]
-					b_ptr[b_index + 15]
-				)
-			);
+				);
+			#elif VWM == 8
+				//return vload8(0, b_ptr + b_index);
+				return real8(
+					real4(
+						b_ptr[b_index],
+						b_ptr[b_index + 1]
+						b_ptr[b_index + 2]
+						b_ptr[b_index + 3]
+					),
+					real4(
+						b_ptr[b_index + 4],
+						b_ptr[b_index + 5]
+						b_ptr[b_index + 6]
+						b_ptr[b_index + 7]
+					)
+				);
+			#elif VWM == 16
+				//return vload16(0, b_ptr + b_index);
+				return real16(
+					real4(
+						b_ptr[b_index],
+						b_ptr[b_index + 1]
+						b_ptr[b_index + 2]
+						b_ptr[b_index + 3]
+					),
+					real4(
+						b_ptr[b_index + 4],
+						b_ptr[b_index + 5]
+						b_ptr[b_index + 6]
+						b_ptr[b_index + 7]
+					),
+					real4(
+						b_ptr[b_index + 8],
+						b_ptr[b_index + 9]
+						b_ptr[b_index + 10]
+						b_ptr[b_index + 11]
+					),
+					real4(
+						b_ptr[b_index + 12],
+						b_ptr[b_index + 13]
+						b_ptr[b_index + 14]
+						b_ptr[b_index + 15]
+					)
+				);
+			#endif
 		#endif
 	#endif
 }

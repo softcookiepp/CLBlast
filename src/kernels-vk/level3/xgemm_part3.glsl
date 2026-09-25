@@ -50,11 +50,11 @@ void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
 	#if USE_SUBGROUP_SHUFFLING == 1
 		realN apm_gk1[KREG/VWN]; // KREG (subgroup shuffling in NWI dimension)
 	#else
-		realN apm_gk1[NWI*(KREG/VWN)]; // NWI * KREG
+		realN apm_gk1[(NWI*KREG)/VWN]; // NWI * KREG
 	#endif
-	realM bpm_gk1[KREG*(MWI/VWM)]; // KREG * MWI
+	realM bpm_gk1[(KREG*MWI)/VWM]; // KREG * MWI
 	
-	realM cpm[NWI*(MWI/VWM)]; // NWI * MWI
+	realM cpm[(NWI*MWI)/VWM]; // NWI * MWI
 	
 	int tid_x, tid_y, tid;
 	int a_ptr_offset, b_ptr_offset;

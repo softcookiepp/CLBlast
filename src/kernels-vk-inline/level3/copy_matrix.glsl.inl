@@ -467,6 +467,10 @@ R"(
 	INDEX(buf, index+13), INDEX(buf, index+14), INDEX(buf, index+15) ))
 	
 #define vloadN(index, buf, N) vload##N(index, buf)
+#define vloadN2(ret, index, buf, N) \
+{ \
+	[[unroll]] for (uint i = 0; i < N; i += 1) ret.s[i] = INDEX(buf, index + i); \
+}
 
 #define vTranspose(dst, src, vWidth) \
 { \

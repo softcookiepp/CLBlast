@@ -34,7 +34,14 @@ shared real alm[WGD * (WGD + PADA)];
 shared real blm[WGD * (WGD + PADB)];
 
 // also workgroup is the same
-layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
+#if USE_SPEC_CONSTANTS
+	layout(
+		local_size_x_id = 1, // MDIMCD,
+		local_size_y_id = 2, // NDIMCD,
+		local_size_z = 1) in;
+#else
+	layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
+#endif
 
 // ConvGEMM
 void Xconvgemm(const int num_patches, const int num_kernels, const int patch_size,

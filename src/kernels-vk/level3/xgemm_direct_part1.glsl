@@ -21,35 +21,82 @@
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library. Note that all parameters here have a
 // suffix 'D' to denote that they are for the 'direct' version of the GEMM kernel.
-#ifndef WGD
-	#define WGD 8			// Tile-size in dimension M, N, and K (e.g. 8, 16, 32, 64)
+
+#define USE_SPEC_CONSTANTS 1
+
+#if USE_SPEC_CONSTANTS == 1
+	#ifdef WGD
+		#undef WGD
+	#endif
+	layout(constant_id = 0) const int WGD = 8; // Tile-size in dimension M, N, and K (e.g. 8, 16, 32, 64)
+	
+	#ifdef MDIMCD
+		#undef MDIMCD
+	#endif
+	layout(constant_id = 1) const int MDIMCD = 8;// Threads per workgroup in M-dimension (e.g. 8, 16, 32)
+	
+	#ifdef NDIMCD
+		#undef NDIMCD
+	#endif
+	layout(constant_id = 2) const int NDIMCD = 8; // Threads per workgroup in N-dimension (e.g. 8, 16, 32)
+	
+	#ifdef MDIMAD
+		#undef MDIMAD
+	#endif
+	layout(constant_id = 3) const int MDIMAD = 8; // Re-shaped tile dimension of matrix A: KDIMAD * MDIMAD
+	
+	#ifdef NDIMBD
+		#undef NDIMBD
+	#endif
+	layout(constant_id = 4) const int NDIMBD = 8; // Re-shaped tile dimension of matrix B: KDIMBD * NDIMBD
+	
+	#ifdef KWID
+		#undef KWID
+	#endif
+	layout(constant_id = 5) const int KWID = 1; // Unroll factor of the WGD loop (smaller or equal than WGD)
+	
+	#ifdef PADA
+		#undef PADA
+	#endif
+	layout(constant_id = 6) const int PADA = 1; // Local memory padding for matrix A
+	
+	#ifdef PADB
+		#undef PADB
+	#endif
+	layout(constant_id = 7) const int PADB = 1; // Local memory padding for matrix B
+#else
+	#ifndef WGD
+		#define WGD 8			// Tile-size in dimension M, N, and K (e.g. 8, 16, 32, 64)
+	#endif
+	#ifndef MDIMCD
+		#define MDIMCD 8		// Threads per workgroup in M-dimension (e.g. 8, 16, 32)
+	#endif
+	#ifndef NDIMCD
+		#define NDIMCD 8		// Threads per workgroup in N-dimension (e.g. 8, 16, 32)
+	#endif
+	#ifndef MDIMAD
+		#define MDIMAD 8		// Re-shaped tile dimension of matrix A: KDIMAD * MDIMAD
+	#endif
+	#ifndef NDIMBD
+		#define NDIMBD 8		// Re-shaped tile dimension of matrix B: KDIMBD * NDIMBD
+	#endif
+	#ifndef KWID
+		#define KWID 1			// Unroll factor of the WGD loop (smaller or equal than WGD)
+	#endif
+	#ifndef PADA
+		#define PADA 1			// Local memory padding for matrix A
+	#endif
+	#ifndef PADB
+		#define PADB 1			// Local memory padding for matrix B
+	#endif
 #endif
-#ifndef MDIMCD
-	#define MDIMCD 8		// Threads per workgroup in M-dimension (e.g. 8, 16, 32)
-#endif
-#ifndef NDIMCD
-	#define NDIMCD 8		// Threads per workgroup in N-dimension (e.g. 8, 16, 32)
-#endif
-#ifndef MDIMAD
-	#define MDIMAD 8		// Re-shaped tile dimension of matrix A: KDIMAD * MDIMAD
-#endif
-#ifndef NDIMBD
-	#define NDIMBD 8		// Re-shaped tile dimension of matrix B: KDIMBD * NDIMBD
-#endif
-#ifndef KWID
-	#define KWID 1			// Unroll factor of the WGD loop (smaller or equal than WGD)
-#endif
+
+// these can't be controlled by specialization constants without other major changes
 #ifndef VWMD
 	#define VWMD 1			// Vector width of matrices A and C
 #endif
 #ifndef VWND
 	#define VWND 1			// Vector width of matrix B
-#endif
-#ifndef PADA
-	#define PADA 1			// Local memory padding for matrix A
-#endif
-#ifndef PADB
-	#define PADB 1			// Local memory padding for matrix B
 #endif
 
 // Helper parameters based on the above tuning parameters
@@ -66,28 +113,28 @@
 
 // Data-widths in dimension M
 #if VWMD == 1
-		#define realMD real
+	#define realMD real
 #elif VWMD == 2
-		#define realMD real2
+	#define realMD real2
 #elif VWMD == 4
-		#define realMD real4
+	#define realMD real4
 #elif VWMD == 8
-		#define realMD real8
+	#define realMD real8
 #elif VWMD == 16
-		#define realMD real16
+	#define realMD real16
 #endif
 
 // Data-widths in dimension N
 #if VWND == 1
-		#define realND real
+	#define realND real
 #elif VWND == 2
-		#define realND real2
+	#define realND real2
 #elif VWND == 4
-		#define realND real4
+	#define realND real4
 #elif VWND == 8
-		#define realND real8
+	#define realND real8
 #elif VWND == 16
-		#define realND real16
+	#define realND real16
 #endif
 
 // =================================================================================================

@@ -640,35 +640,82 @@ R"(
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library. Note that all parameters here have a
 // suffix 'D' to denote that they are for the 'direct' version of the GEMM kernel.
-#ifndef WGD
-	#define WGD 8			// Tile-size in dimension M, N, and K (e.g. 8, 16, 32, 64)
+
+#define USE_SPEC_CONSTANTS 1
+
+#if USE_SPEC_CONSTANTS == 1
+	#ifdef WGD
+		#undef WGD
+	#endif
+	layout(constant_id = 0) const int WGD = 8; // Tile-size in dimension M, N, and K (e.g. 8, 16, 32, 64)
+	
+	#ifdef MDIMCD
+		#undef MDIMCD
+	#endif
+	layout(constant_id = 1) const int MDIMCD = 8;// Threads per workgroup in M-dimension (e.g. 8, 16, 32)
+	
+	#ifdef NDIMCD
+		#undef NDIMCD
+	#endif
+	layout(constant_id = 2) const int NDIMCD = 8; // Threads per workgroup in N-dimension (e.g. 8, 16, 32)
+	
+	#ifdef MDIMAD
+		#undef MDIMAD
+	#endif
+	layout(constant_id = 3) const int MDIMAD = 8; // Re-shaped tile dimension of matrix A: KDIMAD * MDIMAD
+	
+	#ifdef NDIMBD
+		#undef NDIMBD
+	#endif
+	layout(constant_id = 4) const int NDIMBD = 8; // Re-shaped tile dimension of matrix B: KDIMBD * NDIMBD
+	
+	#ifdef KWID
+		#undef KWID
+	#endif
+	layout(constant_id = 5) const int KWID = 1; // Unroll factor of the WGD loop (smaller or equal than WGD)
+	
+	#ifdef PADA
+		#undef PADA
+	#endif
+	layout(constant_id = 6) const int PADA = 1; // Local memory padding for matrix A
+	
+	#ifdef PADB
+		#undef PADB
+	#endif
+	layout(constant_id = 7) const int PADB = 1; // Local memory padding for matrix B
+#else
+	#ifndef WGD
+		#define WGD 8			// Tile-size in dimension M, N, and K (e.g. 8, 16, 32, 64)
+	#endif
+	#ifndef MDIMCD
+		#define MDIMCD 8		// Threads per workgroup in M-dimension (e.g. 8, 16, 32)
+	#endif
+	#ifndef NDIMCD
+		#define NDIMCD 8		// Threads per workgroup in N-dimension (e.g. 8, 16, 32)
+	#endif
+	#ifndef MDIMAD
+		#define MDIMAD 8		// Re-shaped tile dimension of matrix A: KDIMAD * MDIMAD
+	#endif
+	#ifndef NDIMBD
+		#define NDIMBD 8		// Re-shaped tile dimension of matrix B: KDIMBD * NDIMBD
+	#endif
+	#ifndef KWID
+		#define KWID 1			// Unroll factor of the WGD loop (smaller or equal than WGD)
+	#endif
+	#ifndef PADA
+		#define PADA 1			// Local memory padding for matrix A
+	#endif
+	#ifndef PADB
+		#define PADB 1			// Local memory padding for matrix B
+	#endif
 #endif
-#ifndef MDIMCD
-	#define MDIMCD 8		// Threads per workgroup in M-dimension (e.g. 8, 16, 32)
-#endif
-#ifndef NDIMCD
-	#define NDIMCD 8		// Threads per workgroup in N-dimension (e.g. 8, 16, 32)
-#endif
-#ifndef MDIMAD
-	#define MDIMAD 8		// Re-shaped tile dimension of matrix A: KDIMAD * MDIMAD
-#endif
-#ifndef NDIMBD
-	#define NDIMBD 8		// Re-shaped tile dimension of matrix B: KDIMBD * NDIMBD
-#endif
-#ifndef KWID
-	#define KWID 1			// Unroll factor of the WGD loop (smaller or equal than WGD)
-#endif
+
+// these can't be controlled by specialization constants without other major changes
 #ifndef VWMD
 	#define VWMD 1			// Vector width of matrices A and C
 #endif
 #ifndef VWND
 	#define VWND 1			// Vector width of matrix B
-#endif
-#ifndef PADA
-	#define PADA 1			// Local memory padding for matrix A
-#endif
-#ifndef PADB
-	#define PADB 1			// Local memory padding for matrix B
 #endif
 
 // Helper parameters based on the above tuning parameters
@@ -685,28 +732,28 @@ R"(
 
 // Data-widths in dimension M
 #if VWMD == 1
-		#define realMD real
+	#define realMD real
 #elif VWMD == 2
-		#define realMD real2
+	#define realMD real2
 #elif VWMD == 4
-		#define realMD real4
+	#define realMD real4
 #elif VWMD == 8
-		#define realMD real8
+	#define realMD real8
 #elif VWMD == 16
-		#define realMD real16
+	#define realMD real16
 #endif
 
 // Data-widths in dimension N
 #if VWND == 1
-		#define realND real
+	#define realND real
 #elif VWND == 2
-		#define realND real2
+	#define realND real2
 #elif VWND == 4
-		#define realND real4
+	#define realND real4
 #elif VWND == 8
-		#define realND real8
+	#define realND real8
 #elif VWND == 16
-		#define realND real16
+	#define realND real16
 #endif
 
 // =================================================================================================
@@ -818,27 +865,35 @@ R"(
 // because preprocessor conditions and function-like macros don't like each other...
 ivec2 getIndexForGlobalToLocalM()
 {
-	#if MDIMCD == MDIMAD
-		const int la0 = get_local_id(0);
-		const int la1 = get_local_id(1);
-	#else
-		const int tid = get_local_id(0) + MDIMCD*get_local_id(1);
-		const int la0 = tid % MDIMAD;
-		const int la1 = tid / MDIMAD;
-	#endif
+	int la0, la1, tid;
+	if (MDIMCD == MDIMAD)
+	{
+		la0 = get_local_id(0);
+		la1 = get_local_id(1);
+	}
+	else
+	{
+		tid = get_local_id(0) + MDIMCD*get_local_id(1);
+		la0 = tid % MDIMAD;
+		la1 = tid / MDIMAD;
+	}
 	return ivec2(la0, la1);
 }
 
 ivec2 getIndexForGlobalToLocalN()
 {
-	#if MDIMCD == NDIMBD
-		const int lb0 = get_local_id(0);
-		const int lb1 = get_local_id(1);
-	#else
-		const int tid = get_local_id(0) + MDIMCD*get_local_id(1);
-		const int lb0 = tid % NDIMBD;
-		const int lb1 = tid / NDIMBD;
-	#endif
+	int lb0, lb1, tid;
+	if (MDIMCD == NDIMBD)
+	{
+		lb0 = get_local_id(0);
+		lb1 = get_local_id(1);
+	}
+	else
+	{
+		tid = get_local_id(0) + MDIMCD*get_local_id(1);
+		lb0 = tid % NDIMBD;
+		lb1 = tid / NDIMBD;
+	}
 	return ivec2(lb0, lb1);
 }
 
@@ -1054,22 +1109,29 @@ ivec2 getIndexForGlobalToLocalN()
 shared real alm[WGD * (WGD + PADA)];
 shared real blm[WGD * (WGD + PADB)];
 
-layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
+#if USE_SPEC_CONSTANTS
+	layout(
+		local_size_x_id = 1, // MDIMCD,
+		local_size_y_id = 2, // NDIMCD,
+		local_size_z = 1) in;
+#else
+	layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
+#endif
 
 // Main body of the kernel. This is the direct version without pre/post processing and restrictions.
 void XgemmDirect(const int kSizeM, const int kSizeN, const int kSizeK, const real_arg arg_alpha,
 		const real_arg arg_beta,
-#if USE_BDA
-		const __global realMD* restrict agm,
-#endif
-		const int a_offset, const int a_ld,
-#if USE_BDA
-		const __global realND* restrict bgm,
-#endif
-		const int b_offset, const int b_ld,
-#if USE_BDA
-		__global real* cgm,
-#endif
+		#if USE_BDA
+			const __global realMD* restrict agm,
+		#endif
+			const int a_offset, const int a_ld,
+		#if USE_BDA
+			const __global realND* restrict bgm,
+		#endif
+			const int b_offset, const int b_ld,
+		#if USE_BDA
+			__global real* cgm,
+		#endif
 		const int c_offset, const int c_ld,
 		// no local memory args allowed :c
 		//LOCAL_PTR real* alm, LOCAL_PTR real* blm,
@@ -1273,9 +1335,6 @@ void XgemmDirect(const int kSizeM, const int kSizeN, const int kSizeK, const rea
 // =================================================================================================
 
 // Direct version of the batched GEMM kernel with [A, B] = [transposed, non-transposed]
-#if 1
-	layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
-#endif
 layout(push_constant, std430) uniform XgemmDirectBatchedTN
 {
 	int kSizeM; int kSizeN; int kSizeK;

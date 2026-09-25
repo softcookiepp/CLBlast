@@ -18,27 +18,35 @@
 // because preprocessor conditions and function-like macros don't like each other...
 ivec2 getIndexForGlobalToLocalM()
 {
-	#if MDIMCD == MDIMAD
-		const int la0 = get_local_id(0);
-		const int la1 = get_local_id(1);
-	#else
-		const int tid = get_local_id(0) + MDIMCD*get_local_id(1);
-		const int la0 = tid % MDIMAD;
-		const int la1 = tid / MDIMAD;
-	#endif
+	int la0, la1, tid;
+	if (MDIMCD == MDIMAD)
+	{
+		la0 = get_local_id(0);
+		la1 = get_local_id(1);
+	}
+	else
+	{
+		tid = get_local_id(0) + MDIMCD*get_local_id(1);
+		la0 = tid % MDIMAD;
+		la1 = tid / MDIMAD;
+	}
 	return ivec2(la0, la1);
 }
 
 ivec2 getIndexForGlobalToLocalN()
 {
-	#if MDIMCD == NDIMBD
-		const int lb0 = get_local_id(0);
-		const int lb1 = get_local_id(1);
-	#else
-		const int tid = get_local_id(0) + MDIMCD*get_local_id(1);
-		const int lb0 = tid % NDIMBD;
-		const int lb1 = tid / NDIMBD;
-	#endif
+	int lb0, lb1, tid;
+	if (MDIMCD == NDIMBD)
+	{
+		lb0 = get_local_id(0);
+		lb1 = get_local_id(1);
+	}
+	else
+	{
+		tid = get_local_id(0) + MDIMCD*get_local_id(1);
+		lb0 = tid % NDIMBD;
+		lb1 = tid / NDIMBD;
+	}
 	return ivec2(lb0, lb1);
 }
 

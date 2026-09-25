@@ -5,9 +5,6 @@
 #define USE_XGEMM_BATCHED 1
 #include "xgemm_direct_part3_batched.glsl"
 // Direct version of the batched GEMM kernel with [A, B] = [transposed, transposed]
-#if 1
-	layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
-#endif
 layout(push_constant, std430) uniform XgemmDirectBatchedTT
 {
 	int kSizeM; int kSizeN; int kSizeK;

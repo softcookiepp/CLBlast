@@ -18,7 +18,12 @@
 // =================================================================================================
 
 // ConvGEMM kernel
-#if 1
+#if USE_SPEC_CONSTANTS
+	layout(
+		local_size_x_id = 1, // MDIMCD,
+		local_size_y_id = 2, // NDIMCD,
+		local_size_z = 1) in;
+#else
 	layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
 #endif
 

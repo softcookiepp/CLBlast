@@ -18,7 +18,7 @@
 // =================================================================================================
 
 // Direct version of the strided-batched GEMM kernel with [A, B] = [transposed, non-transposed]
-layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
+//layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
 
 layout(push_constant) uniform XgemmDirectStridedBatchedTN
 {

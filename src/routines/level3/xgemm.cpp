@@ -391,9 +391,20 @@ void Xgemm<T>::GemmDirect(const size_t m, const size_t n, const size_t k, const 
 	const auto n_ceiled = Ceil(n, db_["WGD"]);
 	const auto global = std::vector<uint32_t>{m_ceiled / db_["WGD"], n_ceiled / db_["WGD"], 1};
 	//const auto local = std::vector<uint32_t>{db_["MDIMCD"], db_["NDIMCD"], 1};
+	
+	const std::vector<uint32_t> spec({
+		db_["WGD"],
+		db_["MDIMCD"],
+		db_["NDIMCD"],
+		db_["MDIMAD"],
+		db_["NDIMBD"],
+		db_["KWID"],
+		db_["PADA"],
+		db_["PADB"]
+	});
 
 	// Launches the kernel
-	kernel->enqueue(global, {});
+	kernel->enqueue(global, spec);
 }
 
 // =================================================================================================

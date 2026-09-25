@@ -136,64 +136,74 @@ void Xconvgemm<T>::DoConvgemm(const KernelMode kernel_mode, const size_t channel
 		}
 		TestMatrixC(num_patches, num_kernels, result_buffer, result_offset + result_stride * batch, num_patches);
 	}
-
+	
 	// Retrieves the proper XgemmDirect kernel from the compiled binary
-	const std::string kernel_name = (method_ == ConvGemmMethod::kWithIm2Col)		? "Xconvgemm"
-																	: (kernel_mode == KernelMode::kConvolution) ? "XconvgemmFlip"
-																																							: "XconvgemmNormal";
-	auto kernel = Kernel(program_, kernel_name);
-
+	const std::string kernel_name = (method_ == ConvGemmMethod::kWithIm2Col) ? "Xconvgemm" : (kernel_mode == KernelMode::kConvolution) ? "XconvgemmFlip" : "XconvgemmNormal";
+	auto kernelOld = Kernel(program_, kernel_name);
+	tart::kernel_ptr kernel = kernelOld.get();
+	
 	// Sets the kernel arguments
-	kernel.SetArgument(0, static_cast<int>(num_patches));
-	kernel.SetArgument(1, static_cast<int>(num_kernels));
-	kernel.SetArgument(2, static_cast<int>(patch_size));
-	kernel.SetArgument(3, kernel_buffer());
-	kernel.SetArgument(4, static_cast<int>(kernel_offset));
-	kernel.SetArgument(5, result_buffer());
-	kernel.SetArgument(6, static_cast<int>(result_offset));
-	kernel.SetArgument(7, static_cast<int>(result_stride));
+	kernel->setArg(0, static_cast<int>(num_patches));
+	kernel->setArg(1, static_cast<int>(num_kernels));
+	kernel->setArg(2, static_cast<int>(patch_size));
+	kernel->setArg(3, kernel_buffer());
+	kernel->setArg(4, static_cast<int>(kernel_offset));
+	kernel->setArg(5, result_buffer());
+	kernel->setArg(6, static_cast<int>(result_offset));
+	kernel->setArg(7, static_cast<int>(result_stride));
 	if (method_ == ConvGemmMethod::kWithIm2Col) {
 #if VULKAN_API
 		// both buffers need scalar casting
-		kernel.SetArgument(23, kernel_buffer());
-		kernel.SetArgument(24, col_buffer());
+		kernel->setArg(23, kernel_buffer());
+		kernel->setArg(24, col_buffer());
 #else
-		kernel.SetArgument(8, col_buffer());
+		kernel->setArg(8, col_buffer());
 #endif
-		kernel.SetArgument(9, static_cast<int>(0));
-		kernel.SetArgument(10, static_cast<int>(col_stride));
+		kernel->setArg(9, static_cast<int>(0));
+		kernel->setArg(10, static_cast<int>(col_stride));
 
 	}
 	if (method_ == ConvGemmMethod::kSingleKernel) {
 #if VULKAN_API
-		kernel.SetArgument(23, kernel_buffer());
+		kernel->setArg(23, kernel_buffer());
 #endif
-		kernel.SetArgument(8, im_buffer());
-		kernel.SetArgument(9, static_cast<int>(im_offset));
-		kernel.SetArgument(10, static_cast<int>(height));
-		kernel.SetArgument(11, static_cast<int>(width));
-		kernel.SetArgument(12, static_cast<int>(channels));
-		kernel.SetArgument(13, static_cast<int>(kernel_h));
-		kernel.SetArgument(14, static_cast<int>(kernel_w));
-		kernel.SetArgument(15, static_cast<int>(pad_h));
-		kernel.SetArgument(16, static_cast<int>(pad_w));
-		kernel.SetArgument(17, static_cast<int>(stride_h));
-		kernel.SetArgument(18, static_cast<int>(stride_w));
-		kernel.SetArgument(19, static_cast<int>(dilation_h));
-		kernel.SetArgument(20, static_cast<int>(dilation_w));
-		kernel.SetArgument(21, static_cast<int>(output_h));
-		kernel.SetArgument(22, static_cast<int>(output_w));
+		kernel->setArg(8, im_buffer());
+		kernel->setArg(9, static_cast<int>(im_offset));
+		kernel->setArg(10, static_cast<int>(height));
+		kernel->setArg(11, static_cast<int>(width));
+		kernel->setArg(12, static_cast<int>(channels));
+		kernel->setArg(13, static_cast<int>(kernel_h));
+		kernel->setArg(14, static_cast<int>(kernel_w));
+		kernel->setArg(15, static_cast<int>(pad_h));
+		kernel->setArg(16, static_cast<int>(pad_w));
+		kernel->setArg(17, static_cast<int>(stride_h));
+		kernel->setArg(18, static_cast<int>(stride_w));
+		kernel->setArg(19, static_cast<int>(dilation_h));
+		kernel->setArg(20, static_cast<int>(dilation_w));
+		kernel->setArg(21, static_cast<int>(output_h));
+		kernel->setArg(22, static_cast<int>(output_w));
 	}
 
 	// Computes the global and local thread sizes
 	const auto m_ceiled = Ceil(num_patches, db_["WGD"]);
 	const auto n_ceiled = Ceil(num_kernels, db_["WGD"]);
-	const auto global = std::vector<size_t>{(m_ceiled * db_["MDIMCD"]) / db_["WGD"],
-																					(n_ceiled * db_["NDIMCD"]) / db_["WGD"], batch_count};
-	const auto local = std::vector<size_t>{db_["MDIMCD"], db_["NDIMCD"], 1};
+	//const auto global = std::vector<size_t>{(m_ceiled * db_["MDIMCD"]) / db_["WGD"], (n_ceiled * db_["NDIMCD"]) / db_["WGD"], batch_count};
+	const auto global = std::vector<uint32_t>{m_ceiled / db_["WGD"], (n_ceiled) / db_["WGD"], batch_count};
+	//const auto local = std::vector<size_t>{db_["MDIMCD"], db_["NDIMCD"], 1};
+	
+	const std::vector<uint32_t> spec({
+		db_["WGD"],
+		db_["MDIMCD"],
+		db_["NDIMCD"],
+		db_["MDIMAD"],
+		db_["NDIMBD"],
+		db_["KWID"],
+		db_["PADA"],
+		db_["PADB"]
+	});
 
 	// Launches the kernel
-	RunKernel(kernel, queue_, device_, global, local);
+	kernel->enqueue(global, spec);
 	
 }
 

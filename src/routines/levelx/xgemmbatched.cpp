@@ -332,44 +332,55 @@ void XgemmBatched<T>::BatchedGemmDirect(const size_t m, const size_t n, const si
 	// Retrieves the proper XgemmDirect kernel from the compiled binary
 	const auto name = (a_do_transpose) ? (b_do_transpose ? "XgemmDirectBatchedTT" : "XgemmDirectBatchedTN")
 																		 : (b_do_transpose ? "XgemmDirectBatchedNT" : "XgemmDirectBatchedNN");
-	auto kernel = Kernel(program_, name);
+	auto kernelOld = Kernel(program_, name);
+	tart::kernel_ptr kernel = kernelOld.get();
 
 	// Sets the kernel arguments
-	kernel.SetArgument(0, static_cast<int>(m));
-	kernel.SetArgument(1, static_cast<int>(n));
-	kernel.SetArgument(2, static_cast<int>(k));
+	kernel->setArg(0, static_cast<int>(m));
+	kernel->setArg(1, static_cast<int>(n));
+	kernel->setArg(2, static_cast<int>(k));
 	
-	kernel.SetArgument(3, a_buffer());
-	kernel.SetArgument(4, static_cast<int>(a_ld));
+	kernel->setArg(3, a_buffer());
+	kernel->setArg(4, static_cast<int>(a_ld));
 	
-	kernel.SetArgument(5, b_buffer());
-	kernel.SetArgument(6, static_cast<int>(b_ld));
-	kernel.SetArgument(7, c_buffer());
-	kernel.SetArgument(8, static_cast<int>(c_ld));
+	kernel->setArg(5, b_buffer());
+	kernel->setArg(6, static_cast<int>(b_ld));
+	kernel->setArg(7, c_buffer());
+	kernel->setArg(8, static_cast<int>(c_ld));
 	
-	kernel.SetArgument(9, static_cast<int>(c_do_transpose));
-	kernel.SetArgument(10, static_cast<int>(a_conjugate));
-	kernel.SetArgument(11, static_cast<int>(b_conjugate));
+	kernel->setArg(9, static_cast<int>(c_do_transpose));
+	kernel->setArg(10, static_cast<int>(a_conjugate));
+	kernel->setArg(11, static_cast<int>(b_conjugate));
 	
 	// for workaround to no pointer casting allowed. for some reason this kernel doesn't like duplicate bindings
-	kernel.SetArgument(12, a_buffer());
-	kernel.SetArgument(13, b_buffer());
+	kernel->setArg(12, a_buffer());
+	kernel->setArg(13, b_buffer());
 	
-	kernel.SetArgument(14, alphas());
-	kernel.SetArgument(15, betas());
-	kernel.SetArgument(16, a_offsets_device());
-	kernel.SetArgument(17, b_offsets_device());
-	kernel.SetArgument(18, c_offsets_device());
+	kernel->setArg(14, alphas());
+	kernel->setArg(15, betas());
+	kernel->setArg(16, a_offsets_device());
+	kernel->setArg(17, b_offsets_device());
+	kernel->setArg(18, c_offsets_device());
 
 	// Computes the global and local thread sizes
 	const auto m_ceiled = Ceil(m, db_["WGD"]);
 	const auto n_ceiled = Ceil(n, db_["WGD"]);
-	const auto global = std::vector<size_t>{(m_ceiled * db_["MDIMCD"]) / db_["WGD"],
-																					(n_ceiled * db_["NDIMCD"]) / db_["WGD"], batch_count};
-	const auto local = std::vector<size_t>{db_["MDIMCD"], db_["NDIMCD"], 1};
+	//const auto global = std::vector<size_t>{(m_ceiled * db_["MDIMCD"]) / db_["WGD"], (n_ceiled * db_["NDIMCD"]) / db_["WGD"], batch_count};
+	const auto global = std::vector<uint32_t>{m_ceiled / db_["WGD"], n_ceiled / db_["WGD"], batch_count};
+	
+	const std::vector<uint32_t> spec({
+		db_["WGD"],
+		db_["MDIMCD"],
+		db_["NDIMCD"],
+		db_["MDIMAD"],
+		db_["NDIMBD"],
+		db_["KWID"],
+		db_["PADA"],
+		db_["PADB"]
+	});
 
 	// Launches the kernel
-	RunKernel(kernel, queue_, device_, global, local);
+	kernel->enqueue(global, spec);
 }
 
 // =================================================================================================

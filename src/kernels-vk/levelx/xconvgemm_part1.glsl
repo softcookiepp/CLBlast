@@ -16,6 +16,10 @@
 //R"(
 #ifndef XCONVGEMM_PART1_GLSL
 #define XCONVGEMM_PART1_GLSL
+
+#ifndef USE_SPEC_CONSTANTS
+	#define USE_SPEC_CONSTANTS 0
+#endif
 #include "../level3/xgemm_direct_part2.glsl"
 // =================================================================================================
 

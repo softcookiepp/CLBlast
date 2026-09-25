@@ -15,6 +15,9 @@
 //R"(
 #ifndef XCONVGEMM_PART2_GLSL
 #define XCONVGEMM_PART2_GLSL
+#ifndef USE_SPEC_CONSTANTS
+	#define USE_SPEC_CONSTANTS 0
+#endif
 // =================================================================================================
 #if defined(ROUTINE_CONVGEMM)
 

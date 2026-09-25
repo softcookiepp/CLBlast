@@ -14,11 +14,15 @@
 R"(
 #ifndef XCONVGEMM_PART2_XCONVGEMM_GLSL
 #define XCONVGEMM_PART2_XCONVGEMM_GLSL
+#ifndef USE_SPEC_CONSTANTS
+	#define USE_SPEC_CONSTANTS 0
+#endif
 // =================================================================================================
 #if defined(ROUTINE_CONVGEMM)
 
 // ConvGEMM kernel
 #if defined(CONVGEMM_WITH_IM2COL)
+#define USE_SPEC_CONSTANTS 0
 #if 1
 	layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
 #endif

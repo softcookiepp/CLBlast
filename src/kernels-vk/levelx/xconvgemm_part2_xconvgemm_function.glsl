@@ -15,7 +15,9 @@
 //R"(
 #ifndef XCONVGEMM_PART2_XCONVGEMM_FUNCTION_GLSL
 #define XCONVGEMM_PART2_XCONVGEMM_FUNCTION_GLSL
-
+#ifndef USE_SPEC_CONSTANTS
+	#define USE_SPEC_CONSTANTS 0
+#endif
 #include "xconvgemm_part1.glsl"
 // =================================================================================================
 

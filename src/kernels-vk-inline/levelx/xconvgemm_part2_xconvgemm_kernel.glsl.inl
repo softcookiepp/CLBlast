@@ -12,6 +12,9 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
+#ifndef USE_SPEC_CONSTANTS
+	#define USE_SPEC_CONSTANTS 0
+#endif
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
@@ -638,7 +641,9 @@ R"(
 // this kernel file is used outside of the CLBlast library. Note that all parameters here have a
 // suffix 'D' to denote that they are for the 'direct' version of the GEMM kernel.
 
-#define USE_SPEC_CONSTANTS 1
+#ifndef USE_SPEC_CONSTANTS
+	#define USE_SPEC_CONSTANTS 1
+#endif
 
 #if USE_SPEC_CONSTANTS == 1
 	#ifdef WGD

@@ -140,6 +140,7 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 	for (auto& str : source) preSources.push_back(str);
 	std::string allDefines;
 	for (auto& str : defines) allDefines += (str + "\n");
+	
 	for (size_t i = 0; i < source.size(); i += 1)
 	{
 		if (kernelNames.size() == i) throw std::runtime_error("not enough kernel names!");
@@ -147,6 +148,8 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 		kernelSources.emplace(kernelNames[i], allDefines+preSources[i]);
 	}
 	std::string dummy("");
+
+	
 
 	program_ = CompileFromSource(dummy, precision_, routine_name_, device_, options, 0, false, kernelSources);
 	

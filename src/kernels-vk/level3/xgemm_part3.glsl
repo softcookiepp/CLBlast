@@ -17,17 +17,17 @@
 // A common interface for subgroup functions
 // genuinely no idea how this maps to GLSL as of now; Vulkan probably has entirely different extensions
 // We will just have to disable it host-side until a solution is found...
-#if USE_SUBGROUP_SHUFFLING == 1
+#if SUBGROUP_OPERATIONS_SUPPORTED == 1
 
-int clblast_get_sub_group_local_id()
-{
-	return get_sub_group_local_id();
-}
+	int clblast_get_sub_group_local_id()
+	{
+		return get_sub_group_local_id();
+	}
 
-realN clblast_sub_group_shuffle(realN reg, int src)
-{
-	return subgroupShuffle(reg, uint(src));
-}
+	realN clblast_sub_group_shuffle(realN reg, int src)
+	{
+		return subgroupShuffle(reg, uint(src));
+	}
 #endif
 
 // Main body of the matrix-multiplication algorithm. It calls various (inlined) functions.
@@ -40,15 +40,25 @@ void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
 	#endif
 	const real alpha, const real beta)
 {
-
+	// Disables subgroups in case the assumptions don't hold
+	bool ACTUALLY_USE_SUBGROUP_SHUFFLING = (USE_SUBGROUP_SHUFFLING == 1)
+			&& !(NWI != SUBGROUP_SIZE || MDIMC < SUBGROUP_SIZE);
 	// Allocates workitem-private memory (registers)
 	// Different register variables for different GEMMK ids. Will be a testament to the power of specialization constants later on.
 	// GEMMK == 0
 	realM apm_gk0[MWI/VWM]; // MWI * 1
 	realN bpm_gk0[NWI/VWN]; // 1 * NWI
 	// GEMMK == 1
-	#if USE_SUBGROUP_SHUFFLING == 1
-		realN apm_gk1[KREG/VWN]; // KREG (subgroup shuffling in NWI dimension)
+
+	#if SUBGROUP_OPERATIONS_SUPPORTED == 1
+		// KREG (subgroup shuffling in NWI dimension)
+		// vs NWI * KREG
+		#if 1
+			// ok, this is giving SPIR-V-val errors. I am just going to set it to the bigger one
+			realN apm_gk1[(NWI*KREG)/VWN];
+		#else
+			realN apm_gk1[ACTUALLY_USE_SUBGROUP_SHUFFLING ? KREG/VWN : (NWI*KREG)/VWN];
+		#endif
 	#else
 		realN apm_gk1[(NWI*KREG)/VWN]; // NWI * KREG
 	#endif
@@ -186,23 +196,28 @@ void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
 				else if (GEMMK == 1)
 				{
 					// Loads data: 2D global --> 2D private (matrix A). Partly, shuffled later among subgroups
-					#if USE_SUBGROUP_SHUFFLING == 1
-						const int _ni = clblast_get_sub_group_local_id();
-						
-						for (int _ki = 0; _ki < KREG/VWN; _ki += 1) {
-							apm_gk1[_ki] = GlobalToPrivateA2D(
-								#if USE_BDA
-									a_ptr,
-								#else
-									a_ptr_offset,
-								#endif
-								tid_y, _ni, kSizeK, idk, _ki);
-						}
-					// Loads data: 2D global --> 2D private (matrix A)
-					#else
-						
-						for (int _ni = 0; _ni < NWI; _ni += 1) {
+					#if SUBGROUP_OPERATIONS_SUPPORTED == 1
+						if (ACTUALLY_USE_SUBGROUP_SHUFFLING)
+						{
+							const int _ni = clblast_get_sub_group_local_id();
 							
+							for (int _ki = 0; _ki < KREG/VWN; _ki += 1)
+							{
+								apm_gk1[_ki] = GlobalToPrivateA2D(
+									#if USE_BDA
+										a_ptr,
+									#else
+										a_ptr_offset,
+									#endif
+									tid_y, _ni, kSizeK, idk, _ki);
+							}
+						// Loads data: 2D global --> 2D private (matrix A)
+						}
+						else
+					#endif
+					{
+						for (int _ni = 0; _ni < NWI; _ni += 1)
+						{
 							for (int _ki = 0; _ki < KREG/VWN; _ki += 1) {
 								apm_gk1[_ni * (KREG/VWN) + _ki] = GlobalToPrivateA2D(
 									#if USE_BDA
@@ -213,7 +228,7 @@ void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
 									tid_y, _ni, kSizeK, idk, _ki);
 							}
 						}
-					#endif
+					}
 				}
 
 				// Performs the accumulation (Cpm += Apm * Bpm)
@@ -238,12 +253,15 @@ void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
 						
 						for (int _mi = 0; _mi < MWI/VWM; _mi += 1) {
 							
-							for (int _ki = 0; _ki < KREG/VWN; _ki += 1) {
-								#if USE_SUBGROUP_SHUFFLING == 1
-									const realN aval = clblast_sub_group_shuffle(apm_gk1[_ki], _ni);
-								#else
-									const realN aval = apm_gk1[_ni * (KREG/VWN) + _ki];
+							for (int _ki = 0; _ki < KREG/VWN; _ki += 1)
+							{
+								realN aval;
+								#if SUBGROUP_OPERATIONS_SUPPORTED == 1
+									if (ACTUALLY_USE_SUBGROUP_SHUFFLING)
+										aval = clblast_sub_group_shuffle(apm_gk1[_ki], _ni);
+									else
 								#endif
+										aval = apm_gk1[_ni * (KREG/VWN) + _ki];
 								#if VWN == 1
 									cpm[_ni * (MWI/VWM) + _mi] = MultiplyAddVector(cpm[_ni * (MWI/VWM) + _mi], bpm_gk1[(VWN * _ki + 0) * (MWI/VWM) + _mi], aval);
 								#else

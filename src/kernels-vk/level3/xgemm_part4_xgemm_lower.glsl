@@ -16,7 +16,13 @@
 // The upper-triangular and lower-triangular kernels are only used in special cases
 
 // Main entry point of the kernel. This is the lower-triangular version.
-#if 1
+#if USE_SPECIALIZATION_CONSTANTS
+	layout(
+		local_size_x_id = 4, // MDIMC,
+		local_size_y_id = 5, // NDIMC,
+		local_size_z = 1
+		) in;
+#else
 	layout(local_size_x = MDIMC, local_size_y = NDIMC, local_size_z = 1) in;
 #endif
 

@@ -112,10 +112,10 @@ R"(
 #endif
 
 // support for subgroup operations
-#ifndef USE_SUBGROUP_SHUFFLING
-	#define USE_SUBGROUP_SHUFFLING 0
+#ifndef SUBGROUP_OPERATIONS_SUPPORTED
+	#define SUBGROUP_OPERATIONS_SUPPORTED 0
 #endif
-#if USE_SUBGROUP_SHUFFLING
+#if SUBGROUP_OPERATIONS_SUPPORTED
 	//#extension GL_EXT_shader_subgroup : require
 	#extension GL_KHR_shader_subgroup_shuffle : require
 #endif
@@ -124,6 +124,9 @@ R"(
 #if PRECISION == 16
 	#extension GL_EXT_shader_16bit_storage : require
 	#extension GL_EXT_shader_explicit_arithmetic_types_float16 : require
+	#if SUBGROUP_OPERATIONS_SUPPORTED
+		#extension GL_EXT_shader_subgroup_extended_types_float16 : require
+	#endif
 #endif
 
 // Enable support for double-precision
@@ -670,77 +673,171 @@ R"(
 
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library.
-#ifndef GEMMK
-	#define GEMMK 0		// Kernel to choose: 0 regular, 1 with 2D register tiling
-#endif
-#ifndef MWG
-	#define MWG 8			// Tile-size in dimension M (e.g. 64, 128)
-#endif
-#ifndef NWG
-	#define NWG 8			// Tile-size in dimension N (e.g. 64, 128)
-#endif
-#ifndef KWG
-	#define KWG 8			// Tile-size in dimension K (e.g. 8, 16)
-#endif
-#ifndef MDIMC
-	#define MDIMC 8		// Threads per workgroup in M-dimension (e.g. 8, 16, 32)
-#endif
-#ifndef NDIMC
-	#define NDIMC 8		// Threads per workgroup in N-dimension (e.g. 8, 16, 32)
-#endif
-#ifndef MDIMA
-	#define MDIMA 8		// Re-shaped tile dimension of matrix A: KDIMA * MDIMA (kernel 0 only)
-#endif
-#ifndef NDIMB
-	#define NDIMB 8		// Re-shaped tile dimension of matrix B: KDIMB * NDIMB (kernel 0 only)
-#endif
-#ifndef KWI
-	#define KWI 1			// Unroll factor of the KWG loop (smaller or equal than KWG)
-#endif
-#ifndef VWM
-	#define VWM 1			// Vector width of matrices A and C
-#endif
-#ifndef VWN
-	#define VWN 1			// Vector width of matrix B
-#endif
-#ifndef STRM
-	#define STRM 0		 // Use strided access within a thread in the M-dimension (1) or not (0) (kernel 0 only)
-#endif
-#ifndef STRN
-	#define STRN 0		 // Use strided access within a thread in the N-dimension (1) or not (0) (kernel 0 only)
-#endif
-#ifndef SA
-	#define SA 0			 // Use local/shared memory to cache matrix A (1) or not (0) (kernel 0 only)
-#endif
-#ifndef SB
-	#define SB 0			 // Use local/shared memory to cache matrix B (1) or not (0) (kernel 0 only)
-#endif
-#ifndef KREG
-	#define KREG 1		 // Amount of register tiling in second dimension, multiple of VWN (kernel 1 only)
-#endif
 
-// Helper parameters based on the above tuning parameters
-#define MWI (MWG/MDIMC)							 // Work per work-item (M-dimension)
-#define NWI (NWG/NDIMC)							 // Work per work-item (N-dimension)
-#define KDIMA ((MDIMC*NDIMC)/(MDIMA)) // Re-shaped tile dimension of matrix A: KDIMA * MDIMA
-#define KDIMB ((MDIMC*NDIMC)/(NDIMB)) // Re-shaped tile dimension of matrix B: KDIMB * NDIMB
-#define MWA (MWG/MDIMA)							 // Amount of loads-per-thread for matrix A (M-dimension)
-#define KWA (KWG/KDIMA)							 // Amount of loads-per-thread for matrix A (K-dimension)
-#define KWB (KWG/KDIMB)							 // Amount of loads-per-thread for matrix B (K-dimension)
-#define NWB (NWG/NDIMB)							 // Amount of loads-per-thread for matrix B (N-dimension)
+#define USE_SPECIALIZATION_CONSTANTS 1
 
-// Settings
-#ifndef USE_VECTOR_MAD
-	#define USE_VECTOR_MAD 0			// Unroll (0) or don't (1) unroll the vector MAD manually
-#endif
+#if USE_SPECIALIZATION_CONSTANTS
+	#ifdef GEMMK
+		#undef GEMMK		
+	#endif
+	layout(constant_id = 0) const int GEMMK = 0; // Kernel to choose: 0 regular, 1 with 2D register tiling
+	#ifdef MWG
+		#undef MWG	
+	#endif
+	layout(constant_id = 1) const int MWG = 8; // Tile-size in dimension M (e.g. 64, 128)
+	#ifdef NWG
+		#undef NWG
+	#endif
+	layout(constant_id = 2) const int NWG = 8; // Tile-size in dimension N (e.g. 64, 128)
+	#ifdef KWG
+		#undef KWG
+	#endif
+	layout(constant_id = 3) const int KWG = 8; // Tile-size in dimension K (e.g. 8, 16)
+	#ifdef MDIMC
+		#undef MDIMC
+	#endif
+	layout(constant_id = 4) const int MDIMC = 8; // Threads per workgroup in M-dimension (e.g. 8, 16, 32)
+	#ifdef NDIMC
+		#undef NDIMC
+	#endif
+	layout(constant_id = 5) const int NDIMC = 8; // Threads per workgroup in N-dimension (e.g. 8, 16, 32)
+	#ifdef MDIMA
+		#undef MDIMA
+	#endif
+	layout(constant_id = 6) const int MDIMA = 8; // Re-shaped tile dimension of matrix A: KDIMA * MDIMA (kernel 0 only)
+	#ifdef NDIMB
+		#undef NDIMB
+	#endif
+	layout(constant_id = 7) const int NDIMB = 8; // Re-shaped tile dimension of matrix B: KDIMB * NDIMB (kernel 0 only)
+	#ifdef KWI
+		#undef KWI
+	#endif
+	layout(constant_id = 8) const int KWI = 1; // Unroll factor of the KWG loop (smaller or equal than KWG)
+	#if 0 // this determines type, will not be possible to use as a specialization constant yet.
+		#ifdef VWM
+			#undef VWM
+		#endif
+		layout(constant_id = -1) const int VWM = 1; // Vector width of matrices A and C
+		#ifdef VWN
+			#undef VWN
+		#endif
+		layout(constant_id = -1) const int VWN = 1; // Vector width of matrix B
+	#endif
+	#ifdef STRM
+		#undef STRM
+	#endif
+	layout(constant_id = 9) const int STRM = 0; // Use strided access within a thread in the M-dimension (1) or not (0) (kernel 0 only)
+	#ifdef STRN
+		#undef STRN
+	#endif
+	layout(constant_id = 10) const int STRN = 0; // Use strided access within a thread in the N-dimension (1) or not (0) (kernel 0 only)
+	#ifdef SA
+		#undef SA
+	#endif
+	layout(constant_id = 11) const int SA = 0; // Use local/shared memory to cache matrix A (1) or not (0) (kernel 0 only)
+	#ifdef SB
+		#undef SB
+	#endif
+	layout(constant_id = 12) const int SB = 0; // Use local/shared memory to cache matrix B (1) or not (0) (kernel 0 only)
+	#ifdef KREG
+		#undef KREG
+	#endif
+	layout(constant_id = 13) const int KREG = 1; // Amount of register tiling in second dimension, multiple of VWN (kernel 1 only)
 
-#ifndef USE_SUBGROUP_SHUFFLING
-	#define USE_SUBGROUP_SHUFFLING 0		 // Optionally enables subgroup shuffling for Intel GPUs
-#endif
+	// Helper parameters based on the above tuning parameters
+	#define MWI (MWG/MDIMC)							 // Work per work-item (M-dimension)
+	#define NWI (NWG/NDIMC)							 // Work per work-item (N-dimension)
+	#define KDIMA ((MDIMC*NDIMC)/(MDIMA)) // Re-shaped tile dimension of matrix A: KDIMA * MDIMA
+	#define KDIMB ((MDIMC*NDIMC)/(NDIMB)) // Re-shaped tile dimension of matrix B: KDIMB * NDIMB
+	#define MWA (MWG/MDIMA)							 // Amount of loads-per-thread for matrix A (M-dimension)
+	#define KWA (KWG/KDIMA)							 // Amount of loads-per-thread for matrix A (K-dimension)
+	#define KWB (KWG/KDIMB)							 // Amount of loads-per-thread for matrix B (K-dimension)
+	#define NWB (NWG/NDIMB)							 // Amount of loads-per-thread for matrix B (N-dimension)
+	
+	// Settings
+	#ifdef USE_VECTOR_MAD
+		#undef USE_VECTOR_MAD 0			// Unroll (0) or don't (1) unroll the vector MAD manually
+	#endif
+	layout(constant_id = 14) const int USE_VECTOR_MAD = 0; // Unroll (0) or don't (1) unroll the vector MAD manually
+	
+	// this logic doesn't apply if subgroup operations aren't supported at all
+	#if SUBGROUP_OPERATIONS_SUPPORTED == 1
+		#ifdef USE_SUBGROUP_SHUFFLING
+			#undef USE_SUBGROUP_SHUFFLING	 
+		#endif
+		layout(constant_id = 15) const int USE_SUBGROUP_SHUFFLING = 0; // Optionally enables subgroup shuffling for supported GPUs
+	#endif
+#else
+	#ifndef GEMMK
+		#define GEMMK 0		// Kernel to choose: 0 regular, 1 with 2D register tiling
+	#endif
+	#ifndef MWG
+		#define MWG 8			// Tile-size in dimension M (e.g. 64, 128)
+	#endif
+	#ifndef NWG
+		#define NWG 8			// Tile-size in dimension N (e.g. 64, 128)
+	#endif
+	#ifndef KWG
+		#define KWG 8			// Tile-size in dimension K (e.g. 8, 16)
+	#endif
+	#ifndef MDIMC
+		#define MDIMC 8		// Threads per workgroup in M-dimension (e.g. 8, 16, 32)
+	#endif
+	#ifndef NDIMC
+		#define NDIMC 8		// Threads per workgroup in N-dimension (e.g. 8, 16, 32)
+	#endif
+	#ifndef MDIMA
+		#define MDIMA 8		// Re-shaped tile dimension of matrix A: KDIMA * MDIMA (kernel 0 only)
+	#endif
+	#ifndef NDIMB
+		#define NDIMB 8		// Re-shaped tile dimension of matrix B: KDIMB * NDIMB (kernel 0 only)
+	#endif
+	#ifndef KWI
+		#define KWI 1			// Unroll factor of the KWG loop (smaller or equal than KWG)
+	#endif
+	#ifndef VWM
+		#define VWM 1			// Vector width of matrices A and C
+	#endif
+	#ifndef VWN
+		#define VWN 1			// Vector width of matrix B
+	#endif
+	#ifndef STRM
+		#define STRM 0		 // Use strided access within a thread in the M-dimension (1) or not (0) (kernel 0 only)
+	#endif
+	#ifndef STRN
+		#define STRN 0		 // Use strided access within a thread in the N-dimension (1) or not (0) (kernel 0 only)
+	#endif
+	#ifndef SA
+		#define SA 0			 // Use local/shared memory to cache matrix A (1) or not (0) (kernel 0 only)
+	#endif
+	#ifndef SB
+		#define SB 0			 // Use local/shared memory to cache matrix B (1) or not (0) (kernel 0 only)
+	#endif
+	#ifndef KREG
+		#define KREG 1		 // Amount of register tiling in second dimension, multiple of VWN (kernel 1 only)
+	#endif
 
-#if NWI != SUBGROUP_SIZE || MDIMC < SUBGROUP_SIZE
-	#undef USE_SUBGROUP_SHUFFLING
-	#define USE_SUBGROUP_SHUFFLING 0		 // Disables subgroups in case the assumptions don't hold
+	// Helper parameters based on the above tuning parameters
+	#define MWI (MWG/MDIMC)							 // Work per work-item (M-dimension)
+	#define NWI (NWG/NDIMC)							 // Work per work-item (N-dimension)
+	#define KDIMA ((MDIMC*NDIMC)/(MDIMA)) // Re-shaped tile dimension of matrix A: KDIMA * MDIMA
+	#define KDIMB ((MDIMC*NDIMC)/(NDIMB)) // Re-shaped tile dimension of matrix B: KDIMB * NDIMB
+	#define MWA (MWG/MDIMA)							 // Amount of loads-per-thread for matrix A (M-dimension)
+	#define KWA (KWG/KDIMA)							 // Amount of loads-per-thread for matrix A (K-dimension)
+	#define KWB (KWG/KDIMB)							 // Amount of loads-per-thread for matrix B (K-dimension)
+	#define NWB (NWG/NDIMB)							 // Amount of loads-per-thread for matrix B (N-dimension)
+
+	// Settings
+	#ifndef USE_VECTOR_MAD
+		#define USE_VECTOR_MAD 0			// Unroll (0) or don't (1) unroll the vector MAD manually
+	#endif
+
+	// this logic doesn't apply if subgroup operations aren't supported at all
+	#if SUBGROUP_OPERATIONS_SUPPORTED == 1
+		#ifndef USE_SUBGROUP_SHUFFLING
+			#define USE_SUBGROUP_SHUFFLING 0		 // Optionally enables subgroup shuffling for Intel GPUs
+		#endif
+	#endif
 #endif
 
 // =================================================================================================
@@ -1167,17 +1264,17 @@ void StoreResults(
 // A common interface for subgroup functions
 // genuinely no idea how this maps to GLSL as of now; Vulkan probably has entirely different extensions
 // We will just have to disable it host-side until a solution is found...
-#if USE_SUBGROUP_SHUFFLING == 1
+#if SUBGROUP_OPERATIONS_SUPPORTED == 1
 
-int clblast_get_sub_group_local_id()
-{
-	return get_sub_group_local_id();
-}
+	int clblast_get_sub_group_local_id()
+	{
+		return get_sub_group_local_id();
+	}
 
-realN clblast_sub_group_shuffle(realN reg, int src)
-{
-	return subgroupShuffle(reg, uint(src));
-}
+	realN clblast_sub_group_shuffle(realN reg, int src)
+	{
+		return subgroupShuffle(reg, uint(src));
+	}
 #endif
 
 // Main body of the matrix-multiplication algorithm. It calls various (inlined) functions.
@@ -1190,15 +1287,25 @@ void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
 	#endif
 	const real alpha, const real beta)
 {
-
+	// Disables subgroups in case the assumptions don't hold
+	bool ACTUALLY_USE_SUBGROUP_SHUFFLING = (USE_SUBGROUP_SHUFFLING == 1)
+			&& !(NWI != SUBGROUP_SIZE || MDIMC < SUBGROUP_SIZE);
 	// Allocates workitem-private memory (registers)
 	// Different register variables for different GEMMK ids. Will be a testament to the power of specialization constants later on.
 	// GEMMK == 0
 	realM apm_gk0[MWI/VWM]; // MWI * 1
 	realN bpm_gk0[NWI/VWN]; // 1 * NWI
 	// GEMMK == 1
-	#if USE_SUBGROUP_SHUFFLING == 1
-		realN apm_gk1[KREG/VWN]; // KREG (subgroup shuffling in NWI dimension)
+
+	#if SUBGROUP_OPERATIONS_SUPPORTED == 1
+		// KREG (subgroup shuffling in NWI dimension)
+		// vs NWI * KREG
+		#if 1
+			// ok, this is giving SPIR-V-val errors. I am just going to set it to the bigger one
+			realN apm_gk1[(NWI*KREG)/VWN];
+		#else
+			realN apm_gk1[ACTUALLY_USE_SUBGROUP_SHUFFLING ? KREG/VWN : (NWI*KREG)/VWN];
+		#endif
 	#else
 		realN apm_gk1[(NWI*KREG)/VWN]; // NWI * KREG
 	#endif
@@ -1336,23 +1443,28 @@ void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
 				else if (GEMMK == 1)
 				{
 					// Loads data: 2D global --> 2D private (matrix A). Partly, shuffled later among subgroups
-					#if USE_SUBGROUP_SHUFFLING == 1
-						const int _ni = clblast_get_sub_group_local_id();
-						
-						for (int _ki = 0; _ki < KREG/VWN; _ki += 1) {
-							apm_gk1[_ki] = GlobalToPrivateA2D(
-								#if USE_BDA
-									a_ptr,
-								#else
-									a_ptr_offset,
-								#endif
-								tid_y, _ni, kSizeK, idk, _ki);
-						}
-					// Loads data: 2D global --> 2D private (matrix A)
-					#else
-						
-						for (int _ni = 0; _ni < NWI; _ni += 1) {
+					#if SUBGROUP_OPERATIONS_SUPPORTED == 1
+						if (ACTUALLY_USE_SUBGROUP_SHUFFLING)
+						{
+							const int _ni = clblast_get_sub_group_local_id();
 							
+							for (int _ki = 0; _ki < KREG/VWN; _ki += 1)
+							{
+								apm_gk1[_ki] = GlobalToPrivateA2D(
+									#if USE_BDA
+										a_ptr,
+									#else
+										a_ptr_offset,
+									#endif
+									tid_y, _ni, kSizeK, idk, _ki);
+							}
+						// Loads data: 2D global --> 2D private (matrix A)
+						}
+						else
+					#endif
+					{
+						for (int _ni = 0; _ni < NWI; _ni += 1)
+						{
 							for (int _ki = 0; _ki < KREG/VWN; _ki += 1) {
 								apm_gk1[_ni * (KREG/VWN) + _ki] = GlobalToPrivateA2D(
 									#if USE_BDA
@@ -1363,7 +1475,7 @@ void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
 									tid_y, _ni, kSizeK, idk, _ki);
 							}
 						}
-					#endif
+					}
 				}
 
 				// Performs the accumulation (Cpm += Apm * Bpm)
@@ -1388,12 +1500,15 @@ void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
 						
 						for (int _mi = 0; _mi < MWI/VWM; _mi += 1) {
 							
-							for (int _ki = 0; _ki < KREG/VWN; _ki += 1) {
-								#if USE_SUBGROUP_SHUFFLING == 1
-									const realN aval = clblast_sub_group_shuffle(apm_gk1[_ki], _ni);
-								#else
-									const realN aval = apm_gk1[_ni * (KREG/VWN) + _ki];
+							for (int _ki = 0; _ki < KREG/VWN; _ki += 1)
+							{
+								realN aval;
+								#if SUBGROUP_OPERATIONS_SUPPORTED == 1
+									if (ACTUALLY_USE_SUBGROUP_SHUFFLING)
+										aval = clblast_sub_group_shuffle(apm_gk1[_ki], _ni);
+									else
 								#endif
+										aval = apm_gk1[_ni * (KREG/VWN) + _ki];
 								#if VWN == 1
 									cpm[_ni * (MWI/VWM) + _mi] = MultiplyAddVector(cpm[_ni * (MWI/VWM) + _mi], bpm_gk1[(VWN * _ki + 0) * (MWI/VWM) + _mi], aval);
 								#else
@@ -1441,7 +1556,13 @@ void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
 // The upper-triangular and lower-triangular kernels are only used in special cases
 
 // Main entry point of the kernel. This is the lower-triangular version.
-#if 1
+#if USE_SPECIALIZATION_CONSTANTS
+	layout(
+		local_size_x_id = 4, // MDIMC,
+		local_size_y_id = 5, // NDIMC,
+		local_size_z = 1
+		) in;
+#else
 	layout(local_size_x = MDIMC, local_size_y = NDIMC, local_size_z = 1) in;
 #endif
 

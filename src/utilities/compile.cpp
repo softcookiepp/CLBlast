@@ -50,6 +50,7 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 	tart::DeviceMetadata meta = device()->getMetadata();
 	if (meta.subgroupAdd)
 	{
+		header_string += "#define SUBGROUP_OPERATIONS_SUPPORTED 1\n";
 		header_string += "#define USE_SUBGROUP_SHUFFLING 1\n";
 		header_string += ("#define SUBGROUP_SIZE " + std::to_string(meta.subgroupSize) + "\n");
 	}

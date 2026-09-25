@@ -14,7 +14,13 @@
 #define USE_XGEMM_INDIRECT 1
 #include "xgemm_part3.glsl"
 // Main entry point of the kernel. This is the regular full version.
-#if 1
+#if USE_SPECIALIZATION_CONSTANTS
+	layout(
+		local_size_x_id = 4, // MDIMC,
+		local_size_y_id = 5, // NDIMC,
+		local_size_z = 1
+		) in;
+#else
 	layout(local_size_x = MDIMC, local_size_y = NDIMC, local_size_z = 1) in;
 #endif
 

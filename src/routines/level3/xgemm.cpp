@@ -294,28 +294,49 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	}
 
 	// Retrieves the Xgemm kernel from the compiled binary
-	auto kernel = Kernel(program_, "Xgemm");
+	auto kernelOld = Kernel(program_, "Xgemm");
+	tart::kernel_ptr kernel = kernelOld.get();
 
 	// Sets the kernel arguments
-	kernel.SetArgument(0, static_cast<int>(m_ceiled));
-	kernel.SetArgument(1, static_cast<int>(n_ceiled));
-	kernel.SetArgument(2, static_cast<int>(k_ceiled));
-	kernel.SetArgument(3, GetRealArg(alpha));
-	kernel.SetArgument(4, GetRealArg(beta));
-	kernel.SetArgument(5, a_temp());
-	kernel.SetArgument(6, b_temp());
-	kernel.SetArgument(7, c_temp());
-	kernel.SetArgument(8, a_temp());
-	kernel.SetArgument(9, b_temp());
-	kernel.SetArgument(10, static_cast<int>(b_temp_offset / db_["VWN"]));
-	kernel.SetArgument(11, static_cast<int>(c_temp_offset / db_["VWM"]));
+	kernel->setArg(0, static_cast<int>(m_ceiled));
+	kernel->setArg(1, static_cast<int>(n_ceiled));
+	kernel->setArg(2, static_cast<int>(k_ceiled));
+	kernel->setArg(3, GetRealArg(alpha));
+	kernel->setArg(4, GetRealArg(beta));
+	kernel->setArg(5, a_temp());
+	kernel->setArg(6, b_temp());
+	kernel->setArg(7, c_temp());
+	kernel->setArg(8, a_temp());
+	kernel->setArg(9, b_temp());
+	kernel->setArg(10, static_cast<int>(b_temp_offset / db_["VWN"]));
+	kernel->setArg(11, static_cast<int>(c_temp_offset / db_["VWM"]));
 
 	// Computes the global and local thread sizes
-	const auto global = std::vector<size_t>{(c_one_i * db_["MDIMC"]) / db_["MWG"], (c_two_i * db_["NDIMC"]) / db_["NWG"]};
-	const auto local = std::vector<size_t>{db_["MDIMC"], db_["NDIMC"]};
+	//const auto global = std::vector<size_t>{(c_one_i * db_["MDIMC"]) / db_["MWG"], (c_two_i * db_["NDIMC"]) / db_["NWG"]};
+	const auto global = std::vector<uint32_t>{c_one_i / db_["MWG"], c_two_i / db_["NWG"]};
+
+	const bool subgroupSupported = this->device_()->getMetadata().subgroupAdd;
+	std::vector<uint> spec(subgroupSupported ? 16 : 15);
+	spec[0] = db_["GEMMK"];
+	spec[1] = db_["MWG"];
+	spec[2] = db_["NWG"];
+	spec[3] = db_["KWG"];
+	spec[4] = db_["MDIMC"];
+	spec[5] = db_["NDIMC"];
+	spec[6] = db_["MDIMA"];
+	spec[7] = db_["NDIMB"];
+	spec[8] = db_["KWI"];
+	spec[9] = db_["STRM"];
+	spec[10] = db_["STRN"];
+	spec[11] = db_["SA"];
+	spec[12] = db_["SB"];
+	spec[13] = db_["KREG"];
+	spec[14] = 1; // there is no db key for this for whatever reason
+	if (subgroupSupported)
+		spec[15] = 1; // this may actually not need to be a spec constant
 
 	// Launches the kernel
-	RunKernel(kernel, queue_, device_, global, local);
+	kernel->enqueue(global, spec);
 
 	// Runs the post-processing kernel if needed
 	if (!c_no_temp) {
@@ -372,7 +393,6 @@ void Xgemm<T>::GemmDirect(const size_t m, const size_t n, const size_t k, const 
 	//const auto local = std::vector<uint32_t>{db_["MDIMCD"], db_["NDIMCD"], 1};
 
 	// Launches the kernel
-	//RunKernel(kernelOld, queue_, device_, global, local);
 	kernel->enqueue(global, {});
 }
 

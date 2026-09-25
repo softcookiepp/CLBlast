@@ -65,10 +65,10 @@ R"(
 #endif
 
 // support for subgroup operations
-#ifndef USE_SUBGROUP_SHUFFLING
-	#define USE_SUBGROUP_SHUFFLING 0
+#ifndef SUBGROUP_OPERATIONS_SUPPORTED
+	#define SUBGROUP_OPERATIONS_SUPPORTED 0
 #endif
-#if USE_SUBGROUP_SHUFFLING
+#if SUBGROUP_OPERATIONS_SUPPORTED
 	//#extension GL_EXT_shader_subgroup : require
 	#extension GL_KHR_shader_subgroup_shuffle : require
 #endif
@@ -77,6 +77,9 @@ R"(
 #if PRECISION == 16
 	#extension GL_EXT_shader_16bit_storage : require
 	#extension GL_EXT_shader_explicit_arithmetic_types_float16 : require
+	#if SUBGROUP_OPERATIONS_SUPPORTED
+		#extension GL_EXT_shader_subgroup_extended_types_float16 : require
+	#endif
 #endif
 
 // Enable support for double-precision

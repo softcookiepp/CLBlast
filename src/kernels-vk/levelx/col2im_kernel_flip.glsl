@@ -37,7 +37,7 @@ layout(push_constant) uniform Xcol2imKernelFlip
 
 void main()
 {
-	const bool kernel_flip = true;
+	const bool kernel_flip = KERNEL_FLIP;
 	Xcol2im(input_h, input_w, channels, output_h, output_w, kernel_h, kernel_w,
 					pad_h, pad_w, stride_h, stride_w, dilation_h, dilation_w,
 					stride_bez_h, stride_bez_w, dilation_bez_h, dilation_bez_w, gcd_h, gcd_w,

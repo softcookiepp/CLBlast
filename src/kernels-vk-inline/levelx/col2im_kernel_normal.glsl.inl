@@ -526,6 +526,8 @@ layout(constant_id = 0) const int COPY_DIMX = 8; // Local workgroup size in the 
 #endif
 layout(constant_id = 1) const int COPY_DIMY = 8; // Local workgroup size in the second dimension (h)
 
+layout(constant_id = 2) const bool KERNEL_FLIP = false; // whether or not to use the flip kernel
+
 // =================================================================================================
 
 // buffer defs
@@ -700,7 +702,7 @@ layout(push_constant) uniform Xcol2imKernelNormal
 
 void main()
 {
-	const bool kernel_flip = false;
+	const bool kernel_flip = KERNEL_FLIP;
 	Xcol2im(input_h, input_w, channels, output_h, output_w, kernel_h, kernel_w,
 					pad_h, pad_w, stride_h, stride_w, dilation_h, dilation_w,
 					stride_bez_h, stride_bez_w, dilation_bez_h, dilation_bez_w, gcd_h, gcd_w,

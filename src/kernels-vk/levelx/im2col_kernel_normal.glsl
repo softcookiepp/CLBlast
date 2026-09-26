@@ -35,7 +35,7 @@ layout(push_constant) uniform Xim2colKernelNormal
 
 void main()
 {
-	const bool kernel_flip = false;
+	const bool kernel_flip = KERNEL_FLIP;
 	Xim2col(input_h, input_w, channels, output_h, output_w, kernel_h, kernel_w,
 					pad_h, pad_w, stride_h, stride_w, dilation_h, dilation_w,
 					kernel_flip,

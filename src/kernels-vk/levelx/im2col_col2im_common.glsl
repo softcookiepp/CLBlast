@@ -13,6 +13,8 @@ layout(constant_id = 0) const int COPY_DIMX = 8; // Local workgroup size in the 
 #endif
 layout(constant_id = 1) const int COPY_DIMY = 8; // Local workgroup size in the second dimension (h)
 
+layout(constant_id = 2) const bool KERNEL_FLIP = false; // whether or not to use the flip kernel
+
 // =================================================================================================
 
 // buffer defs

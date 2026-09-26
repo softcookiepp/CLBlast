@@ -516,38 +516,17 @@ R"(
 
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library.
-#ifndef LEVEL1_USE_SPEC_CONSTANTS
-	#define LEVEL1_USE_SPEC_CONSTANTS 0
-#endif
 
-#if LEVEL1_USE_SPEC_CONSTANTS == 1
-	#ifdef WGS1
-		#undef WGS1
-	#endif
-	//layout(constant_id = 0) const int WGS1 = 64; // The local work-group size of the main kernel
-	
-	#ifdef WGS2
-		#undef WGS2
-	#endif
-	layout(constant_id = 0) const int WGS2 = 62; // The local work-group size of the epilogue kernel
-#else
-	#ifndef WGS1
-		#define WGS1 64		 // The local work-group size of the main kernel
-	#endif
-	#ifndef WGS2
-		#define WGS2 64		 // The local work-group size of the epilogue kernel
-	#endif
+#ifdef WGS2
+	#undef WGS2
 #endif
+layout(constant_id = 0) const int WGS2 = 62; // The local work-group size of the epilogue kernel
 
 // =================================================================================================
 
 // The epilogue reduction kernel, performing the final bit of the operation. This kernel has to
 // be launched with a single workgroup only.
-#if LEVEL1_USE_SPEC_CONSTANTS == 1
-	layout(local_size_x_id = 0) in;
-#else
-	layout(local_size_x = WGS2, local_size_y = 1, local_size_z = 1) in;
-#endif
+layout(local_size_x_id = 0) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) readonly buffer inp_buf { real inp[]; };

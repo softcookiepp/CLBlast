@@ -41,6 +41,7 @@ Xasum<T>::Xasum(Queue& queue, EventPointer event, const std::string& name)
 			{"Xasum", "XasumEpilogue"}
 			)							
 {
+	mSum = static_cast<uint32_t>(name == "SUM");
 }
 
 // =================================================================================================
@@ -51,7 +52,8 @@ void Xasum<T>::DoAsum(const size_t n, const Buffer<T>& asum_buffer, const size_t
 											const size_t x_offset, const size_t x_inc)
 {
 	// Makes sure all dimensions are larger than zero
-	if (n == 0) {
+	if (n == 0)
+	{
 		throw BLASError(StatusCode::kInvalidDimension);
 	}
 
@@ -60,69 +62,61 @@ void Xasum<T>::DoAsum(const size_t n, const Buffer<T>& asum_buffer, const size_t
 	TestVectorScalar(1, asum_buffer, asum_offset);
 
 	// Retrieves the Xasum kernels from the compiled binary
-	auto kernel1 = Kernel(program_, "Xasum");
-	auto kernel2 = Kernel(program_, "XasumEpilogue");
-
+	auto kernel1Old = Kernel(program_, "Xasum");
+	tart::kernel_ptr kernel1 = kernel1Old.get();
+	auto kernel2Old = Kernel(program_, "XasumEpilogue");
+	tart::kernel_ptr kernel2 = kernel2Old.get();
+	
 	// Creates the buffer for intermediate values
 	auto temp_size = 2 * db_["WGS2"];
 	auto temp_buffer = Buffer<T>(queue_(), temp_size);
-	
-	// get working sequence
-	
 
 	// Sets the kernel arguments
-#if VULKAN_USE_BDA
-	tart::DeviceMetadata meta = device_()->getMetadata();
-	kernel1.SetArgument(0, static_cast<int>(n));
-	if (meta.bda)
-		kernel1.SetArgument(1, x_buffer()->getAddress());
-	else
-		kernel1.SetArgument(1, x_buffer());
-	kernel1.SetArgument(2, static_cast<int>(x_offset));
-	kernel1.SetArgument(3, static_cast<int>(x_inc));
-	if (meta.bda)
-		kernel1.SetArgument(4, temp_buffer()->getAddress());
-	else
-		kernel1.SetArgument(4, temp_buffer());
-#else
-	kernel1.SetArgument(0, static_cast<int>(n));
-	kernel1.SetArgument(1, x_buffer());
-	kernel1.SetArgument(2, static_cast<int>(x_offset));
-	kernel1.SetArgument(3, static_cast<int>(x_inc));
-	kernel1.SetArgument(4, temp_buffer());
-#endif
+	#if VULKAN_USE_BDA
+		tart::DeviceMetadata meta = device_()->getMetadata();
+		kernel1->setArg(0, static_cast<int>(n));
+		if (meta.bda)
+			kernel1->setArg(1, x_buffer()->getAddress());
+		else
+			kernel1->setArg(1, x_buffer());
+		kernel1->setArg(2, static_cast<int>(x_offset));
+		kernel1->setArg(3, static_cast<int>(x_inc));
+		if (meta.bda)
+			kernel1->setArg(4, temp_buffer()->getAddress());
+		else
+			kernel1->setArg(4, temp_buffer());
+	#else
+		kernel1->setArg(0, static_cast<int>(n));
+		kernel1->setArg(1, x_buffer());
+		kernel1->setArg(2, static_cast<int>(x_offset));
+		kernel1->setArg(3, static_cast<int>(x_inc));
+		kernel1->setArg(4, temp_buffer());
+	#endif
 
 	// Launches the main kernel
-	auto global1 = std::vector<size_t>{db_["WGS1"] * temp_size};
-	auto local1 = std::vector<size_t>{db_["WGS1"]};
-	
-	RunKernel(kernel1, queue_, device_, global1, local1);
+	kernel1->enqueue({temp_size, 1, 1}, {db_["WGS1"], mSum});
 
 	// Sets the arguments for the epilogue kernel
 #if VULKAN_USE_BDA
 	if (meta.bda)
 	{
-		kernel2.SetArgument(0, temp_buffer()->getAddress());
-		kernel2.SetArgument(1, asum_buffer()->getAddress());
+		kernel2->setArg(0, temp_buffer()->getAddress());
+		kernel2->setArg(1, asum_buffer()->getAddress());
 	}
 	else
 	{
-		kernel2.SetArgument(0, temp_buffer());
-		kernel2.SetArgument(1, asum_buffer());
+		kernel2->setArg(0, temp_buffer());
+		kernel2->setArg(1, asum_buffer());
 	}
-	kernel2.SetArgument(2, static_cast<int>(asum_offset));
+	kernel2->setArg(2, static_cast<int>(asum_offset));
 #else
-	kernel2.SetArgument(0, temp_buffer());
-	kernel2.SetArgument(1, asum_buffer());
-	kernel2.SetArgument(2, static_cast<int>(asum_offset));
+	kernel2->setArg(0, temp_buffer());
+	kernel2->setArg(1, asum_buffer());
+	kernel2->setArg(2, static_cast<int>(asum_offset));
 #endif
 
 	// Launches the epilogue kernel
-	auto global2 = std::vector<size_t>{db_["WGS2"]};
-	auto local2 = std::vector<size_t>{db_["WGS2"]};
-	RunKernel(kernel2, queue_, device_, global2, local2);
-	
-	
+	kernel2->enqueue({1, 1, 1}, {db_["WGS2"]});
 }
 
 // =================================================================================================

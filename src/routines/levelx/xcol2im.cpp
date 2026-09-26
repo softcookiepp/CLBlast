@@ -110,7 +110,7 @@ void Xcol2im<T>::DoCol2im(const KernelMode kernel_mode, const size_t channels, c
 	const auto w_ceiled = Ceil((width - 1) / gcd_w + 1, db_["COPY_DIMX"]);
 	const auto h_ceiled = Ceil((height - 1) / gcd_h + 1, db_["COPY_DIMY"]);
 	const auto global = std::vector<uint32_t>{w_ceiled/db_["COPY_DIMX"], (h_ceiled * channels)/db_["COPY_DIMY"] };
-	kernel->enqueue(global, {});
+	kernel->enqueue(global, {db_["COPY_DIMX"], db_["COPY_DIMY"]});
 }
 
 // =================================================================================================

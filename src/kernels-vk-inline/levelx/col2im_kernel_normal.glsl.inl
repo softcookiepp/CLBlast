@@ -515,12 +515,16 @@ R"(
 #define IM2COL_COL2IM_COMMON
 
 // Work-group size parameters re-used from the 'copy' kernel
-#ifndef COPY_DIMX
-	#define COPY_DIMX 8			// Local workgroup size in the first dimension (w)
+
+#ifdef COPY_DIMX
+	#undef COPY_DIMX
 #endif
-#ifndef COPY_DIMY
-	#define COPY_DIMY 8			// Local workgroup size in the second dimension (h)
+layout(constant_id = 0) const int COPY_DIMX = 8; // Local workgroup size in the first dimension (w)
+
+#ifdef COPY_DIMY
+	#undef COPY_DIMY
 #endif
+layout(constant_id = 1) const int COPY_DIMY = 8; // Local workgroup size in the second dimension (h)
 
 // =================================================================================================
 
@@ -669,8 +673,7 @@ void Xcol2im(const int input_h, const int input_w, const int channels,
 // =================================================================================================
 
 // Kernel flip version of the Xim2col kernel (for convolution)
-layout(local_size_x = COPY_DIMX, local_size_y = COPY_DIMY, local_size_z = 1) in;
-
+layout(local_size_x_id = 0, local_size_y_id = 1, local_size_z = 1) in;
 #endif
 
 

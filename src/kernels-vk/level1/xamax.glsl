@@ -18,65 +18,43 @@
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library.
 
-#ifndef LEVEL1_USE_SPEC_CONSTANTS
-	#define LEVEL1_USE_SPEC_CONSTANTS 1
+#ifdef WGS1
+	#undef WGS1
 #endif
+layout(constant_id = 0) const int WGS1 = 64; // The local work-group size of the main kernel
 
-#if LEVEL1_USE_SPEC_CONSTANTS == 1
-	#ifdef WGS1
-		#undef WGS1
+#if 0 // need to make these parameters accessible
+	#ifdef ROUTINE_MAX
+		#undef ROUTINE_MAX
 	#endif
-	layout(constant_id = 0) const int WGS1 = 64; // The local work-group size of the main kernel
+	layout(constant_id = 1) const int ROUTINE_MAX = 0;
 	
-	#ifdef WGS2
-		#undef WGS2
+	#ifdef ROUTINE_MIN
+		#undef ROUTINE_MIN
 	#endif
-	//layout(constant_id = 1) const int WGS2 = 64; // The local work-group size of the epilogue kernel
+	layout(constant_id = 2) const int ROUTINE_MIN = 0;
 	
-	#if 0 // need to make these parameters accessible
-		#ifdef ROUTINE_MAX
-			#undef ROUTINE_MAX
-		#endif
-		layout(constant_id = 1) const int ROUTINE_MAX = 0;
-		
-		#ifdef ROUTINE_MIN
-			#undef ROUTINE_MIN
-		#endif
-		layout(constant_id = 2) const int ROUTINE_MIN = 0;
-		
-		#ifdef ROUTINE_AMIN
-			#undef ROUTINE_AMIN
-		#endif
-		layout(constant_id = 3) const int ROUTINE_AMIN = 0;
+	#ifdef ROUTINE_AMIN
+		#undef ROUTINE_AMIN
 	#endif
+	layout(constant_id = 3) const int ROUTINE_AMIN = 0;
 #else
-	#ifndef WGS1
-		#define WGS1 64		 // The local work-group size of the main kernel
+	// no way to extract routine information yet. whyyyyy
+	#ifndef ROUTINE_MAX
+		#define ROUTINE_MAX 0
 	#endif
-	#ifndef WGS2
-		#define WGS2 64		 // The local work-group size of the epilogue kernel
+	#ifndef ROUTINE_MIN
+		#define ROUTINE_MIN 0
 	#endif
-#endif
-
-// no way to extract routine information yet. whyyyyy
-#ifndef ROUTINE_MAX
-	#define ROUTINE_MAX 0
-#endif
-#ifndef ROUTINE_MIN
-	#define ROUTINE_MIN 0
-#endif
-#ifndef ROUTINE_AMIN
-	#define ROUTINE_AMIN 0
+	#ifndef ROUTINE_AMIN
+		#define ROUTINE_AMIN 0
+	#endif
 #endif
 
 // =================================================================================================
 
 // The main reduction kernel, performing the loading and the majority of the operation
-#if LEVEL1_USE_SPEC_CONSTANTS == 1
-	layout(local_size_x_id = 0) in;
-#else
-	layout(local_size_x = WGS1, local_size_y = 1, local_size_z = 1) in;
-#endif
+layout(local_size_x_id = 0) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) readonly buffer xgm_buf { real xgm[]; };

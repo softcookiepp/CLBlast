@@ -29,15 +29,13 @@ Xcol2im<T>::Xcol2im(Queue& queue, EventPointer event, const std::string& name)
 							{
 #if VULKAN_API
 	#include "../../kernels-vk-inline/levelx/col2im_kernel_normal.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/levelx/col2im_kernel_flip.glsl.inl"
 #else
 	#include "../../kernels/levelx/col2im.opencl"
 #endif
 							}
 #if VULKAN_API
 ,
- {"Xcol2imKernelNormal", "Xcol2imKernelFlip"}
+ {"Xcol2imKernelNormal"}
 #endif
 		) {
 }
@@ -53,7 +51,7 @@ void Xcol2im<T>::DoCol2im(const KernelMode kernel_mode, const size_t channels, c
 													const Buffer<T>& im_buffer, const size_t im_offset)
 {
 	// Flip the output along kernel_h and kernel_w, or not.
-	const auto kernel_name = (kernel_mode == KernelMode::kConvolution) ? "Xcol2imKernelFlip" : "Xcol2imKernelNormal";
+	const auto kernel_name = "Xcol2imKernelNormal";
 
 	// Makes sure all dimensions are larger than zero
 	if ((channels == 0) || (height == 0) || (width == 0)) {

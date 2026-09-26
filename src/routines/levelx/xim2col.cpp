@@ -28,8 +28,6 @@ Xim2col<T>::Xim2col(Queue& queue, EventPointer event, const std::string& name)
 		: Routine(queue, event, name, {"Copy"}, PrecisionValue<T>(), {},
 							{
 #if VULKAN_API
-	#include "../../kernels-vk-inline/levelx/im2col_kernel_flip.glsl.inl"
-	,
 	#include "../../kernels-vk-inline/levelx/im2col_kernel_normal.glsl.inl"
 #else
 	#include "../../kernels/levelx/im2col.opencl"
@@ -37,7 +35,7 @@ Xim2col<T>::Xim2col(Queue& queue, EventPointer event, const std::string& name)
 							}
 #if VULKAN_API
 ,
-	 {"Xim2colKernelFlip", "Xim2colKernelNormal"}
+	 {"Xim2colKernelNormal"}
 #endif
 			) {
 }
@@ -53,7 +51,7 @@ void Xim2col<T>::DoIm2col(const KernelMode kernel_mode, const size_t channels, c
 													const Buffer<T>& col_buffer, const size_t col_offset)
 {
 	// Flip the output along kernel_h and kernel_w, or not.
-	const auto kernel_name = (kernel_mode == KernelMode::kConvolution) ? "Xim2colKernelFlip" : "Xim2colKernelNormal";
+	const auto kernel_name = "Xim2colKernelNormal";
 
 	// Makes sure all dimensions are larger than zero
 	if ((channels == 0) || (height == 0) || (width == 0)) {

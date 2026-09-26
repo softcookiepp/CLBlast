@@ -669,6 +669,7 @@ R"(
 	#endif
 #endif
 
+// converting these into specialization constants seems to cause a lot of problems.
 #ifndef MDIMCD
 	#define MDIMCD 8		// Threads per workgroup in M-dimension (e.g. 8, 16, 32)
 #endif

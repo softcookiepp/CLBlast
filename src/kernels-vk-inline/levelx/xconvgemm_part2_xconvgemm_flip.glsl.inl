@@ -672,45 +672,60 @@ R"(
 // this kernel file is used outside of the CLBlast library. Note that all parameters here have a
 // suffix 'D' to denote that they are for the 'direct' version of the GEMM kernel.
 
-#if 1
+#ifndef USE_SPEC_CONSTANTS
+	#define USE_SPEC_CONSTANTS 1
+#endif
+
+#if USE_SPEC_CONSTANTS == 1
 	#ifdef WGD
 		#undef WGD
 	#endif
-	layout(constant_id = 0) const int WGD = 8;
+	layout(constant_id = 0) const int WGD = 8; // Tile-size in dimension M, N, and K (e.g. 8, 16, 32, 64)
 	
-	// put workgroup spec constants here later
+	#ifdef MDIMCD
+		#undef MDIMCD
+	#endif
+	layout(constant_id = 1) const int MDIMCD = 8;// Threads per workgroup in M-dimension (e.g. 8, 16, 32)
+	
+	#ifdef NDIMCD
+		#undef NDIMCD
+	#endif
+	layout(constant_id = 2) const int NDIMCD = 8; // Threads per workgroup in N-dimension (e.g. 8, 16, 32)
 	
 	#ifdef MDIMAD
 		#undef MDIMAD
 	#endif
-	layout(constant_id = 1) const int MDIMAD = 8;
+	layout(constant_id = 3) const int MDIMAD = 8; // Re-shaped tile dimension of matrix A: KDIMAD * MDIMAD
 	
 	#ifdef NDIMBD
 		#undef NDIMBD
 	#endif
-	layout(constant_id = 2) const int NDIMBD = 8;
+	layout(constant_id = 4) const int NDIMBD = 8; // Re-shaped tile dimension of matrix B: KDIMBD * NDIMBD
 	
 	#ifdef KWID
 		#undef KWID
 	#endif
-	layout(constant_id = 3) const int KWID = 1;
+	layout(constant_id = 5) const int KWID = 1; // Unroll factor of the WGD loop (smaller or equal than WGD)
 	
 	#ifdef PADA
 		#undef PADA
 	#endif
-	layout(constant_id = 4) const int PADA = 1;
+	layout(constant_id = 6) const int PADA = 1; // Local memory padding for matrix A
 	
 	#ifdef PADB
 		#undef PADB
 	#endif
-	layout(constant_id = 5) const int PADB = 1;
+	layout(constant_id = 7) const int PADB = 1; // Local memory padding for matrix B
 #else
 	#ifndef WGD
 		#define WGD 8			// Tile-size in dimension M, N, and K (e.g. 8, 16, 32, 64)
 	#endif
-	
-	
-	
+	#ifndef MDIMCD
+		#define MDIMCD 8		// Threads per workgroup in M-dimension (e.g. 8, 16, 32)
+	#endif
+	#ifndef NDIMCD
+		#define NDIMCD 8		// Threads per workgroup in N-dimension (e.g. 8, 16, 32)
+	#endif
 	#ifndef MDIMAD
 		#define MDIMAD 8		// Re-shaped tile dimension of matrix A: KDIMAD * MDIMAD
 	#endif
@@ -726,13 +741,6 @@ R"(
 	#ifndef PADB
 		#define PADB 1			// Local memory padding for matrix B
 	#endif
-#endif
-
-#ifndef MDIMCD
-	#define MDIMCD 8		// Threads per workgroup in M-dimension (e.g. 8, 16, 32)
-#endif
-#ifndef NDIMCD
-	#define NDIMCD 8		// Threads per workgroup in N-dimension (e.g. 8, 16, 32)
 #endif
 
 // these can't be controlled by specialization constants without other major changes
@@ -885,8 +893,6 @@ R"(
 
 // =================================================================================================
 
-
-layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
 // =================================================================================================
 
 // because preprocessor conditions and function-like macros don't like each other...
@@ -1102,6 +1108,10 @@ ivec2 getIndexForGlobalToLocalN()
 
 // =================================================================================================
 
+	layout(
+		local_size_x_id = 1, // MDIMCD,
+		local_size_y_id = 2, // NDIMCD,
+		local_size_z = 1) in;
 // =================================================================================================
 
 // Loads global off-chip memory into thread-private register files. This function is specific for
@@ -1132,16 +1142,10 @@ ivec2 getIndexForGlobalToLocalN()
 // get indices for the below function
 ivec2 get_la0_la1()
 {
-	#if MDIMCD == MDIMAD
+	if (MDIMCD == MDIMAD)
 		return ivec2(get_local_id(0), get_local_id(1));
-		// const int la0 = get_local_id(0);
-		// const int la1 = get_local_id(1);
-	#else
-		const int tid = get_local_id(0) + MDIMCD*get_local_id(1);
-		//const int la0 = tid % MDIMAD;
-		//const int la1 = tid / MDIMAD;
-		return ivec2(tid % MDIMAD, tid / MDIMAD);
-	#endif
+	const int tid = get_local_id(0) + MDIMCD*get_local_id(1);
+	return ivec2(tid % MDIMAD, tid / MDIMAD);
 }
 
 // Loads global off-chip memory into local (shared) memory on-chip. This function is specific for

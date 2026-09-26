@@ -681,6 +681,7 @@ R"(
 	#endif
 #endif
 
+// converting these into specialization constants seems to cause a lot of problems.
 #ifndef MDIMCD
 	#define MDIMCD 8		// Threads per workgroup in M-dimension (e.g. 8, 16, 32)
 #endif
@@ -839,7 +840,7 @@ R"(
 // =================================================================================================
 
 
-layout(local_size_x = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
+layout(local_size_x_id = MDIMCD, local_size_y = NDIMCD, local_size_z = 1) in;
 // =================================================================================================
 
 // because preprocessor conditions and function-like macros don't like each other...

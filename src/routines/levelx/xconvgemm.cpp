@@ -195,7 +195,8 @@ void Xconvgemm<T>::DoConvgemm(const KernelMode kernel_mode, const size_t channel
 	const std::vector<uint32_t> spec({
 		db_["WGD"],
 		// workgroup size ones go here
-		//db_["MDIMCD"],
+		db_["MDIMCD"],
+		db_["NDIMCD"],
 		
 		db_["MDIMAD"],
 		db_["NDIMBD"],

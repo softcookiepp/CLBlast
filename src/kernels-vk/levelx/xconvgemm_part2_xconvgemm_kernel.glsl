@@ -14,7 +14,11 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
-#include "xconvgemm_direct_part2.glsl"
+#include "../level3/xgemm_direct_part2.glsl"
+	layout(
+		local_size_x_id = 1, // MDIMCD,
+		local_size_y_id = 2, // NDIMCD,
+		local_size_z = 1) in;
 // =================================================================================================
 
 // ConvGEMM kernel

@@ -17,7 +17,11 @@
 #ifndef XCONVGEMM_PART1_GLSL
 #define XCONVGEMM_PART1_GLSL
 
-#include "xconvgemm_direct_part2.glsl"
+#include "../level3/xgemm_direct_part2.glsl"
+	layout(
+		local_size_x_id = 1, // MDIMCD,
+		local_size_y_id = 2, // NDIMCD,
+		local_size_z = 1) in;
 // =================================================================================================
 
 // Loads global off-chip memory into thread-private register files. This function is specific for
@@ -48,16 +52,10 @@
 // get indices for the below function
 ivec2 get_la0_la1()
 {
-	#if MDIMCD == MDIMAD
+	if (MDIMCD == MDIMAD)
 		return ivec2(get_local_id(0), get_local_id(1));
-		// const int la0 = get_local_id(0);
-		// const int la1 = get_local_id(1);
-	#else
-		const int tid = get_local_id(0) + MDIMCD*get_local_id(1);
-		//const int la0 = tid % MDIMAD;
-		//const int la1 = tid / MDIMAD;
-		return ivec2(tid % MDIMAD, tid / MDIMAD);
-	#endif
+	const int tid = get_local_id(0) + MDIMCD*get_local_id(1);
+	return ivec2(tid % MDIMAD, tid / MDIMAD);
 }
 
 // Loads global off-chip memory into local (shared) memory on-chip. This function is specific for

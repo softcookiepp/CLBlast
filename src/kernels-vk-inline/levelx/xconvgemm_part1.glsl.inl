@@ -1078,10 +1078,11 @@ ivec2 getIndexForGlobalToLocalN()
 
 // =================================================================================================
 
-	layout(
-		local_size_x_id = 1, // MDIMCD,
-		local_size_y_id = 2, // NDIMCD,
-		local_size_z = 1) in;
+layout(constant_id = 8) const bool KERNEL_FLIP = false;
+layout(
+	local_size_x_id = 1, // MDIMCD,
+	local_size_y_id = 2, // NDIMCD,
+	local_size_z = 1) in;
 // =================================================================================================
 
 // Loads global off-chip memory into thread-private register files. This function is specific for

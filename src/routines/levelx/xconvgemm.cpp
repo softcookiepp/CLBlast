@@ -37,9 +37,6 @@ Xconvgemm<T>::Xconvgemm(Queue& queue, EventPointer event, const std::string& nam
 	,
 	// normal
 	#include "../../kernels-vk-inline/levelx/xconvgemm_part2_xconvgemm_normal.glsl.inl"
-	,
-	// flip
-	#include "../../kernels-vk-inline/levelx/xconvgemm_part2_xconvgemm_flip.glsl.inl"
 #else
 	(method == ConvGemmMethod::kWithIm2Col) ? "#define CONVGEMM_WITH_IM2COL\n" : "",
 	#include "../../kernels/level3/level3.opencl"
@@ -58,8 +55,7 @@ Xconvgemm<T>::Xconvgemm(Queue& queue, EventPointer event, const std::string& nam
 		
 			{
 				"Xconvgemm",
-				"XconvgemmNormal",
-				"XconvgemmFlip"
+				"XconvgemmNormal"
 			}
 #endif
 		),
@@ -139,7 +135,7 @@ void Xconvgemm<T>::DoConvgemm(const KernelMode kernel_mode, const size_t channel
 	}
 	
 	// Retrieves the proper XgemmDirect kernel from the compiled binary
-	const std::string kernel_name = (method_ == ConvGemmMethod::kWithIm2Col) ? "Xconvgemm" : (kernel_mode == KernelMode::kConvolution) ? "XconvgemmFlip" : "XconvgemmNormal";
+	const std::string kernel_name = (method_ == ConvGemmMethod::kWithIm2Col) ? "Xconvgemm" : "XconvgemmNormal";
 	auto kernelOld = Kernel(program_, kernel_name);
 	tart::kernel_ptr kernel = kernelOld.get();
 	
@@ -192,7 +188,7 @@ void Xconvgemm<T>::DoConvgemm(const KernelMode kernel_mode, const size_t channel
 	const auto global = std::vector<uint32_t>{m_ceiled / db_["WGD"], (n_ceiled) / db_["WGD"], batch_count};
 	//const auto local = std::vector<size_t>{db_["MDIMCD"], db_["NDIMCD"], 1};
 	
-	const std::vector<uint32_t> spec({
+	std::vector<uint32_t> spec({
 		db_["WGD"],
 		// workgroup size ones go here
 		db_["MDIMCD"],
@@ -204,6 +200,8 @@ void Xconvgemm<T>::DoConvgemm(const KernelMode kernel_mode, const size_t channel
 		db_["PADA"],
 		db_["PADB"]
 	});
+	if (method_ != ConvGemmMethod::kWithIm2Col) // extra spec constant required
+		spec.push_back(static_cast<uint32_t>(kernel_mode == KernelMode::kConvolution));
 	
 	// Launches the kernel
 	kernel->enqueue(global, spec);

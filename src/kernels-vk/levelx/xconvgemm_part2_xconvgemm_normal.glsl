@@ -42,7 +42,7 @@ layout(push_constant, std430) uniform XconvgemmNormal
 
 void main()										 
 {
-	const bool kernel_flip = false;
+	const bool kernel_flip = KERNEL_FLIP;
 	Xconvgemm(num_patches, num_kernels, patch_size,
 #if USE_BDA
 		kernelgm,

@@ -59,8 +59,10 @@ void Xamax<T>::DoAmax(const size_t n, const Buffer<unsigned int>& imax_buffer, c
 	TestVectorIndex(1, imax_buffer, imax_offset);
 
 	// Retrieves the Xamax kernels from the compiled binary
-	auto kernel1 = Kernel(program_, "Xamax");
-	auto kernel2 = Kernel(program_, "XamaxEpilogue");
+	auto kernel1Old = Kernel(program_, "Xamax");
+	tart::kernel_ptr kernel1 = kernel1Old.get();
+	auto kernel2Old = Kernel(program_, "XamaxEpilogue");
+	tart::kernel_ptr kernel2 = kernel2Old.get();
 
 	// Creates the buffer for intermediate values
 	auto temp_size = 2 * db_["WGS2"];
@@ -72,53 +74,54 @@ void Xamax<T>::DoAmax(const size_t n, const Buffer<unsigned int>& imax_buffer, c
 	const tart::DeviceMetadata meta& = device_()->getMetadata();
 	if (meta.bda)
 	{
-		kernel1.SetArgument(0, static_cast<int>(n));
-		kernel1.SetArgument(1, x_buffer()->getAddress() + x_offset*sizeof(T));
-		kernel1.SetArgument(2, static_cast<int>(0));
-		kernel1.SetArgument(3, static_cast<int>(x_inc));
-		kernel1.SetArgument(4, temp_buffer1()->getAddress());
-		kernel1.SetArgument(5, temp_buffer2()->getAddress());
+		kernel1->setArg(0, static_cast<int>(n));
+		kernel1->setArg(1, x_buffer()->getAddress() + x_offset*sizeof(T));
+		kernel1->setArg(2, static_cast<int>(0));
+		kernel1->setArg(3, static_cast<int>(x_inc));
+		kernel1->setArg(4, temp_buffer1()->getAddress());
+		kernel1->setArg(5, temp_buffer2()->getAddress());
 	}
 	else
 #endif
 	{
-		kernel1.SetArgument(0, static_cast<int>(n));
-		kernel1.SetArgument(1, x_buffer());
-		kernel1.SetArgument(2, static_cast<int>(x_offset));
-		kernel1.SetArgument(3, static_cast<int>(x_inc));
-		kernel1.SetArgument(4, temp_buffer1());
-		kernel1.SetArgument(5, temp_buffer2());
+		kernel1->setArg(0, static_cast<int>(n));
+		kernel1->setArg(1, x_buffer());
+		kernel1->setArg(2, static_cast<int>(x_offset));
+		kernel1->setArg(3, static_cast<int>(x_inc));
+		kernel1->setArg(4, temp_buffer1());
+		kernel1->setArg(5, temp_buffer2());
 	}
 
 	// Launches the main kernel
-	auto global1 = std::vector<size_t>{db_["WGS1"] * temp_size};
-	auto local1 = std::vector<size_t>{db_["WGS1"]};
+	//auto global1 = std::vector<size_t>{db_["WGS1"] * temp_size};
+	auto global1 = std::vector<uint32_t>{temp_size};
+	//auto local1 = std::vector<size_t>{db_["WGS1"]};
 	
 	// the number of workgroups in the X dimension
-	int num_groups_0 = static_cast<int>(global1[0]/local1[0]);
-	kernel1.SetArgument(6, num_groups_0);
-
-	RunKernel(kernel1, queue_, device_, global1, local1);
+	int num_groups_0 = static_cast<int>(global1[0]);
+	kernel1->setArg(6, num_groups_0);
+	
+	kernel1->enqueue(global1, {db_["WGS1"]});
+	//RunKernel(kernel1, queue_, device_, global1, local1);
 
 	// Sets the arguments for the epilogue kernel
 #if VULKAN_USE_BDA
-	kernel2.SetArgument(0, temp_buffer1()->getAddress());
-	kernel2.SetArgument(1, temp_buffer2()->getAddress());
-	kernel2.SetArgument(2, imax_buffer()->getAddress());
-	kernel2.SetArgument(3, static_cast<int>(imax_offset));
+	kernel2->setArg(0, temp_buffer1()->getAddress());
+	kernel2->setArg(1, temp_buffer2()->getAddress());
+	kernel2->setArg(2, imax_buffer()->getAddress());
+	kernel2->setArg(3, static_cast<int>(imax_offset));
 #else
-	kernel2.SetArgument(0, temp_buffer1());
-	kernel2.SetArgument(1, temp_buffer2());
-	kernel2.SetArgument(2, imax_buffer());
-	kernel2.SetArgument(3, static_cast<int>(imax_offset));
+	kernel2->setArg(0, temp_buffer1());
+	kernel2->setArg(1, temp_buffer2());
+	kernel2->setArg(2, imax_buffer());
+	kernel2->setArg(3, static_cast<int>(imax_offset));
 #endif
 
 	// Launches the epilogue kernel
-	auto global2 = std::vector<size_t>{db_["WGS2"]};
+	//auto global2 = std::vector<size_t>{db_["WGS2"]};
+	auto global2 = std::vector<uint32_t>{1};
 	auto local2 = std::vector<size_t>{db_["WGS2"]};
-	RunKernel(kernel2, queue_, device_, global2, local2);
-	
-	
+	kernel2->enqueue(global2, {db_["WGS2"]});
 }
 
 // =================================================================================================

@@ -23,33 +23,20 @@
 #endif
 layout(constant_id = 0) const int WGS1 = 64; // The local work-group size of the main kernel
 
-#if 1 // need to make these parameters accessible
-	#ifdef ROUTINE_MAX
-		#undef ROUTINE_MAX
-	#endif
-	layout(constant_id = 1) const int ROUTINE_MAX = 0;
-	
-	#ifdef ROUTINE_MIN
-		#undef ROUTINE_MIN
-	#endif
-	layout(constant_id = 2) const int ROUTINE_MIN = 0;
-	
-	#ifdef ROUTINE_AMIN
-		#undef ROUTINE_AMIN
-	#endif
-	layout(constant_id = 3) const int ROUTINE_AMIN = 0;
-#else
-	// no way to extract routine information yet. whyyyyy
-	#ifndef ROUTINE_MAX
-		#define ROUTINE_MAX 0
-	#endif
-	#ifndef ROUTINE_MIN
-		#define ROUTINE_MIN 0
-	#endif
-	#ifndef ROUTINE_AMIN
-		#define ROUTINE_AMIN 0
-	#endif
+#ifdef ROUTINE_MAX
+	#undef ROUTINE_MAX
 #endif
+layout(constant_id = 1) const int ROUTINE_MAX = 0;
+
+#ifdef ROUTINE_MIN
+	#undef ROUTINE_MIN
+#endif
+layout(constant_id = 2) const int ROUTINE_MIN = 0;
+
+#ifdef ROUTINE_AMIN
+	#undef ROUTINE_AMIN
+#endif
+layout(constant_id = 3) const int ROUTINE_AMIN = 0;
 
 // =================================================================================================
 

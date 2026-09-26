@@ -191,20 +191,21 @@ void Xconvgemm<T>::DoConvgemm(const KernelMode kernel_mode, const size_t channel
 	//const auto global = std::vector<size_t>{(m_ceiled * db_["MDIMCD"]) / db_["WGD"], (n_ceiled * db_["NDIMCD"]) / db_["WGD"], batch_count};
 	const auto global = std::vector<uint32_t>{m_ceiled / db_["WGD"], (n_ceiled) / db_["WGD"], batch_count};
 	//const auto local = std::vector<size_t>{db_["MDIMCD"], db_["NDIMCD"], 1};
-	#if 0
+	
 	const std::vector<uint32_t> spec({
 		db_["WGD"],
-		db_["MDIMCD"],
-		db_["NDIMCD"],
+		// workgroup size ones go here
+		//db_["MDIMCD"],
+		
 		db_["MDIMAD"],
 		db_["NDIMBD"],
 		db_["KWID"],
 		db_["PADA"],
 		db_["PADB"]
 	});
-	#endif
+	
 	// Launches the kernel
-	kernel->enqueue(global, {});
+	kernel->enqueue(global, spec);
 	
 }
 

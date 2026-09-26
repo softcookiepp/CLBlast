@@ -14,9 +14,6 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
-#ifndef USE_SPEC_CONSTANTS
-	#define USE_SPEC_CONSTANTS 0
-#endif
 #include "xconvgemm_part2_xconvgemm_function.glsl"
 // =================================================================================================
 

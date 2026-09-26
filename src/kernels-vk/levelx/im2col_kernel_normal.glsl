@@ -12,79 +12,8 @@
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
 #include "../common.glsl"
-// Work-group size parameters re-used from the 'copy' kernel
-#ifndef COPY_DIMX
-	#define COPY_DIMX 8			// Local workgroup size in the first dimension (w)
-#endif
-#ifndef COPY_DIMY
-	#define COPY_DIMY 8			// Local workgroup size in the second dimension (h)
-#endif
-
-// =================================================================================================
-
-// buffer defs
-#if USE_BDA == 0
-	layout(binding = 0, std430) readonly buffer im_buffer_def { real im_buffer[]; }; 
-	layout(binding = 1, std430) writeonly buffer col_buffer_def { real col_buffer[]; }; 
-#endif
-
-// Main body of the kernel
-void Xim2col(const int input_h, const int input_w, const int channels,
-	const int output_h, const int output_w,
-	const int kernel_h, const int kernel_w,
-	const int pad_h, const int pad_w,
-	const int stride_h, const int stride_w,
-	const int dilation_h, const int dilation_w,
-	const bool kernel_flip,
-#if USE_BDA
-	const __global real* restrict im_buffer,
-#endif
-	const int im_offset,
-#if USE_BDA
-	__global real* col_buffer,
-#endif
-	const int col_offset)
-{
-
-	// Thread IDs
-	const int w_id = get_global_id(0); // image width, max 'output_w'
-	const int h_id = (get_global_id(1)) % output_h; // image height, max 'output_h'
-	const int c_id = (get_global_id(1)) / output_h; // input channels
-	if (h_id < output_h && w_id < output_w && c_id < channels) {
-
-		for (int kh_id = 0; kh_id < kernel_h; ++kh_id) { // kernel height
-			for (int kw_id = 0; kw_id < kernel_w; ++kw_id) { // kernel width
-
-				// Retrieves the input value
-				const int h_index = -pad_h + kh_id * dilation_h + stride_h * h_id;
-				const int w_index = -pad_w + kw_id * dilation_w + stride_w * w_id;
-				real val;
-				if (h_index >= 0 && h_index < input_h &&
-						w_index >= 0 && w_index < input_w) {
-					const int input_index = w_index + input_w * (h_index + input_h * c_id);
-					val = im_buffer[input_index + im_offset];
-				}
-				else {
-					SetToZero(val);
-				}
-
-				// Sets the output value
-				const int kernel_index = (kernel_flip)
-															 ? kernel_h * kernel_w - kw_id - kernel_w * kh_id - 1
-															 : kw_id + kernel_w * kh_id;
-				const int patch_index = w_id + output_w * h_id;
-				const int output_index = patch_index + kernel_index * output_w * output_h +
-																	c_id * output_w * output_h * kernel_h * kernel_w;
-				col_buffer[output_index + col_offset] = val;
-			}
-		}
-	}
-}
-
-// =================================================================================================
-
-// Kernel flip version of the Xim2col kernel (for convolution)
-layout(local_size_x = COPY_DIMX, local_size_y = COPY_DIMY, local_size_z = 1) in;
+#define ROUTINE_IM2COL 1
+#include "im2col_col2im_common.glsl"
 
 layout(push_constant) uniform Xim2colKernelNormal
 {

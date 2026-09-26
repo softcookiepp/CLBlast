@@ -522,7 +522,7 @@ R"(
 #endif
 layout(constant_id = 0) const int WGS1 = 64; // The local work-group size of the main kernel
 
-#if 0 // need to make these parameters accessible
+#if 1 // need to make these parameters accessible
 	#ifdef ROUTINE_MAX
 		#undef ROUTINE_MAX
 	#endif

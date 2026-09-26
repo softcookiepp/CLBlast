@@ -40,7 +40,11 @@ Xamax<T>::Xamax(Queue& queue, EventPointer event, const std::string& name)
 						
 							{"Xamax", "XamaxEpilogue"}
 #endif
-						) {
+						)
+{
+	mMax = static_cast<uint32_t>(name == "MAX");
+	mMin = static_cast<uint32_t>(name == "MIN");
+	mAmin = static_cast<uint32_t>(name == "AMIN");
 }
 
 // =================================================================================================
@@ -101,7 +105,7 @@ void Xamax<T>::DoAmax(const size_t n, const Buffer<unsigned int>& imax_buffer, c
 	int num_groups_0 = static_cast<int>(global1[0]);
 	kernel1->setArg(6, num_groups_0);
 	
-	kernel1->enqueue(global1, {db_["WGS1"]});
+	kernel1->enqueue(global1, {db_["WGS1"], mMax, mMin, mAmin});
 	//RunKernel(kernel1, queue_, device_, global1, local1);
 
 	// Sets the arguments for the epilogue kernel

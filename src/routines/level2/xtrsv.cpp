@@ -54,27 +54,26 @@ void Xtrsv<T>::Substitution(const Layout layout, const Triangle triangle, const 
 
 	// Retrieves the kernel from the compiled binary
 	const auto kernel_name = (is_upper) ? "trsv_backward" : "trsv_forward";
-	auto kernel = Kernel(program_, kernel_name);
-
+	auto kernelOld = Kernel(program_, kernel_name);
+	tart::kernel_ptr kernel = kernelOld.get();
+	
 	// Sets the kernel arguments
-	kernel.SetArgument(0, static_cast<int>(n));
-	kernel.SetArgument(1, a_buffer());
-	kernel.SetArgument(2, static_cast<int>(a_offset));
-	kernel.SetArgument(3, static_cast<int>(a_ld));
-	kernel.SetArgument(4, b_buffer());
-	kernel.SetArgument(5, static_cast<int>(b_offset));
-	kernel.SetArgument(6, static_cast<int>(b_inc));
-	kernel.SetArgument(7, x_buffer());
-	kernel.SetArgument(8, static_cast<int>(x_offset));
-	kernel.SetArgument(9, static_cast<int>(x_inc));
-	kernel.SetArgument(10, static_cast<int>(is_transposed));
-	kernel.SetArgument(11, static_cast<int>(is_unit_diagonal));
-	kernel.SetArgument(12, static_cast<int>(do_conjugate));
+	kernel->setArg(0, static_cast<int>(n));
+	kernel->setArg(1, a_buffer());
+	kernel->setArg(2, static_cast<int>(a_offset));
+	kernel->setArg(3, static_cast<int>(a_ld));
+	kernel->setArg(4, b_buffer());
+	kernel->setArg(5, static_cast<int>(b_offset));
+	kernel->setArg(6, static_cast<int>(b_inc));
+	kernel->setArg(7, x_buffer());
+	kernel->setArg(8, static_cast<int>(x_offset));
+	kernel->setArg(9, static_cast<int>(x_inc));
+	kernel->setArg(10, static_cast<int>(is_transposed));
+	kernel->setArg(11, static_cast<int>(is_unit_diagonal));
+	kernel->setArg(12, static_cast<int>(do_conjugate));
 
 	// Launches the kernel
-	const auto local = std::vector<size_t>{db_["TRSV_BLOCK_SIZE"]};
-	const auto global = std::vector<size_t>{Ceil(n, db_["TRSV_BLOCK_SIZE"])};
-	RunKernel(kernel, queue_, device_, global, local);
+	kernel->enqueue({1, 1, 1}, {db_["TRSV_BLOCK_SIZE"]});
 }
 
 // =================================================================================================

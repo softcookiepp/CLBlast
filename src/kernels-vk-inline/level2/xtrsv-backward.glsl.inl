@@ -512,16 +512,19 @@ R"(
 // =================================================================================================
 
 // =================================================================================================
-#ifndef ROUTINE_TRSV
-	#define ROUTINE_TRSV 1
-#endif
-#if defined(ROUTINE_TRSV)
 
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library.
 
-#ifndef TRSV_BLOCK_SIZE
-	#define TRSV_BLOCK_SIZE 32		// The block size for forward or backward substition
+#if 1
+	#ifdef TRSV_BLOCK_SIZE
+		#undef TRSV_BLOCK_SIZE
+	#endif
+	layout(constant_id = 0) const int TRSV_BLOCK_SIZE = 32; // The block size for forward or backward substition
+#else
+	#ifndef TRSV_BLOCK_SIZE
+		#define TRSV_BLOCK_SIZE 32
+	#endif
 #endif
 
 // buffers
@@ -533,7 +536,8 @@ R"(
 
 // =================================================================================================
 
-layout(local_size_x = TRSV_BLOCK_SIZE, local_size_y = 1, local_size_z = 1) in;
+//layout(local_size_x = TRSV_BLOCK_SIZE, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x_id = 0, local_size_y = 1, local_size_z = 1) in;
 
 layout(push_constant) uniform trsv_backward
 {
@@ -604,7 +608,6 @@ void main()
 	}
 }
 
-#endif
 // =================================================================================================
 
 // End of the C++11 raw string literal

@@ -511,6 +511,7 @@ R"(
 
 // =================================================================================================
 
+#define LEVEL2_USE_SPEC 0
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
@@ -716,7 +717,11 @@ real MatrixUpdate2Impl(const int id1, const int id2, const int max1, const int m
 #endif
 
 // Symmetric version of the rank-2 matrix update kernel (HER2, HPR2, SYR2, SPR2)
-layout(local_size_x = WGS1, local_size_y = WGS2, local_size_Z = 1) in;
+#if LEVEL2_USE_SPEC
+	layout(local_size_x_id = 0, local_size_y_id = 1) in;
+#else
+	layout(local_size_x = WGS1, local_size_y = WGS2, local_size_z = 1) in;
+#endif
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) buffer xgm_buf { real xgm[]; };

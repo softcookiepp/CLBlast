@@ -12,7 +12,7 @@
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
 #include "../common.glsl"
-#define LEVEL2_USE_SPEC 0
+#define LEVEL2_USE_SPEC 1
 #include "level2.glsl"
 // =================================================================================================
 

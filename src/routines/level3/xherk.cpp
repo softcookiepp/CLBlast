@@ -209,24 +209,46 @@ void Xherk<T, U>::HerkAB(const Layout layout, const Triangle triangle, const Tra
 	device_()->enqueueBarrier(barrierBuffers);
 
 	// Retrieves the XgemmUpper or XgemmLower kernel from the compiled binary
-	auto kernel = Kernel(program_, kernel_name);
-
+	auto kernelOld = Kernel(program_, kernel_name);
+	tart::kernel_ptr kernel = kernelOld.get();
+	
 	// Sets the kernel arguments
-	kernel.SetArgument(0, static_cast<int>(n_ceiled));
-	kernel.SetArgument(1, static_cast<int>(k_ceiled));
-	kernel.SetArgument(2, GetRealArg(complex_alpha));
-	kernel.SetArgument(3, GetRealArg(complex_beta));
-	kernel.SetArgument(4, a_temp());
-	kernel.SetArgument(5, b_temp());
-	kernel.SetArgument(6, c_temp());
+	kernel->setArg(0, static_cast<int>(n_ceiled));
+	kernel->setArg(1, static_cast<int>(k_ceiled));
+	kernel->setArg(2, GetRealArg(complex_alpha));
+	kernel->setArg(3, GetRealArg(complex_beta));
+	kernel->setArg(4, a_temp());
+	kernel->setArg(5, b_temp());
+	kernel->setArg(6, c_temp());
 
 	// Computes the global and local thread sizes
-	auto global = std::vector<size_t>{(n_ceiled * db_["MDIMC"]) / db_["MWG"], (n_ceiled * db_["NDIMC"]) / db_["NWG"]};
+	auto global = std::vector<uint32_t>{(n_ceiled) / db_["MWG"], (n_ceiled) / db_["NWG"]};
 	auto local = std::vector<size_t>{db_["MDIMC"], db_["NDIMC"]};
 
+	const bool subgroupSupported = this->device_()->getMetadata().subgroupAdd;
+	std::vector<uint> spec(subgroupSupported ? 16 : 15);
+	spec[0] = db_["GEMMK"];
+	spec[1] = db_["MWG"];
+	spec[2] = db_["NWG"];
+	spec[3] = db_["KWG"];
+	spec[4] = db_["MDIMC"];
+	spec[5] = db_["NDIMC"];
+	spec[6] = db_["MDIMA"];
+	spec[7] = db_["NDIMB"];
+	spec[8] = db_["KWI"];
+	spec[9] = db_["STRM"];
+	spec[10] = db_["STRN"];
+	spec[11] = db_["SA"];
+	spec[12] = db_["SB"];
+	spec[13] = db_["KREG"];
+	spec[14] = 1; // there is no db key for this for whatever reason
+	if (subgroupSupported)
+		spec[15] = 1; // this may actually not need to be a spec constant
+	
 	// Launches the kernel
-	RunKernel(kernel, queue_, device_, global, local);
-	device_()->enqueueBarrier( {a_temp(), b_temp(), c_temp()} );
+	kernel->enqueue(global, spec);
+	//RunKernel(kernel, queue_, device_, global, local);
+	//device_()->enqueueBarrier( {a_temp(), b_temp(), c_temp()} );
 
 	// Runs the post-processing kernel
 	const auto upper =

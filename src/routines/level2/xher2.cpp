@@ -72,29 +72,31 @@ void Xher2<T>::DoHer2(const Layout layout, const Triangle triangle, const size_t
 	TestVectorY(n, y_buffer, y_offset, y_inc);
 
 	// Retrieves the kernel from the compiled binary
-	auto kernel = Kernel(program_, "Xher2");
-
+	auto kernelOld = Kernel(program_, "Xher2");
+	tart::kernel_ptr kernel = kernelOld.get();
+	
 	// Sets the kernel arguments
-	kernel.SetArgument(0, static_cast<int>(n));
-	kernel.SetArgument(1, GetRealArg(alpha));
-	kernel.SetArgument(2, x_buffer());
-	kernel.SetArgument(3, static_cast<int>(x_offset));
-	kernel.SetArgument(4, static_cast<int>(x_inc));
-	kernel.SetArgument(5, y_buffer());
-	kernel.SetArgument(6, static_cast<int>(y_offset));
-	kernel.SetArgument(7, static_cast<int>(y_inc));
-	kernel.SetArgument(8, a_buffer());
-	kernel.SetArgument(9, static_cast<int>(a_offset));
-	kernel.SetArgument(10, static_cast<int>(a_ld));
-	kernel.SetArgument(11, static_cast<int>(is_upper));
-	kernel.SetArgument(12, static_cast<int>(is_rowmajor));
+	kernel->setArg(0, static_cast<int>(n));
+	kernel->setArg(1, GetRealArg(alpha));
+	kernel->setArg(2, x_buffer());
+	kernel->setArg(3, static_cast<int>(x_offset));
+	kernel->setArg(4, static_cast<int>(x_inc));
+	kernel->setArg(5, y_buffer());
+	kernel->setArg(6, static_cast<int>(y_offset));
+	kernel->setArg(7, static_cast<int>(y_inc));
+	kernel->setArg(8, a_buffer());
+	kernel->setArg(9, static_cast<int>(a_offset));
+	kernel->setArg(10, static_cast<int>(a_ld));
+	kernel->setArg(11, static_cast<int>(is_upper));
+	kernel->setArg(12, static_cast<int>(is_rowmajor));
 
 	// Launches the kernel
 	auto global_one = Ceil(CeilDiv(n, db_["WPT"]), db_["WGS1"]);
 	auto global_two = Ceil(CeilDiv(n, db_["WPT"]), db_["WGS2"]);
-	auto global = std::vector<size_t>{global_one, global_two};
+	auto global = std::vector<uint32_t>{global_one / db_["WGS1"], global_two / db_["WGS2"]};
 	auto local = std::vector<size_t>{db_["WGS1"], db_["WGS2"]};
-	RunKernel(kernel, queue_, device_, global, local);
+	//RunKernel(kernel, queue_, device_, global, local);
+	kernel->enqueue(global, {db_["WGS1"], db_["WGS2"], db_["WPT"]});
 }
 
 // =================================================================================================

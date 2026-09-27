@@ -15,20 +15,19 @@
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
 #include "../common.glsl"
+#define LEVEL1_USE_SPEC_CONSTANTS 1
 #include "level1.glsl"
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library.
-#ifndef WGS1
-	#define WGS1 64		 // The local work-group size of the main kernel
+#ifdef WGS1
+	#undef WGS1
 #endif
-#ifndef WGS2
-	#define WGS2 64		 // The local work-group size of the epilogue kernel
-#endif
+#define WGS1 WGS
 
 // =================================================================================================
 
 // The main reduction kernel, performing the multiplication and the majority of the operation
-layout(local_size_x = WGS1, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x_id = 0, local_size_y = 1, local_size_z = 1) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) buffer xgm_buf { real xgm[]; };

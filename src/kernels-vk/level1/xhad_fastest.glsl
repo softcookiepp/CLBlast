@@ -16,6 +16,7 @@
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
 #include "../common.glsl"
+#define LEVEL1_USE_SPEC_CONSTANTS 1
 #include "level1.glsl"
 // =================================================================================================
 
@@ -31,7 +32,7 @@ realV MultiplyVectorVector(realV cvec, const realV aval, const realV bvec) {
 
 // =================================================================================================
 
-layout(local_size_x = WGS, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x_id = 0, local_size_y = 1, local_size_z = 1) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) buffer xgm_buf { realV xgm[]; };

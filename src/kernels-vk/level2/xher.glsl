@@ -12,11 +12,14 @@
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
 #include "../common.glsl"
+#define LEVEL2_USE_SPEC 0
 #include "level2.glsl"
 // =================================================================================================
 
 // Symmetric version of the rank-1 matrix update kernel (HER, HPR, SYR, SPR)
-#if 1
+#if LEVEL2_USE_SPEC
+	layout(local_size_x_id = 0, local_size_y_id = 1) in;
+#else
 	layout(local_size_x = WGS1, local_size_y = WGS2, local_size_z = 1) in;
 #endif
 

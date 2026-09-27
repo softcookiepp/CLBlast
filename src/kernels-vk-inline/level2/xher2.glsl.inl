@@ -527,17 +527,35 @@ R"(
 
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library.
-
-#ifndef WGS1
-	#define WGS1 8		// The local work-group size in first dimension
+#ifndef LEVEL2_USE_SPEC
+	#define LEVEL2_USE_SPEC 0
 #endif
-#ifndef WGS2
-	#define WGS2 8		// The local work-group size in second dimension
+#if LEVEL2_USE_SPEC
+	#ifdef WGS1
+		#undef WGS1		// The local work-group size in first dimension
+	#endif
+	layout(constant_id = 0) const int WGS1 = 8;
+	
+	#ifdef WGS2
+		#undef WGS2		// The local work-group size in second dimension
+	#endif
+	layout(constant_id = 1) const int WGS2 = 8;
+	
+	#ifdef WPT
+		#undef WPT		 // The amount of work-per-thread in both dimensions
+	#endif
+	layout(constant_id = 2) const int WPT = 1;
+#else
+	#ifndef WGS1
+		#define WGS1 8		// The local work-group size in first dimension
+	#endif
+	#ifndef WGS2
+		#define WGS2 8		// The local work-group size in second dimension
+	#endif
+	#ifndef WPT
+		#define WPT 1		 // The amount of work-per-thread in both dimensions
+	#endif
 #endif
-#ifndef WPT
-	#define WPT 1		 // The amount of work-per-thread in both dimensions
-#endif
-
 // =================================================================================================
 
 // Returns an element from a vector

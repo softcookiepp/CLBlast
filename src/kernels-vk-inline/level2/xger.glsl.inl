@@ -512,6 +512,7 @@ R"(
 
 // =================================================================================================
 
+#define LEVEL2_USE_SPEC 0
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
@@ -528,17 +529,35 @@ R"(
 
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library.
-
-#ifndef WGS1
-	#define WGS1 8		// The local work-group size in first dimension
+#ifndef LEVEL2_USE_SPEC
+	#define LEVEL2_USE_SPEC 0
 #endif
-#ifndef WGS2
-	#define WGS2 8		// The local work-group size in second dimension
+#if LEVEL2_USE_SPEC
+	#ifdef WGS1
+		#undef WGS1		// The local work-group size in first dimension
+	#endif
+	layout(constant_id = 0) const int WGS1 = 8;
+	
+	#ifdef WGS2
+		#undef WGS2		// The local work-group size in second dimension
+	#endif
+	layout(constant_id = 1) const int WGS2 = 8;
+	
+	#ifdef WPT
+		#undef WPT		 // The amount of work-per-thread in both dimensions
+	#endif
+	layout(constant_id = 2) const int WPT = 1;
+#else
+	#ifndef WGS1
+		#define WGS1 8		// The local work-group size in first dimension
+	#endif
+	#ifndef WGS2
+		#define WGS2 8		// The local work-group size in second dimension
+	#endif
+	#ifndef WPT
+		#define WPT 1		 // The amount of work-per-thread in both dimensions
+	#endif
 #endif
-#ifndef WPT
-	#define WPT 1		 // The amount of work-per-thread in both dimensions
-#endif
-
 // =================================================================================================
 
 // Returns an element from a vector
@@ -692,8 +711,11 @@ real MatrixUpdate2Impl(const int id1, const int id2, const int max1, const int m
 // =================================================================================================
 
 // Regular version of the rank-1 matrix update kernel (GER, GERU, GERC)
-
-layout(local_size_x = WGS1, local_size_y = WGS2, local_size_z = 1) in;
+#if LEVEL2_USE_SPEC
+	layout(local_size_x_id = 0, local_size_y_id = 1) in;
+#else
+	layout(local_size_x = WGS1, local_size_y = WGS2, local_size_z = 1) in;
+#endif
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) buffer xgm_buf { real xgm[]; };

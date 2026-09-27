@@ -15,7 +15,6 @@
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
 #include "../common.glsl"
-#define LEVEL1_USE_SPEC_CONSTANTS 1
 #include "level1.glsl"
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library.

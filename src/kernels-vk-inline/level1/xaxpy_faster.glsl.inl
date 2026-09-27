@@ -515,7 +515,6 @@ R"(
 
 // =================================================================================================
 
-#define LEVEL1_USE_SPEC_CONSTANTS 1
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
@@ -1035,28 +1034,16 @@ R"(
 
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library.
-#ifndef LEVEL1_USE_SPEC_CONSTANTS
-	#define LEVEL1_USE_SPEC_CONSTANTS 0
+#ifdef WGS 
+	#undef WGS
 #endif
-#if LEVEL1_USE_SPEC_CONSTANTS == 1
-	#ifdef WGS 
-		#undef WGS
-	#endif
-	layout(constant_id = 0) const int WGS = 64; // The local work-group size
-	
-	#ifdef WPT
-		#undef WPT
-	#endif
-	layout(constant_id = 1) const int WPT = 1; // The amount of work-per-thread
-#else
-	#ifndef WGS
-		#define WGS 64		 // The local work-group size
-	#endif
-	#ifndef WPT
-		#define WPT 1			// The amount of work-per-thread
-	#endif
-	
+layout(constant_id = 0) const int WGS = 64; // The local work-group size
+
+#ifdef WPT
+	#undef WPT
 #endif
+layout(constant_id = 1) const int WPT = 1; // The amount of work-per-thread
+
 
 #ifndef VW
 	#define VW 1			 // Vector width of vectors X and Y
@@ -1114,11 +1101,7 @@ realV MultiplyAddVector(realV cvec, const real aval, const realV bvec) {
 
 // Faster version of the kernel without offsets and strided accesses but with if-statement. Also
 // assumes that 'n' is dividable by 'VW' and 'WPT'.
-#if LEVEL1_USE_SPEC_CONSTANTS == 1
-	layout(local_size_x_id = 0) in;
-#else
-	layout(local_size_x = WGS, local_size_y = 1, local_size_z = 1) in;
-#endif
+layout(local_size_x_id = 0) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) readonly buffer xgm_buf { realV xgm[]; };

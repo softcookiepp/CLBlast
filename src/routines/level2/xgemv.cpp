@@ -20,7 +20,8 @@
 #include "utilities/clblast_exceptions.hpp"
 #include "utilities/utilities.hpp"
 
-namespace clblast {
+namespace clblast
+{
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
@@ -60,6 +61,16 @@ Xgemv<T>::Xgemv(Queue& queue, EventPointer event, const std::string& name)
 #endif
 	)
 {
+	mGBMV = (name == "GBMV");
+	mHEMV = (name == "HEMV");
+	mSYMV = (name == "SYMV");
+	mTRMV = (name == "TRMV");
+	mHBMV = (name == "HBMV");
+	mSBMV = (name == "SBMV");
+	mTBMV = (name == "TBMV");
+	mHPMV = (name == "HPMV");
+	mSPMV = (name == "SPMV");
+	mTPMV = (name == "TPMV");
 }
 
 // =================================================================================================
@@ -143,60 +154,96 @@ void Xgemv<T>::MatVec(const Layout layout, const Transpose a_transpose, const si
 	}
 
 	// Retrieves the Xgemv kernel from the compiled binary
-	auto kernel = Kernel(program_, kernel_name);
+	auto kernelOld = Kernel(program_, kernel_name);
+	tart::kernel_ptr kernel = kernelOld.get();
 	
 #if VULKAN_API
 	if (fast_kernel || fast_kernel_rot)
 	{
 		// Sets the kernel arguments
 		// some are unused if fast_kernel or fast_kernel_rot is true
-		kernel.SetArgument(0, static_cast<int>(m_real));
-		kernel.SetArgument(1, static_cast<int>(n_real));
-		kernel.SetArgument(2, GetRealArg(alpha));
-		kernel.SetArgument(3, GetRealArg(beta));
-		//kernel.SetArgument(4, static_cast<int>(a_rotated));
-		kernel.SetArgument(5, a_buffer());
-		//kernel.SetArgument(6, static_cast<int>(a_offset));
-		kernel.SetArgument(7, static_cast<int>(a_ld));
-		kernel.SetArgument(8, x_buffer());
-		kernel.SetArgument(9, static_cast<int>(x_offset));
-		kernel.SetArgument(10, static_cast<int>(x_inc));
-		kernel.SetArgument(11, y_buffer());
-		kernel.SetArgument(12, static_cast<int>(y_offset));
-		kernel.SetArgument(13, static_cast<int>(y_inc));
-		//kernel.SetArgument(14, static_cast<int>(a_conjugate));
-		//kernel.SetArgument(15, static_cast<int>(parameter));	// extra parameter used for symm/herm
-		//kernel.SetArgument(16, static_cast<int>(kl));				 // only used for banded matrices
-		//kernel.SetArgument(17, static_cast<int>(ku));				 // only used for banded matrices
+		kernel->setArg(0, static_cast<int>(m_real));
+		kernel->setArg(1, static_cast<int>(n_real));
+		kernel->setArg(2, GetRealArg(alpha));
+		kernel->setArg(3, GetRealArg(beta));
+		//kernel->setArg(4, static_cast<int>(a_rotated));
+		kernel->setArg(5, a_buffer());
+		//kernel->setArg(6, static_cast<int>(a_offset));
+		kernel->setArg(7, static_cast<int>(a_ld));
+		kernel->setArg(8, x_buffer());
+		kernel->setArg(9, static_cast<int>(x_offset));
+		kernel->setArg(10, static_cast<int>(x_inc));
+		kernel->setArg(11, y_buffer());
+		kernel->setArg(12, static_cast<int>(y_offset));
+		kernel->setArg(13, static_cast<int>(y_inc));
+		//kernel->setArg(14, static_cast<int>(a_conjugate));
+		//kernel->setArg(15, static_cast<int>(parameter));	// extra parameter used for symm/herm
+		//kernel->setArg(16, static_cast<int>(kl));				 // only used for banded matrices
+		//kernel->setArg(17, static_cast<int>(ku));				 // only used for banded matrices
 	}
 	else
 #endif
 	{
 		// Sets the kernel arguments
-		kernel.SetArgument(0, static_cast<int>(m_real));
-		kernel.SetArgument(1, static_cast<int>(n_real));
-		kernel.SetArgument(2, GetRealArg(alpha));
-		kernel.SetArgument(3, GetRealArg(beta));
-		kernel.SetArgument(4, static_cast<int>(a_rotated));
-		kernel.SetArgument(5, a_buffer());
-		kernel.SetArgument(6, static_cast<int>(a_offset));
-		kernel.SetArgument(7, static_cast<int>(a_ld));
-		kernel.SetArgument(8, x_buffer());
-		kernel.SetArgument(9, static_cast<int>(x_offset));
-		kernel.SetArgument(10, static_cast<int>(x_inc));
-		kernel.SetArgument(11, y_buffer());
-		kernel.SetArgument(12, static_cast<int>(y_offset));
-		kernel.SetArgument(13, static_cast<int>(y_inc));
-		kernel.SetArgument(14, static_cast<int>(a_conjugate));
-		kernel.SetArgument(15, static_cast<int>(parameter));	// extra parameter used for symm/herm
-		kernel.SetArgument(16, static_cast<int>(kl));				 // only used for banded matrices
-		kernel.SetArgument(17, static_cast<int>(ku));				 // only used for banded matrices
+		kernel->setArg(0, static_cast<int>(m_real));
+		kernel->setArg(1, static_cast<int>(n_real));
+		kernel->setArg(2, GetRealArg(alpha));
+		kernel->setArg(3, GetRealArg(beta));
+		kernel->setArg(4, static_cast<int>(a_rotated));
+		kernel->setArg(5, a_buffer());
+		kernel->setArg(6, static_cast<int>(a_offset));
+		kernel->setArg(7, static_cast<int>(a_ld));
+		kernel->setArg(8, x_buffer());
+		kernel->setArg(9, static_cast<int>(x_offset));
+		kernel->setArg(10, static_cast<int>(x_inc));
+		kernel->setArg(11, y_buffer());
+		kernel->setArg(12, static_cast<int>(y_offset));
+		kernel->setArg(13, static_cast<int>(y_inc));
+		kernel->setArg(14, static_cast<int>(a_conjugate));
+		kernel->setArg(15, static_cast<int>(parameter));	// extra parameter used for symm/herm
+		kernel->setArg(16, static_cast<int>(kl));				 // only used for banded matrices
+		kernel->setArg(17, static_cast<int>(ku));				 // only used for banded matrices
 	}
 
 	// Launches the kernel
-	auto global = std::vector<size_t>{global_size};
-	auto local = std::vector<size_t>{local_size};
-	RunKernel(kernel, queue_, device_, global, local);
+	auto global = std::vector<uint32_t>{global_size / local_size};
+	//auto local = std::vector<size_t>{local_size};
+	
+	std::vector<uint32_t> spec;
+	if (fast_kernel)
+	{
+		spec = {
+			db_["WGS2"],
+			db_["WPT2"]
+		};
+	}
+	else if (fast_kernel_rot)
+	{
+		spec = {
+			db_["WGS3"],
+			db_["WPT3"]
+		};
+	}
+	else
+	{
+		spec = {
+			db_["WGS1"],
+			db_["WPT1"],
+			32, //db_["UNROLL1"], // apparently this isn't in the database for whatever reason
+			mGBMV,
+			mHEMV,
+			mSYMV,
+			mTRMV,
+			mHBMV,
+			mSBMV,
+			mTBMV,
+			mHPMV,
+			mSPMV,
+			mTPMV
+		};
+	}
+	kernel->enqueue(global, spec);
+	//RunKernel(kernel, queue_, device_, global, local);
 }
 
 // =================================================================================================

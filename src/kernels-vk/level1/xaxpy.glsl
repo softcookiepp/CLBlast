@@ -16,16 +16,11 @@
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
 #include "../common.glsl"
-#define LEVEL1_USE_SPEC_CONSTANTS 1
 #include "level1.glsl"
 // =================================================================================================
 
 // Full version of the kernel with offsets and strided accesses
-#if LEVEL1_USE_SPEC_CONSTANTS == 1
-	layout(local_size_x_id = 0) in;
-#else
-	layout(local_size_x = WGS, local_size_y = 1, local_size_z = 1) in;
-#endif
+layout(local_size_x_id = 0) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) buffer xgm_buf { real xgm[]; };
@@ -36,14 +31,14 @@ layout(push_constant) uniform Xaxpy
 {
 	int n;
 	real_arg arg_alpha;
-#if USE_BDA
-	real_ptr_t xgm;
-#endif
+	#if USE_BDA
+		real_ptr_t xgm;
+	#endif
 	int x_offset;
 	int x_inc;
-#if USE_BDA
-	real_ptr_t ygm;
-#endif
+	#if USE_BDA
+		real_ptr_t ygm;
+	#endif
 	int y_offset;
 	int y_inc;
 };

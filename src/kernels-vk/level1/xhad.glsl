@@ -16,7 +16,6 @@
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
 #include "../common.glsl"
-#define LEVEL1_USE_SPEC_CONSTANTS 1
 #include "level1.glsl"
 // =================================================================================================
 

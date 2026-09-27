@@ -18,45 +18,112 @@
 // this kernel file is used outside of the CLBlast library.
 
 // 1: For the full version of the kernel
-#ifndef WGS1
-	#define WGS1 64		 // The local work-group size
-#endif
-#ifndef WPT1
-	#define WPT1 1			// The amount of work-per-thread
-#endif
-#ifndef UNROLL1
-	#define UNROLL1 32	// Unroll factor (must be a divider of WGS1)
-#endif
+#if 1
+	#ifdef WGS1
+		#undef WGS1
+	#endif
+	layout(constant_id = 0) const int WGS1 = 64;
+	
+	#ifdef WPT1
+		#undef WPT1
+	#endif
+	layout(constant_id = 1) const int WPT1 = 1;
+	
+	#ifdef UNROLL1
+		#undef UNROLL1
+	#endif
+	layout(constant_id = 2) const int UNROLL1 = 32;
+	
+	#ifdef ROUTINE_GBMV
+		#undef ROUTINE_GBMV
+	#endif
+	layout(constant_id = 3) const int ROUTINE_GBMV = 0;
+	
+	#ifdef ROUTINE_HEMV
+		#undef ROUTINE_HEMV
+	#endif
+	layout(constant_id = 4) const int ROUTINE_HEMV = 0;
+	
+	#ifdef ROUTINE_SYMV
+		#undef ROUTINE_SYMV
+	#endif
+	layout(constant_id = 5) const int ROUTINE_SYMV = 0;
+	
+	#ifdef ROUTINE_TRMV
+		#undef ROUTINE_TRMV
+	#endif
+	layout(constant_id = 6) const int ROUTINE_TRMV = 0;
+	
+	#ifdef ROUTINE_HBMV
+		#undef ROUTINE_HBMV
+	#endif
+	layout(constant_id = 7) const int ROUTINE_HBMV = 0;
+	
+	#ifdef ROUTINE_SBMV
+		#undef ROUTINE_SBMV
+	#endif
+	layout(constant_id = 8) const int ROUTINE_SBMV = 0;
+	
+	#ifdef ROUTINE_TBMV
+		#undef ROUTINE_TBMV
+	#endif
+	layout(constant_id = 9) const int ROUTINE_TBMV = 0;
+	
+	#ifdef ROUTINE_HPMV
+		#undef ROUTINE_HPMV
+	#endif
+	layout(constant_id = 10) const int ROUTINE_HPMV = 0;
+	
+	#ifdef ROUTINE_SPMV
+		#undef ROUTINE_SPMV
+	#endif
+	layout(constant_id = 11) const int ROUTINE_SPMV = 0;
+	
+	#ifdef ROUTINE_TPMV
+		#undef ROUTINE_TPMV
+	#endif
+	layout(constant_id = 12) const int ROUTINE_TPMV = 0;
+#else
+	#ifndef WGS1
+		#define WGS1 64		 // The local work-group size
+	#endif
+	#ifndef WPT1
+		#define WPT1 1			// The amount of work-per-thread
+	#endif
+	#ifndef UNROLL1
+		#define UNROLL1 32	// Unroll factor (must be a divider of WGS1)
+	#endif
 
-#ifndef ROUTINE_GBMV
-	#define ROUTINE_GBMV 0
-#endif
-#ifndef ROUTINE_HEMV
-	#define ROUTINE_HEMV 0
-#endif
-#ifndef ROUTINE_SYMV
-	#define ROUTINE_SYMV 0
-#endif
-#ifndef ROUTINE_TRMV
-	#define ROUTINE_TRMV 0
-#endif
-#ifndef ROUTINE_HBMV
-	#define ROUTINE_HBMV 0
-#endif
-#ifndef ROUTINE_SBMV
-	#define ROUTINE_SBMV 0
-#endif
-#ifndef ROUTINE_TBMV
-	#define ROUTINE_TBMV 0
-#endif
-#ifndef ROUTINE_HPMV
-	#define ROUTINE_HPMV 0
-#endif
-#ifndef ROUTINE_SPMV
-	#define ROUTINE_SPMV 0
-#endif
-#ifndef ROUTINE_TPMV
-	#define ROUTINE_TPMV 0
+	#ifndef ROUTINE_GBMV
+		#define ROUTINE_GBMV 0
+	#endif
+	#ifndef ROUTINE_HEMV
+		#define ROUTINE_HEMV 0
+	#endif
+	#ifndef ROUTINE_SYMV
+		#define ROUTINE_SYMV 0
+	#endif
+	#ifndef ROUTINE_TRMV
+		#define ROUTINE_TRMV 0
+	#endif
+	#ifndef ROUTINE_HBMV
+		#define ROUTINE_HBMV 0
+	#endif
+	#ifndef ROUTINE_SBMV
+		#define ROUTINE_SBMV 0
+	#endif
+	#ifndef ROUTINE_TBMV
+		#define ROUTINE_TBMV 0
+	#endif
+	#ifndef ROUTINE_HPMV
+		#define ROUTINE_HPMV 0
+	#endif
+	#ifndef ROUTINE_SPMV
+		#define ROUTINE_SPMV 0
+	#endif
+	#ifndef ROUTINE_TPMV
+		#define ROUTINE_TPMV 0
+	#endif
 #endif
 
 // buffer declarations
@@ -291,7 +358,7 @@ real LoadMatrixA(
 
 // Full version of the kernel
 #if 1
-	layout(local_size_x = WGS1, local_size_y = 1, local_size_z = 1) in;
+	layout(local_size_x_id = 0, local_size_y = 1, local_size_z = 1) in;
 #endif
 
 layout(push_constant) uniform Xgemv

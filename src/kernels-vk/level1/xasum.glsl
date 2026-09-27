@@ -26,7 +26,6 @@ layout(constant_id = 0) const int WGS1 = 64; // The local work-group size of the
 #ifdef WGS2
 	#undef WGS2
 #endif
-//layout(constant_id = 1) const int WGS2 = 64; // The local work-group size of the epilogue kernel
 
 #ifdef ROUTINE_SUM
 	#undef ROUTINE_SUM

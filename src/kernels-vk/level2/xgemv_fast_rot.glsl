@@ -22,12 +22,25 @@
 // 2: For the fast version see xgemv_fast.glsl
 
 // 3: For the fast rotated version
-#ifndef WGS3
-	#define WGS3 64		 // The local work-group size
+#if 1
+	#ifdef WGS3
+		#undef WGS3	// The local work-group size
+	#endif
+	layout(constant_id = 0) const int WGS3 = 64;
+	
+	#ifdef WPT3
+		#undef WPT3	// The tile-size
+	#endif
+	layout(constant_id = 1) const int WPT3 = 64;
+#else
+	#ifndef WGS3
+		#define WGS3 64		 // The local work-group size
+	#endif
+	#ifndef WPT3
+		#define WPT3 1			// The tile-size
+	#endif
 #endif
-#ifndef WPT3
-	#define WPT3 1			// The tile-size
-#endif
+
 #ifndef VW3
 	#define VW3 1			 // Vector width of matrix A loads
 #endif
@@ -61,7 +74,7 @@
 // --> 'a_ld' is a multiple of VW3
 // --> 'a_rotated' is 1
 // --> 'do_conjugate' is 0
-layout(local_size_x = WGS3, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x_id = 0, local_size_y = 1, local_size_z = 1) in;
 
 layout(push_constant) uniform XgemvFastRot
 {

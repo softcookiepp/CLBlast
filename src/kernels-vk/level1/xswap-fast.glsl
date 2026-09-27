@@ -14,7 +14,6 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
-#define LEVEL1_USE_SPEC_CONSTANTS 1
 #include "level1.glsl"
 // =================================================================================================
 

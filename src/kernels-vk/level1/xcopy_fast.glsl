@@ -16,17 +16,12 @@
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
 #include "../common.glsl"
-#define LEVEL1_USE_SPEC_CONSTANTS 1
 #include "level1.glsl"
 // =================================================================================================
 
 // Faster version of the kernel without offsets and strided accesses. Also assumes that 'n' is
 // dividable by 'VW', 'WGS' and 'WPT'.
-#if LEVEL1_USE_SPEC_CONSTANTS == 1
-	layout(local_size_x_id = 0) in;
-#else
-	layout(local_size_x = WGS, local_size_y = 1, local_size_z = 1) in;
-#endif
+layout(local_size_x_id = 0) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) buffer xgm_buf { realV xgm[]; }; 

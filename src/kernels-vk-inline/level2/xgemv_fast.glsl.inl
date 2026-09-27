@@ -516,15 +516,28 @@ R"(
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library.
 
-// 1: For the full version, see 'xgemv.opencl'
+// 1: For the full version, see 'xgemv.glsl'
 
 // 2: For the fast version
-#ifndef WGS2
-	#define WGS2 64		 // The local work-group size
+#if 1
+	#ifdef WGS2
+		#undef WGS2
+	#endif
+	layout(constant_id = 0) const int WGS2 = 64;
+	
+	#ifdef WPT2
+		#undef WPT2
+	#endif
+	layout(constant_id = 1) const int WPT2 = 1;
+#else
+	#ifndef WGS2
+		#define WGS2 64		 // The local work-group size
+	#endif
+	#ifndef WPT2
+		#define WPT2 1			// The amount of work-per-thread
+	#endif	
 #endif
-#ifndef WPT2
-	#define WPT2 1			// The amount of work-per-thread
-#endif
+
 #ifndef VW2
 	#define VW2 1			 // Vector width of matrix A loads
 #endif
@@ -559,9 +572,8 @@ R"(
 // --> 'a_ld' is a multiple of VW2
 // --> 'a_rotated' is 0
 // --> 'do_conjugate' is 0
-#if 1
-	layout(local_size_x = WGS2, local_size_y = 1, local_size_z = 1) in;
-#endif
+
+layout(local_size_x_id = 0, local_size_y = 1, local_size_z = 1) in;
 
 layout(push_constant) uniform XgemvFast
 {

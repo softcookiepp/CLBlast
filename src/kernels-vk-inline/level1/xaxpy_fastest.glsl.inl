@@ -515,6 +515,7 @@ R"(
 
 // =================================================================================================
 
+#define LEVEL1_USE_SPEC_CONSTANTS 1
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
@@ -1114,7 +1115,11 @@ realV MultiplyAddVector(realV cvec, const real aval, const realV bvec) {
 // Faster version of the kernel without offsets and strided accesses. Also assumes that 'n' is
 // dividable by 'VW', 'WGS' and 'WPT'.
 
-layout(local_size_x = WGS, local_size_y = 1, local_size_z = 1) in;
+#if LEVEL1_USE_SPEC_CONSTANTS == 1
+	layout(local_size_x_id = 0) in;
+#else
+	layout(local_size_x = WGS, local_size_y = 1, local_size_z = 1) in;
+#endif
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) readonly buffer xgm_buf { realV xgm[]; };

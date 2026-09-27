@@ -70,8 +70,9 @@ void Xaxpy<T>::DoAxpy(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 	const auto kernel_name = (use_fastest_kernel) ? "XaxpyFastest" : (use_faster_kernel) ? "XaxpyFaster" : "Xaxpy";
 
 	// Retrieves the Xaxpy kernel from the compiled binary
-	auto kernel = Kernel(program_, kernel_name);
-#if VULKAN_API
+	auto kernelOld = Kernel(program_, kernel_name);
+	tart::kernel_ptr kernel = kernelOld.get();
+
 	// Sets the kernel arguments
 	#if VULKAN_USE_BDA
 	tart::DeviceMetadata meta = device_()->getMetadata();
@@ -79,19 +80,19 @@ void Xaxpy<T>::DoAxpy(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 	{
 		if (use_faster_kernel || use_fastest_kernel)
 		{
-			if (!use_fastest_kernel) kernel.SetArgument(0, static_cast<int>(n));
-			kernel.SetArgument(1, GetRealArg(alpha));
-			kernel.SetArgument(2, x_buffer()->getAddress());
-			kernel.SetArgument(3, y_buffer()->getAddress());
+			if (!use_fastest_kernel) kernel->setArg(0, static_cast<int>(n));
+			kernel->setArg(1, GetRealArg(alpha));
+			kernel->setArg(2, x_buffer()->getAddress());
+			kernel->setArg(3, y_buffer()->getAddress());
 		} else {
-			kernel.SetArgument(0, static_cast<int>(n));
-			kernel.SetArgument(1, GetRealArg(alpha));
-			kernel.SetArgument(2, x_buffer()->getAddress() );
-			kernel.SetArgument(3, static_cast<int>(x_offset));
-			kernel.SetArgument(4, static_cast<int>(x_inc));
-			kernel.SetArgument(5, y_buffer()->getAddress() );
-			kernel.SetArgument(6, static_cast<int>(y_offset));
-			kernel.SetArgument(7, static_cast<int>(y_inc));
+			kernel->setArg(0, static_cast<int>(n));
+			kernel->setArg(1, GetRealArg(alpha));
+			kernel->setArg(2, x_buffer()->getAddress() );
+			kernel->setArg(3, static_cast<int>(x_offset));
+			kernel->setArg(4, static_cast<int>(x_inc));
+			kernel->setArg(5, y_buffer()->getAddress() );
+			kernel->setArg(6, static_cast<int>(y_offset));
+			kernel->setArg(7, static_cast<int>(y_inc));
 		}
 	}
 	else
@@ -99,61 +100,38 @@ void Xaxpy<T>::DoAxpy(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 	{
 		if (use_faster_kernel || use_fastest_kernel)
 		{
-			if (!use_fastest_kernel) kernel.SetArgument(0, static_cast<int>(n));
-			kernel.SetArgument(1, GetRealArg(alpha));
-			kernel.SetArgument(2, x_buffer());
-			kernel.SetArgument(3, y_buffer());
+			if (!use_fastest_kernel) kernel->setArg(0, static_cast<int>(n));
+			kernel->setArg(1, GetRealArg(alpha));
+			kernel->setArg(2, x_buffer());
+			kernel->setArg(3, y_buffer());
 		} else {
-			kernel.SetArgument(0, static_cast<int>(n));
-			kernel.SetArgument(1, GetRealArg(alpha));
-			kernel.SetArgument(2, x_buffer());
-			kernel.SetArgument(3, static_cast<int>(x_offset));
-			kernel.SetArgument(4, static_cast<int>(x_inc));
-			kernel.SetArgument(5, y_buffer());
-			kernel.SetArgument(6, static_cast<int>(y_offset));
-			kernel.SetArgument(7, static_cast<int>(y_inc));
+			kernel->setArg(0, static_cast<int>(n));
+			kernel->setArg(1, GetRealArg(alpha));
+			kernel->setArg(2, x_buffer());
+			kernel->setArg(3, static_cast<int>(x_offset));
+			kernel->setArg(4, static_cast<int>(x_inc));
+			kernel->setArg(5, y_buffer());
+			kernel->setArg(6, static_cast<int>(y_offset));
+			kernel->setArg(7, static_cast<int>(y_inc));
 		}
 	}
-	
-#else
-	// Sets the kernel arguments
-	if (use_faster_kernel || use_fastest_kernel)
-	{
-		kernel.SetArgument(0, static_cast<int>(n));
-		kernel.SetArgument(1, GetRealArg(alpha));
-		kernel.SetArgument(2, x_buffer());
-		kernel.SetArgument(3, y_buffer());
-	} else {
-		kernel.SetArgument(0, static_cast<int>(n));
-		kernel.SetArgument(1, GetRealArg(alpha));
-		kernel.SetArgument(2, x_buffer());
-		kernel.SetArgument(3, static_cast<int>(x_offset));
-		kernel.SetArgument(4, static_cast<int>(x_inc));
-		kernel.SetArgument(5, y_buffer());
-		kernel.SetArgument(6, static_cast<int>(y_offset));
-		kernel.SetArgument(7, static_cast<int>(y_inc));
-	}
-#endif
-	
-	// get working sequence
-	
 
 	// Launches the kernel
-	if (use_fastest_kernel) {
-		auto global = std::vector<size_t>{CeilDiv(n, db_["WPT"] * db_["VW"])};
-		auto local = std::vector<size_t>{db_["WGS"]};
-		RunKernel(kernel, queue_, device_, global, local);
-	} else if (use_faster_kernel) {
-		auto global = std::vector<size_t>{Ceil(CeilDiv(n, db_["WPT"] * db_["VW"]), db_["WGS"])};
-		auto local = std::vector<size_t>{db_["WGS"]};
-		RunKernel(kernel, queue_, device_, global, local);
-	} else {
-		const auto n_ceiled = Ceil(n, db_["WGS"] * db_["WPT"]);
-		auto global = std::vector<size_t>{n_ceiled / db_["WPT"]};
-		auto local = std::vector<size_t>{db_["WGS"]};
-		RunKernel(kernel, queue_, device_, global, local);
+	std::vector<uint32_t> global(3, 1);
+	if (use_fastest_kernel)
+	{
+		global[0] = CeilDiv(n, db_["WPT"] * db_["VW"])/db_["WGS"];
 	}
-	
+	else if (use_faster_kernel)
+	{
+		global[0] = Ceil(CeilDiv(n, db_["WPT"] * db_["VW"]), db_["WGS"])/db_["WGS"];
+	}
+	else
+	{
+		const auto n_ceiled = Ceil(n, db_["WGS"] * db_["WPT"])/db_["WGS"];
+		global[0] = n_ceiled / db_["WPT"];
+	}
+	kernel->enqueue(global, {db_["WGS"], db_["WPT"]});
 }
 
 // =================================================================================================

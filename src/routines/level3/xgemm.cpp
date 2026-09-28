@@ -359,7 +359,7 @@ void Xgemm<T>::GemmDirect(const size_t m, const size_t n, const size_t k, const 
 	{
 	// Retrieves the proper XgemmDirect kernel from the compiled binary
 	const auto name = (a_do_transpose) ? (b_do_transpose ? "XgemmDirectTT" : "XgemmDirectTN")
-																		 : (b_do_transpose ? "XgemmDirectNT" : "XgemmDirectNN");
+		: (b_do_transpose ? "XgemmDirectNT" : "XgemmDirectNN");
 	auto kernelOld = Kernel(program_, name);
 	tart::kernel_ptr kernel = kernelOld.get();
 
@@ -400,7 +400,9 @@ void Xgemm<T>::GemmDirect(const size_t m, const size_t n, const size_t k, const 
 		db_["NDIMBD"],
 		db_["KWID"],
 		db_["PADA"],
-		db_["PADB"]
+		db_["PADB"],
+		static_cast<uint32_t>(a_do_transpose),
+		static_cast<uint32_t>(b_do_transpose)
 	});
 
 	// Launches the kernel

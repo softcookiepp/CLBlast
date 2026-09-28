@@ -62,10 +62,11 @@ void main()
 	// Sets the group identifiers. They might be 'shuffled' around to distribute work in a different
 	// way over workgroups, breaking memory-bank dependencies.
 	const int gid0 = get_group_id(0);
+	int gid1;
 	if (TRA_SHUFFLE == 1)
-		const int gid1 = (get_group_id(0) + get_group_id(1)) % get_num_groups(0);
+		gid1 = (get_group_id(0) + get_group_id(1)) % get_num_groups(0);
 	else
-		const int gid1 = get_group_id(1);
+		gid1 = get_group_id(1);
 
 	// Loops over the work per thread
 	[[unroll]]

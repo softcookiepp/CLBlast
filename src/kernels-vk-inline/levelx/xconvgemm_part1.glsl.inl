@@ -713,6 +713,15 @@ R"(
 	#endif
 #endif
 
+#ifndef USE_SPEC_CONSTANTS_FOR_TRANSPOSE
+	#define USE_SPEC_CONSTANTS_FOR_TRANSPOSE 0
+#endif
+
+#if USE_SPEC_CONSTANTS_FOR_TRANSPOSE
+	layout(constant_id = 8) const int TRANSPOSE_A = 0;
+	layout(constant_id = 9) const int TRANSPOSE_B = 0;
+#endif
+
 // these can't be controlled by specialization constants without other major changes
 #ifndef VWMD
 	#define VWMD 1			// Vector width of matrices A and C

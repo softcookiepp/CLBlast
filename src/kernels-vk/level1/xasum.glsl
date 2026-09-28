@@ -23,10 +23,6 @@
 #endif
 layout(constant_id = 0) const int WGS1 = 64; // The local work-group size of the main kernel
 
-#ifdef WGS2
-	#undef WGS2
-#endif
-
 #ifdef ROUTINE_SUM
 	#undef ROUTINE_SUM
 #endif

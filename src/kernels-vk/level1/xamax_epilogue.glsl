@@ -21,7 +21,7 @@
 #ifdef WGS2
 	#undef WGS2
 #endif
-layout(constant_id = 0) const int WGS2 = 62; // The local work-group size of the epilogue kernel
+layout(constant_id = 0) const int WGS2 = 64; // The local work-group size of the epilogue kernel
 
 // =================================================================================================
 

@@ -9,6 +9,7 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
+#define USE_SPEC_CONSTANTS_FOR_TRANSPOSE 1
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
@@ -719,6 +720,15 @@ R"(
 	#endif
 #endif
 
+#ifndef USE_SPEC_CONSTANTS_FOR_TRANSPOSE
+	#define USE_SPEC_CONSTANTS_FOR_TRANSPOSE 0
+#endif
+
+#if USE_SPEC_CONSTANTS_FOR_TRANSPOSE
+	layout(constant_id = 8) const int TRANSPOSE_A = 0;
+	layout(constant_id = 9) const int TRANSPOSE_B = 0;
+#endif
+
 // these can't be controlled by specialization constants without other major changes
 #ifndef VWMD
 	#define VWMD 1			// Vector width of matrices A and C
@@ -1383,7 +1393,12 @@ void main()
 #endif
 		c_offset, c_ld,
 		//alm, blm,
-		0, 0, c_transpose, a_conjugate, b_conjugate);
+		#if USE_SPEC_CONSTANTS_FOR_TRANSPOSE
+			TRANSPOSE_A, TRANSPOSE_B,
+		#else
+			0, 1,
+		#endif
+		c_transpose, a_conjugate, b_conjugate);
 }
 
 // =================================================================================================

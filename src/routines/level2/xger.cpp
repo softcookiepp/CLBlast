@@ -42,6 +42,13 @@ Xger<T>::Xger(Queue& queue, EventPointer event, const std::string& name)
 #endif
 	)
 {
+	mHPR = static_cast<uint32_t>(name == "HPR");
+	mSPR = static_cast<uint32_t>(name == "SPR");
+	mGERC = static_cast<uint32_t>(name == "GERC");
+	mHER = static_cast<uint32_t>(name == "HER");
+	mHER2 = static_cast<uint32_t>(name == "HER2");
+	mHPR2 = static_cast<uint32_t>(name == "HPR2");
+	mSPR2 = static_cast<uint32_t>(name == "SPR2");
 }
 
 // =================================================================================================
@@ -90,8 +97,16 @@ void Xger<T>::DoGer(const Layout layout, const size_t m, const size_t n, const T
 	auto a_two_ceiled = CeilDiv(CeilDiv(a_two, db_["WPT"]), db_["WGS2"]);
 	//auto global = std::vector<size_t>{a_one_ceiled, a_two_ceiled};
 	//auto local = std::vector<size_t>{db_["WGS1"], db_["WGS2"]};
-	kernel->enqueue({a_one_ceiled, a_two_ceiled}, {db_["WGS1"], db_["WGS2"], db_["WPT"]});
-	//RunKernel(kernel, queue_, device_, global, local);
+	kernel->enqueue({a_one_ceiled, a_two_ceiled}, {
+		db_["WGS1"], db_["WGS2"], db_["WPT"],
+		mHPR,
+		mSPR,
+		mGERC,
+		mHER,
+		mHER2,
+		mHPR2,
+		mSPR2
+	});
 }
 
 // =================================================================================================

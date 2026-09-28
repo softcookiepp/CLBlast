@@ -46,21 +46,20 @@ void main()
 	const bool is_rowmajor = bool(is_rowmajor);
 
 	// Register storage for X and XT
-	//#pragma promote_to_registers
 	real xvalues[WPT];
-	//#pragma promote_to_registers
 	real xtvalues[WPT];
 
 	// Loads the X-vector
-	//#pragma unroll
+	[[unroll]]
 	for (int _w = 0; _w < WPT; _w += 1) {
 		const int id2 = _w*get_global_size(1) + get_global_id(1);
 		LoadVector(xvalues[_w], id2, n, xgm, x_offset, x_inc, !is_rowmajor);
 	}
 
 	// Loads the X-transposed-vector
-	//#pragma unroll
-	for (int _w = 0; _w < WPT; _w += 1) {
+	[[unroll]]
+	for (int _w = 0; _w < WPT; _w += 1)
+	{
 		const int id1 = _w*get_global_size(0) + get_global_id(0);
 		LoadVector(xtvalues[_w], id1, n, xgm, x_offset, x_inc, is_rowmajor);
 	}

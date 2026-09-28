@@ -40,7 +40,15 @@ Xher2<T>::Xher2(Queue& queue, EventPointer event, const std::string& name)
 ,
  {"Xher2"}
 #endif
-		) {
+		)
+{
+	mHPR = static_cast<uint32_t>(name == "HPR");
+	mSPR = static_cast<uint32_t>(name == "SPR");
+	mGERC = static_cast<uint32_t>(name == "GERC");
+	mHER = static_cast<uint32_t>(name == "HER");
+	mHER2 = static_cast<uint32_t>(name == "HER2");
+	mHPR2 = static_cast<uint32_t>(name == "HPR2");
+	mSPR2 = static_cast<uint32_t>(name == "SPR2");
 }
 
 // =================================================================================================
@@ -96,7 +104,15 @@ void Xher2<T>::DoHer2(const Layout layout, const Triangle triangle, const size_t
 	auto global = std::vector<uint32_t>{global_one / db_["WGS1"], global_two / db_["WGS2"]};
 	auto local = std::vector<size_t>{db_["WGS1"], db_["WGS2"]};
 	//RunKernel(kernel, queue_, device_, global, local);
-	kernel->enqueue(global, {db_["WGS1"], db_["WGS2"], db_["WPT"]});
+	kernel->enqueue(global, {db_["WGS1"], db_["WGS2"], db_["WPT"],
+		mHPR,
+		mSPR,
+		mGERC,
+		mHER,
+		mHER2,
+		mHPR2,
+		mSPR2
+	});
 }
 
 // =================================================================================================

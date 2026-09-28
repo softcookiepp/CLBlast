@@ -559,26 +559,63 @@ R"(
 #endif
 
 // these will eventually be converted to specialization constants, but now I am too lazy
-#ifndef ROUTINE_HPR
-	#define ROUTINE_HPR 0
-#endif
-#ifndef ROUTINE_SPR
-	#define ROUTINE_SPR 0
-#endif
-#ifndef ROUTINE_GERC
-	#define ROUTINE_GERC 0
-#endif
-#ifndef ROUTINE_HER
-	#define ROUTINE_HER 0
-#endif
-#ifndef ROUTINE_HER2
-	#define ROUTINE_HER2 0
-#endif
-#ifndef ROUTINE_HPR2
-	#define ROUTINE_HPR2 0
-#endif
-#ifndef ROUTINE_SPR2
-	#define ROUTINE_SPR2 0
+#if LEVEL2_USE_SPEC
+	#ifdef ROUTINE_HPR
+		#undef ROUTINE_HPR
+	#endif
+	layout(constant_id = 3) const int ROUTINE_HPR = 0;
+	
+	#ifdef ROUTINE_SPR
+		#undef ROUTINE_SPR
+	#endif
+	layout(constant_id = 4) const int ROUTINE_SPR = 0;
+	
+	#ifdef ROUTINE_GERC
+		#undef ROUTINE_GERC
+	#endif
+	layout(constant_id = 5) const int ROUTINE_GERC = 0;
+	
+	#ifdef ROUTINE_HER
+		#undef ROUTINE_HER
+	#endif
+	layout(constant_id = 6) const int ROUTINE_HER = 0;
+	
+	#ifdef ROUTINE_HER2
+		#undef ROUTINE_HER2
+	#endif
+	layout(constant_id = 7) const int ROUTINE_HER2 = 0;
+	
+	#ifdef ROUTINE_HPR2
+		#undef ROUTINE_HPR2
+	#endif
+	layout(constant_id = 8) const int ROUTINE_HPR2 = 0;
+	
+	#ifdef ROUTINE_SPR2
+		#undef ROUTINE_SPR2
+	#endif
+	layout(constant_id = 9) const int ROUTINE_SPR2 = 0;
+#else
+	#ifndef ROUTINE_HPR
+		#define ROUTINE_HPR 0
+	#endif
+	#ifndef ROUTINE_SPR
+		#define ROUTINE_SPR 0
+	#endif
+	#ifndef ROUTINE_GERC
+		#define ROUTINE_GERC 0
+	#endif
+	#ifndef ROUTINE_HER
+		#define ROUTINE_HER 0
+	#endif
+	#ifndef ROUTINE_HER2
+		#define ROUTINE_HER2 0
+	#endif
+	#ifndef ROUTINE_HPR2
+		#define ROUTINE_HPR2 0
+	#endif
+	#ifndef ROUTINE_SPR2
+		#define ROUTINE_SPR2 0
+	#endif
 #endif
 
 // =================================================================================================
@@ -775,21 +812,20 @@ void main()
 	const bool is_rowmajor = bool(is_rowmajor);
 
 	// Register storage for X and XT
-	//#pragma promote_to_registers
 	real xvalues[WPT];
-	//#pragma promote_to_registers
 	real xtvalues[WPT];
 
 	// Loads the X-vector
-	//#pragma unroll
+	[[unroll]]
 	for (int _w = 0; _w < WPT; _w += 1) {
 		const int id2 = _w*get_global_size(1) + get_global_id(1);
 		LoadVector(xvalues[_w], id2, n, xgm, x_offset, x_inc, !is_rowmajor);
 	}
 
 	// Loads the X-transposed-vector
-	//#pragma unroll
-	for (int _w = 0; _w < WPT; _w += 1) {
+	[[unroll]]
+	for (int _w = 0; _w < WPT; _w += 1)
+	{
 		const int id1 = _w*get_global_size(0) + get_global_id(0);
 		LoadVector(xtvalues[_w], id1, n, xgm, x_offset, x_inc, is_rowmajor);
 	}

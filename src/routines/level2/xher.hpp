@@ -1,7 +1,7 @@
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
-//   Cedric Nugteren <www.cedricnugteren.nl>
+//	 Cedric Nugteren <www.cedricnugteren.nl>
 //
 // This file implements the Xher routine. The precision is implemented using a template argument.
 //
@@ -21,22 +21,30 @@ namespace clblast {
 
 // See comment at top of file for a description of the class
 template <typename T, typename U>
-class Xher : public Routine {
+class Xher : public Routine
+{
+	uint32_t mHPR;
+	uint32_t mSPR;
+	uint32_t mGERC;
+	uint32_t mHER;
+	uint32_t mHER2;
+	uint32_t mHPR2;
+	uint32_t mSPR2;
  public:
-  // Constructor
-  Xher(Queue& queue, EventPointer event, const std::string& name = "HER");
+	// Constructor
+	Xher(Queue& queue, EventPointer event, const std::string& name = "HER");
 
-  // Translates alpha of type 'U' into type 'T'
-  T GetAlpha(const U alpha);
+	// Translates alpha of type 'U' into type 'T'
+	T GetAlpha(const U alpha);
 
-  // Templated-precision implementation of the routine
-  void DoHer(const Layout layout, const Triangle triangle, const size_t n, const U alpha, const Buffer<T>& x_buffer,
-             const size_t x_offset, const size_t x_inc, const Buffer<T>& a_buffer, const size_t a_offset,
-             const size_t a_ld, const bool packed = false);
+	// Templated-precision implementation of the routine
+	void DoHer(const Layout layout, const Triangle triangle, const size_t n, const U alpha, const Buffer<T>& x_buffer,
+						 const size_t x_offset, const size_t x_inc, const Buffer<T>& a_buffer, const size_t a_offset,
+						 const size_t a_ld, const bool packed = false);
 };
 
 // =================================================================================================
-}  // namespace clblast
+}	// namespace clblast
 
 // CLBLAST_ROUTINES_XHER_H_
 #endif

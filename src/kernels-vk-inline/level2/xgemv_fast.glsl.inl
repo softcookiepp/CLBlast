@@ -519,24 +519,15 @@ R"(
 // 1: For the full version, see 'xgemv.glsl'
 
 // 2: For the fast version
-#if 1
-	#ifdef WGS2
-		#undef WGS2
-	#endif
-	layout(constant_id = 0) const int WGS2 = 64;
-	
-	#ifdef WPT2
-		#undef WPT2
-	#endif
-	layout(constant_id = 1) const int WPT2 = 1;
-#else
-	#ifndef WGS2
-		#define WGS2 64		 // The local work-group size
-	#endif
-	#ifndef WPT2
-		#define WPT2 1			// The amount of work-per-thread
-	#endif	
+#ifdef WGS2
+	#undef WGS2
 #endif
+layout(constant_id = 0) const int WGS2 = 64;
+
+#ifdef WPT2
+	#undef WPT2
+#endif
+layout(constant_id = 1) const int WPT2 = 1;
 
 #ifndef VW2
 	#define VW2 1			 // Vector width of matrix A loads

@@ -45,21 +45,49 @@
 		#define WPT 1		 // The amount of work-per-thread in both dimensions
 	#endif
 #endif
+
+// these will eventually be converted to specialization constants, but now I am too lazy
+#ifndef ROUTINE_HPR
+	#define ROUTINE_HPR 0
+#endif
+#ifndef ROUTINE_SPR
+	#define ROUTINE_SPR 0
+#endif
+#ifndef ROUTINE_GERC
+	#define ROUTINE_GERC 0
+#endif
+#ifndef ROUTINE_HER
+	#define ROUTINE_HER 0
+#endif
+#ifndef ROUTINE_HER2
+	#define ROUTINE_HER2 0
+#endif
+#ifndef ROUTINE_HPR2
+	#define ROUTINE_HPR2 0
+#endif
+#ifndef ROUTINE_SPR2
+	#define ROUTINE_SPR2 0
+#endif
+
 // =================================================================================================
 
 // Returns an element from a vector
 real LoadVectorImpl(real result, const int id, const int max, const int offset, const int inc,
 														const bool do_conjugate) {
-	if (id < max) {
+	if (id < max)
+	{
 		//real result = gm[id*inc + offset];
-		if (do_conjugate) {
-			#if defined(ROUTINE_GERC) || defined(ROUTINE_HER) || defined(ROUTINE_HPR) || defined(ROUTINE_HER2) || defined(ROUTINE_HPR2)
+		if (do_conjugate)
+		{
+			if (ROUTINE_GERC == 1 || ROUTINE_HER == 1 || ROUTINE_HPR == 1 || ROUTINE_HER2 == 1 || ROUTINE_HPR2 == 1)
+			{
 				COMPLEX_CONJUGATE(result);
-			#endif
+			}
 		}
 		return result;
 	}
-	else {
+	else
+	{
 		real default_result;
 		SetToZero(default_result);
 		return default_result;
@@ -74,7 +102,8 @@ real LoadVectorImpl(real result, const int id, const int max, const int offset, 
 
 int GetMatrixUpdateIndex(const int id1, const int id2, const int a_offset, const int a_ld, const bool is_upper)
 {
-	#if defined(ROUTINE_SPR) || defined(ROUTINE_HPR)
+	if (ROUTINE_SPR == 1 || ROUTINE_HPR == 1)
+	{
 		int a_index;
 		if (is_upper) {
 			a_index = (id1 <= id2) ? ((id2+1)*id2)/2 + id1 : ((id1+1)*id1)/2 + id2;
@@ -84,9 +113,9 @@ int GetMatrixUpdateIndex(const int id1, const int id2, const int a_offset, const
 		}
 		a_index += a_offset;
 		return a_index;
-	#else
-		return id2*a_ld + id1 + a_offset;
-	#endif
+	}
+	return id2*a_ld + id1 + a_offset;
+	
 }
 
 // Performs the rank-1 matrix update
@@ -108,8 +137,9 @@ real MatrixUpdateImpl(const int id1, const int id2, const int max1, const int ma
 	#endif
 
 	// For hermetian matrices
-	#if ROUTINE_IS_COMPLEX && (defined(ROUTINE_HER) || defined(ROUTINE_HPR))
-		if (id1 == id2) { result.y = ZERO; }
+	#if ROUTINE_IS_COMPLEX
+		if((ROUTINE_HER == 1 || ROUTINE_HPR == 1) && id1 == id2)
+			result.y = ZERO;
 	#endif
 	
 	// Stores the final result
@@ -128,19 +158,21 @@ real MatrixUpdateImpl(const int id1, const int id2, const int max1, const int ma
 
 int GetMatrixUpdate2Index(const int id1, const int id2, const int a_offset, const int a_ld, const bool is_upper)
 {
-	#if defined(ROUTINE_SPR2) || defined(ROUTINE_HPR2)
+	if (ROUTINE_SPR2 == 1 || ROUTINE_HPR2 == 1)
+	{
 		int a_index;
-		if (is_upper) {
+		if (is_upper)
+		{
 			a_index = (id1 <= id2) ? ((id2+1)*id2)/2 + id1 : ((id1+1)*id1)/2 + id2;
 		}
-		else {
+		else
+		{
 			a_index = (id1 >= id2) ? ((2*a_ld-(id2+1))*id2)/2 + id1 : ((2*a_ld-(id1+1))*id1)/2 + id2;
 		}
 		a_index += a_offset;
 		return a_index;
-	#else
-		return id2*a_ld + id1 + a_offset;
-	#endif
+	}
+	return id2*a_ld + id1 + a_offset;
 }
 
 // main body of matrix update 2
@@ -166,8 +198,12 @@ real MatrixUpdate2Impl(const int id1, const int id2, const int max1, const int m
 	#endif
 
 	// For hermetian matrices
-	#if ROUTINE_IS_COMPLEX && ( defined(ROUTINE_HER2) || defined(ROUTINE_HPR2) )
-		if (id1 == id2 && (alpha1.x > 0.0 || alpha1.y > 0.0 || alpha2.x > 0 || alpha2.y > 0)) { result.y = ZERO; }
+	#if ROUTINE_IS_COMPLEX
+		if (ROUTINE_HER2 == 1 || ROUTINE_HPR2 == 1)
+		{
+			if (id1 == id2 && (alpha1.x > 0.0 || alpha1.y > 0.0 || alpha2.x > 0 || alpha2.y > 0))
+				result.y = ZERO;
+		}
 	#endif
 
 	// Stores the final result

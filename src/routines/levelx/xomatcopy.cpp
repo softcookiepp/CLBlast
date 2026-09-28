@@ -28,7 +28,6 @@ template <typename T>
 Xomatcopy<T>::Xomatcopy(Queue& queue, EventPointer event, const std::string& name)
 		: Routine(queue, event, name, {"Copy", "Pad", "Transpose", "Padtranspose"}, PrecisionValue<T>(), {},
 							{
-#if VULKAN_API
 	#include "../../kernels-vk-inline/level3/copy_fast.glsl.inl"
 	,
 	#include "../../kernels-vk-inline/level3/copy_pad_matrix.glsl.inl"
@@ -56,21 +55,12 @@ Xomatcopy<T>::Xomatcopy(Queue& queue, EventPointer event, const std::string& nam
 	#include "../../kernels-vk-inline/level3/transpose_matrix_batched.glsl.inl"
 	,
 	#include "../../kernels-vk-inline/level3/transpose_matrix_strided_batched.glsl.inl"
-#else
-	#include "../../kernels/level3/level3.opencl"
-	// (comment to prevent auto-re-ordering)
-	#include "../../kernels/level3/copy_fast.opencl"
-	#include "../../kernels/level3/copy_pad.opencl"
-	#include "../../kernels/level3/transpose_fast.opencl"
-	#include "../../kernels/level3/transpose_pad.opencl"
-#endif
 							}
-#if VULKAN_API
 ,
- {"CopyMatrixFast", "CopyPadMatrix", "CopyPadMatrixBatched", "CopyPadMatrixStridedBatched", "CopyMatrix", "CopyMatrixBatched", "CopyMatrixStridedBatched",
+		{"CopyMatrixFast", "CopyPadMatrix", "CopyPadMatrixBatched", "CopyPadMatrixStridedBatched", "CopyMatrix", "CopyMatrixBatched", "CopyMatrixStridedBatched",
 			"TransposeMatrixFast", "TransposePadMatrix", "TransposePadMatrixBatched", "TransposePadMatrixStridedBatched", "TransposeMatrix", "TransposeMatrixBatched", "TransposeMatrixStridedBatched"}
-#endif
-	) {
+	)
+{
 }
 
 // =================================================================================================

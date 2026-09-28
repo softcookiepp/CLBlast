@@ -28,21 +28,17 @@ template <typename T>
 Xscal<T>::Xscal(Queue& queue, EventPointer event, const std::string& name)
 		: Routine(queue, event, name, {"Xaxpy"}, PrecisionValue<T>(), {},
 							{
-#if VULKAN_API
 	#include "../../kernels-vk-inline/level1/xscal.glsl.inl"
 	,
 	#include "../../kernels-vk-inline/level1/xscal-fast.glsl.inl"
-#else
 	#include "../../kernels/level1/level1.opencl"
 	// (comment to prevent auto-re-ordering)
 	#include "../../kernels/level1/xscal.opencl"
-#endif
 							}
-#if VULKAN_API
 ,
- {"Xscal", "XscalFast"}
-#endif
-) {
+		{"Xscal", "XscalFast"}
+	)
+{
 }
 
 // =================================================================================================

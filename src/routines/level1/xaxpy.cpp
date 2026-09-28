@@ -28,21 +28,14 @@ template <typename T>
 Xaxpy<T>::Xaxpy(Queue& queue, EventPointer event, const std::string& name)
 		: Routine(queue, event, name, {"Xaxpy"}, PrecisionValue<T>(), {},
 							{
-#if VULKAN_API
 	#include "../../kernels-vk-inline/level1/xaxpy.glsl.inl"
 	,
 	#include "../../kernels-vk-inline/level1/xaxpy_faster.glsl.inl"
 	,
 	#include "../../kernels-vk-inline/level1/xaxpy_fastest.glsl.inl"
-#else
-	#include "../../kernels/level1/level1.opencl"
-	// (comment to prevent auto-re-ordering)
-	#include "../../kernels/level1/xaxpy.opencl"
-#endif
 							}
-#if VULKAN_API
  ,{"Xaxpy", "XaxpyFaster", "XaxpyFastest"}
-#endif
+
 				) {
 }
 

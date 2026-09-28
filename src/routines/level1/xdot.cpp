@@ -28,19 +28,14 @@ template <typename T>
 Xdot<T>::Xdot(Queue& queue, EventPointer event, const std::string& name)
 		: Routine(queue, event, name, {"Xdot"}, PrecisionValue<T>(), {},
 							{
-#if VULKAN_API
 	#include "../../kernels-vk-inline/level1/xdot.glsl.inl"
 	,
 	#include "../../kernels-vk-inline/level1/xdot_epilogue.glsl.inl"
-#else
-	#include "../../kernels/level1/xdot.opencl"
-#endif
 							}
-#if VULKAN_API
 ,
 	 {"Xdot", "XdotEpilogue"}
-#endif
-			) {
+	)
+{
 }
 
 // =================================================================================================

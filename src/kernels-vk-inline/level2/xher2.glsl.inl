@@ -825,28 +825,28 @@ void main()
 	real ytvalues[WPT];
 
 	// Loads the X-vector
-	//#pragma unroll
+	[[unroll]]
 	for (int _w = 0; _w < WPT; _w += 1) {
 		const int id2 = _w*get_global_size(1) + get_global_id(1);
 		LoadVector(xvalues[_w], id2, n, xgm, x_offset, x_inc, !bool(is_rowmajor));
 	}
 
 	// Loads the X-transposed-vector
-	//#pragma unroll
+	[[unroll]]
 	for (int _w = 0; _w < WPT; _w += 1) {
 		const int id1 = _w*get_global_size(0) + get_global_id(0);
 		LoadVector(xtvalues[_w], id1, n, xgm, x_offset, x_inc, bool(is_rowmajor));
 	}
 
 	// Loads the Y-vector
-	//#pragma unroll
+	[[unroll]]
 	for (int _w = 0; _w < WPT; _w += 1) {
 		const int id1 = _w*get_global_size(0) + get_global_id(0);
 		LoadVector(yvalues[_w], id1, n, ygm, y_offset, y_inc, bool(is_rowmajor));
 	}
 
 	// Loads the Y-transposed-vector
-	//#pragma unroll
+	[[unroll]]
 	for (int _w = 0; _w < WPT; _w += 1) {
 		const int id2 = _w*get_global_size(1) + get_global_id(1);
 		LoadVector(ytvalues[_w], id2, n, ygm, y_offset, y_inc, !bool(is_rowmajor));

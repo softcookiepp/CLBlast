@@ -31,33 +31,17 @@ template <typename T>
 Xconvgemm<T>::Xconvgemm(Queue& queue, EventPointer event, const std::string& name, const ConvGemmMethod method)
 		: Routine(queue, event, name, {"Xconvgemm"}, PrecisionValue<T>(), {},
 							{
-#if VULKAN_API
 	// regular kernel
 	#include "../../kernels-vk-inline/levelx/xconvgemm_part2_xconvgemm_kernel.glsl.inl"
 	,
 	// normal
 	#include "../../kernels-vk-inline/levelx/xconvgemm_part2_xconvgemm_normal.glsl.inl"
-#else
-	(method == ConvGemmMethod::kWithIm2Col) ? "#define CONVGEMM_WITH_IM2COL\n" : "",
-	#include "../../kernels/level3/level3.opencl"
-						,	// separated in multiple parts to prevent C1091 in MSVC 2013
-	#include "../../kernels/level3/xgemm_direct_part1.opencl"
-	#include "../../kernels/level3/xgemm_direct_part2.opencl"
-	#include "../../kernels/level3/xgemm_direct_part3.opencl"
-						,	// separated in multiple parts to prevent C1091 in MSVC 2013
-	#include "../../kernels/levelx/xconvgemm_part1.opencl"
-	#include "../../kernels/levelx/xconvgemm_part2.opencl"
-#endif
 							}
-							
-#if VULKAN_API
 ,
-		
 			{
 				"Xconvgemm",
 				"XconvgemmNormal"
 			}
-#endif
 		),
 			method_(method) {
 }

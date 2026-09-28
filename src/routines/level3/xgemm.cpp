@@ -29,7 +29,6 @@ Xgemm<T>::Xgemm(Queue& queue, EventPointer event, const std::string& name)
 		: Routine(queue, event, name, {"Copy", "Pad", "Transpose", "Padtranspose", "Xgemm", "XgemmDirect", "GemmRoutine"},
 							PrecisionValue<T>(), {},
 							{
-#if VULKAN_API
 	#include "../../kernels-vk-inline/level3/copy_fast.glsl.inl"
 	,
 	#include "../../kernels-vk-inline/level3/copy_matrix.glsl.inl"
@@ -67,31 +66,8 @@ Xgemm<T>::Xgemm(Queue& queue, EventPointer event, const std::string& name)
 	#include "../../kernels-vk-inline/level3/convert_triangular_upper.glsl.inl"
 	,
 	#include "../../kernels-vk-inline/level3/level3_fill_matrix.glsl.inl"
-#else
-	#include "../../kernels/level3/level3.opencl"
-	// (comment to prevent auto-re-ordering)
-	#include "../../kernels/level3/convert_hermitian.opencl"
-	#include "../../kernels/level3/convert_symmetric.opencl"
-	#include "../../kernels/level3/convert_triangular.opencl"
-	#include "../../kernels/level3/copy_fast.opencl"
-	#include "../../kernels/level3/copy_pad.opencl"
-	#include "../../kernels/level3/transpose_fast.opencl"
-	#include "../../kernels/level3/transpose_pad.opencl"
-						,	// separated in multiple parts to prevent C1091 in MSVC 2013
-	#include "../../kernels/level3/xgemm_direct_part1.opencl"
-	#include "../../kernels/level3/xgemm_direct_part2.opencl"
-	#include "../../kernels/level3/xgemm_direct_part3.opencl"
-						,	// separated in multiple parts to prevent C1091 in MSVC 2013
-	#include "../../kernels/level3/xgemm_part1.opencl"
-	#include "../../kernels/level3/xgemm_part2.opencl"
-						,	// separated in multiple parts to prevent C1091 in MSVC 2013
-	#include "../../kernels/level3/xgemm_part3.opencl"
-	#include "../../kernels/level3/xgemm_part4.opencl"
-#endif
 							}
-#if VULKAN_API
 ,
-
 	{	
 		"CopyMatrixFast",
 		"CopyMatrix",
@@ -115,7 +91,6 @@ Xgemm<T>::Xgemm(Queue& queue, EventPointer event, const std::string& name)
 		
 		"FillMatrix"
 	}
-#endif
 				) {
 }
 

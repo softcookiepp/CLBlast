@@ -28,18 +28,10 @@ template <typename T>
 Xher2<T>::Xher2(Queue& queue, EventPointer event, const std::string& name)
 		: Routine(queue, event, name, {"Xger"}, PrecisionValue<T>(), {},
 							{
-#if VULKAN_API
 	#include "../../kernels-vk-inline/level2/xher2.glsl.inl"
-#else
-	#include "../../kernels/level2/level2.opencl"
-	// (comment to prevent auto-re-ordering)
-	#include "../../kernels/level2/xher2.opencl"
-#endif
 							}
-#if VULKAN_API
 ,
  {"Xher2"}
-#endif
 		)
 {
 	mHPR = static_cast<uint32_t>(name == "HPR");

@@ -874,14 +874,14 @@ void main()
 		}
 
 		// Loads the Y-vector
-		//#pragma unroll
+		[[unroll]]
 		for (int _w = 0; _w < WPT; _w += 1) {
 			const int id2 = _w*get_global_size(1) + get_global_id(1);
 			LoadVector(yvalues[_w], id2, max2, ygm, y_offset, y_inc, true);
 		}
 
 		// Loops over the work per thread twice
-		//#pragma unroll
+		[[unroll]]
 		for (int _w1 = 0; _w1 < WPT; _w1 += 1) {
 			[[unroll]]
 			for (int _w2 = 0; _w2 < WPT; _w2 += 1) {

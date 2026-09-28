@@ -28,20 +28,12 @@ template <typename T>
 Xswap<T>::Xswap(Queue& queue, EventPointer event, const std::string& name)
 		: Routine(queue, event, name, {"Xaxpy"}, PrecisionValue<T>(), {},
 							{
-#if VULKAN_API
 	#include "../../kernels-vk-inline/level1/xswap.glsl.inl"
 	,
 	#include "../../kernels-vk-inline/level1/xswap-fast.glsl.inl"
-#else
-	#include "../../kernels/level1/level1.opencl"
-	// (comment to prevent auto-re-ordering)
-	#include "../../kernels/level1/xswap.opencl"
-#endif
 							}
-#if VULKAN_API
 ,
 	 {"Xswap", "XswapFast"}
-#endif
 							) {
 }
 

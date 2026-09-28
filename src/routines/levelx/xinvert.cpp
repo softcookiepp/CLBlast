@@ -33,7 +33,6 @@ template <typename T>
 Xinvert<T>::Xinvert(Queue& queue, EventPointer event, const std::string& name)
 		: Routine(queue, event, name, {"Invert"}, PrecisionValue<T>(), {},
 							{
-#if VULKAN_API
 	#include "../../kernels-vk-inline/level3/level3_fill_matrix.glsl.inl"
 	,
 	#include "../../kernels-vk-inline/level3//invert_diagonal_blocks_part1_invert_diagonal_block.glsl.inl"
@@ -67,15 +66,7 @@ Xinvert<T>::Xinvert(Queue& queue, EventPointer event, const std::string& name)
 	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_64_part1_upper.glsl.inl"
 	,
 	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_64_part2_upper.glsl.inl"
-#else
-	#include "../../kernels/level3/level3.opencl"
-						,	// separated in multiple parts to prevent C1091 in MSVC 2013
-	#include "../../kernels/level3/invert_diagonal_blocks_part1.opencl"
-						,	// separated in multiple parts to prevent C1091 in MSVC 2013
-	#include "../../kernels/level3/invert_diagonal_blocks_part2.opencl"
-#endif
 							}
-#if VULKAN_API
 		,
 		{
 			"FillMatrix",
@@ -94,7 +85,6 @@ Xinvert<T>::Xinvert(Queue& queue, EventPointer event, const std::string& name)
 			"TripleMatMul64Part1Upper",
 			"TripleMatMul64Part2Upper"
 		}
-#endif
 			) {
 }
 

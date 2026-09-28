@@ -29,7 +29,6 @@ template <typename T>
 Xgemv<T>::Xgemv(Queue& queue, EventPointer event, const std::string& name)
 		: Routine(queue, event, name, {"Xgemv", "XgemvFast", "XgemvFastRot", "TrsvRoutine"}, PrecisionValue<T>(), {},
 							{
-#if VULKAN_API
 	#include "../../kernels-vk-inline/level2/xgemv.glsl.inl"
 	,
 	#include "../../kernels-vk-inline/level2/xgemv_fast.glsl.inl"
@@ -41,24 +40,17 @@ Xgemv<T>::Xgemv(Queue& queue, EventPointer event, const std::string& name)
 	#include "../../kernels-vk-inline/level2/xtrsv-backward.glsl.inl"
 	,
 	#include "../../kernels-vk-inline/level2/xtrsv-fill-vector.glsl.inl"
-#else
-	#include "../../kernels/level2/xgemv.opencl"
-	#include "../../kernels/level2/xgemv_fast.opencl"
-	#include "../../kernels/level2/xtrsv.opencl"
-#endif
 							}
-#if VULKAN_API
 ,
 
-	{
-		"Xgemv",
-		"XgemvFast",
-		"XgemvFastRot",
-		"trsv_forward",
-		"trsv_backward",
-		"FillVector"
-	}
-#endif
+		{
+			"Xgemv",
+			"XgemvFast",
+			"XgemvFastRot",
+			"trsv_forward",
+			"trsv_backward",
+			"FillVector"
+		}
 	)
 {
 	mGBMV = (name == "GBMV");

@@ -28,7 +28,6 @@ template <typename T>
 Xsyrk<T>::Xsyrk(Queue& queue, EventPointer event, const std::string& name)
 		: Routine(queue, event, name, {"Copy", "Pad", "Transpose", "Padtranspose", "Xgemm"}, PrecisionValue<T>(), {},
 							{
-#if VULKAN_API
 	#include "../../kernels-vk-inline/level3/copy_fast.glsl.inl"
 	,
 	#include "../../kernels-vk-inline/level3/copy_matrix.glsl.inl"
@@ -63,22 +62,7 @@ Xsyrk<T>::Xsyrk(Queue& queue, EventPointer event, const std::string& name)
 	#include "../../kernels-vk-inline/level3/xgemm_part4_xgemm_lower.glsl.inl"
 	,
 	#include "../../kernels-vk-inline/level3/xgemm_part4_xgemm_upper.glsl.inl"
-#else
-	#include "../../kernels/level3/level3.opencl"
-	// (comment to prevent auto-re-ordering)
-	#include "../../kernels/level3/copy_fast.opencl"
-	#include "../../kernels/level3/copy_pad.opencl"
-	#include "../../kernels/level3/transpose_fast.opencl"
-	#include "../../kernels/level3/transpose_pad.opencl"
-						,	// separated in multiple parts to prevent C1091 in MSVC 2013
-	#include "../../kernels/level3/xgemm_part1.opencl"
-	#include "../../kernels/level3/xgemm_part2.opencl"
-						,	// separated in multiple parts to prevent C1091 in MSVC 2013
-	#include "../../kernels/level3/xgemm_part3.opencl"
-	#include "../../kernels/level3/xgemm_part4.opencl"
-#endif
 							}
-#if VULKAN_API
 ,
 
 	{
@@ -101,7 +85,6 @@ Xsyrk<T>::Xsyrk(Queue& queue, EventPointer event, const std::string& name)
 		"XgemmLower",
 		"XgemmUpper"
 	}
-#endif
 		)
 {
 }

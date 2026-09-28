@@ -35,7 +35,7 @@
 
 // Transposes and copies a matrix. Requires both matrices to be of the same dimensions and without
 // offset. A more general version is available in 'padtranspose.opencl'.
-	layout(local_size_x = TRA_DIM, local_size_y = TRA_DIM, local_size_z = 1) in;
+layout(local_size_x = TRA_DIM, local_size_y = TRA_DIM, local_size_z = 1) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) readonly buffer src_buf { realT src[]; };
@@ -62,11 +62,10 @@ void main()
 	// Sets the group identifiers. They might be 'shuffled' around to distribute work in a different
 	// way over workgroups, breaking memory-bank dependencies.
 	const int gid0 = get_group_id(0);
-	#if TRA_SHUFFLE == 1
+	if (TRA_SHUFFLE == 1)
 		const int gid1 = (get_group_id(0) + get_group_id(1)) % get_num_groups(0);
-	#else
+	else
 		const int gid1 = get_group_id(1);
-	#endif
 
 	// Loops over the work per thread
 	[[unroll]]

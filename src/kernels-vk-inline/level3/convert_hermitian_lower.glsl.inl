@@ -633,36 +633,36 @@ layout(push_constant) uniform HermLowerToSquared
 
 void main()
 {
-#if PRECISION == 3232 || PRECISION == 6464
-	// Loops over the work per thread in both dimensions
-	//#pragma unroll
-	for (int _w_one = 0; _w_one < PAD_WPTX; _w_one += 1) {
-		const int id_one = (get_group_id(0)*PAD_WPTX + _w_one) * PAD_DIMX + get_local_id(0);
+	#if ROUTINE_IS_COMPLEX
+		// Loops over the work per thread in both dimensions
 		//#pragma unroll
-		for (int _w_two = 0; _w_two < PAD_WPTY; _w_two += 1) {
-			const int id_two = (get_group_id(1)*PAD_WPTY + _w_two) * PAD_DIMY + get_local_id(1);
-			if (id_two < dest_dim && id_one < dest_dim) {
+		for (int _w_one = 0; _w_one < PAD_WPTX; _w_one += 1) {
+			const int id_one = (get_group_id(0)*PAD_WPTX + _w_one) * PAD_DIMX + get_local_id(0);
+			//#pragma unroll
+			for (int _w_two = 0; _w_two < PAD_WPTY; _w_two += 1) {
+				const int id_two = (get_group_id(1)*PAD_WPTY + _w_two) * PAD_DIMY + get_local_id(1);
+				if (id_two < dest_dim && id_one < dest_dim) {
 
-				// Loads data from the lower-hermitian matrix
-				real result;
-				SetToZero(result);
-				if (id_two < src_dim && id_one < src_dim) {
-					if (id_two <= id_one) {
-						result = src[id_two*src_ld + id_one + src_offset];
-						if (id_one == id_two) { result.y = ZERO; }
+					// Loads data from the lower-hermitian matrix
+					real result;
+					SetToZero(result);
+					if (id_two < src_dim && id_one < src_dim) {
+						if (id_two <= id_one) {
+							result = src[id_two*src_ld + id_one + src_offset];
+							if (id_one == id_two) { result.y = ZERO; }
+						}
+						else {
+							result = src[id_one*src_ld + id_two + src_offset];
+							COMPLEX_CONJUGATE(result);
+						}
 					}
-					else {
-						result = src[id_one*src_ld + id_two + src_offset];
-						COMPLEX_CONJUGATE(result);
-					}
+
+					// Stores the result in the destination matrix
+					dest[id_two*dest_ld + id_one + dest_offset] = result;
 				}
-
-				// Stores the result in the destination matrix
-				dest[id_two*dest_ld + id_one + dest_offset] = result;
 			}
 		}
-	}
-#endif
+	#endif
 }
 // =================================================================================================
 

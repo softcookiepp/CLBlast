@@ -42,7 +42,7 @@ layout(push_constant) uniform HermUpperToSquared
 
 void main()
 {
-#if PRECISION == 3232 || PRECISION == 6464
+#if ROUTINE_IS_COMPLEX
 	// Loops over the work per thread in both dimensions
 	//#pragma unroll
 	for (int _w_one = 0; _w_one < PAD_WPTX; _w_one += 1) {

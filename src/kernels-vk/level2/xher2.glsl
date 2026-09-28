@@ -16,13 +16,6 @@
 #include "level2.glsl"
 // =================================================================================================
 
-#ifndef ROUTINE_HER2
-	#define ROUTINE_HER2 0
-#endif
-#ifndef ROUTINE_HPR2
-	#define ROUTINE_HPR2 0
-#endif
-
 // Symmetric version of the rank-2 matrix update kernel (HER2, HPR2, SYR2, SPR2)
 #if LEVEL2_USE_SPEC
 	layout(local_size_x_id = 0, local_size_y_id = 1) in;

@@ -518,16 +518,10 @@ R"(
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library.
 
-#if 1
-	#ifdef TRSV_BLOCK_SIZE
-		#undef TRSV_BLOCK_SIZE
-	#endif
-	layout(constant_id = 0) const int TRSV_BLOCK_SIZE = 32; // The block size for forward or backward substition
-#else
-	#ifndef TRSV_BLOCK_SIZE
-		#define TRSV_BLOCK_SIZE 32
-	#endif
+#ifdef TRSV_BLOCK_SIZE
+	#undef TRSV_BLOCK_SIZE
 #endif
+layout(constant_id = 0) const int TRSV_BLOCK_SIZE = 32; // The block size for forward or backward substition
 
 // buffers
 #if USE_BDA == 0

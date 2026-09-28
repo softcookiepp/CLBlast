@@ -25,8 +25,8 @@
 #endif
 
 #if USE_BDA == 0
-	layout(binding = 0, std430) buffer xgm_buf { real xgm[]; };
-	layout(binding = 1, std430) buffer ygm_buf { real ygm[]; };
+	layout(binding = 0, std430) readonly buffer xgm_buf { real xgm[]; };
+	layout(binding = 1, std430) readonly buffer ygm_buf { real ygm[]; };
 	layout(binding = 2, std430) buffer agm_buf { real agm[]; };
 #endif
 

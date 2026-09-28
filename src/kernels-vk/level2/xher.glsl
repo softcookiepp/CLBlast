@@ -17,11 +17,7 @@
 // =================================================================================================
 
 // Symmetric version of the rank-1 matrix update kernel (HER, HPR, SYR, SPR)
-#if LEVEL2_USE_SPEC
-	layout(local_size_x_id = 0, local_size_y_id = 1) in;
-#else
-	layout(local_size_x = WGS1, local_size_y = WGS2, local_size_z = 1) in;
-#endif
+layout(local_size_x_id = 0, local_size_y_id = 1) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) buffer xgm_buf { real xgm[]; };
@@ -70,11 +66,12 @@ void main()
 	}
 
 	// Loops over the work per thread twice
-	//#pragma unroll
-	for (int _w1 = 0; _w1 < WPT; _w1 += 1) {
-		//#pragma unroll
-		for (int _w2 = 0; _w2 < WPT; _w2 += 1) {
-
+	[[unroll]]
+	for (int _w1 = 0; _w1 < WPT; _w1 += 1)
+	{
+		[[unroll]]
+		for (int _w2 = 0; _w2 < WPT; _w2 += 1)
+		{
 			// Global thread IDs
 			const int id1 = _w1*get_global_size(0) + get_global_id(0);
 			const int id2 = _w2*get_global_size(1) + get_global_id(1);

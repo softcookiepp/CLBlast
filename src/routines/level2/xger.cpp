@@ -67,29 +67,31 @@ void Xger<T>::DoGer(const Layout layout, const size_t m, const size_t n, const T
 	TestVectorY(n, y_buffer, y_offset, y_inc);
 
 	// Retrieves the kernel from the compiled binary
-	auto kernel = Kernel(program_, "Xger");
-
+	auto kernelOld = Kernel(program_, "Xger");
+	tart::kernel_ptr kernel = kernelOld.get();
+	
 	// Sets the kernel arguments
-	kernel.SetArgument(0, static_cast<int>(a_one));
-	kernel.SetArgument(1, static_cast<int>(a_two));
-	kernel.SetArgument(2, GetRealArg(alpha));
-	kernel.SetArgument(3, x_buffer());
-	kernel.SetArgument(4, static_cast<int>(x_offset));
-	kernel.SetArgument(5, static_cast<int>(x_inc));
-	kernel.SetArgument(6, y_buffer());
-	kernel.SetArgument(7, static_cast<int>(y_offset));
-	kernel.SetArgument(8, static_cast<int>(y_inc));
-	kernel.SetArgument(9, a_buffer());
-	kernel.SetArgument(10, static_cast<int>(a_offset));
-	kernel.SetArgument(11, static_cast<int>(a_ld));
-	kernel.SetArgument(12, static_cast<int>(a_is_rowmajor));
+	kernel->setArg(0, static_cast<int>(a_one));
+	kernel->setArg(1, static_cast<int>(a_two));
+	kernel->setArg(2, GetRealArg(alpha));
+	kernel->setArg(3, x_buffer());
+	kernel->setArg(4, static_cast<int>(x_offset));
+	kernel->setArg(5, static_cast<int>(x_inc));
+	kernel->setArg(6, y_buffer());
+	kernel->setArg(7, static_cast<int>(y_offset));
+	kernel->setArg(8, static_cast<int>(y_inc));
+	kernel->setArg(9, a_buffer());
+	kernel->setArg(10, static_cast<int>(a_offset));
+	kernel->setArg(11, static_cast<int>(a_ld));
+	kernel->setArg(12, static_cast<int>(a_is_rowmajor));
 
 	// Launches the kernel
-	auto a_one_ceiled = Ceil(CeilDiv(a_one, db_["WPT"]), db_["WGS1"]);
-	auto a_two_ceiled = Ceil(CeilDiv(a_two, db_["WPT"]), db_["WGS2"]);
-	auto global = std::vector<size_t>{a_one_ceiled, a_two_ceiled};
-	auto local = std::vector<size_t>{db_["WGS1"], db_["WGS2"]};
-	RunKernel(kernel, queue_, device_, global, local);
+	auto a_one_ceiled = CeilDiv(CeilDiv(a_one, db_["WPT"]), db_["WGS1"]);
+	auto a_two_ceiled = CeilDiv(CeilDiv(a_two, db_["WPT"]), db_["WGS2"]);
+	//auto global = std::vector<size_t>{a_one_ceiled, a_two_ceiled};
+	//auto local = std::vector<size_t>{db_["WGS1"], db_["WGS2"]};
+	kernel->enqueue({a_one_ceiled, a_two_ceiled}, {});
+	//RunKernel(kernel, queue_, device_, global, local);
 }
 
 // =================================================================================================

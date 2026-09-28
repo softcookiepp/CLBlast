@@ -609,7 +609,7 @@ real MatrixUpdateImpl(const int id1, const int id2, const int max1, const int ma
 															const bool is_upper)
 {
 	// Computes result = alpha * x[i] * y[j] + a[i][j]
-	#if PRECISION == 3232 || PRECISION == 6464
+	#if ROUTINE_IS_COMPLEX
 		real ax;
 		ax.x = MulReal(alpha, xvalue);
 		ax.y = MulImag(alpha, xvalue);
@@ -621,7 +621,7 @@ real MatrixUpdateImpl(const int id1, const int id2, const int max1, const int ma
 	#endif
 
 	// For hermetian matrices
-	#if defined(ROUTINE_HER) || defined(ROUTINE_HPR)
+	#if ROUTINE_IS_COMPLEX && (defined(ROUTINE_HER) || defined(ROUTINE_HPR))
 		if (id1 == id2) { result.y = ZERO; }
 	#endif
 	
@@ -664,7 +664,7 @@ real MatrixUpdate2Impl(const int id1, const int id2, const int max1, const int m
 															 const bool is_upper)
 {
 	// Computes result = alpha * x[i] * y[j] + alpha * x[j] * y[i] + a[i][j]
-	#if PRECISION == 3232 || PRECISION == 6464
+	#if ROUTINE_IS_COMPLEX
 		real ax;
 		ax.x = MulReal(alpha2, xvalue);
 		ax.y = MulImag(alpha2, xvalue);
@@ -679,7 +679,7 @@ real MatrixUpdate2Impl(const int id1, const int id2, const int max1, const int m
 	#endif
 
 	// For hermetian matrices
-	#if defined(ROUTINE_HER2) || defined(ROUTINE_HPR2)
+	#if ROUTINE_IS_COMPLEX && ( defined(ROUTINE_HER2) || defined(ROUTINE_HPR2) )
 		if (id1 == id2 && (alpha1.x > 0.0 || alpha1.y > 0.0 || alpha2.x > 0 || alpha2.y > 0)) { result.y = ZERO; }
 	#endif
 
@@ -718,8 +718,8 @@ real MatrixUpdate2Impl(const int id1, const int id2, const int max1, const int m
 #endif
 
 #if USE_BDA == 0
-	layout(binding = 0, std430) buffer xgm_buf { real xgm[]; };
-	layout(binding = 1, std430) buffer ygm_buf { real ygm[]; };
+	layout(binding = 0, std430) readonly buffer xgm_buf { real xgm[]; };
+	layout(binding = 1, std430) readonly buffer ygm_buf { real ygm[]; };
 	layout(binding = 2, std430) buffer agm_buf { real agm[]; };
 #endif
 

@@ -608,7 +608,7 @@ real MatrixUpdateImpl(const int id1, const int id2, const int max1, const int ma
 															const bool is_upper)
 {
 	// Computes result = alpha * x[i] * y[j] + a[i][j]
-	#if PRECISION == 3232 || PRECISION == 6464
+	#if ROUTINE_IS_COMPLEX
 		real ax;
 		ax.x = MulReal(alpha, xvalue);
 		ax.y = MulImag(alpha, xvalue);
@@ -620,7 +620,7 @@ real MatrixUpdateImpl(const int id1, const int id2, const int max1, const int ma
 	#endif
 
 	// For hermetian matrices
-	#if defined(ROUTINE_HER) || defined(ROUTINE_HPR)
+	#if ROUTINE_IS_COMPLEX && (defined(ROUTINE_HER) || defined(ROUTINE_HPR))
 		if (id1 == id2) { result.y = ZERO; }
 	#endif
 	
@@ -663,7 +663,7 @@ real MatrixUpdate2Impl(const int id1, const int id2, const int max1, const int m
 															 const bool is_upper)
 {
 	// Computes result = alpha * x[i] * y[j] + alpha * x[j] * y[i] + a[i][j]
-	#if PRECISION == 3232 || PRECISION == 6464
+	#if ROUTINE_IS_COMPLEX
 		real ax;
 		ax.x = MulReal(alpha2, xvalue);
 		ax.y = MulImag(alpha2, xvalue);
@@ -678,7 +678,7 @@ real MatrixUpdate2Impl(const int id1, const int id2, const int max1, const int m
 	#endif
 
 	// For hermetian matrices
-	#if defined(ROUTINE_HER2) || defined(ROUTINE_HPR2)
+	#if ROUTINE_IS_COMPLEX && ( defined(ROUTINE_HER2) || defined(ROUTINE_HPR2) )
 		if (id1 == id2 && (alpha1.x > 0.0 || alpha1.y > 0.0 || alpha2.x > 0 || alpha2.y > 0)) { result.y = ZERO; }
 	#endif
 
@@ -710,11 +710,7 @@ real MatrixUpdate2Impl(const int id1, const int id2, const int max1, const int m
 // =================================================================================================
 
 // Symmetric version of the rank-1 matrix update kernel (HER, HPR, SYR, SPR)
-#if LEVEL2_USE_SPEC
-	layout(local_size_x_id = 0, local_size_y_id = 1) in;
-#else
-	layout(local_size_x = WGS1, local_size_y = WGS2, local_size_z = 1) in;
-#endif
+layout(local_size_x_id = 0, local_size_y_id = 1) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) buffer xgm_buf { real xgm[]; };
@@ -763,11 +759,12 @@ void main()
 	}
 
 	// Loops over the work per thread twice
-	//#pragma unroll
-	for (int _w1 = 0; _w1 < WPT; _w1 += 1) {
-		//#pragma unroll
-		for (int _w2 = 0; _w2 < WPT; _w2 += 1) {
-
+	[[unroll]]
+	for (int _w1 = 0; _w1 < WPT; _w1 += 1)
+	{
+		[[unroll]]
+		for (int _w2 = 0; _w2 < WPT; _w2 += 1)
+		{
 			// Global thread IDs
 			const int id1 = _w1*get_global_size(0) + get_global_id(0);
 			const int id2 = _w2*get_global_size(1) + get_global_id(1);

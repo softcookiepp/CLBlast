@@ -43,15 +43,6 @@ XgemmBatched<T>::XgemmBatched(Queue& queue, EventPointer event, const std::strin
 	// xgemm batched
 	#include "../../kernels-vk-inline/level3/xgemm_batched.glsl.inl"
 	,
-	// direct batched nn
-	#include "../../kernels-vk-inline/level3/xgemm_direct_batched_nn.glsl.inl"
-	,
-	// direct batched nt
-	#include "../../kernels-vk-inline/level3/xgemm_direct_batched_nt.glsl.inl"
-	,
-	// direct batched tn
-	#include "../../kernels-vk-inline/level3/xgemm_direct_batched_tn.glsl.inl"
-	,
 	// direct batched tt
 	#include "../../kernels-vk-inline/level3/xgemm_direct_batched_tt.glsl.inl"
 #else
@@ -85,9 +76,6 @@ XgemmBatched<T>::XgemmBatched(Queue& queue, EventPointer event, const std::strin
 		"TransposeMatrixBatched",
 		"TransposePadMatrixBatched",
 		"XgemmBatched",
-		"XgemmDirectBatchedNN",
-		"XgemmDirectBatchedNT",
-		"XgemmDirectBatchedTN",
 		"XgemmDirectBatchedTT"
 	}
 #endif
@@ -330,9 +318,7 @@ void XgemmBatched<T>::BatchedGemmDirect(const size_t m, const size_t n, const si
 	c_offsets_device.Write(queue_, batch_count, c_offsets);
 
 	// Retrieves the proper XgemmDirect kernel from the compiled binary
-	const auto name = (a_do_transpose) ? (b_do_transpose ? "XgemmDirectBatchedTT" : "XgemmDirectBatchedTN")
-																		 : (b_do_transpose ? "XgemmDirectBatchedNT" : "XgemmDirectBatchedNN");
-	auto kernelOld = Kernel(program_, name);
+	auto kernelOld = Kernel(program_, "XgemmDirectBatchedTT");
 	tart::kernel_ptr kernel = kernelOld.get();
 
 	// Sets the kernel arguments
@@ -376,7 +362,9 @@ void XgemmBatched<T>::BatchedGemmDirect(const size_t m, const size_t n, const si
 		db_["NDIMBD"],
 		db_["KWID"],
 		db_["PADA"],
-		db_["PADB"]
+		db_["PADB"],
+		a_do_transpose,
+		b_do_transpose
 	});
 
 	// Launches the kernel

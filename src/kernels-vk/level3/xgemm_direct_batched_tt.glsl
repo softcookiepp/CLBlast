@@ -3,6 +3,7 @@
 
 //R"(
 #define USE_XGEMM_BATCHED 1
+#define USE_SPEC_CONSTANTS_FOR_TRANSPOSE 1
 #include "xgemm_direct_part3_batched.glsl"
 // Direct version of the batched GEMM kernel with [A, B] = [transposed, transposed]
 layout(push_constant, std430) uniform XgemmDirectBatchedTT
@@ -47,6 +48,7 @@ void main()
 #endif
 		c_offset, c_ld,
 		//alm, blm,
-		1, 1, c_transpose, a_conjugate, b_conjugate);
+		TRANSPOSE_A, TRANSPOSE_B,
+		c_transpose, a_conjugate, b_conjugate);
 }
 //)"

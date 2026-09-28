@@ -2,6 +2,7 @@
 
 R"(
 #define USE_XGEMM_BATCHED 1
+#define USE_SPEC_CONSTANTS_FOR_TRANSPOSE 1
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
@@ -1388,6 +1389,7 @@ void main()
 #endif
 		c_offset, c_ld,
 		//alm, blm,
-		1, 1, c_transpose, a_conjugate, b_conjugate);
+		TRANSPOSE_A, TRANSPOSE_B,
+		c_transpose, a_conjugate, b_conjugate);
 }
 )"

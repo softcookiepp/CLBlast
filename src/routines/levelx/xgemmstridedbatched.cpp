@@ -43,15 +43,6 @@ XgemmStridedBatched<T>::XgemmStridedBatched(Queue& queue, EventPointer event, co
 	// xgemm strided batched
 	#include "../../kernels-vk-inline/level3/xgemm_batched_xgemm_strided_batched.glsl.inl"
 	,
-	// direct strided batched nn
-	#include "../../kernels-vk-inline/level3/xgemm_direct_strided_batched_nn.glsl.inl"
-	,
-	// direct strided batched nt
-	#include "../../kernels-vk-inline/level3/xgemm_direct_strided_batched_nt.glsl.inl"
-	,
-	// direct strided batched tn
-	#include "../../kernels-vk-inline/level3/xgemm_direct_strided_batched_tn.glsl.inl"
-	,
 	// direct strided batched tt
 	#include "../../kernels-vk-inline/level3/xgemm_direct_strided_batched_tt.glsl.inl"
 #else
@@ -85,9 +76,6 @@ XgemmStridedBatched<T>::XgemmStridedBatched(Queue& queue, EventPointer event, co
 		"TransposeMatrixStridedBatched",
 		"TransposePadMatrixStridedBatched",
 		"XgemmStridedBatched",
-		"XgemmDirectStridedBatchedNN",
-		"XgemmDirectStridedBatchedNT",
-		"XgemmDirectStridedBatchedTN",
 		"XgemmDirectStridedBatchedTT"
 	}
 #endif
@@ -323,11 +311,10 @@ void XgemmStridedBatched<T>::BatchedGemmDirect(
 		const size_t a_ld, const size_t a_stride, const Buffer<T>& b_buffer, const size_t b_offset, const size_t b_ld,
 		const size_t b_stride, const T beta, const Buffer<T>& c_buffer, const size_t c_offset, const size_t c_ld,
 		const size_t c_stride, const bool a_do_transpose, const bool b_do_transpose, const bool c_do_transpose,
-		const bool a_conjugate, const bool b_conjugate, const size_t batch_count) {
-	// Retrieves the proper XgemmDirect kernel from the compiled binary
-	const auto name = (a_do_transpose) ? (b_do_transpose ? "XgemmDirectStridedBatchedTT" : "XgemmDirectStridedBatchedTN")
-																		 : (b_do_transpose ? "XgemmDirectStridedBatchedNT" : "XgemmDirectStridedBatchedNN");
-	auto kernelOld = Kernel(program_, name);
+		const bool a_conjugate, const bool b_conjugate, const size_t batch_count)
+{
+	// Retrieves the XgemmDirect kernel from the compiled binary
+	auto kernelOld = Kernel(program_, "XgemmDirectStridedBatchedTT");
 	tart::kernel_ptr kernel = kernelOld.get();
 
 	// Sets the kernel arguments
@@ -373,7 +360,9 @@ void XgemmStridedBatched<T>::BatchedGemmDirect(
 		db_["NDIMBD"],
 		db_["KWID"],
 		db_["PADA"],
-		db_["PADB"]
+		db_["PADB"],
+		a_do_transpose,
+		b_do_transpose
 	});
 	
 	// Launches the kernel

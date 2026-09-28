@@ -46,16 +46,6 @@ Xgemm<T>::Xgemm(Queue& queue, EventPointer event, const std::string& name)
 	,
 
 	// END OF THE COPY PAD TRANSPOSE ROUTINES
-	// direct nn
-	#include "../../kernels-vk-inline/level3/xgemm_direct_nn.glsl.inl"
-	,
-	// direct nt
-	#include "../../kernels-vk-inline/level3/xgemm_direct_nt.glsl.inl"
-	,
-	// direct tn
-	#include "../../kernels-vk-inline/level3/xgemm_direct_tn.glsl.inl"
-	,
-	// direct tt
 	#include "../../kernels-vk-inline/level3/xgemm_direct_tt.glsl.inl"
 	,
 	// the final boss
@@ -110,9 +100,6 @@ Xgemm<T>::Xgemm(Queue& queue, EventPointer event, const std::string& name)
 		"TransposeMatrixFast",
 		"TransposeMatrix",
 		"TransposePadMatrix",
-		"XgemmDirectNN",
-		"XgemmDirectNT",
-		"XgemmDirectTN",
 		"XgemmDirectTT",
 		
 		"Xgemm",
@@ -357,10 +344,8 @@ void Xgemm<T>::GemmDirect(const size_t m, const size_t n, const size_t k, const 
 													const size_t c_ld, const bool a_do_transpose, const bool b_do_transpose,
 													const bool c_do_transpose, const bool a_conjugate, const bool b_conjugate)
 	{
-	// Retrieves the proper XgemmDirect kernel from the compiled binary
-	const auto name = (a_do_transpose) ? (b_do_transpose ? "XgemmDirectTT" : "XgemmDirectTN")
-		: (b_do_transpose ? "XgemmDirectNT" : "XgemmDirectNN");
-	auto kernelOld = Kernel(program_, name);
+	// Retrieves the XgemmDirect kernel from the compiled binary
+	auto kernelOld = Kernel(program_, "XgemmDirectTT");
 	tart::kernel_ptr kernel = kernelOld.get();
 
 	// Sets the kernel arguments

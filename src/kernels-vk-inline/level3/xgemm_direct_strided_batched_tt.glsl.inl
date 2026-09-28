@@ -10,6 +10,7 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
+#define USE_SPEC_CONSTANTS_FOR_TRANSPOSE 1
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
@@ -1400,7 +1401,7 @@ void main()
 #endif
 		c_offset_batch, c_ld,
 		//alm, blm,
-		1, 1, c_transpose, a_conjugate, b_conjugate);
+		TRANSPOSE_A, TRANSPOSE_B, c_transpose, a_conjugate, b_conjugate);
 }
 
 // =================================================================================================

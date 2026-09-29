@@ -132,6 +132,24 @@ void PadCopyTransposeMatrix(Queue& queue, const Device& device, const Databases&
 	std::vector<uint32_t> global(3, 1);
 	std::vector<uint32_t> local(3, 1);
 	std::vector<uint32_t> spec;
+	if (!use_fast_kernel)
+	{
+		spec = {
+			db["COPY_DIMX"],
+			db["COPY_DIMY"],
+			db["COPY_WPT"],
+			db["PAD_DIMX"],
+			db["PAD_DIMY"],
+			db["PAD_WPTX"],
+			db["PAD_WPTY"],
+			db["TRA_DIM"],
+			db["TRA_PAD"],
+			db["TRA_SHUFFLE"],
+			db["PADTRA_TILE"],
+			db["PADTRA_WPT"],
+			db["PADTRA_PAD"]
+		};
+	}
 	if (do_transpose)
 	{
 		if (use_fast_kernel)
@@ -145,7 +163,6 @@ void PadCopyTransposeMatrix(Queue& queue, const Device& device, const Databases&
 			global = {Ceil(CeilDiv(dest_one, db["PADTRA_WPT"]), db["PADTRA_TILE"]),
 																							Ceil(CeilDiv(dest_two, db["PADTRA_WPT"]), db["PADTRA_TILE"])};
 			local = {db["PADTRA_TILE"], db["PADTRA_TILE"]};
-			//RunKernel(kernel, queue, device, global, local);
 		}
 	}
 	else
@@ -160,7 +177,6 @@ void PadCopyTransposeMatrix(Queue& queue, const Device& device, const Databases&
 		{
 			global = {Ceil(CeilDiv(dest_one, db["PAD_WPTX"]), db["PAD_DIMX"]), Ceil(CeilDiv(dest_two, db["PAD_WPTY"]), db["PAD_DIMY"])};
 			local = {db["PAD_DIMX"], db["PAD_DIMY"]};
-			//RunKernel(kernel, queue, device, global, local);
 		}
 	}
 	global.resize(3, 1);

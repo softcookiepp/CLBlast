@@ -15,6 +15,7 @@
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
 #include "../common.glsl"
+#define LEVEL3_USE_SPEC 1
 #include "level3.glsl"
 // =================================================================================================
 
@@ -35,7 +36,11 @@
 
 // Transposes and copies a matrix. Requires both matrices to be of the same dimensions and without
 // offset. A more general version is available in 'padtranspose.opencl'.
-layout(local_size_x = TRA_DIM, local_size_y = TRA_DIM, local_size_z = 1) in;
+#if LEVEL3_USE_SPEC == 1
+	layout(local_size_x_id = 7, local_size_y_id = 7, local_size_z = 1) in;
+#else
+	layout(local_size_x = TRA_DIM, local_size_y = TRA_DIM, local_size_z = 1) in;
+#endif
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) readonly buffer src_buf { realT src[]; };

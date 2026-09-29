@@ -13,6 +13,7 @@
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
 #include "../common.glsl"
+#define LEVEL3_USE_SPEC 1
 #include "level3.glsl"
 // =================================================================================================
 
@@ -33,7 +34,11 @@
 
 // Fast copy kernel. Requires 'ld' and the number of threads in dimension 0 to be a multiple of
 // COPY_VW. Also requires both matrices to be of the same dimensions and without offset.
-layout(local_size_x = COPY_DIMX, local_size_y = COPY_DIMY, local_size_z = 1) in;
+#if LEVEL3_USE_SPEC == 1
+	layout(local_size_x_id = 0, local_size_y_id = 1) in;
+#else
+	layout(local_size_x = COPY_DIMX, local_size_y = COPY_DIMY, local_size_z = 1) in;
+#endif
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) buffer src_buf { realC src[]; };

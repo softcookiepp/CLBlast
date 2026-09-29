@@ -508,6 +508,10 @@ R"(
 	//int GetGroupID0() { return int(gl_WorkGroupID.x); }
 #endif
 
+
+// Copies a vector src to dest, without regards to width or non-scalar type of either one
+#define copyArbitraryVector(dst, src, size) { [[unroll]] for (uint _i = 0; _i < size; _i += 1) dst.s[_i] = src.s[_i]; }
+
 // =================================================================================================
 
 // End of the C++11 raw string literal
@@ -515,6 +519,10 @@ R"(
 
 // =================================================================================================
 
+// Enable this flag in order to pass vector width via specialization constant.
+// This would eliminate the need for compilation of a different SPIR-V file for each vector width.
+// It still needs to be performance-profiled before being introduced permanently, as it requires substantially more code.
+#define USE_SPEC_FOR_VW 0
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
@@ -1023,6 +1031,10 @@ R"(
 	//int GetGroupID0() { return int(gl_WorkGroupID.x); }
 #endif
 
+
+// Copies a vector src to dest, without regards to width or non-scalar type of either one
+#define copyArbitraryVector(dst, src, size) { [[unroll]] for (uint _i = 0; _i < size; _i += 1) dst.s[_i] = src.s[_i]; }
+
 // =================================================================================================
 
 // End of the C++11 raw string literal
@@ -1051,42 +1063,66 @@ layout(constant_id = 1) const int WPT = 1; // The amount of work-per-thread
 
 // =================================================================================================
 
+#ifndef USE_SPEC_FOR_VW
+	#define USE_SPEC_FOR_VW 0
+#endif
+
 // Data-widths
-#if VW == 1
-	#define realV_ptr_t real_ptr_t
-	#define realV real
-#elif VW == 2
-	#define realV_ptr_t real2_ptr_t
-	#define realV real2
-#elif VW == 4
-	#define realV_ptr_t real4_ptr_t
-	#define realV real4
-#elif VW == 8
-	#define realV_ptr_t real8_ptr_t
-	#define realV real8
-#elif VW == 16
-	#define realV_ptr_t real16_ptr_t
-	#define realV real16
+#if USE_SPEC_FOR_VW
+	#ifdef VW
+		#undef VW
+	#endif
+	layout(constant_id = 2) const int VW = 1;
+	
+	struct real1 { real s[1]; };
+	struct realV { real s[VW]; };
+#else
+	#if VW == 1
+		#define realV_ptr_t real_ptr_t
+		#define realV real
+	#elif VW == 2
+		#define realV_ptr_t real2_ptr_t
+		#define realV real2
+	#elif VW == 4
+		#define realV_ptr_t real4_ptr_t
+		#define realV real4
+	#elif VW == 8
+		#define realV_ptr_t real8_ptr_t
+		#define realV real8
+	#elif VW == 16
+		#define realV_ptr_t real16_ptr_t
+		#define realV real16
+	#endif
 #endif
 
 // =================================================================================================
 
 // The vectorized multiply function
-realV MultiplyVector(realV cvec, const real aval, const realV bvec) {
-	#if VW == 1
-		Multiply(cvec, aval, bvec);
+realV MultiplyVector(realV cvec, const real aval, const realV bvec)
+{
+	#if USE_SPEC_FOR_VW
+		vsMultiplyAdd(cvec, aval, bvec, VW);
 	#else
-		vsMultiply(cvec, aval, bvec, VW);
+		#if VW == 1
+			Multiply(cvec, aval, bvec);
+		#else
+			vsMultiply(cvec, aval, bvec, VW);
+		#endif
 	#endif
 	return cvec;
 }
 
 // The vectorized multiply-add function
-realV MultiplyAddVector(realV cvec, const real aval, const realV bvec) {
-	#if VW == 1
-		MultiplyAdd(cvec, aval, bvec);
-	#else
+realV MultiplyAddVector(realV cvec, const real aval, const realV bvec)
+{
+	#if USE_SPEC_FOR_VW
 		vsMultiplyAdd(cvec, aval, bvec, VW);
+	#else
+		#if VW == 1
+			MultiplyAdd(cvec, aval, bvec);
+		#else
+			vsMultiplyAdd(cvec, aval, bvec, VW);
+		#endif
 	#endif
 	return cvec;
 }
@@ -1104,8 +1140,76 @@ realV MultiplyAddVector(realV cvec, const real aval, const realV bvec) {
 layout(local_size_x_id = 0) in;
 
 #if USE_BDA == 0
-	layout(binding = 0, std430) readonly buffer xgm_buf { realV xgm[]; };
-	layout(binding = 1, std430) buffer ygm_buf { realV ygm[]; };
+	#if USE_SPEC_FOR_VW
+		layout(binding = 0, std430) readonly buffer xgm_buf1 { real1 xgm1[]; };
+		layout(binding = 0, std430) readonly buffer xgm_buf2 { real2 xgm2[]; };
+		layout(binding = 0, std430) readonly buffer xgm_buf4 { real4 xgm4[]; };
+		layout(binding = 0, std430) readonly buffer xgm_buf8 { real8 xgm8[]; };
+		layout(binding = 0, std430) readonly buffer xgm_buf16 { real16 xgm16[]; };
+		layout(binding = 1, std430) buffer ygm_buf1 { real1 ygm1[]; };
+		layout(binding = 1, std430) buffer ygm_buf2 { real2 ygm2[]; };
+		layout(binding = 1, std430) buffer ygm_buf4 { real4 ygm4[]; };
+		layout(binding = 1, std430) buffer ygm_buf8 { real8 ygm8[]; };
+		layout(binding = 1, std430) buffer ygm_buf16 { real16 ygm16[]; };
+		
+		#define loadXgm(x, id) \
+		{ \
+			[[flatten]] \
+			if (VW == 1) { real1 xp = xgm1[id]; copyArbitraryVector(x, xp, VW); } \
+			else if (VW == 2) { real2 xp = xgm2[id]; copyArbitraryVector(x, xp, VW); } \
+			else if (VW == 4) { real4 xp = xgm4[id]; copyArbitraryVector(x, xp, VW); } \
+			else if (VW == 8) { real8 xp = xgm8[id]; copyArbitraryVector(x, xp, VW); } \
+			else if (VW == 16) { real16 xp = xgm16[id]; copyArbitraryVector(x, xp, VW); } \
+		}
+		
+		#define loadYgm(y, id) \
+		{ \
+			[[flatten]] \
+			if (VW == 1) { real1 yp = ygm1[id]; copyArbitraryVector(y, yp, VW); } \
+			else if (VW == 2) { real2 yp = ygm2[id]; copyArbitraryVector(y, yp, VW); } \
+			else if (VW == 4) { real4 yp = ygm4[id]; copyArbitraryVector(y, yp, VW); } \
+			else if (VW == 8) { real8 yp = ygm8[id]; copyArbitraryVector(y, yp, VW); } \
+			else if (VW == 16) { real16 yp = ygm16[id]; copyArbitraryVector(y, yp, VW); } \
+		}
+		
+		void storeYgm(int id, realV y)
+		{
+			[[flatten]]
+			if (VW == 1)
+			{
+				real1 yp;
+				copyArbitraryVector(yp, y, VW);
+				ygm1[id] = yp;
+			}
+			else if (VW == 2)
+			{
+				real2 yp;
+				copyArbitraryVector(yp, y, VW);
+				ygm2[id] = yp;
+			}
+			else if (VW == 4)
+			{
+				real4 yp;
+				copyArbitraryVector(yp, y, VW);
+				ygm4[id] = yp;
+			}
+			else if (VW == 8)
+			{
+				real8 yp = ygm8[id];
+				copyArbitraryVector(yp, y, VW);
+				ygm8[id] = yp;
+			}
+			else if (VW == 16)
+			{
+				real16 yp = ygm16[id];
+				copyArbitraryVector(yp, y, VW);
+				ygm16[id] = yp;
+			}
+		}
+	#else
+		layout(binding = 0, std430) readonly buffer xgm_buf { realV xgm[]; };
+		layout(binding = 1, std430) buffer ygm_buf { realV ygm[]; };
+	#endif
 #endif
 
 layout(push_constant) uniform XaxpyFaster
@@ -1128,9 +1232,18 @@ void main()
 		for (int _w = 0; _w < WPT; _w += 1)
 		{
 			const int id = _w*num_usefull_threads + get_global_id(0);
-			realV xvalue = indexGM(xgm, id);
-			realV yvalue = indexGM(ygm, id);
-			indexGM(ygm, id) = MultiplyAddVector(yvalue, alpha, xvalue);
+			#if USE_SPEC_FOR_VW
+				realV xvalue;
+				loadXgm(xvalue, id);
+				realV yvalue;
+				loadYgm(yvalue, id);
+				vsMultiplyAdd(yvalue, alpha, xvalue, VW);
+				storeYgm(id, yvalue);
+			#else
+				realV xvalue = indexGM(xgm, id);
+				realV yvalue = indexGM(ygm, id);
+				indexGM(ygm, id) = MultiplyAddVector(yvalue, alpha, xvalue);
+			#endif
 		}
 	}
 }

@@ -506,6 +506,10 @@ R"(
 	//int GetGroupID0() { return int(gl_WorkGroupID.x); }
 #endif
 
+
+// Copies a vector src to dest, without regards to width or non-scalar type of either one
+#define copyArbitraryVector(dst, src, size) { [[unroll]] for (uint _i = 0; _i < size; _i += 1) dst.s[_i] = src.s[_i]; }
+
 // =================================================================================================
 
 // End of the C++11 raw string literal
@@ -1021,6 +1025,10 @@ R"(
 	//int GetGroupID0() { return int(gl_WorkGroupID.x); }
 #endif
 
+
+// Copies a vector src to dest, without regards to width or non-scalar type of either one
+#define copyArbitraryVector(dst, src, size) { [[unroll]] for (uint _i = 0; _i < size; _i += 1) dst.s[_i] = src.s[_i]; }
+
 // =================================================================================================
 
 // End of the C++11 raw string literal
@@ -1049,42 +1057,66 @@ layout(constant_id = 1) const int WPT = 1; // The amount of work-per-thread
 
 // =================================================================================================
 
+#ifndef USE_SPEC_FOR_VW
+	#define USE_SPEC_FOR_VW 0
+#endif
+
 // Data-widths
-#if VW == 1
-	#define realV_ptr_t real_ptr_t
-	#define realV real
-#elif VW == 2
-	#define realV_ptr_t real2_ptr_t
-	#define realV real2
-#elif VW == 4
-	#define realV_ptr_t real4_ptr_t
-	#define realV real4
-#elif VW == 8
-	#define realV_ptr_t real8_ptr_t
-	#define realV real8
-#elif VW == 16
-	#define realV_ptr_t real16_ptr_t
-	#define realV real16
+#if USE_SPEC_FOR_VW
+	#ifdef VW
+		#undef VW
+	#endif
+	layout(constant_id = 2) const int VW = 1;
+	
+	struct real1 { real s[1]; };
+	struct realV { real s[VW]; };
+#else
+	#if VW == 1
+		#define realV_ptr_t real_ptr_t
+		#define realV real
+	#elif VW == 2
+		#define realV_ptr_t real2_ptr_t
+		#define realV real2
+	#elif VW == 4
+		#define realV_ptr_t real4_ptr_t
+		#define realV real4
+	#elif VW == 8
+		#define realV_ptr_t real8_ptr_t
+		#define realV real8
+	#elif VW == 16
+		#define realV_ptr_t real16_ptr_t
+		#define realV real16
+	#endif
 #endif
 
 // =================================================================================================
 
 // The vectorized multiply function
-realV MultiplyVector(realV cvec, const real aval, const realV bvec) {
-	#if VW == 1
-		Multiply(cvec, aval, bvec);
+realV MultiplyVector(realV cvec, const real aval, const realV bvec)
+{
+	#if USE_SPEC_FOR_VW
+		vsMultiplyAdd(cvec, aval, bvec, VW);
 	#else
-		vsMultiply(cvec, aval, bvec, VW);
+		#if VW == 1
+			Multiply(cvec, aval, bvec);
+		#else
+			vsMultiply(cvec, aval, bvec, VW);
+		#endif
 	#endif
 	return cvec;
 }
 
 // The vectorized multiply-add function
-realV MultiplyAddVector(realV cvec, const real aval, const realV bvec) {
-	#if VW == 1
-		MultiplyAdd(cvec, aval, bvec);
-	#else
+realV MultiplyAddVector(realV cvec, const real aval, const realV bvec)
+{
+	#if USE_SPEC_FOR_VW
 		vsMultiplyAdd(cvec, aval, bvec, VW);
+	#else
+		#if VW == 1
+			MultiplyAdd(cvec, aval, bvec);
+		#else
+			vsMultiplyAdd(cvec, aval, bvec, VW);
+		#endif
 	#endif
 	return cvec;
 }

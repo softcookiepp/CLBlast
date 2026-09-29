@@ -504,6 +504,10 @@ R"(
 	//int GetGroupID0() { return int(gl_WorkGroupID.x); }
 #endif
 
+
+// Copies a vector src to dest, without regards to width or non-scalar type of either one
+#define copyArbitraryVector(dst, src, size) { [[unroll]] for (uint _i = 0; _i < size; _i += 1) dst.s[_i] = src.s[_i]; }
+
 // =================================================================================================
 
 // End of the C++11 raw string literal

@@ -211,23 +211,8 @@ R"(
 	// uint BDA
 	layout(buffer_reference, buffer_reference_align = 4) buffer int_ptr_t { int s[]; };
 	layout(buffer_reference, buffer_reference_align = 4) buffer uint_ptr_t { uint s[]; };
-	#if 0
-		// index function to make BDA and non-BDA devices share the same code
-		#define INDEX_AS_ALIGNED(buffer_t, ptr, index, alignment) buffer_t(addPtrOffset(addr_t(ptr), index*alignment))
-		real_ptr_t indexGMimpl(real_ptr_t ptr, uint index) { return INDEX_AS_ALIGNED(real_ptr_t, ptr, index, DTYPE_SIZE); }
-		real2_ptr_t indexGMimpl(real2_ptr_t ptr, uint index, uint gae) { return INDEX_AS_ALIGNED(real2_ptr_t, ptr, index, DTYPE_SIZE*2); }
-		real4_ptr_t indexGMimpl(real4_ptr_t ptr, uint index) { return INDEX_AS_ALIGNED(real4_ptr_t, ptr, index, DTYPE_SIZE*4); }
-		real8_ptr_t indexGMimpl(real8_ptr_t ptr, uint index) { return INDEX_AS_ALIGNED(real8_ptr_t, ptr, index, DTYPE_SIZE*8); }
-		real16_ptr_t indexGMimpl(real16_ptr_t ptr, uint index) { return INDEX_AS_ALIGNED(real16_ptr_t, ptr, index, DTYPE_SIZE*16); }
-		int_ptr_t indexGMimpl(int_ptr_t, uint index) {return INDEX_AS_ALIGNED(int_ptr_t, ptr, index, 4); }
-		uint_ptr_t indexGMimpl(uint_ptr_t, uint index) {return INDEX_AS_ALIGNED(uint_ptr_t, ptr, index, 4); }
-	
-		#define indexGM(ptr, index) indexGMimpl(ptr, index).s[0]
-	#else
-		// that, above, does not seem to work right now.
-		// Therefore, it is only possible to do it this way:
-		#define indexGM(ptr, index) ptr.s[index]
-	#endif
+
+	#define indexGM(ptr, index) ptr.s[index]
 #else
 	#define indexGM(ptr, index) ptr[index]
 #endif

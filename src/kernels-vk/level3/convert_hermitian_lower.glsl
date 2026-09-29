@@ -44,6 +44,7 @@ layout(push_constant) uniform HermLowerToSquared
 void main()
 {
 	#if ROUTINE_IS_COMPLEX
+		#error "gae"
 		// Loops over the work per thread in both dimensions
 		[[unroll]]
 		for (int _w_one = 0; _w_one < PAD_WPTX; _w_one += 1) {
@@ -55,7 +56,7 @@ void main()
 
 					// Loads data from the lower-hermitian matrix
 					real result;
-					SetToZero(result);
+					//SetToZero(result);
 					if (id_two < src_dim && id_one < src_dim) {
 						if (id_two <= id_one) {
 							result = src[id_two*src_ld + id_one + src_offset];

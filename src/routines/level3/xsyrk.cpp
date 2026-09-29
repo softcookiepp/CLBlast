@@ -194,6 +194,8 @@ void Xsyrk<T>::SyrkAB(const Layout layout, const Triangle triangle, const Transp
 	kernel.SetArgument(4, a_temp());
 	kernel.SetArgument(5, b_temp());
 	kernel.SetArgument(6, c_temp());
+	kernel.SetArgument(7, a_temp());
+	kernel.SetArgument(8, b_temp());
 
 	// Computes the global and local thread sizes
 	auto global = std::vector<size_t>{(n_ceiled * db_["MDIMC"]) / db_["MWG"], (n_ceiled * db_["NDIMC"]) / db_["NWG"]};

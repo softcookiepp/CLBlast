@@ -17,6 +17,7 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
+#define LEVEL3_USE_SPEC 1
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):

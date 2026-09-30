@@ -18,6 +18,7 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
+#define LEVEL3_USE_SPEC 1
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
@@ -765,10 +766,13 @@ void _CopyPadMatrix(const int src_one, const int src_two,
 // =================================================================================================
 
 // =================================================================================================
-#if 1
 
 // Strided-batched version of the above
-layout(local_size_x = PAD_DIMX, local_size_y = PAD_DIMY, local_size_z = 1) in;
+#if LEVEL3_USE_SPEC == 1
+	layout(local_size_x_id = 3, local_size_y_id = 4, local_size_z = 1) in;
+#else
+	layout(local_size_x = PAD_DIMX, local_size_y = PAD_DIMY, local_size_z = 1) in;
+#endif
 
 layout(push_constant) uniform CopyPadMatrixStridedBatched
 {
@@ -804,7 +808,6 @@ void main()
 		alpha, do_conjugate);
 }
 
-#endif
 // =================================================================================================
 
 // End of the C++11 raw string literal

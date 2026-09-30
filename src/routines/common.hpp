@@ -301,7 +301,21 @@ void PadCopyTransposeMatrixStridedBatched(Queue& queue, const Device& device, co
 	// parameters in the database.
 	std::vector<uint32_t> global(3, 1);
 	std::vector<uint32_t> local(3, 1);
-	std::vector<uint32_t> spec;
+	std::vector<uint32_t> spec = {
+		db["COPY_DIMX"],
+		db["COPY_DIMY"],
+		db["COPY_WPT"],
+		db["PAD_DIMX"],
+		db["PAD_DIMY"],
+		db["PAD_WPTX"],
+		db["PAD_WPTY"],
+		db["TRA_DIM"],
+		db["TRA_PAD"],
+		db["TRA_SHUFFLE"],
+		db["PADTRA_TILE"],
+		db["PADTRA_WPT"],
+		db["PADTRA_PAD"]
+	};
 	if (do_transpose) {
 		global = {Ceil(CeilDiv(dest_one, db["PADTRA_WPT"]), db["PADTRA_TILE"]),
 																						Ceil(CeilDiv(dest_two, db["PADTRA_WPT"]), db["PADTRA_TILE"]), batch_count};

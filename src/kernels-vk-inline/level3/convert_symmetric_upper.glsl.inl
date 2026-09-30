@@ -500,6 +500,7 @@ R"(
 
 // =================================================================================================
 
+#define LEVEL3_USE_SPEC 1
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
@@ -679,10 +680,13 @@ R"(
 // =================================================================================================
 
 // =================================================================================================
-#if 1 //defined(ROUTINE_SYMM)
 
 // Same as above, but now the matrix' data is stored in the upper-triangle
-layout(local_size_x = PAD_DIMX, local_size_y = PAD_DIMY, local_size_z = 1) in;
+#if LEVEL3_USE_SPEC == 1
+	layout(local_size_x_id = 3, local_size_y_id = 4, local_size_z = 1) in;
+#else
+	layout(local_size_x = PAD_DIMX, local_size_y = PAD_DIMY, local_size_z = 1) in;
+#endif
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) readonly buffer src_buf { real src[]; };
@@ -729,7 +733,6 @@ void main()
 	}
 }
 
-#endif
 // =================================================================================================
 
 // End of the C++11 raw string literal

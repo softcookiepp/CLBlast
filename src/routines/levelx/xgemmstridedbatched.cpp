@@ -343,7 +343,6 @@ void XgemmStridedBatched<T>::BatchedGemmDirect(
 	
 	// Launches the kernel
 	kernel->enqueue(global, spec);
-	//RunKernel(kernel, queue_, device_, global, local);
 }
 
 // =================================================================================================

@@ -98,7 +98,6 @@ void Xamax<T>::DoAmax(const size_t n, const Buffer<unsigned int>& imax_buffer, c
 	kernel1->setArg(6, num_groups_0);
 	
 	kernel1->enqueue(global1, {db_["WGS1"], mMax, mMin, mAmin});
-	//RunKernel(kernel1, queue_, device_, global1, local1);
 
 	// Sets the arguments for the epilogue kernel
 #if VULKAN_USE_BDA

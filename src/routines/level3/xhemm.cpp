@@ -77,12 +77,23 @@ void Xhemm<T>::DoHemm(const Layout layout, const Side side, const Triangle trian
 	auto local = std::vector<size_t>{db_["PAD_DIMX"], db_["PAD_DIMY"]};
 	global[0] = global[0] / local[0];
 	global[1] = global[1] / local[1];
-	kernel->enqueue(global, {});
-	//RunKernel(kernel, queue_, device_, global, local);
+	std::vector<uint32_t> spec = {
+		db_["COPY_DIMX"],
+		db_["COPY_DIMY"],
+		db_["COPY_WPT"],
+		db_["PAD_DIMX"],
+		db_["PAD_DIMY"],
+		db_["PAD_WPTX"],
+		db_["PAD_WPTY"],
+		db_["TRA_DIM"],
+		db_["TRA_PAD"],
+		db_["TRA_SHUFFLE"],
+		db_["PADTRA_TILE"],
+		db_["PADTRA_WPT"],
+		db_["PADTRA_PAD"]
+	};
+	kernel->enqueue(global, spec);
 	device_()->enqueueBarrier({temp_herm()});
-
-	// Synchronize now: 'DoGemm' does not accept a list of events to wait for
-	//kernelEvent.WaitForCompletion();
 
 	// Runs the regular Xgemm code with either "C := AB+C" or ...
 	if (side == Side::kLeft) {

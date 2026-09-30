@@ -132,17 +132,11 @@ void Xswap<T>::DoSwap(const size_t n, const Buffer<T>& x_buffer, const size_t x_
 	if (use_fast_kernel)
 	{
 		global[0] = CeilDiv(n, db_["WPT"] * db_["VW"]) / db_["WGS"];
-		//auto global = std::vector<size_t>{CeilDiv(n, db_["WPT"] * db_["VW"])};
-		//auto local = std::vector<size_t>{db_["WGS"]};
-		//RunKernel(kernel, queue_, device_, global, local);
 	}
 	else
 	{
 		auto n_ceiled = Ceil(n, db_["WGS"] * db_["WPT"]);
 		global[0] = n_ceiled / (db_["WPT"]*db_["WGS"]);
-		//auto global = std::vector<size_t>{n_ceiled / db_["WPT"]};
-		//auto local = std::vector<size_t>{db_["WGS"]};
-		//RunKernel(kernel, queue_, device_, global, local);
 	}
 	kernel->enqueue(global, {db_["WGS"], db_["WPT"]});
 }

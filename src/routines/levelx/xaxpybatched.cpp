@@ -76,24 +76,24 @@ void XaxpyBatched<T>::DoAxpyBatched(const size_t n, const std::vector<T>& alphas
 	alphas_device.Write(queue_, batch_count, alphas);
 
 	// Retrieves the Xaxpy kernel from the compiled binary
-	auto kernel = Kernel(program_, "XaxpyBatched");
+	auto kernelOld = Kernel(program_, "XaxpyBatched");
+	tart::kernel_ptr kernel = kernelOld.get();
 
 	// Sets the kernel arguments
-	kernel.SetArgument(0, static_cast<int>(n));
-	kernel.SetArgument(1, alphas_device());
-	kernel.SetArgument(2, x_buffer());
-	kernel.SetArgument(3, x_offsets_device());
-	kernel.SetArgument(4, static_cast<int>(x_inc));
-	kernel.SetArgument(5, y_buffer());
-	kernel.SetArgument(6, y_offsets_device());
-	kernel.SetArgument(7, static_cast<int>(y_inc));
+	kernel->setArg(0, static_cast<int>(n));
+	kernel->setArg(1, alphas_device());
+	kernel->setArg(2, x_buffer());
+	kernel->setArg(3, x_offsets_device());
+	kernel->setArg(4, static_cast<int>(x_inc));
+	kernel->setArg(5, y_buffer());
+	kernel->setArg(6, y_offsets_device());
+	kernel->setArg(7, static_cast<int>(y_inc));
 
 	// Launches the kernel
 	auto n_ceiled = Ceil(n, db_["WGS"] * db_["WPT"]);
 	auto global = std::vector<size_t>{n_ceiled / db_["WPT"], batch_count};
 	auto local = std::vector<size_t>{db_["WGS"], 1};
-	
-	RunKernel(kernel, queue_, device_, global, local);
+	kernel->enqueue({global[0] / local[0], 1, 1}, {db_["WGS"], db_["WPT"]});
 }
 
 // =================================================================================================

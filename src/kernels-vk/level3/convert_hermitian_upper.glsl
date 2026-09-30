@@ -15,11 +15,16 @@
 	#define PRECISION 3232
 #endif
 #include "../common.glsl"
+#define LEVEL3_USE_SPEC 1
 #include "level3.glsl"
 // =================================================================================================
 
 // Same as above, but now the matrix' data is stored in the upper-triangle
-layout(local_size_x = PAD_DIMX, local_size_y = PAD_DIMY, local_size_z = 1) in;
+#if LEVEL3_USE_SPEC == 1
+	layout(local_size_x_id = 3, local_size_y_id = 4, local_size_z = 1) in;
+#else
+	layout(local_size_x = PAD_DIMX, local_size_y = PAD_DIMY, local_size_z = 1) in;
+#endif
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) readonly buffer src_buf { real src[]; };

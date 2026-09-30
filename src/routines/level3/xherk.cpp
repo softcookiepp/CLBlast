@@ -230,8 +230,7 @@ void Xherk<T, U>::HerkAB(const Layout layout, const Triangle triangle, const Tra
 	
 	// Launches the kernel
 	kernel->enqueue(global, spec);
-	//RunKernel(kernel, queue_, device_, global, local);
-	//device_()->enqueueBarrier( {a_temp(), b_temp(), c_temp()} );
+	device_()->enqueueBarrier( {a_temp(), b_temp(), c_temp()} );
 
 	// Runs the post-processing kernel
 	const auto upper =

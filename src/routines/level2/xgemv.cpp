@@ -235,7 +235,6 @@ void Xgemv<T>::MatVec(const Layout layout, const Transpose a_transpose, const si
 		};
 	}
 	kernel->enqueue(global, spec);
-	//RunKernel(kernel, queue_, device_, global, local);
 }
 
 // =================================================================================================

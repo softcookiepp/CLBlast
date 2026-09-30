@@ -19,6 +19,7 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
+#define LEVEL3_USE_SPEC 1
 #include "level3.glsl"
 #include "transpose_matrix_batched_impl.glsl"
 // =================================================================================================

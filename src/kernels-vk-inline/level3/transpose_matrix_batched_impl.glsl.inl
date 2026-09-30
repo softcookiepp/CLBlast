@@ -545,7 +545,7 @@ R"(
 	#define LEVEL3_USE_SPEC 0
 #endif
 
-#if LEVEL3_USE_SPEC
+#if LEVEL3_USE_SPEC == 1
 		// For the 'fast' copy kernel
 	#ifdef COPY_DIMX
 		#undef COPY_DIMX 			// Local workgroup size in the first dimension (x)
@@ -691,7 +691,11 @@ R"(
 // =================================================================================================
 
 // just define some shader parameters here, they are basically the same across all
+#if LEVEL3_USE_SPEC
+	layout(local_size_x_id = 10, local_size_y_id = 10, local_size_z = 1) in;
+#else
 	layout(local_size_x = PADTRA_TILE, local_size_y = PADTRA_TILE, local_size_z = 1) in;
+#endif
 
 #if USE_BDA == 0
 	#if 1

@@ -20,6 +20,7 @@ R"(
 #ifndef ROUTINE_GEMMBATCHED
 	#define ROUTINE_GEMMBATCHED
 #endif
+#define LEVEL3_USE_SPEC 1
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
@@ -564,7 +565,7 @@ R"(
 	#define LEVEL3_USE_SPEC 0
 #endif
 
-#if LEVEL3_USE_SPEC
+#if LEVEL3_USE_SPEC == 1
 		// For the 'fast' copy kernel
 	#ifdef COPY_DIMX
 		#undef COPY_DIMX 			// Local workgroup size in the first dimension (x)
@@ -774,7 +775,7 @@ void _CopyMatrix(const int src_one, const int src_two,
 #if 1//def ROUTINE_GEMMBATCHED
 
 // Batched version of the above
-layout(local_size_x = PAD_DIMX, local_size_y = PAD_DIMY, local_size_z = 1) in;
+layout(local_size_x_id = 3, local_size_y_id = 4, local_size_z = 1) in;
 
 layout(push_constant) uniform CopyMatrixBatched
 {

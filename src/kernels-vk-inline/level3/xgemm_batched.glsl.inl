@@ -580,7 +580,7 @@ R"(
 	#define LEVEL3_USE_SPEC 0
 #endif
 
-#if LEVEL3_USE_SPEC
+#if LEVEL3_USE_SPEC == 1
 		// For the 'fast' copy kernel
 	#ifdef COPY_DIMX
 		#undef COPY_DIMX 			// Local workgroup size in the first dimension (x)
@@ -1805,7 +1805,7 @@ realN LocalToPrivateB(
 	#define LEVEL3_USE_SPEC 0
 #endif
 
-#if LEVEL3_USE_SPEC
+#if LEVEL3_USE_SPEC == 1
 		// For the 'fast' copy kernel
 	#ifdef COPY_DIMX
 		#undef COPY_DIMX 			// Local workgroup size in the first dimension (x)
@@ -3132,7 +3132,7 @@ void StoreResults(
 	#define LEVEL3_USE_SPEC 0
 #endif
 
-#if LEVEL3_USE_SPEC
+#if LEVEL3_USE_SPEC == 1
 		// For the 'fast' copy kernel
 	#ifdef COPY_DIMX
 		#undef COPY_DIMX 			// Local workgroup size in the first dimension (x)

@@ -18,13 +18,13 @@
 #ifndef ROUTINE_GEMMBATCHED
 	#define ROUTINE_GEMMBATCHED
 #endif
-
+#define LEVEL3_USE_SPEC 1
 #include "copy_pad_matrix_batched_impl.glsl"
 // =================================================================================================
 #if 1//def ROUTINE_GEMMBATCHED
 
 // Batched version of the above
-layout(local_size_x = PAD_DIMX, local_size_y = PAD_DIMY, local_size_z = 1) in;
+layout(local_size_x_id = 3, local_size_y_id = 4, local_size_z = 1) in;
 
 layout(push_constant) uniform CopyPadMatrixBatched
 {

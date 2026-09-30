@@ -14,6 +14,9 @@
 #ifndef PRECISION
 	#define PRECISION 3232
 #endif
+#ifndef ROUTINE_IS_COMPLEX
+	#define ROUTINE_IS_COMPLEX 1
+#endif
 #include "../common.glsl"
 #include "level3.glsl"
 // =================================================================================================
@@ -44,7 +47,6 @@ layout(push_constant) uniform HermLowerToSquared
 void main()
 {
 	#if ROUTINE_IS_COMPLEX
-		#error "gae"
 		// Loops over the work per thread in both dimensions
 		[[unroll]]
 		for (int _w_one = 0; _w_one < PAD_WPTX; _w_one += 1) {

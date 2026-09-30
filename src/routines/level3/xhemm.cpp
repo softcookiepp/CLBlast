@@ -58,25 +58,27 @@ void Xhemm<T>::DoHemm(const Layout layout, const Side side, const Triangle trian
 
 	// Creates a general matrix from the hermitian matrix to be able to run the regular Xgemm
 	// routine afterwards
-	auto kernel = Kernel(program_, kernel_name);
+	auto kernelOld = Kernel(program_, kernel_name);
+	tart::kernel_ptr kernel = kernelOld.get();
 
 	// Sets the arguments for the hermitian-to-squared kernel
-	kernel.SetArgument(0, static_cast<int>(k));
-	kernel.SetArgument(1, static_cast<int>(a_ld));
-	kernel.SetArgument(2, static_cast<int>(a_offset));
-	kernel.SetArgument(3, a_buffer());
-	kernel.SetArgument(4, static_cast<int>(k));
-	kernel.SetArgument(5, static_cast<int>(k));
-	kernel.SetArgument(6, static_cast<int>(0));
-	kernel.SetArgument(7, temp_herm());
+	kernel->setArg(0, static_cast<int>(k));
+	kernel->setArg(1, static_cast<int>(a_ld));
+	kernel->setArg(2, static_cast<int>(a_offset));
+	kernel->setArg(3, a_buffer());
+	kernel->setArg(4, static_cast<int>(k));
+	kernel->setArg(5, static_cast<int>(k));
+	kernel->setArg(6, static_cast<int>(0));
+	kernel->setArg(7, temp_herm());
 
 	// Uses the common padding kernel's thread configuration. This is allowed, since the
 	// hermitian-to-squared kernel uses the same parameters.
-	auto global = std::vector<size_t>{Ceil(CeilDiv(k, db_["PAD_WPTX"]), db_["PAD_DIMX"]),
-																		Ceil(CeilDiv(k, db_["PAD_WPTY"]), db_["PAD_DIMY"])};
+	std::vector<uint32_t> global = {Ceil(CeilDiv(k, db_["PAD_WPTX"]), db_["PAD_DIMX"]), Ceil(CeilDiv(k, db_["PAD_WPTY"]), db_["PAD_DIMY"])};
 	auto local = std::vector<size_t>{db_["PAD_DIMX"], db_["PAD_DIMY"]};
-	
-	RunKernel(kernel, queue_, device_, global, local);
+	global[0] = global[0] / local[0];
+	global[1] = global[1] / local[1];
+	kernel->enqueue(global, {});
+	//RunKernel(kernel, queue_, device_, global, local);
 	device_()->enqueueBarrier({temp_herm()});
 
 	// Synchronize now: 'DoGemm' does not accept a list of events to wait for

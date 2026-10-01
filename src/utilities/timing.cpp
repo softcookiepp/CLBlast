@@ -20,7 +20,8 @@ namespace clblast {
 // =================================================================================================
 
 double RunKernelTimed(const size_t num_runs, Kernel& kernel, Queue& queue, const Device& device,
-											std::vector<size_t> global, const std::vector<size_t>& local) {
+											std::vector<size_t> global, const std::vector<size_t>& local,
+											const std::vector<uint32_t>& spec) {
 	if (!local.empty()) {
 		// Tests for validity of the local thread sizes
 		auto local_size = size_t{1};
@@ -49,7 +50,7 @@ double RunKernelTimed(const size_t num_runs, Kernel& kernel, Queue& queue, const
 }
 
 double TimeKernel(const size_t num_runs, Kernel& kernel, Queue& queue, const Device& device, std::vector<size_t> global,
-									const std::vector<size_t>& local, const bool silent)
+	const std::vector<size_t>& local, const bool silent, const std::vector<uint32_t>& spec)
 {
 	const auto time_ms = RunKernelTimed(num_runs, kernel, queue, device, std::move(global), local);
 	if (!silent)

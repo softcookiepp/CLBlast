@@ -278,7 +278,7 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	const auto global = std::vector<uint32_t>{c_one_i / db_["MWG"], c_two_i / db_["NWG"]};
 
 	const bool subgroupSupported = this->device_()->getMetadata().subgroupAdd;
-	std::vector<uint> spec(subgroupSupported ? 16 : 15);
+	std::vector<uint32_t> spec(subgroupSupported ? 16 : 15);
 	spec[0] = db_["GEMMK"];
 	spec[1] = db_["MWG"];
 	spec[2] = db_["NWG"];

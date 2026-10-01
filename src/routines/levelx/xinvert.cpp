@@ -141,18 +141,20 @@ void Xinvert<T>::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle 
 	device_()->enqueueBarrier({dest()});
 
 	// Inverts the diagonal IB by IB inner blocks of the matrix: one block per work-group
-	auto kernel = Kernel(program_, "InvertDiagonalBlock");
-	kernel.SetArgument(0, static_cast<int>(n));
-	kernel.SetArgument(1, src());
-	kernel.SetArgument(2, static_cast<int>(offset));
-	kernel.SetArgument(3, static_cast<int>(ld_src));
-	kernel.SetArgument(4, dest());
-	kernel.SetArgument(5, static_cast<int>(block_size));
-	kernel.SetArgument(6, static_cast<int>(unit_diagonal));
-	kernel.SetArgument(7, static_cast<int>(is_upper));
+	auto kernelOld = Kernel(program_, "InvertDiagonalBlock");
+	tart::kernel_ptr kernel = kernelOld.get();
+	kernel->setArg(0, static_cast<int>(n));
+	kernel->setArg(1, src());
+	kernel->setArg(2, static_cast<int>(offset));
+	kernel->setArg(3, static_cast<int>(ld_src));
+	kernel->setArg(4, dest());
+	kernel->setArg(5, static_cast<int>(block_size));
+	kernel->setArg(6, static_cast<int>(unit_diagonal));
+	kernel->setArg(7, static_cast<int>(is_upper));
 	const auto local_invert = std::vector<size_t>{internal_block_size};
-	const auto global_invert = std::vector<size_t>{num_internal_blocks * internal_block_size};
-	RunKernel(kernel, queue_, device_, global_invert, local_invert);
+	auto global_invert = std::vector<uint32_t>{num_internal_blocks * internal_block_size};
+	global_invert[0] = global_invert[0] / local_invert[0];
+	kernel->enqueue(global_invert, {});
 	if (internal_block_size == block_size) {
 		//event_wait_list.push_back(base_kernel_event);
 		device_()->enqueueBarrier({dest()});
@@ -170,34 +172,37 @@ void Xinvert<T>::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle 
 		const auto npages = CeilDiv(n, current_size * 2);
 		const auto local0 = (current_size <= 32) ? current_size / 4 : 16;
 		const auto local = std::vector<size_t>{local0, 4};
-		const auto global = std::vector<size_t>{Ceil(current_size / local[1], local[0]),
-																						Ceil(npages * (current_size / 16) * local[1], local[1])};
+		auto global = std::vector<uint32_t>{Ceil(current_size / local[1], local[0]), Ceil(npages * (current_size / 16) * local[1], local[1])};
+		global[0] = global[0] / local0;
+		global[1] = global[1] / 4;
 
 		// Part 1
-		auto kernel1 = Kernel(program_, "TripleMatMul" + ToString(current_size) + "Part1" + name_postfix);
+		auto kernel1Old = Kernel(program_, "TripleMatMul" + ToString(current_size) + "Part1" + name_postfix);
+		tart::kernel_ptr kernel1 = kernel1Old.get();
 		std::cout << "KERNEL 1: " << "TripleMatMul" + ToString(current_size) + "Part1" + name_postfix << std::endl;
-		kernel1.SetArgument(0, static_cast<int>(n));
-		kernel1.SetArgument(1, src());
-		kernel1.SetArgument(2, static_cast<int>(offset));
-		kernel1.SetArgument(3, static_cast<int>(ld_src));
-		kernel1.SetArgument(4, dest());
-		kernel1.SetArgument(5, static_cast<int>(current_size));
-		kernel1.SetArgument(6, static_cast<int>(npages));
-		kernel1.SetArgument(7, static_cast<int>(block_size));
-		RunKernel(kernel1, queue_, device_, global, local);
+		kernel1->setArg(0, static_cast<int>(n));
+		kernel1->setArg(1, src());
+		kernel1->setArg(2, static_cast<int>(offset));
+		kernel1->setArg(3, static_cast<int>(ld_src));
+		kernel1->setArg(4, dest());
+		kernel1->setArg(5, static_cast<int>(current_size));
+		kernel1->setArg(6, static_cast<int>(npages));
+		kernel1->setArg(7, static_cast<int>(block_size));
+		kernel1->enqueue(global, {});
 		device_()->enqueueBarrier({dest()});
 		//event_wait_list.push_back(kernel1_event);
 
 		// Part 2
 		const bool is_last_kernel = (current_size * 2 >= block_size);
-		auto kernel2 = Kernel(program_, "TripleMatMul" + ToString(current_size) + "Part2" + name_postfix);
+		auto kernel2Old = Kernel(program_, "TripleMatMul" + ToString(current_size) + "Part2" + name_postfix);
+		tart::kernel_ptr kernel2 = kernel2Old.get();
 		std::cout << "KERNEL 2: " << "TripleMatMul" + ToString(current_size) + "Part2" + name_postfix << std::endl;
-		kernel2.SetArgument(0, static_cast<int>(n));
-		kernel2.SetArgument(1, dest());
-		kernel2.SetArgument(2, static_cast<int>(current_size));
-		kernel2.SetArgument(3, static_cast<int>(npages));
-		kernel2.SetArgument(4, static_cast<int>(block_size));
-		RunKernel(kernel2, queue_, device_, global, local);
+		kernel2->setArg(0, static_cast<int>(n));
+		kernel2->setArg(1, dest());
+		kernel2->setArg(2, static_cast<int>(current_size));
+		kernel2->setArg(3, static_cast<int>(npages));
+		kernel2->setArg(4, static_cast<int>(block_size));
+		kernel2->enqueue(global, {});
 		if (!is_last_kernel) {
 			//event_wait_list.push_back(kernel2_event);
 			device_()->enqueueBarrier({dest()});

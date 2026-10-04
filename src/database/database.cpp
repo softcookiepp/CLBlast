@@ -15,7 +15,6 @@
 #include <string>
 #include <vector>
 
-#include "database/apple_cpu_fallback.hpp"
 #include "database/database_structure.hpp"
 #include "database/kernels/copy/copy.hpp"
 #include "database/kernels/gemm_routine/gemm_routine.hpp"
@@ -41,11 +40,6 @@ namespace clblast {
 // =================================================================================================
 
 std::vector<database::DatabaseEntry> Database::database = std::vector<database::DatabaseEntry>{};
-const std::vector<database::DatabaseEntry> Database::apple_cpu_fallback = std::vector<database::DatabaseEntry>{
-    database::XaxpyApple,        database::XdotApple,         database::XgemvApple,  database::XgemvFastApple,
-    database::XgemvFastRotApple, database::XgerApple,         database::XtrsvApple,  database::XgemmApple,
-    database::XgemmDirectApple,  database::XconvgemmApple,    database::CopyApple,   database::PadApple,
-    database::TransposeApple,    database::PadtransposeApple, database::InvertApple, database::TrsvRoutineApple};
 
 // The default values
 const std::string Database::kDeviceVendorAll = "default";
@@ -153,18 +147,6 @@ Database::Database(const Device& device, const std::string& kernel_name, const P
 
   // Sets the databases to search through
   auto databases = std::list<std::vector<database::DatabaseEntry>>{overlay, database};
-
-// Special case: modifies the database if the device is a CPU with Apple OpenCL
-#if defined(__APPLE__) || defined(__MACOSX)
-  if (device.Type() == "CPU") {
-    const auto extensions = device.Capabilities();
-    const auto is_apple = (extensions.find("cl_APPLE_SetMemObjectDestructor") == std::string::npos) ? false : true;
-    const auto is_likely_apple = device.MaxWorkGroupSize() <= 32;
-    if (is_apple || is_likely_apple) {
-      databases.push_front(apple_cpu_fallback);
-    }
-  }
-#endif
 
   // Searches potentially multiple databases
   auto search_result = database::Parameters();

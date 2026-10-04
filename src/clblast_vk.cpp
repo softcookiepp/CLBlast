@@ -24,6 +24,26 @@
 
 namespace clblast {
 
+tart::DType precisionToDataType(Precision p)
+{
+	switch(p)
+	{
+		case Precision::kHalf:
+			return tart::dtypes::float16;
+		case Precision::kSingle:
+			return tart::dtypes::float32;
+		case Precision::kDouble:
+			return tart::dtypes::float64;
+		case Precision::kComplexSingle:
+			return tart::dtypes::complex64;
+		case Precision::kComplexDouble:
+			return tart::dtypes::complex128;
+		default:
+			throw std::runtime_error("invalid precision");
+	}
+	return tart::dtypes::float32;
+}
+
 // =================================================================================================
 // BLAS level-1 (vector-vector) routines
 // =================================================================================================

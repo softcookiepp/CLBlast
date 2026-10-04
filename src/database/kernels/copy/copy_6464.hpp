@@ -12,7 +12,7 @@ namespace database {
 
 const DatabaseEntry CopyComplexDouble = {
   "Copy", Precision::kComplexDouble, {"COPY_DIMX", "COPY_DIMY", "COPY_VW", "COPY_WPT"}, {
-#if 0
+#if 1
     { // AMD GPUs
       kDeviceTypeGPU, "AMD", {
         { "Ellesmere", {

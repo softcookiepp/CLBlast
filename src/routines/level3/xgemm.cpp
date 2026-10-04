@@ -194,7 +194,7 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	const
 #endif
 	auto temp_buffer_all =
-			(temp_buffer_provided) ? temp_buffer : ((temp_size > 0) ? Buffer<T>(queue_(), temp_size) : a_buffer);
+			(temp_buffer_provided) ? temp_buffer : ((temp_size > 0) ? Buffer<T>(this->mDevice, temp_size) : a_buffer);
 	// Verifies if the provided temporary buffer is large enough
 	if (temp_buffer_provided) {
 		const auto required_size = temp_size * sizeof(T);
@@ -202,7 +202,7 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 #if VULKAN_API
 			// temporary hack due to indirect kernel being forced on under certain circumstances
 			if (temp_size == 0) throw std::runtime_error("this probably shouldn't happen");
-			temp_buffer_all = Buffer<T>(queue_(), temp_size);
+			temp_buffer_all = Buffer<T>(this->mDevice, temp_size);
 #else
 			throw BLASError(StatusCode::kInsufficientMemoryTemp);
 #endif
@@ -252,11 +252,11 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	
 	if (recordTempBarrier)
 	{
-		this->device_()->enqueueBarrier({temp_buffer_all()});
+		//this->//device_()->enqueueBarrier({temp_buffer_all()});
 	}
 
 	// Retrieves the Xgemm kernel from the compiled binary
-	auto kernelOld = Kernel(program_, "Xgemm");
+	Kernel kernelOld(program_, "Xgemm");
 	tart::kernel_ptr kernel = kernelOld.get();
 
 	// Sets the kernel arguments
@@ -320,7 +320,7 @@ void Xgemm<T>::GemmDirect(const size_t m, const size_t n, const size_t k, const 
 													const bool c_do_transpose, const bool a_conjugate, const bool b_conjugate)
 	{
 	// Retrieves the XgemmDirect kernel from the compiled binary
-	auto kernelOld = Kernel(program_, "XgemmDirectTT");
+	Kernel kernelOld(program_, "XgemmDirectTT");
 	tart::kernel_ptr kernel = kernelOld.get();
 
 	// Sets the kernel arguments

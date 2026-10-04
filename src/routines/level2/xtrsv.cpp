@@ -54,7 +54,7 @@ void Xtrsv<T>::Substitution(const Layout layout, const Triangle triangle, const 
 
 	// Retrieves the kernel from the compiled binary
 	const auto kernel_name = (is_upper) ? "trsv_backward" : "trsv_forward";
-	auto kernelOld = Kernel(program_, kernel_name);
+	Kernel kernelOld(program_, kernel_name);
 	tart::kernel_ptr kernel = kernelOld.get();
 	
 	// Sets the kernel arguments
@@ -105,15 +105,15 @@ void Xtrsv<T>::DoTrsv(const Layout layout, const Triangle triangle, const Transp
 	const auto x_offset = b_offset;
 	const auto x_inc = b_inc;
 	const auto x_size = (1 + (n - 1) * x_inc) + x_offset;
-	auto x_buffer = Buffer<T>(queue_(), x_size);
+	auto x_buffer = Buffer<T>(this->mDevice, x_size);
 	//b_buffer.CopyTo(queue_, x_size, x_buffer);
 	device_()->enqueueCopyBuffer(x_buffer(), b_buffer(), 0, 0, x_size*sizeof(T));
-	device_()->enqueueBarrier({x_buffer()});
+	//device_()->enqueueBarrier({x_buffer()});
 
 	// Fills the output buffer with zeros
 	FillVector(queue_, device_, program_, n, x_inc, x_offset, x_buffer,
 						 ConstantZero<T>(), 16);
-	device_()->enqueueBarrier({x_buffer()});
+	//device_()->enqueueBarrier({x_buffer()});
 
 	// Derives properties based on the arguments
 	const auto is_upper = ((triangle == Triangle::kUpper && a_transpose == Transpose::kNo) ||
@@ -143,14 +143,14 @@ void Xtrsv<T>::DoTrsv(const Layout layout, const Triangle triangle, const Transp
 			gemv.DoGemv(layout, a_transpose, gemv_m, gemv_n, ConstantOne<T>(), a_buffer, a_offset + extra_offset_a, a_ld,
 									x_buffer, x_offset + extra_offset_x, x_inc, ConstantOne<T>(), x_buffer, x_offset + extra_offset_b,
 									x_inc);
-			device_()->enqueueBarrier({x_buffer(), a_buffer()});
+			//device_()->enqueueBarrier({x_buffer(), a_buffer()});
 		}
 
 		// Runs the triangular substitution for the block size
 		Substitution(layout, triangle, a_transpose, diagonal, block_size, a_buffer, a_offset + col + col * a_ld, a_ld,
 								 b_buffer, b_offset + col * b_inc, b_inc, x_buffer, x_offset + col * x_inc, x_inc);
 		//sub_event.WaitForCompletion();
-		device_()->enqueueBarrier( {x_buffer(), b_buffer(), a_buffer()} );
+		//device_()->enqueueBarrier( {x_buffer(), b_buffer(), a_buffer()} );
 	}
 
 	// Retrieves the results

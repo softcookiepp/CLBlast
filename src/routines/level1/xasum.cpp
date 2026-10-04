@@ -58,14 +58,14 @@ void Xasum<T>::DoAsum(const size_t n, const Buffer<T>& asum_buffer, const size_t
 	TestVectorScalar(1, asum_buffer, asum_offset);
 
 	// Retrieves the Xasum kernels from the compiled binary
-	auto kernel1Old = Kernel(program_, "Xasum");
+	Kernel kernel1Old(program_, "Xasum");
 	tart::kernel_ptr kernel1 = kernel1Old.get();
-	auto kernel2Old = Kernel(program_, "XasumEpilogue");
+	Kernel kernel2Old(program_, "XasumEpilogue");
 	tart::kernel_ptr kernel2 = kernel2Old.get();
 	
 	// Creates the buffer for intermediate values
 	auto temp_size = 2 * db_["WGS2"];
-	auto temp_buffer = Buffer<T>(queue_(), temp_size);
+	auto temp_buffer = Buffer<T>(this->mDevice, temp_size);
 
 	// Sets the kernel arguments
 	#if VULKAN_USE_BDA

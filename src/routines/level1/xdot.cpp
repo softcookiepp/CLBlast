@@ -56,14 +56,14 @@ void Xdot<T>::DoDot(const size_t n, const Buffer<T>& dot_buffer, const size_t do
 	TestVectorScalar(1, dot_buffer, dot_offset);
 
 	// Retrieves the Xdot kernels from the compiled binary
-	auto kernel1Old = Kernel(program_, "Xdot");
+	Kernel kernel1Old(program_, "Xdot");
 	tart::kernel_ptr kernel1 = kernel1Old.get();
-	auto kernel2Old = Kernel(program_, "XdotEpilogue");
+	Kernel kernel2Old(program_, "XdotEpilogue");
 	tart::kernel_ptr kernel2 = kernel2Old.get();
 
 	// Creates the buffer for intermediate values
 	auto temp_size = 2 * db_["WGS2"];
-	auto temp_buffer = Buffer<T>(queue_(), temp_size);
+	auto temp_buffer = Buffer<T>(this->mDevice, temp_size);
 	
 	// Sets the kernel arguments
 #if VULKAN_USE_BDA

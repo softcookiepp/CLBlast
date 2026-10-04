@@ -54,11 +54,11 @@ void Xhemm<T>::DoHemm(const Layout layout, const Side side, const Triangle trian
 	auto kernel_name = (is_upper) ? "HermUpperToSquared" : "HermLowerToSquared";
 	
 	// Temporary buffer for a copy of the hermitian matrix
-	auto temp_herm = Buffer<T>(queue_(), k * k);
+	auto temp_herm = Buffer<T>(this->mDevice, k * k);
 
 	// Creates a general matrix from the hermitian matrix to be able to run the regular Xgemm
 	// routine afterwards
-	auto kernelOld = Kernel(program_, kernel_name);
+	Kernel kernelOld(program_, kernel_name);
 	tart::kernel_ptr kernel = kernelOld.get();
 
 	// Sets the arguments for the hermitian-to-squared kernel
@@ -93,7 +93,7 @@ void Xhemm<T>::DoHemm(const Layout layout, const Side side, const Triangle trian
 		db_["PADTRA_PAD"]
 	};
 	kernel->enqueue(global, spec);
-	device_()->enqueueBarrier({temp_herm()});
+	//device_()->enqueueBarrier({temp_herm()});
 
 	// Runs the regular Xgemm code with either "C := AB+C" or ...
 	if (side == Side::kLeft) {

@@ -187,9 +187,9 @@ void XgemmStridedBatched<T>::BatchedGemmIndirect(
 	auto c_no_temp = c_one == c_one_i && c_two == c_two_i && c_ld == c_one && !c_do_transpose;
 
 	// Creates the temporary matrices
-	const auto a_temp = (a_no_temp) ? a_buffer : Buffer<T>(queue_(), batch_count * a_one_i * a_two_i);
-	const auto b_temp = (b_no_temp) ? b_buffer : Buffer<T>(queue_(), batch_count * b_one_i * b_two_i);
-	const auto c_temp = (c_no_temp) ? c_buffer : Buffer<T>(queue_(), batch_count * c_one_i * c_two_i);
+	const auto a_temp = (a_no_temp) ? a_buffer : Buffer<T>(this->mDevice, batch_count * a_one_i * a_two_i);
+	const auto b_temp = (b_no_temp) ? b_buffer : Buffer<T>(this->mDevice, batch_count * b_one_i * b_two_i);
+	const auto c_temp = (c_no_temp) ? c_buffer : Buffer<T>(this->mDevice, batch_count * c_one_i * c_two_i);
 
 	// Runs the pre-processing kernel for matrix A. This transposes the matrix, but also pads zeros
 	// to fill it up until it reaches a certain multiple of size (kernel parameter dependent). In
@@ -220,10 +220,10 @@ void XgemmStridedBatched<T>::BatchedGemmIndirect(
 		barrierBuffers.push_back(c_temp());
 	}
 	
-	this->device_()->enqueueBarrier(barrierBuffers);
+	//this->//device_()->enqueueBarrier(barrierBuffers);
 
 	// Retrieves the Xgemm kernel from the compiled binary
-	auto kernelOld = Kernel(program_, "XgemmStridedBatched");
+	Kernel kernelOld(program_, "XgemmStridedBatched");
 	tart::kernel_ptr kernel = kernelOld.get();
 
 	// Sets the kernel arguments
@@ -290,7 +290,7 @@ void XgemmStridedBatched<T>::BatchedGemmDirect(
 		const bool a_conjugate, const bool b_conjugate, const size_t batch_count)
 {
 	// Retrieves the XgemmDirect kernel from the compiled binary
-	auto kernelOld = Kernel(program_, "XgemmDirectStridedBatchedTT");
+	Kernel kernelOld(program_, "XgemmDirectStridedBatchedTT");
 	tart::kernel_ptr kernel = kernelOld.get();
 
 	// Sets the kernel arguments

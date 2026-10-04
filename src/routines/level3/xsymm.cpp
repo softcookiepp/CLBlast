@@ -54,11 +54,11 @@ void Xsymm<T>::DoSymm(const Layout layout, const Side side, const Triangle trian
 	auto kernel_name = (is_upper) ? "SymmUpperToSquared" : "SymmLowerToSquared";
 
 	// Temporary buffer for a copy of the symmetric matrix
-	auto temp_symm = Buffer<T>(queue_(), k * k);
+	auto temp_symm = Buffer<T>(this->mDevice, k * k);
 
 	// Creates a general matrix from the symmetric matrix to be able to run the regular Xgemm
 	// routine afterwards
-	auto kernelOld = Kernel(program_, kernel_name);
+	Kernel kernelOld(program_, kernel_name);
 	tart::kernel_ptr kernel = kernelOld.get();
 
 	// Sets the arguments for the symmetric-to-squared kernel

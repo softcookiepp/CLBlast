@@ -73,11 +73,10 @@ Routine::Routine(Queue& queue, EventPointer event, const std::string& name,
 			kernel_names_(kernel_names),
 			queue_(queue),
 			event_(event),
-			device_(queue_.GetDevice()),
-			db_(kernel_names)
-#if VULKAN_API
-			, mEntryPointNames(entryPointNames)
-#endif
+			device_(queue.GetDevice()),
+			db_(kernel_names),
+			mEntryPointNames(entryPointNames),
+			mDevice(queue())
 {
 	InitDatabase(device_, kernel_names, precision, userDatabase, db_);
 	InitProgram(source);

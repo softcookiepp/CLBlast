@@ -83,12 +83,12 @@ void Xconvgemm<T>::DoConvgemm(const KernelMode kernel_mode, const size_t channel
 
 	// Possible approach: im2col + GEMM
 	//			result = GEMM(im2col(image), kernel)
-	auto col_buffer = Buffer<T>(queue_(), 0);	// nullptr, will be optionally created later
+	auto col_buffer = Buffer<T>(this->mDevice, 0);	// nullptr, will be optionally created later
 	if (method_ == ConvGemmMethod::kWithIm2Col)
 	{
 		// Temporary col matrix
 		const auto col_size = (method_ == ConvGemmMethod::kWithIm2Col) ? patch_size * num_patches * batch_count : 1;
-		col_buffer = Buffer<T>(queue_(), col_size);
+		col_buffer = Buffer<T>(this->mDevice, col_size);
 
 		// Loops over each batch
 		for (auto batch_id = size_t{0}; batch_id < batch_count; ++batch_id) {
@@ -99,7 +99,7 @@ void Xconvgemm<T>::DoConvgemm(const KernelMode kernel_mode, const size_t channel
 			im2col.DoIm2col(kernel_mode, channels, height, width, kernel_h, kernel_w, pad_h, pad_w, stride_h, stride_w,
 											dilation_h, dilation_w, im_buffer, im_batch_offset, col_buffer, col_batch_offset);
 			//im2col_event.WaitForCompletion();
-			device_()->enqueueBarrier( {col_buffer()} );
+			//device_()->enqueueBarrier( {col_buffer()} );
 		}
 	}
 
@@ -120,7 +120,7 @@ void Xconvgemm<T>::DoConvgemm(const KernelMode kernel_mode, const size_t channel
 	
 	// Retrieves the proper XgemmDirect kernel from the compiled binary
 	const std::string kernel_name = (method_ == ConvGemmMethod::kWithIm2Col) ? "Xconvgemm" : "XconvgemmNormal";
-	auto kernelOld = Kernel(program_, kernel_name);
+	Kernel kernelOld(program_, kernel_name);
 	tart::kernel_ptr kernel = kernelOld.get();
 	
 	// Sets the kernel arguments

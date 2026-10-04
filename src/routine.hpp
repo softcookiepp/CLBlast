@@ -74,6 +74,7 @@ class Routine {
 	Queue queue_;
 	EventPointer event_;
 	const Device device_;
+	tart::device_ptr mDevice = nullptr;
 
 	// Compiled program (either retrieved from cache or compiled in slow path)
 	std::shared_ptr<Program> program_;

@@ -138,10 +138,10 @@ void Xinvert<T>::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle 
 	FillMatrix(queue_, device_, program_, block_size,
 						 num_blocks * block_size, block_size, 0, dest, ConstantZero<T>(), 16);
 	//event_wait_list.push_back(fill_matrix_event);
-	device_()->enqueueBarrier({dest()});
+	//device_()->enqueueBarrier({dest()});
 
 	// Inverts the diagonal IB by IB inner blocks of the matrix: one block per work-group
-	auto kernelOld = Kernel(program_, "InvertDiagonalBlock");
+	Kernel kernelOld(program_, "InvertDiagonalBlock");
 	tart::kernel_ptr kernel = kernelOld.get();
 	kernel->setArg(0, static_cast<int>(n));
 	kernel->setArg(1, src());
@@ -157,7 +157,7 @@ void Xinvert<T>::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle 
 	kernel->enqueue(global_invert, {});
 	if (internal_block_size == block_size) {
 		//event_wait_list.push_back(base_kernel_event);
-		device_()->enqueueBarrier({dest()});
+		//device_()->enqueueBarrier({dest()});
 	}
 	
 	// Builds up block_size x block_size blocks. For example, internal_block_size=16:
@@ -177,7 +177,7 @@ void Xinvert<T>::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle 
 		global[1] = global[1] / 4;
 
 		// Part 1
-		auto kernel1Old = Kernel(program_, "TripleMatMul" + ToString(current_size) + "Part1" + name_postfix);
+		Kernel kernel1Old(program_, "TripleMatMul" + ToString(current_size) + "Part1" + name_postfix);
 		tart::kernel_ptr kernel1 = kernel1Old.get();
 		std::cout << "KERNEL 1: " << "TripleMatMul" + ToString(current_size) + "Part1" + name_postfix << std::endl;
 		kernel1->setArg(0, static_cast<int>(n));
@@ -189,12 +189,12 @@ void Xinvert<T>::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle 
 		kernel1->setArg(6, static_cast<int>(npages));
 		kernel1->setArg(7, static_cast<int>(block_size));
 		kernel1->enqueue(global, {});
-		device_()->enqueueBarrier({dest()});
+		//device_()->enqueueBarrier({dest()});
 		//event_wait_list.push_back(kernel1_event);
 
 		// Part 2
 		const bool is_last_kernel = (current_size * 2 >= block_size);
-		auto kernel2Old = Kernel(program_, "TripleMatMul" + ToString(current_size) + "Part2" + name_postfix);
+		Kernel kernel2Old(program_, "TripleMatMul" + ToString(current_size) + "Part2" + name_postfix);
 		tart::kernel_ptr kernel2 = kernel2Old.get();
 		std::cout << "KERNEL 2: " << "TripleMatMul" + ToString(current_size) + "Part2" + name_postfix << std::endl;
 		kernel2->setArg(0, static_cast<int>(n));
@@ -205,7 +205,7 @@ void Xinvert<T>::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle 
 		kernel2->enqueue(global, {});
 		if (!is_last_kernel) {
 			//event_wait_list.push_back(kernel2_event);
-			device_()->enqueueBarrier({dest()});
+			//device_()->enqueueBarrier({dest()});
 		}
 
 		// Exit in case we reach beyond the bounds of the input matrix

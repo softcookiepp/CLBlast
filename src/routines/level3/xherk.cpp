@@ -155,9 +155,9 @@ void Xherk<T, U>::HerkAB(const Layout layout, const Triangle triangle, const Tra
 			Xgemm<T>::NoTempBuffer(b_one, b_one_i, b_two, b_two_i, b_ld, b_offset, b_do_transpose, b_conjugate);
 
 	// Creates the temporary matrices
-	auto a_temp = (a_no_temp) ? a_buffer : Buffer<T>(queue_(), a_one_i * a_two_i);
-	auto b_temp = (b_no_temp) ? b_buffer : Buffer<T>(queue_(), b_one_i * b_two_i);
-	auto c_temp = Buffer<T>(queue_(), n_ceiled * n_ceiled);
+	auto a_temp = (a_no_temp) ? a_buffer : Buffer<T>(this->mDevice, a_one_i * a_two_i);
+	auto b_temp = (b_no_temp) ? b_buffer : Buffer<T>(this->mDevice, b_one_i * b_two_i);
+	auto c_temp = Buffer<T>(this->mDevice, n_ceiled * n_ceiled);
 
 	// Runs the pre-processing kernel for matrix A. This transposes the matrix, but also pads zeros
 	// to fill it up until it reaches a certain multiple of size (kernel parameter dependent). In
@@ -189,10 +189,10 @@ void Xherk<T, U>::HerkAB(const Layout layout, const Triangle triangle, const Tra
 												 false,
 												 false, false, false);
 	// now we can just use a single barrier for them all!
-	device_()->enqueueBarrier(barrierBuffers);
+	//device_()->enqueueBarrier(barrierBuffers);
 
 	// Retrieves the XgemmUpper or XgemmLower kernel from the compiled binary
-	auto kernelOld = Kernel(program_, kernel_name);
+	Kernel kernelOld(program_, kernel_name);
 	tart::kernel_ptr kernel = kernelOld.get();
 	
 	// Sets the kernel arguments
@@ -230,7 +230,7 @@ void Xherk<T, U>::HerkAB(const Layout layout, const Triangle triangle, const Tra
 	
 	// Launches the kernel
 	kernel->enqueue(global, spec);
-	device_()->enqueueBarrier( {a_temp(), b_temp(), c_temp()} );
+	//device_()->enqueueBarrier( {a_temp(), b_temp(), c_temp()} );
 
 	// Runs the post-processing kernel
 	const auto upper =

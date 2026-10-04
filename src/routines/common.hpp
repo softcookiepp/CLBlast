@@ -45,7 +45,7 @@ void FillVector(Queue& queue, const Device& device, const std::shared_ptr<Progra
 // Copies or transposes a matrix and optionally pads/unpads it with zeros. This method is also able
 // to write to symmetric and triangular matrices through optional arguments.
 template <typename T>
-void PadCopyTransposeMatrix(Queue& queue, const Device& device, const Databases& db, 
+void PadCopyTransposeMatrix(const Databases& db, 
 														const size_t src_one, const size_t src_two,
 														const size_t src_ld, const size_t src_offset, const Buffer<T>& src, const size_t dest_one,
 														const size_t dest_two, const size_t dest_ld, const size_t dest_offset,
@@ -153,7 +153,6 @@ void PadCopyTransposeMatrix(Queue& queue, const Device& device, const Databases&
 		{
 			global = {dest_one / db["TRA_WPT"], dest_two / db["TRA_WPT"]};
 			local = {db["TRA_DIM"], db["TRA_DIM"]};
-			//RunKernel(kernel, queue, device, global, local);
 		}
 		else
 		{
@@ -168,7 +167,6 @@ void PadCopyTransposeMatrix(Queue& queue, const Device& device, const Databases&
 		{
 			global = {dest_one / db["COPY_VW"], dest_two / db["COPY_WPT"]};
 			local = {db["COPY_DIMX"], db["COPY_DIMY"]};
-			//RunKernel(kernel, queue, device, global, local);
 		} 
 		else
 		{
@@ -186,7 +184,7 @@ void PadCopyTransposeMatrix(Queue& queue, const Device& device, const Databases&
 
 // Batched version of the above
 template <typename T>
-void PadCopyTransposeMatrixBatched(Queue& queue, const Device& device, const Databases& db, const size_t src_one, const size_t src_two,
+void PadCopyTransposeMatrixBatched(const Databases& db, const size_t src_one, const size_t src_two,
 																	 const size_t src_ld, const Buffer<int>& src_offsets, const Buffer<T>& src,
 																	 const size_t dest_one, const size_t dest_two, const size_t dest_ld,
 																	 const Buffer<int>& dest_offsets, const Buffer<T>& dest,
@@ -243,12 +241,10 @@ void PadCopyTransposeMatrixBatched(Queue& queue, const Device& device, const Dat
 		global = {Ceil(CeilDiv(dest_one, db["PADTRA_WPT"]), db["PADTRA_TILE"]),
 																						Ceil(CeilDiv(dest_two, db["PADTRA_WPT"]), db["PADTRA_TILE"]), batch_count};
 		local = {db["PADTRA_TILE"], db["PADTRA_TILE"], 1};
-		//RunKernel(kernel, queue, device, global, local);
 	} else {
 		global = {Ceil(CeilDiv(dest_one, db["PAD_WPTX"]), db["PAD_DIMX"]),
 																						Ceil(CeilDiv(dest_two, db["PAD_WPTY"]), db["PAD_DIMY"]), batch_count};
 		local = {db["PAD_DIMX"], db["PAD_DIMY"], 1};
-		//RunKernel(kernel, queue, device, global, local);
 	}
 	global.resize(3, 1);
 	local.resize(3, 1);
@@ -260,7 +256,7 @@ void PadCopyTransposeMatrixBatched(Queue& queue, const Device& device, const Dat
 
 // Batched version of the above
 template <typename T>
-void PadCopyTransposeMatrixStridedBatched(Queue& queue, const Device& device, const Databases& db, const size_t src_one,
+void PadCopyTransposeMatrixStridedBatched(const Databases& db, const size_t src_one,
 										const size_t src_two, const size_t src_ld, const size_t src_offset,
 										const size_t src_stride, const Buffer<T>& src, const size_t dest_one,
 										const size_t dest_two, const size_t dest_ld, const size_t dest_offset,
@@ -320,12 +316,12 @@ void PadCopyTransposeMatrixStridedBatched(Queue& queue, const Device& device, co
 		global = {Ceil(CeilDiv(dest_one, db["PADTRA_WPT"]), db["PADTRA_TILE"]),
 																						Ceil(CeilDiv(dest_two, db["PADTRA_WPT"]), db["PADTRA_TILE"]), batch_count};
 		local = {db["PADTRA_TILE"], db["PADTRA_TILE"], 1};
-		//RunKernel(kernel, queue, device, global, local);
-	} else {
+	}
+	else
+	{
 		global = {Ceil(CeilDiv(dest_one, db["PAD_WPTX"]), db["PAD_DIMX"]),
 																						Ceil(CeilDiv(dest_two, db["PAD_WPTY"]), db["PAD_DIMY"]), batch_count};
 		local = {db["PAD_DIMX"], db["PAD_DIMY"], 1};
-		//RunKernel(kernel, queue, device, global, local);
 	}
 	global.resize(3, 1);
 	local.resize(3, 1);

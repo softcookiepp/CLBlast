@@ -220,7 +220,7 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	bool recordTempBarrier = false;
 	if (!a_no_temp)
 	{
-		PadCopyTransposeMatrix(queue_, device_, db_, a_one, a_two, a_ld, a_offset,
+		PadCopyTransposeMatrix(db_, a_one, a_two, a_ld, a_offset,
 													 a_buffer, a_one_i, a_two_i, a_one_i, 0, a_temp, ConstantOne<T>(), program_, true,
 													 a_do_transpose, a_conjugate,
 													 false, false, false);
@@ -231,7 +231,7 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	// As above, but now for matrix B
 	if (!b_no_temp)
 	{
-		PadCopyTransposeMatrix(queue_, device_, db_, b_one, b_two, b_ld, b_offset,
+		PadCopyTransposeMatrix(db_, b_one, b_two, b_ld, b_offset,
 													 b_buffer, b_one_i, b_two_i, b_one_i, b_temp_offset, b_temp, ConstantOne<T>(), program_, true,
 													 b_do_transpose, b_conjugate,
 													 false, false, false);
@@ -242,7 +242,7 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	// As above, but now for matrix C. This is only necessary if C is used both as input and output.
 	if (!c_no_temp && beta != static_cast<T>(0))
 	{
-		PadCopyTransposeMatrix(queue_, device_, db_, c_one, c_two, c_ld, c_offset,
+		PadCopyTransposeMatrix(db_, c_one, c_two, c_ld, c_offset,
 													 c_buffer, c_one_i, c_two_i, c_one_i, c_temp_offset, c_temp, ConstantOne<T>(), program_, true,
 													 c_do_transpose, false,
 													 false, false, false);
@@ -303,7 +303,7 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	// Runs the post-processing kernel if needed
 	if (!c_no_temp) {
 		// eventWaitList.push_back(eventKernel);
-		PadCopyTransposeMatrix(queue_, device_, db_, c_one_i, c_two_i, c_one_i, c_temp_offset,
+		PadCopyTransposeMatrix(db_, c_one_i, c_two_i, c_one_i, c_temp_offset,
 													 c_temp, c_one, c_two, c_ld, c_offset, c_buffer, ConstantOne<T>(), program_, false,
 													 c_do_transpose, false, false, false, false);
 	}

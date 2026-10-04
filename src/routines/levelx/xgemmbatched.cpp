@@ -181,7 +181,7 @@ void XgemmBatched<T>::BatchedGemmIndirect(
 		auto a_offsets_i_device = Buffer<int>(this->mDevice, batch_count);
 		a_offsets_device.Write(queue_, batch_count, a_offsets);
 		a_offsets_i_device.Write(queue_, batch_count, a_offsets_i);
-		PadCopyTransposeMatrixBatched(queue_, device_, db_, a_one, a_two, a_ld,
+		PadCopyTransposeMatrixBatched(db_, a_one, a_two, a_ld,
 																	a_offsets_device, a_buffer, a_one_i, a_two_i, a_one_i, a_offsets_i_device, a_temp,
 																	program_, true, a_do_transpose, a_conjugate, batch_count);
 		//eventWaitList.push_back(eventProcessA);
@@ -194,7 +194,7 @@ void XgemmBatched<T>::BatchedGemmIndirect(
 		auto b_offsets_i_device = Buffer<int>(this->mDevice, batch_count);
 		b_offsets_device.Write(queue_, batch_count, b_offsets);
 		b_offsets_i_device.Write(queue_, batch_count, b_offsets_i);
-		PadCopyTransposeMatrixBatched(queue_, device_, db_, b_one, b_two, b_ld,
+		PadCopyTransposeMatrixBatched(db_, b_one, b_two, b_ld,
 																	b_offsets_device, b_buffer, b_one_i, b_two_i, b_one_i, b_offsets_i_device, b_temp,
 																	program_, true, b_do_transpose, b_conjugate, batch_count);
 		//eventWaitList.push_back(eventProcessB);
@@ -207,7 +207,7 @@ void XgemmBatched<T>::BatchedGemmIndirect(
 	if (!c_no_temp) {
 		c_offsets_device.Write(queue_, batch_count, c_offsets);
 		c_offsets_i_device.Write(queue_, batch_count, c_offsets_i);
-		PadCopyTransposeMatrixBatched(queue_, device_, db_, c_one, c_two, c_ld,
+		PadCopyTransposeMatrixBatched(db_, c_one, c_two, c_ld,
 																	c_offsets_device, c_buffer, c_one_i, c_two_i, c_one_i, c_offsets_i_device, c_temp,
 																	program_, true, c_do_transpose, false, batch_count);
 		//eventWaitList.push_back(eventProcessC);
@@ -268,7 +268,7 @@ void XgemmBatched<T>::BatchedGemmIndirect(
 	if (!c_no_temp) {
 		//eventWaitList.push_back(eventKernel);
 		//this->//device_()->enqueueBarrier({c_buffer()});
-		PadCopyTransposeMatrixBatched(queue_, device_, db_, c_one_i, c_two_i, c_one_i,
+		PadCopyTransposeMatrixBatched(db_, c_one_i, c_two_i, c_one_i,
 																	c_offsets_i_device, c_temp, c_one, c_two, c_ld, c_offsets_device, c_buffer, program_,
 																	false, c_do_transpose, false, batch_count);
 	}

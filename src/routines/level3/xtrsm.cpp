@@ -110,17 +110,13 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 	auto a_inv_buffer = Buffer<T>(this->mDevice, a_inv_size);
 
 	// Fills the output buffer with zeros
-	FillMatrix(queue_, device_, program_, x_one, x_two, x_ld, x_offset,
+	FillMatrix(program_, x_one, x_two, x_ld, x_offset,
 						 x_buffer, ConstantZero<T>(), 16);
-	//fill_matrix_event.WaitForCompletion();
-	//device_()->enqueueBarrier({x_buffer()});
 
 	// Inverts the diagonal blocks
 	auto inverter = Xinvert<T>(queue_, nullptr);
 	inverter.InvertMatrixDiagonalBlocks(Layout::kColMajor, triangle, diagonal, k, block_size, a_buffer, a_offset, a_ld,
 																			a_inv_buffer);
-	//diagonal_invert_event.WaitForCompletion();
-	//device_()->enqueueBarrier({a_inv_buffer()});
 
 	// Derives properties based on the arguments
 	const auto condition = ((triangle == Triangle::kUpper && a_transpose != Transpose::kNo) ||
@@ -137,8 +133,6 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 				gemm1.DoGemm(Layout::kColMajor, a_transpose, Transpose::kNo, current_block_size, n, current_block_size,
 										 gemm_alpha, a_inv_buffer, i * block_size, block_size, b_buffer, b_offset + i, b_ld,
 										 ConstantZero<T>(), x_buffer, x_offset + i, x_ld, Buffer<T>(0), false);
-				//gemm1_event.WaitForCompletion();
-				//device_()->enqueueBarrier({x_buffer()});
 				if (i + block_size >= m) {
 					break;
 				}
@@ -148,8 +142,6 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 				gemm1.DoGemm(Layout::kColMajor, a_transpose, Transpose::kNo, m - i - block_size, n, block_size,
 										 ConstantNegOne<T>(), a_buffer, this_a_offset + a_offset, a_ld, x_buffer, x_offset + i, x_ld,
 										 gemm_alpha, b_buffer, b_offset + i + block_size, b_ld, Buffer<T>(0), false);
-				//gemm2_event.WaitForCompletion();
-				//device_()->enqueueBarrier({b_buffer()});
 			}
 		}
 
@@ -164,8 +156,6 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 				gemm1.DoGemm(Layout::kColMajor, a_transpose, Transpose::kNo, current_block_size, n, current_block_size,
 										 gemm_alpha, a_inv_buffer, i * block_size, block_size, b_buffer, b_offset + i, b_ld,
 										 ConstantZero<T>(), x_buffer, x_offset + i, x_ld, Buffer<T>(0), false);
-				//gemm1_event.WaitForCompletion();
-				//device_()->enqueueBarrier({x_buffer()});
 				if (i - static_cast<int>(block_size) < 0) {
 					break;
 				}
@@ -175,8 +165,6 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 				gemm2.DoGemm(Layout::kColMajor, a_transpose, Transpose::kNo, i, n, current_block_size, ConstantNegOne<T>(),
 										 a_buffer, this_a_offset + a_offset, a_ld, x_buffer, x_offset + i, x_ld, gemm_alpha, b_buffer,
 										 b_offset, b_ld, Buffer<T>(0), false);
-				//gemm2_event.WaitForCompletion();
-				//device_()->enqueueBarrier({b_buffer()});
 			}
 		}
 	}
@@ -194,8 +182,6 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 				gemm1.DoGemm(Layout::kColMajor, Transpose::kNo, a_transpose, m, current_block_size, current_block_size,
 										 gemm_alpha, b_buffer, b_offset + i * b_ld, b_ld, a_inv_buffer, i * block_size, block_size,
 										 ConstantZero<T>(), x_buffer, x_offset + i * x_ld, x_ld, Buffer<T>(0), false);
-				//gemm1_event.WaitForCompletion();
-				//device_()->enqueueBarrier({x_buffer()});
 				if (i - static_cast<int>(block_size) < 0) {
 					break;
 				}
@@ -205,8 +191,6 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 				gemm2.DoGemm(Layout::kColMajor, Transpose::kNo, a_transpose, m, i, current_block_size, ConstantNegOne<T>(),
 										 x_buffer, x_offset + i * x_ld, x_ld, a_buffer, this_a_offset + a_offset, a_ld, gemm_alpha,
 										 b_buffer, b_offset, b_ld, Buffer<T>(0), false);
-				//gemm2_event.WaitForCompletion();
-				//device_()->enqueueBarrier({b_buffer()});
 			}
 		}
 
@@ -219,8 +203,6 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 				gemm1.DoGemm(Layout::kColMajor, Transpose::kNo, a_transpose, m, current_block_size, current_block_size,
 										 gemm_alpha, b_buffer, b_offset + i * b_ld, b_ld, a_inv_buffer, i * block_size, block_size,
 										 ConstantZero<T>(), x_buffer, x_offset + i * x_ld, x_ld, Buffer<T>(0), false);
-				//gemm1_event.WaitForCompletion();
-				//device_()->enqueueBarrier({x_buffer()});
 				if (i + block_size >= n) {
 					break;
 				}
@@ -231,8 +213,6 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 				gemm2.DoGemm(Layout::kColMajor, Transpose::kNo, a_transpose, m, n - i - block_size, block_size,
 										 ConstantNegOne<T>(), x_buffer, x_offset + i * x_ld, x_ld, a_buffer, this_a_offset + a_offset, a_ld,
 										 gemm_alpha, b_buffer, b_offset + (i + block_size) * b_ld, b_ld, Buffer<T>(0), false);
-				//gemm2_event.WaitForCompletion();
-				//device_()->enqueueBarrier({b_buffer()});
 			}
 		}
 	}

@@ -11,7 +11,7 @@ namespace clblast {
 namespace database {
 
 const DatabaseEntry XconvgemmComplexSingle = {
-  "Xconvgemm", Precision::kComplexSingle, {"KWID", "MDIMAD", "MDIMCD", "NDIMBD", "NDIMCD", "PADA", "PADB", "VWMD", "VWND", "WGD"}, {
+  "Xconvgemm", tart::dtypes::complex64, {"KWID", "MDIMAD", "MDIMCD", "NDIMBD", "NDIMCD", "PADA", "PADB", "VWMD", "VWND", "WGD"}, {
     { // Default
       kDeviceTypeAll, "default", {
         { "default", {

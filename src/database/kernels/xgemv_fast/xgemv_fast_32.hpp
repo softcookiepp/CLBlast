@@ -11,7 +11,7 @@ namespace clblast {
 namespace database {
 
 const DatabaseEntry XgemvFastSingle = {
-  "XgemvFast", Precision::kSingle, {"VW2", "WGS2", "WPT2"}, {
+  "XgemvFast", tart::dtypes::float32, {"VW2", "WGS2", "WPT2"}, {
     { // AMD GPUs
       kDeviceTypeGPU, "AMD", {
         { "Ellesmere", {

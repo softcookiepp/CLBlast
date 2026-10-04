@@ -11,8 +11,7 @@ namespace clblast {
 namespace database {
 
 const DatabaseEntry CopyHalf = {
-  "Copy", Precision::kHalf, {"COPY_DIMX", "COPY_DIMY", "COPY_VW", "COPY_WPT"}, {
-#if 0
+  "Copy", tart::dtypes::float16, {"COPY_DIMX", "COPY_DIMY", "COPY_VW", "COPY_WPT"}, {
     { // AMD GPUs
       kDeviceTypeGPU, "AMD", {
         { "Ellesmere", {
@@ -172,7 +171,6 @@ const DatabaseEntry CopyHalf = {
         } },
       }
     },
-#endif
     { // Default
       kDeviceTypeAll, "default", {
         { "default", {

@@ -60,7 +60,7 @@ struct DatabaseVendor {
 };
 struct DatabaseEntry {
   std::string kernel;
-  Precision precision;
+  tart::DType precision;
   std::vector<std::string> parameter_names;
   std::vector<DatabaseVendor> vendors;
 };

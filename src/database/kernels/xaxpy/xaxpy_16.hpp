@@ -11,7 +11,7 @@ namespace clblast {
 namespace database {
 
 const DatabaseEntry XaxpyHalf = {
-  "Xaxpy", Precision::kHalf, {"VW", "WGS", "WPT"}, {
+  "Xaxpy", tart::dtypes::float16, {"VW", "WGS", "WPT"}, {
     { // AMD GPUs
       kDeviceTypeGPU, "AMD", {
         { "Ellesmere", {

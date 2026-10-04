@@ -11,7 +11,7 @@ namespace clblast {
 namespace database {
 
 const DatabaseEntry TransposeComplexSingle = {
-  "Transpose", Precision::kComplexSingle, {"TRA_DIM", "TRA_PAD", "TRA_SHUFFLE", "TRA_WPT"}, {
+  "Transpose", tart::dtypes::complex64, {"TRA_DIM", "TRA_PAD", "TRA_SHUFFLE", "TRA_WPT"}, {
     { // AMD GPUs
       kDeviceTypeGPU, "AMD", {
         { "Ellesmere", {

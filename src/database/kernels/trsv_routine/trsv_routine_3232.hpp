@@ -11,7 +11,7 @@ namespace clblast {
 namespace database {
 
 const DatabaseEntry TrsvRoutineComplexSingle = {
-  "TrsvRoutine", Precision::kComplexSingle, {"TRSV_BLOCK_SIZE"}, {
+  "TrsvRoutine", tart::dtypes::complex64, {"TRSV_BLOCK_SIZE"}, {
     { // AMD GPUs
       kDeviceTypeGPU, "AMD", {
         { "Ellesmere", {

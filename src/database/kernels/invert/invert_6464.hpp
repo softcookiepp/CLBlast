@@ -11,7 +11,7 @@ namespace clblast {
 namespace database {
 
 const DatabaseEntry InvertComplexDouble = {
-  "Invert", Precision::kComplexDouble, {"INTERNAL_BLOCK_SIZE", "LOCALPAD", "TMMWGSX", "TMMWGSY"}, {
+  "Invert", tart::dtypes::complex128, {"INTERNAL_BLOCK_SIZE", "LOCALPAD", "TMMWGSX", "TMMWGSY"}, {
     { // AMD GPUs
       kDeviceTypeGPU, "AMD", {
         { "Ellesmere", {

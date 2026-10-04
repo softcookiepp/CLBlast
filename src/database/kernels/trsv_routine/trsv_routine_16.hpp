@@ -11,7 +11,7 @@ namespace clblast {
 namespace database {
 
 const DatabaseEntry TrsvRoutineHalf = {
-  "TrsvRoutine", Precision::kHalf, {"TRSV_BLOCK_SIZE"}, {
+  "TrsvRoutine", tart::dtypes::float16, {"TRSV_BLOCK_SIZE"}, {
     { // Default
       kDeviceTypeAll, "default", {
         { "default", {

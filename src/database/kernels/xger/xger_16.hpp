@@ -11,7 +11,7 @@ namespace clblast {
 namespace database {
 
 const DatabaseEntry XgerHalf = {
-  "Xger", Precision::kHalf, {"WGS1", "WGS2", "WPT"}, {
+  "Xger", tart::dtypes::float16, {"WGS1", "WGS2", "WPT"}, {
     { // AMD GPUs
       kDeviceTypeGPU, "AMD", {
         { "Ellesmere", {

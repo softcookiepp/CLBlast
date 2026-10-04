@@ -11,7 +11,7 @@ namespace clblast {
 namespace database {
 
 const DatabaseEntry InvertSingle = {
-  "Invert", Precision::kSingle, {"INTERNAL_BLOCK_SIZE", "LOCALPAD", "TMMWGSX", "TMMWGSY"}, {
+  "Invert", tart::dtypes::float32, {"INTERNAL_BLOCK_SIZE", "LOCALPAD", "TMMWGSX", "TMMWGSY"}, {
     { // AMD GPUs
       kDeviceTypeGPU, "AMD", {
         { "Ellesmere", {

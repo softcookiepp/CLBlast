@@ -11,7 +11,7 @@ namespace clblast {
 namespace database {
 
 const DatabaseEntry PadComplexDouble = {
-  "Pad", Precision::kComplexDouble, {"PAD_DIMX", "PAD_DIMY", "PAD_WPTX", "PAD_WPTY"}, {
+  "Pad", tart::dtypes::complex128, {"PAD_DIMX", "PAD_DIMY", "PAD_WPTX", "PAD_WPTY"}, {
     { // AMD GPUs
       kDeviceTypeGPU, "AMD", {
         { "Ellesmere", {

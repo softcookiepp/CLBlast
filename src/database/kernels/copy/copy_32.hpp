@@ -11,7 +11,7 @@ namespace clblast {
 namespace database {
 
 const DatabaseEntry CopySingle = {
-  "Copy", Precision::kSingle, {"COPY_DIMX", "COPY_DIMY", "COPY_VW", "COPY_WPT"}, {
+  "Copy", tart::dtypes::float32, {"COPY_DIMX", "COPY_DIMY", "COPY_VW", "COPY_WPT"}, {
 #if 1
     { // AMD GPUs
       kDeviceTypeGPU, "AMD", {

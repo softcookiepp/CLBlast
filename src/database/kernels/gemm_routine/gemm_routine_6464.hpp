@@ -11,7 +11,7 @@ namespace clblast {
 namespace database {
 
 const DatabaseEntry GemmRoutineComplexDouble = {
-  "GemmRoutine", Precision::kComplexDouble, {"XGEMM_MIN_INDIRECT_SIZE"}, {
+  "GemmRoutine", tart::dtypes::complex128, {"XGEMM_MIN_INDIRECT_SIZE"}, {
     { // AMD GPUs
       kDeviceTypeGPU, "AMD", {
         { "Ellesmere", {

@@ -11,7 +11,7 @@ namespace clblast {
 namespace database {
 
 const DatabaseEntry XdotSingle = {
-  "Xdot", Precision::kSingle, {"WGS1", "WGS2"}, {
+  "Xdot", tart::dtypes::float32, {"WGS1", "WGS2"}, {
     { // AMD GPUs
       kDeviceTypeGPU, "AMD", {
         { "Ellesmere", {

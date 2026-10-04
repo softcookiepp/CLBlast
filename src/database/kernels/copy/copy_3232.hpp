@@ -11,8 +11,7 @@ namespace clblast {
 namespace database {
 
 const DatabaseEntry CopyComplexSingle = {
-  "Copy", Precision::kComplexSingle, {"COPY_DIMX", "COPY_DIMY", "COPY_VW", "COPY_WPT"}, {
-#if 0
+  "Copy", tart::dtypes::complex64, {"COPY_DIMX", "COPY_DIMY", "COPY_VW", "COPY_WPT"}, {
     { // AMD GPUs
       kDeviceTypeGPU, "AMD", {
         { "Ellesmere", {
@@ -353,7 +352,6 @@ const DatabaseEntry CopyComplexSingle = {
         } },
       }
     },
-#endif
     { // Default
       kDeviceTypeAll, "default", {
         { "default", {

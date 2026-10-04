@@ -11,7 +11,7 @@ namespace clblast {
 namespace database {
 
 const DatabaseEntry PadtransposeDouble = {
-  "Padtranspose", Precision::kDouble, {"PADTRA_PAD", "PADTRA_TILE", "PADTRA_WPT"}, {
+  "Padtranspose", tart::dtypes::float64, {"PADTRA_PAD", "PADTRA_TILE", "PADTRA_WPT"}, {
     { // AMD GPUs
       kDeviceTypeGPU, "AMD", {
         { "Ellesmere", {

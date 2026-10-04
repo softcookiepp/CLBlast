@@ -11,7 +11,7 @@ namespace clblast {
 namespace database {
 
 const DatabaseEntry GemmRoutineHalf = {
-  "GemmRoutine", Precision::kHalf, {"XGEMM_MIN_INDIRECT_SIZE"}, {
+  "GemmRoutine", tart::dtypes::float16, {"XGEMM_MIN_INDIRECT_SIZE"}, {
     { // AMD GPUs
       kDeviceTypeGPU, "AMD", {
         { "Ellesmere", {

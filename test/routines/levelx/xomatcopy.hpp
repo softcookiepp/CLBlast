@@ -80,7 +80,7 @@ StatusCode RunReference<half>(const Arguments<half>& args, BuffersHost<half>& bu
 	args2.b_offset = args.b_offset;
 	args2.layout = args.layout;
 	args2.a_transpose = args.a_transpose;
-	args2.alpha = HalfToFloat(args.alpha);
+	args2.alpha = tart::toFloat(args.alpha);
 	auto status = RunReference(args2, buffers2);
 	FloatToHalfBuffer(buffers_host.b_mat, buffers2.b_mat);
 	return status;

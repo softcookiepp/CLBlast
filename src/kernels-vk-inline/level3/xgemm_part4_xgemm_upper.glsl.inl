@@ -1349,7 +1349,11 @@ void StoreResults(
 
 	realN clblast_sub_group_shuffle(realN reg, int src)
 	{
-		return subgroupShuffle(reg, uint(src));
+		#if VWN == 1
+			return subgroupShuffle(reg, uint(src));
+		#else
+			return realN(subgroupShuffle(reg.s, uint(src)));
+		#endif
 	}
 #endif
 

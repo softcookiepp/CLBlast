@@ -1,4 +1,7 @@
-BasedOnStyle: Google
+BasedOnStyle: LLVM
 PointerAlignment: Left
 DerivePointerAlignment: false
 ColumnLimit: 120
+UseTab: Always
+IndentWidth: 4
+TabWidth: 4

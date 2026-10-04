@@ -34,8 +34,8 @@ T GetScalar() {
 template float GetScalar<float>();
 template double GetScalar<double>();
 template <>
-half GetScalar() {
-	return FloatToHalf(2.0f);
+tart::float16_t GetScalar() {
+	return tart::toHalf(2.0f);
 }
 template <>
 float2 GetScalar() {
@@ -54,8 +54,8 @@ T ConstantZero() {
 template float ConstantZero<float>();
 template double ConstantZero<double>();
 template <>
-half ConstantZero() {
-	return FloatToHalf(0.0f);
+tart::float16_t ConstantZero() {
+	return tart::toHalf(0.0f);
 }
 template <>
 float2 ConstantZero() {
@@ -74,8 +74,8 @@ T ConstantOne() {
 template float ConstantOne<float>();
 template double ConstantOne<double>();
 template <>
-half ConstantOne() {
-	return FloatToHalf(1.0f);
+tart::float16_t ConstantOne() {
+	return tart::toHalf(1.0f);
 }
 template <>
 float2 ConstantOne() {
@@ -94,8 +94,8 @@ T ConstantNegOne() {
 template float ConstantNegOne<float>();
 template double ConstantNegOne<double>();
 template <>
-half ConstantNegOne() {
-	return FloatToHalf(-1.0f);
+tart::float16_t ConstantNegOne() {
+	return tart::toHalf(-1.0f);
 }
 template <>
 float2 ConstantNegOne() {
@@ -114,8 +114,8 @@ T Constant(const double val) {
 template float Constant<float>(const double);
 template double Constant<double>(const double);
 template <>
-half Constant(const double val) {
-	return FloatToHalf(static_cast<float>(val));
+tart::float16_t Constant(const double val) {
+	return tart::toHalf(static_cast<float>(val));
 }
 template <>
 float2 Constant(const double val) {
@@ -134,8 +134,8 @@ T SmallConstant() {
 template float SmallConstant<float>();
 template double SmallConstant<double>();
 template <>
-half SmallConstant() {
-	return FloatToHalf(1e-4f);
+tart::float16_t SmallConstant() {
+	return tart::toHalf(1e-4f);
 }
 template <>
 float2 SmallConstant() {
@@ -154,8 +154,8 @@ typename BaseType<T>::Type AbsoluteValue(const T value) {
 template float AbsoluteValue<float>(const float);
 template double AbsoluteValue<double>(const double);
 template <>
-half AbsoluteValue(const half value) {
-	return FloatToHalf(std::fabs(HalfToFloat(value)));
+tart::float16_t AbsoluteValue(const tart::float16_t value) {
+	return tart::toHalf(std::fabs(tart::toFloat(value)));
 }
 template <>
 float AbsoluteValue(const float2 value) {
@@ -210,8 +210,8 @@ std::string ToString(double2 value) {
 
 // If not possible directly: special case for half-precision
 template <>
-std::string ToString(half value) {
-	return std::to_string(HalfToFloat(value));
+std::string ToString(tart::float16_t value) {
+	return std::to_string(tart::toFloat(value));
 }
 
 // If not possible directly: special cases for CLBlast data-types
@@ -329,8 +329,8 @@ std::string ConvertArgument(const char* value) {
 	return std::string{value};
 }
 template <>
-half ConvertArgument(const char* value) {
-	return FloatToHalf(static_cast<float>(std::stod(value)));
+tart::float16_t ConvertArgument(const char* value) {
+	return tart::toHalf(static_cast<float>(std::stod(value)));
 }
 template <>
 float ConvertArgument(const char* value) {
@@ -388,7 +388,7 @@ T GetArgument(const std::vector<std::string>& arguments, std::string& help, cons
 // Compiles the above function
 template int GetArgument<int>(const std::vector<std::string>&, std::string&, const std::string&, const int);
 template size_t GetArgument<size_t>(const std::vector<std::string>&, std::string&, const std::string&, const size_t);
-template half GetArgument<half>(const std::vector<std::string>&, std::string&, const std::string&, const half);
+template tart::float16_t GetArgument<tart::float16_t>(const std::vector<std::string>&, std::string&, const std::string&, const tart::float16_t);
 template float GetArgument<float>(const std::vector<std::string>&, std::string&, const std::string&, const float);
 template double GetArgument<double>(const std::vector<std::string>&, std::string&, const std::string&, const double);
 template float2 GetArgument<float2>(const std::vector<std::string>&, std::string&, const std::string&, const float2);
@@ -467,9 +467,9 @@ void PopulateVector(std::vector<double2>& vector, std::mt19937& mt, std::uniform
 
 // Specialized versions of the above for half-precision
 template <>
-void PopulateVector(std::vector<half>& vector, std::mt19937& mt, std::uniform_real_distribution<double>& dist) {
+void PopulateVector(std::vector<tart::float16_t>& vector, std::mt19937& mt, std::uniform_real_distribution<double>& dist) {
 	for (auto& element : vector) {
-		element = FloatToHalf(static_cast<float>(dist(mt)));
+		element = tart::toHalf(static_cast<float>(dist(mt)));
 	}
 }
 
@@ -478,8 +478,8 @@ void PopulateVector(std::vector<half>& vector, std::mt19937& mt, std::uniform_re
 // Converts a 'real' value to a 'real argument' value to be passed to a kernel. Normally there is
 // no conversion, but half-precision is not supported as kernel argument so it is converted to float.
 template <>
-typename RealArg<half>::Type GetRealArg(const half value) {
-	return HalfToFloat(value);
+typename RealArg<tart::float16_t>::Type GetRealArg(const tart::float16_t value) {
+	return tart::toFloat(value);
 }
 template <>
 typename RealArg<float>::Type GetRealArg(const float value) {
@@ -536,7 +536,7 @@ size_t GetBytes(const Precision precision) {
 
 // Convert the template argument into a precision value
 template <>
-Precision PrecisionValue<half>() {
+Precision PrecisionValue<tart::float16_t>() {
 	return Precision::kHalf;
 }
 template <>
@@ -576,7 +576,7 @@ bool PrecisionSupported<double2>(const Device& device) {
 	return device()->getMetadata().double_;
 }
 template <>
-bool PrecisionSupported<half>(const Device& device) {
+bool PrecisionSupported<tart::float16_t>(const Device& device) {
 	return device()->getMetadata().half_;
 }
 
@@ -607,8 +607,8 @@ double SquaredDifference(const double2 val1, const double2 val2) {
 	return real + imag;
 }
 template <>
-double SquaredDifference(const half val1, const half val2) {
-	return SquaredDifference(HalfToFloat(val1), HalfToFloat(val2));
+double SquaredDifference(const tart::float16_t val1, const tart::float16_t val2) {
+	return SquaredDifference(tart::toFloat(val1), tart::toFloat(val2));
 }
 
 // =================================================================================================

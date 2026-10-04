@@ -33,8 +33,8 @@ bool IsCloseToZero(const T value) {
 template bool IsCloseToZero<float>(const float);
 template bool IsCloseToZero<double>(const double);
 template <>
-bool IsCloseToZero(const half value) {
-	return IsCloseToZero(HalfToFloat(value));
+bool IsCloseToZero(const tart::float16_t value) {
+	return IsCloseToZero(tart::toFloat(value));
 }
 template <>
 bool IsCloseToZero(const float2 value) {
@@ -52,7 +52,7 @@ template <typename T>
 T ComplexConjugate(const T value) {
 	return value;
 }
-template half ComplexConjugate(const half);
+template tart::float16_t ComplexConjugate(const tart::float16_t);
 template float ComplexConjugate(const float);
 template double ComplexConjugate(const double);
 template <>
@@ -127,7 +127,7 @@ void HostToDevice(const Arguments<U>& args, Buffers<T>& buffers, BuffersHost<T>&
 }
 
 // Compiles the above functions
-template void DeviceToHost(const Arguments<half>&, Buffers<half>&, BuffersHost<half>&, Queue&,
+template void DeviceToHost(const Arguments<tart::float16_t>&, Buffers<tart::float16_t>&, BuffersHost<tart::float16_t>&, Queue&,
 													 const std::vector<std::string>&);
 template void DeviceToHost(const Arguments<float>&, Buffers<float>&, BuffersHost<float>&, Queue&,
 													 const std::vector<std::string>&);
@@ -141,7 +141,7 @@ template void DeviceToHost(const Arguments<float2>&, Buffers<float2>&, BuffersHo
 													 const std::vector<std::string>&);
 template void DeviceToHost(const Arguments<double2>&, Buffers<double2>&, BuffersHost<double2>&, Queue&,
 													 const std::vector<std::string>&);
-template void HostToDevice(const Arguments<half>&, Buffers<half>&, BuffersHost<half>&, Queue&,
+template void HostToDevice(const Arguments<tart::float16_t>&, Buffers<tart::float16_t>&, BuffersHost<tart::float16_t>&, Queue&,
 													 const std::vector<std::string>&);
 template void HostToDevice(const Arguments<float>&, Buffers<float>&, BuffersHost<float>&, Queue&,
 													 const std::vector<std::string>&);
@@ -159,16 +159,17 @@ template void HostToDevice(const Arguments<double2>&, Buffers<double2>&, Buffers
 // =================================================================================================
 
 // Conversion between half and single-precision
-std::vector<float> HalfToFloatBuffer(const std::vector<half>& source) {
+std::vector<float> HalfToFloatBuffer(const std::vector<tart::float16_t>& source)
+{
 	auto result = std::vector<float>(source.size());
 	for (auto i = size_t(0); i < source.size(); ++i) {
-		result[i] = HalfToFloat(source[i]);
+		result[i] = tart::toFloat(source[i]);
 	}
 	return result;
 }
-void FloatToHalfBuffer(std::vector<half>& result, const std::vector<float>& source) {
+void FloatToHalfBuffer(std::vector<tart::float16_t>& result, const std::vector<float>& source) {
 	for (auto i = size_t(0); i < source.size(); ++i) {
-		result[i] = FloatToHalf(source[i]);
+		result[i] = tart::toHalf(source[i]);
 	}
 }
 

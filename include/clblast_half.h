@@ -18,7 +18,9 @@
 
 // The host data-type for half-precision floating-point (16-bit) is based on the `cl_half` OpenCL
 // type, which is a typedef for unsigned short.
-typedef unsigned short half;
+//typedef unsigned short half;
+#include "tart.hpp"
+typedef tart::float16_t half;
 
 // 32-bit union for conversions
 typedef union ConversionBits_ {
@@ -31,6 +33,7 @@ typedef union ConversionBits_ {
 // Converts a IEEE-compliant single-precision value to half-precision floating-point. This function
 // applies simple truncation (round toward zero, but with overflows set to infinity) as rounding
 // mode.
+#if 0
 static half FloatToHalf(const float value) {
 	static const unsigned short base_table[512] = {
 			0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
@@ -346,6 +349,7 @@ static float HalfToFloat(const half value) {
 	bits.i32 = mantissa_table[offset_table[value >> 10] + (value & 0x3FF)] + exponent_table[value >> 10];
 	return bits.f32;
 }
+#endif
 
 // =================================================================================================
 

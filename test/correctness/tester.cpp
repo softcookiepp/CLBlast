@@ -607,7 +607,7 @@ template <>
 bool TestSimilarity(const half val1, const half val2) {
 	const auto kErrorMarginRelative = getRelativeErrorMargin<half>();
 	const auto kErrorMarginAbsolute = getAbsoluteErrorMargin<half>();
-	return TestSimilarityNear(HalfToFloat(val1), HalfToFloat(val2), kErrorMarginAbsolute, kErrorMarginRelative);
+	return TestSimilarityNear(tart::toFloat(val1), tart::toFloat(val2), kErrorMarginAbsolute, kErrorMarginRelative);
 }
 
 // =================================================================================================
@@ -647,11 +647,15 @@ const std::vector<double2> GetExampleScalars(const bool full_test) {
 	}
 }
 template <>
-const std::vector<half> GetExampleScalars(const bool full_test) {
-	if (full_test) {
-		return {FloatToHalf(0.0f), FloatToHalf(1.0f), FloatToHalf(3.14f)};
-	} else {
-		return {FloatToHalf(3.14f)};
+const std::vector<tart::float16_t> GetExampleScalars(const bool full_test)
+{
+	if (full_test)
+	{
+		return {tart::toHalf(0.0f), tart::toHalf(1.0f), tart::toHalf(3.14f)};
+	}
+	else
+	{
+		return {tart::toHalf(3.14f)};
 	}
 }
 

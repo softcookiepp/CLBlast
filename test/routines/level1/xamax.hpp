@@ -113,7 +113,7 @@ class TestXamax {
 		if (sizeof(T) == sizeof(half) )
 		{
 			float fresult = static_cast<float>(result_uint[0]);
-			half hresult = FloatToHalf(fresult);
+			tart::float16_t hresult = tart::toHalf(fresult);
 			result_as_T = static_cast<T>(hresult);
 		}
 		std::vector<T> result(args.scalar_size);

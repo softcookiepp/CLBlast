@@ -10,6 +10,7 @@
 
 #ifndef CLBLAST_TEST_WRAPPER_CBLAS_H_
 #define CLBLAST_TEST_WRAPPER_CBLAS_H_
+#include "tart.hpp"
 
 #include <cstddef>
 #include <vector>
@@ -162,7 +163,7 @@ void cblasXscal(const size_t n, const double2 alpha, std::vector<double2>& x_buf
 void cblasXscal(const size_t n, const half alpha, std::vector<half>& x_buffer, const size_t x_offset,
                 const size_t x_inc) {
   auto x_buffer_bis = HalfToFloatBuffer(x_buffer);
-  cblasXscal(n, HalfToFloat(alpha), x_buffer_bis, x_offset, x_inc);
+  cblasXscal(n, tart::toFloat(alpha), x_buffer_bis, x_offset, x_inc);
   FloatToHalfBuffer(x_buffer, x_buffer_bis);
 }
 
@@ -222,7 +223,7 @@ void cblasXaxpy(const size_t n, const half alpha, const std::vector<half>& x_buf
                 const size_t x_inc, std::vector<half>& y_buffer, const size_t y_offset, const size_t y_inc) {
   auto x_buffer_bis = HalfToFloatBuffer(x_buffer);
   auto y_buffer_bis = HalfToFloatBuffer(y_buffer);
-  cblasXaxpy(n, HalfToFloat(alpha), x_buffer_bis, x_offset, x_inc, y_buffer_bis, y_offset, y_inc);
+  cblasXaxpy(n, tart::toFloat(alpha), x_buffer_bis, x_offset, x_inc, y_buffer_bis, y_offset, y_inc);
   FloatToHalfBuffer(y_buffer, y_buffer_bis);
 }
 
@@ -413,8 +414,8 @@ void cblasXgemv(const CBLAS_ORDER layout, const CBLAS_TRANSPOSE a_transpose, con
   auto a_buffer_bis = HalfToFloatBuffer(a_buffer);
   auto x_buffer_bis = HalfToFloatBuffer(x_buffer);
   auto y_buffer_bis = HalfToFloatBuffer(y_buffer);
-  cblasXgemv(layout, a_transpose, m, n, HalfToFloat(alpha), a_buffer_bis, a_offset, a_ld, x_buffer_bis, x_offset, x_inc,
-             HalfToFloat(beta), y_buffer_bis, y_offset, y_inc);
+  cblasXgemv(layout, a_transpose, m, n, tart::toFloat(alpha), a_buffer_bis, a_offset, a_ld, x_buffer_bis, x_offset, x_inc,
+             tart::toFloat(beta), y_buffer_bis, y_offset, y_inc);
   FloatToHalfBuffer(y_buffer, y_buffer_bis);
 }
 
@@ -469,8 +470,8 @@ void cblasXgbmv(const CBLAS_ORDER layout, const CBLAS_TRANSPOSE a_transpose, con
   auto a_buffer_bis = HalfToFloatBuffer(a_buffer);
   auto x_buffer_bis = HalfToFloatBuffer(x_buffer);
   auto y_buffer_bis = HalfToFloatBuffer(y_buffer);
-  cblasXgbmv(layout, a_transpose, m, n, kl, ku, HalfToFloat(alpha), a_buffer_bis, a_offset, a_ld, x_buffer_bis,
-             x_offset, x_inc, HalfToFloat(beta), y_buffer_bis, y_offset, y_inc);
+  cblasXgbmv(layout, a_transpose, m, n, kl, ku, tart::toFloat(alpha), a_buffer_bis, a_offset, a_ld, x_buffer_bis,
+             x_offset, x_inc, tart::toFloat(beta), y_buffer_bis, y_offset, y_inc);
   FloatToHalfBuffer(y_buffer, y_buffer_bis);
 }
 
@@ -568,8 +569,8 @@ void cblasXsymv(const CBLAS_ORDER layout, const CBLAS_UPLO triangle, const size_
   auto a_buffer_bis = HalfToFloatBuffer(a_buffer);
   auto x_buffer_bis = HalfToFloatBuffer(x_buffer);
   auto y_buffer_bis = HalfToFloatBuffer(y_buffer);
-  cblasXsymv(layout, triangle, n, HalfToFloat(alpha), a_buffer_bis, a_offset, a_ld, x_buffer_bis, x_offset, x_inc,
-             HalfToFloat(beta), y_buffer_bis, y_offset, y_inc);
+  cblasXsymv(layout, triangle, n, tart::toFloat(alpha), a_buffer_bis, a_offset, a_ld, x_buffer_bis, x_offset, x_inc,
+             tart::toFloat(beta), y_buffer_bis, y_offset, y_inc);
   FloatToHalfBuffer(y_buffer, y_buffer_bis);
 }
 
@@ -597,8 +598,8 @@ void cblasXsbmv(const CBLAS_ORDER layout, const CBLAS_UPLO triangle, const size_
   auto a_buffer_bis = HalfToFloatBuffer(a_buffer);
   auto x_buffer_bis = HalfToFloatBuffer(x_buffer);
   auto y_buffer_bis = HalfToFloatBuffer(y_buffer);
-  cblasXsbmv(layout, triangle, n, k, HalfToFloat(alpha), a_buffer_bis, a_offset, a_ld, x_buffer_bis, x_offset, x_inc,
-             HalfToFloat(beta), y_buffer_bis, y_offset, y_inc);
+  cblasXsbmv(layout, triangle, n, k, tart::toFloat(alpha), a_buffer_bis, a_offset, a_ld, x_buffer_bis, x_offset, x_inc,
+             tart::toFloat(beta), y_buffer_bis, y_offset, y_inc);
   FloatToHalfBuffer(y_buffer, y_buffer_bis);
 }
 
@@ -624,8 +625,8 @@ void cblasXspmv(const CBLAS_ORDER layout, const CBLAS_UPLO triangle, const size_
   auto ap_buffer_bis = HalfToFloatBuffer(ap_buffer);
   auto x_buffer_bis = HalfToFloatBuffer(x_buffer);
   auto y_buffer_bis = HalfToFloatBuffer(y_buffer);
-  cblasXspmv(layout, triangle, n, HalfToFloat(alpha), ap_buffer_bis, ap_offset, x_buffer_bis, x_offset, x_inc,
-             HalfToFloat(beta), y_buffer_bis, y_offset, y_inc);
+  cblasXspmv(layout, triangle, n, tart::toFloat(alpha), ap_buffer_bis, ap_offset, x_buffer_bis, x_offset, x_inc,
+             tart::toFloat(beta), y_buffer_bis, y_offset, y_inc);
   FloatToHalfBuffer(y_buffer, y_buffer_bis);
 }
 
@@ -853,7 +854,7 @@ void cblasXger(const CBLAS_ORDER layout, const size_t m, const size_t n, const h
   auto x_buffer_bis = HalfToFloatBuffer(x_buffer);
   auto y_buffer_bis = HalfToFloatBuffer(y_buffer);
   auto a_buffer_bis = HalfToFloatBuffer(a_buffer);
-  cblasXger(layout, m, n, HalfToFloat(alpha), x_buffer_bis, x_offset, x_inc, y_buffer_bis, y_offset, y_inc,
+  cblasXger(layout, m, n, tart::toFloat(alpha), x_buffer_bis, x_offset, x_inc, y_buffer_bis, y_offset, y_inc,
             a_buffer_bis, a_offset, a_ld);
   FloatToHalfBuffer(a_buffer, a_buffer_bis);
 }
@@ -992,7 +993,7 @@ void cblasXsyr(const CBLAS_ORDER layout, const CBLAS_UPLO triangle, const size_t
                std::vector<half>& a_buffer, const size_t a_offset, const size_t a_ld) {
   auto x_buffer_bis = HalfToFloatBuffer(x_buffer);
   auto a_buffer_bis = HalfToFloatBuffer(a_buffer);
-  cblasXsyr(layout, triangle, n, HalfToFloat(alpha), x_buffer_bis, x_offset, x_inc, a_buffer_bis, a_offset, a_ld);
+  cblasXsyr(layout, triangle, n, tart::toFloat(alpha), x_buffer_bis, x_offset, x_inc, a_buffer_bis, a_offset, a_ld);
   FloatToHalfBuffer(a_buffer, a_buffer_bis);
 }
 
@@ -1014,7 +1015,7 @@ void cblasXspr(const CBLAS_ORDER layout, const CBLAS_UPLO triangle, const size_t
                std::vector<half>& ap_buffer, const size_t ap_offset) {
   auto x_buffer_bis = HalfToFloatBuffer(x_buffer);
   auto ap_buffer_bis = HalfToFloatBuffer(ap_buffer);
-  cblasXspr(layout, triangle, n, HalfToFloat(alpha), x_buffer_bis, x_offset, x_inc, ap_buffer_bis, ap_offset);
+  cblasXspr(layout, triangle, n, tart::toFloat(alpha), x_buffer_bis, x_offset, x_inc, ap_buffer_bis, ap_offset);
   FloatToHalfBuffer(ap_buffer, ap_buffer_bis);
 }
 
@@ -1040,7 +1041,7 @@ void cblasXsyr2(const CBLAS_ORDER layout, const CBLAS_UPLO triangle, const size_
   auto x_buffer_bis = HalfToFloatBuffer(x_buffer);
   auto y_buffer_bis = HalfToFloatBuffer(y_buffer);
   auto a_buffer_bis = HalfToFloatBuffer(a_buffer);
-  cblasXsyr2(layout, triangle, n, HalfToFloat(alpha), x_buffer_bis, x_offset, x_inc, y_buffer_bis, y_offset, y_inc,
+  cblasXsyr2(layout, triangle, n, tart::toFloat(alpha), x_buffer_bis, x_offset, x_inc, y_buffer_bis, y_offset, y_inc,
              a_buffer_bis, a_offset, a_ld);
   FloatToHalfBuffer(a_buffer, a_buffer_bis);
 }
@@ -1067,7 +1068,7 @@ void cblasXspr2(const CBLAS_ORDER layout, const CBLAS_UPLO triangle, const size_
   auto x_buffer_bis = HalfToFloatBuffer(x_buffer);
   auto y_buffer_bis = HalfToFloatBuffer(y_buffer);
   auto ap_buffer_bis = HalfToFloatBuffer(ap_buffer);
-  cblasXspr2(layout, triangle, n, HalfToFloat(alpha), x_buffer_bis, x_offset, x_inc, y_buffer_bis, y_offset, y_inc,
+  cblasXspr2(layout, triangle, n, tart::toFloat(alpha), x_buffer_bis, x_offset, x_inc, y_buffer_bis, y_offset, y_inc,
              ap_buffer_bis, ap_offset);
   FloatToHalfBuffer(ap_buffer, ap_buffer_bis);
 }
@@ -1127,8 +1128,8 @@ void cblasXgemm(const CBLAS_ORDER layout, const CBLAS_TRANSPOSE a_transpose, con
   auto a_buffer_bis = HalfToFloatBuffer(a_buffer);
   auto b_buffer_bis = HalfToFloatBuffer(b_buffer);
   auto c_buffer_bis = HalfToFloatBuffer(c_buffer);
-  cblasXgemm(layout, a_transpose, b_transpose, m, n, k, HalfToFloat(alpha), a_buffer_bis, a_offset, a_ld, b_buffer_bis,
-             b_offset, b_ld, HalfToFloat(beta), c_buffer_bis, c_offset, c_ld);
+  cblasXgemm(layout, a_transpose, b_transpose, m, n, k, tart::toFloat(alpha), a_buffer_bis, a_offset, a_ld, b_buffer_bis,
+             b_offset, b_ld, tart::toFloat(beta), c_buffer_bis, c_offset, c_ld);
   FloatToHalfBuffer(c_buffer, c_buffer_bis);
 }
 
@@ -1178,8 +1179,8 @@ void cblasXsymm(const CBLAS_ORDER layout, const CBLAS_SIDE side, const CBLAS_UPL
   auto a_buffer_bis = HalfToFloatBuffer(a_buffer);
   auto b_buffer_bis = HalfToFloatBuffer(b_buffer);
   auto c_buffer_bis = HalfToFloatBuffer(c_buffer);
-  cblasXsymm(layout, side, triangle, m, n, HalfToFloat(alpha), a_buffer_bis, a_offset, a_ld, b_buffer_bis, b_offset,
-             b_ld, HalfToFloat(beta), c_buffer_bis, c_offset, c_ld);
+  cblasXsymm(layout, side, triangle, m, n, tart::toFloat(alpha), a_buffer_bis, a_offset, a_ld, b_buffer_bis, b_offset,
+             b_ld, tart::toFloat(beta), c_buffer_bis, c_offset, c_ld);
   FloatToHalfBuffer(c_buffer, c_buffer_bis);
 }
 
@@ -1248,7 +1249,7 @@ void cblasXsyrk(const CBLAS_ORDER layout, const CBLAS_UPLO triangle, const CBLAS
                 const size_t c_ld) {
   auto a_buffer_bis = HalfToFloatBuffer(a_buffer);
   auto c_buffer_bis = HalfToFloatBuffer(c_buffer);
-  cblasXsyrk(layout, triangle, a_transpose, n, k, HalfToFloat(alpha), a_buffer_bis, a_offset, a_ld, HalfToFloat(beta),
+  cblasXsyrk(layout, triangle, a_transpose, n, k, tart::toFloat(alpha), a_buffer_bis, a_offset, a_ld, tart::toFloat(beta),
              c_buffer_bis, c_offset, c_ld);
   FloatToHalfBuffer(c_buffer, c_buffer_bis);
 }
@@ -1322,8 +1323,8 @@ void cblasXsyr2k(const CBLAS_ORDER layout, const CBLAS_UPLO triangle, const CBLA
   auto a_buffer_bis = HalfToFloatBuffer(a_buffer);
   auto b_buffer_bis = HalfToFloatBuffer(b_buffer);
   auto c_buffer_bis = HalfToFloatBuffer(c_buffer);
-  cblasXsyr2k(layout, triangle, ab_transpose, n, k, HalfToFloat(alpha), a_buffer_bis, a_offset, a_ld, b_buffer_bis,
-              b_offset, b_ld, HalfToFloat(beta), c_buffer_bis, c_offset, c_ld);
+  cblasXsyr2k(layout, triangle, ab_transpose, n, k, tart::toFloat(alpha), a_buffer_bis, a_offset, a_ld, b_buffer_bis,
+              b_offset, b_ld, tart::toFloat(beta), c_buffer_bis, c_offset, c_ld);
   FloatToHalfBuffer(c_buffer, c_buffer_bis);
 }
 
@@ -1390,7 +1391,7 @@ void cblasXtrmm(const CBLAS_ORDER layout, const CBLAS_SIDE side, const CBLAS_UPL
                 std::vector<half>& b_buffer, const size_t b_offset, const size_t b_ld) {
   auto a_buffer_bis = HalfToFloatBuffer(a_buffer);
   auto b_buffer_bis = HalfToFloatBuffer(b_buffer);
-  cblasXtrmm(layout, side, triangle, a_transpose, diagonal, m, n, HalfToFloat(alpha), a_buffer_bis, a_offset, a_ld,
+  cblasXtrmm(layout, side, triangle, a_transpose, diagonal, m, n, tart::toFloat(alpha), a_buffer_bis, a_offset, a_ld,
              b_buffer_bis, b_offset, b_ld);
   FloatToHalfBuffer(b_buffer, b_buffer_bis);
 }

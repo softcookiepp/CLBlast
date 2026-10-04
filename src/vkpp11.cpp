@@ -257,6 +257,7 @@ template class Buffer<uint16_t>;
 template class Buffer<uint32_t>;
 template class Buffer<uint64_t>;
 
+template class Buffer<tart::float16_t>;
 template class Buffer<float>;
 template class Buffer<double>;
 template class Buffer<std::complex<float>>; // not using clblast::float2 because doing so requires circular includes that don't work

@@ -16,8 +16,6 @@
 #include <string>
 #include <vector>
 
-//#include "clblast.h"
-#include "clblast_half.h"
 #include "test/test_utilities.hpp"
 #include "test/wrapper_cuda.hpp"
 #include "utilities/backend.hpp"

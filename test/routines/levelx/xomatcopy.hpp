@@ -12,7 +12,7 @@
 #ifndef CLBLAST_TEST_ROUTINES_XOMATCOPY_H_
 #define CLBLAST_TEST_ROUTINES_XOMATCOPY_H_
 
-#include "clblast_half.h"
+#include "test/test_utilities.hpp"
 #include "test/routines/common.hpp"
 
 namespace clblast {

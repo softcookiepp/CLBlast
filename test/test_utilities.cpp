@@ -18,7 +18,8 @@
 #include <string>
 #include <vector>
 
-#include "clblast_half.h"
+#include "tart.hpp"
+using tart::half;
 #include "utilities/backend.hpp"
 #include "utilities/utilities.hpp"
 

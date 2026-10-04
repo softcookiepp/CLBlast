@@ -19,11 +19,13 @@
 #include <string>
 #include <vector>
 
-#include "clblast_half.h"
+#include "tart.hpp"
 #include "utilities/backend.hpp"
 #include "utilities/device_mapping.hpp"
+using tart::half;
 
-namespace clblast {
+namespace clblast
+{
 // =================================================================================================
 
 // Returns a scalar with a default value

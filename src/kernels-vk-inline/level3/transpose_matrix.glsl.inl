@@ -708,7 +708,7 @@ R"(
 
 // just define some shader parameters here, they are basically the same across all
 #if LEVEL3_USE_SPEC == 1
-	layout(local_size_x = 10, local_size_y = 10) in;
+	layout(local_size_x_id = 10, local_size_y_id = 10) in;
 #else
 	layout(local_size_x = PADTRA_TILE, local_size_y = PADTRA_TILE, local_size_z = 1) in;
 #endif

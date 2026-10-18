@@ -10,6 +10,22 @@
 namespace clblast {
 namespace database {
 
+const NewDatabaseEntry NewDbXgemmDouble = 
+{
+	"Xgemm", tart::dtypes::float64, {"GEMMK", "KREG", "KWG", "KWI", "MDIMA", "MDIMC", "MWG", "NDIMB", "NDIMC", "NWG", "SA", "SB", "STRM", "STRN", "VWM", "VWN"},
+	{ // vendors
+		{ // default vendor
+			kDefaultVendorID,
+			{ // devices
+				{ // default device
+					kDeviceNameDefault, kDefaultDeviceID,
+					Params{ 0, 1, 32, 2, 8, 8, 16, 8, 8, 32, 1, 1, 0, 0, 1, 1 }
+				}
+			}
+		}
+	}
+};
+
 const DatabaseEntry XgemmDouble = {
   "Xgemm", tart::dtypes::float64, {"GEMMK", "KREG", "KWG", "KWI", "MDIMA", "MDIMC", "MWG", "NDIMB", "NDIMC", "NWG", "SA", "SB", "STRM", "STRN", "VWM", "VWN"}, {
 #if 0

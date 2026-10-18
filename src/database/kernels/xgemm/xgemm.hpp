@@ -18,5 +18,11 @@ extern const DatabaseEntry XgemmComplexSingle;
 extern const DatabaseEntry XgemmDouble;
 extern const DatabaseEntry XgemmComplexDouble;
 
+extern const NewDatabaseEntry NewDbXgemmHalf;
+extern const NewDatabaseEntry NewDbXgemmSingle;
+extern const NewDatabaseEntry NewDbXgemmComplexSingle;
+extern const NewDatabaseEntry NewDbXgemmDouble;
+extern const NewDatabaseEntry NewDbXgemmComplexDouble;
+
 } // namespace database
 } // namespace clblast

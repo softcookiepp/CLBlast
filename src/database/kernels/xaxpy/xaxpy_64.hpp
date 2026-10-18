@@ -9,6 +9,22 @@
 #include "database/kernels/xaxpy/xaxpy.hpp"
 namespace clblast {
 namespace database {
+	
+const NewDatabaseEntry NewDbXaxpyDouble = 
+{
+	"Xaxpy", tart::dtypes::float64, {"VW", "WGS", "WPT"},
+	{ // vendors
+		{ // default vendor
+			kDefaultVendorID,
+			{ // devices
+				{ // default device
+					kDeviceNameDefault, kDefaultDeviceID,
+					Params{ 2, 64, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+				}
+			}
+		}
+	}
+};
 
 const DatabaseEntry XaxpyDouble = {
   "Xaxpy", tart::dtypes::float64, {"VW", "WGS", "WPT"}, {

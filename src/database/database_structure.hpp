@@ -1,7 +1,7 @@
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
-//   Cedric Nugteren <www.cedricnugteren.nl>
+//	 Cedric Nugteren <www.cedricnugteren.nl>
 //
 // This file describes the database storage structures.
 //
@@ -32,42 +32,75 @@ namespace database {
 // =================================================================================================
 
 // Type alias for the database storage (arrays for fast compilation/efficiency)
-using Name = std::array<char, 51>;      // name as stored in database (50 chars + string terminator)
-using Params = std::array<size_t, 16>;  // parameters as stored in database
+using Name = std::array<char, 51>;			// name as stored in database (50 chars + string terminator)
+using Params = std::array<size_t, 16>;	// parameters as stored in database
 
 // Type alias after extracting from the database (sorted map for improved code readability)
-using Parameters = std::map<std::string, size_t>;  // parameters after reading from DB
+using Parameters = std::map<std::string, size_t>;	// parameters after reading from DB
 
 // The OpenCL device types
 const std::string kDeviceTypeCPU = "CPU";
 const std::string kDeviceTypeGPU = "GPU";
 const std::string kDeviceTypeAccelerator = "accelerator";
 const std::string kDeviceTypeAll = "default";
-const Name kDeviceNameDefault = {"default                                           "};
+const Name kDeviceNameDefault = {"default"};
 
-struct DatabaseDevice {
-  Name name;
-  Params parameters;  // parameter values
+struct DatabaseDevice
+{
+	Name name;
+	Params parameters;	// parameter values
 };
-struct DatabaseArchitecture {
-  std::string name;
-  std::vector<DatabaseDevice> devices;
+
+struct DatabaseArchitecture
+{
+	std::string name;
+	std::vector<DatabaseDevice> devices;
 };
-struct DatabaseVendor {
-  std::string type;
-  std::string name;
-  std::vector<DatabaseArchitecture> architectures;
+
+struct DatabaseVendor
+{
+	std::string type;
+	std::string name;
+	std::vector<DatabaseArchitecture> architectures;
 };
-struct DatabaseEntry {
-  std::string kernel;
-  tart::DType precision;
-  std::vector<std::string> parameter_names;
-  std::vector<DatabaseVendor> vendors;
+
+struct DatabaseEntry
+{
+	std::string kernel;
+	tart::DType precision;
+	std::vector<std::string> parameter_names;
+	std::vector<DatabaseVendor> vendors;
+};
+
+// Vulkan has no way of determining architecture that I am aware of.
+// There are also efficiencies to be gained by not using any strings for searching through nested arrays
+const uint32_t kDefaultDeviceID = 0;
+const uint32_t kDefaultVendorID = 0;
+
+struct NewDatabaseDevice
+{
+	Name name;
+	uint32_t deviceID;
+	Params parameters;	// parameter values
+};
+
+struct NewDatabaseVendor
+{
+	uint32_t vendorID;
+	std::vector<NewDatabaseDevice> devices;
+};
+
+struct NewDatabaseEntry
+{
+	std::string kernel;
+	tart::DType precision;
+	std::vector<std::string> parameter_names;
+	std::vector<NewDatabaseVendor> vendors;
 };
 
 // =================================================================================================
-}  // namespace database
-}  // namespace clblast
+}	// namespace database
+}	// namespace clblast
 
 // CLBLAST_DATABASE_DATABASE_STRUCTURE_H_
 #endif

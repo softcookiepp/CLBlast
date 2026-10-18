@@ -10,6 +10,22 @@
 namespace clblast {
 namespace database {
 
+const NewDatabaseEntry NewDbCopyHalf = 
+{
+	"Copy", tart::dtypes::float16, {"COPY_DIMX", "COPY_DIMY", "COPY_VW", "COPY_WPT"},
+	{ // vendors
+		{ // default vendor
+			kDefaultVendorID,
+			{ // devices
+				{ // default device
+					kDeviceNameDefault, kDefaultDeviceID,
+					Params{ 16, 8, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+				}
+			}
+		}
+	}
+};
+
 const DatabaseEntry CopyHalf = {
   "Copy", tart::dtypes::float16, {"COPY_DIMX", "COPY_DIMY", "COPY_VW", "COPY_WPT"}, {
     { // AMD GPUs
@@ -175,7 +191,6 @@ const DatabaseEntry CopyHalf = {
       kDeviceTypeAll, "default", {
         { "default", {
           { kDeviceNameDefault                                        , Params{ 16, 8, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } },
-          //{ kDeviceNameDefault                                        , Params{ 16, 8, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } },
         } },
       }
     },

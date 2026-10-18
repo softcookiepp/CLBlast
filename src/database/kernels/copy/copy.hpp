@@ -18,5 +18,12 @@ extern const DatabaseEntry CopyComplexSingle;
 extern const DatabaseEntry CopyDouble;
 extern const DatabaseEntry CopyComplexDouble;
 
+// new implementation
+extern const NewDatabaseEntry NewDbCopyHalf;
+extern const NewDatabaseEntry NewDbCopySingle;
+extern const NewDatabaseEntry NewDbCopyComplexSingle;
+extern const NewDatabaseEntry NewDbCopyDouble;
+extern const NewDatabaseEntry NewDbCopyComplexDouble;
+
 } // namespace database
 } // namespace clblast

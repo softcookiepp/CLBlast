@@ -40,6 +40,7 @@ namespace clblast {
 // =================================================================================================
 
 std::vector<database::DatabaseEntry> Database::database = std::vector<database::DatabaseEntry>{};
+std::vector<database::NewDatabaseEntry> Database::newDatabase = {};
 
 // The default values
 const std::string Database::kDeviceVendorAll = "default";
@@ -50,89 +51,182 @@ const std::string Database::kDeviceVendorAll = "default";
 // This takes an optional overlay database in case of custom tuning or custom kernels.
 Database::Database(const Device& device, const std::string& kernel_name, const Precision precision,
 									 const std::vector<database::DatabaseEntry>& overlay)
-		: parameters_(std::make_shared<database::Parameters>()) {
+	: parameters_(std::make_shared<database::Parameters>())
+{
+	if (newDatabase.size() == 0)
+	{
+		newDatabase = std::vector<database::NewDatabaseEntry>{
+			database::NewDbXaxpyHalf,
+			database::NewDbXaxpySingle,
+			database::NewDbXaxpyDouble,
+			database::NewDbXaxpyComplexSingle,
+			database::NewDbXaxpyComplexDouble,
+		#if 0
+			database::NewDbXdotHalf,
+			database::NewDbXdotSingle,
+			database::NewDbXdotDouble,
+			database::NewDbXdotComplexSingle,
+			database::NewDbXdotComplexDouble,
+			database::NewDbXgemvHalf,
+			database::NewDbXgemvSingle,
+			database::NewDbXgemvDouble,
+			database::NewDbXgemvComplexSingle,
+			database::NewDbXgemvComplexDouble,
+			database::NewDbXgemvFastHalf,
+			database::NewDbXgemvFastSingle,
+			database::NewDbXgemvFastDouble,
+			database::NewDbXgemvFastComplexSingle,
+			database::NewDbXgemvFastComplexDouble,
+			database::NewDbXgemvFastRotHalf,
+			database::NewDbXgemvFastRotSingle,
+			database::NewDbXgemvFastRotDouble,
+			database::NewDbXgemvFastRotComplexSingle,
+			database::NewDbXgemvFastRotComplexDouble,
+			database::NewDbXgerHalf,
+			database::NewDbXgerSingle,
+			database::NewDbXgerDouble,
+			database::NewDbXgerComplexSingle,
+			database::NewDbXgerComplexDouble,
+			database::NewDbXgemmHalf,
+			database::NewDbXgemmSingle,
+			database::NewDbXgemmDouble,
+			database::NewDbXgemmComplexSingle,
+			database::NewDbXgemmComplexDouble,
+			database::NewDbXgemmDirectHalf,
+			database::NewDbXgemmDirectSingle,
+			database::NewDbXgemmDirectDouble,
+			database::NewDbXgemmDirectComplexSingle,
+			database::NewDbXgemmDirectComplexDouble,
+			database::NewDbXconvgemmHalf,
+			database::NewDbXconvgemmSingle,
+			database::NewDbXconvgemmDouble,
+			database::NewDbXconvgemmComplexSingle,
+			database::NewDbXconvgemmComplexDouble,
+		#endif
+			database::NewDbCopyHalf,
+			database::NewDbCopySingle,
+			database::NewDbCopyDouble,
+			database::NewDbCopyComplexSingle,
+			database::NewDbCopyComplexDouble
+		#if 0
+			database::NewDbPadHalf,
+			database::NewDbPadSingle,
+			database::NewDbPadDouble,
+			database::NewDbPadComplexSingle,
+			database::NewDbPadComplexDouble,
+			database::NewDbTransposeHalf,
+			database::NewDbTransposeSingle,
+			database::NewDbTransposeDouble,
+			database::NewDbTransposeComplexSingle,
+			database::NewDbTransposeComplexDouble,
+			database::NewDbPadtransposeHalf,
+			database::NewDbPadtransposeSingle,
+			database::NewDbPadtransposeDouble,
+			database::NewDbPadtransposeComplexSingle,
+			database::NewDbPadtransposeComplexDouble,
+			database::NewDbInvertHalf,
+			database::NewDbInvertSingle,
+			database::NewDbInvertDouble,
+			database::NewDbInvertComplexSingle,
+			database::NewDbInvertComplexDouble,
+			database::NewDbGemmRoutineHalf,
+			database::NewDbGemmRoutineSingle,
+			database::NewDbGemmRoutineDouble,
+			database::NewDbGemmRoutineComplexSingle,
+			database::NewDbGemmRoutineComplexDouble,
+			database::NewDbTrsvRoutineHalf,
+			database::NewDbTrsvRoutineSingle,
+			database::NewDbTrsvRoutineDouble,
+			database::NewDbTrsvRoutineComplexSingle,
+			database::NewDbTrsvRoutineComplexDouble
+		#endif
+		};
+	}
+	
 	// Initializes the static variable on first use. At this point we are sure all global variables are initialized
-	if (database.size() == 0) {
-		database = std::vector<database::DatabaseEntry>{database::XaxpyHalf,
-																										database::XaxpySingle,
-																										database::XaxpyDouble,
-																										database::XaxpyComplexSingle,
-																										database::XaxpyComplexDouble,
-																										database::XdotHalf,
-																										database::XdotSingle,
-																										database::XdotDouble,
-																										database::XdotComplexSingle,
-																										database::XdotComplexDouble,
-																										database::XgemvHalf,
-																										database::XgemvSingle,
-																										database::XgemvDouble,
-																										database::XgemvComplexSingle,
-																										database::XgemvComplexDouble,
-																										database::XgemvFastHalf,
-																										database::XgemvFastSingle,
-																										database::XgemvFastDouble,
-																										database::XgemvFastComplexSingle,
-																										database::XgemvFastComplexDouble,
-																										database::XgemvFastRotHalf,
-																										database::XgemvFastRotSingle,
-																										database::XgemvFastRotDouble,
-																										database::XgemvFastRotComplexSingle,
-																										database::XgemvFastRotComplexDouble,
-																										database::XgerHalf,
-																										database::XgerSingle,
-																										database::XgerDouble,
-																										database::XgerComplexSingle,
-																										database::XgerComplexDouble,
-																										database::XgemmHalf,
-																										database::XgemmSingle,
-																										database::XgemmDouble,
-																										database::XgemmComplexSingle,
-																										database::XgemmComplexDouble,
-																										database::XgemmDirectHalf,
-																										database::XgemmDirectSingle,
-																										database::XgemmDirectDouble,
-																										database::XgemmDirectComplexSingle,
-																										database::XgemmDirectComplexDouble,
-																										database::XconvgemmHalf,
-																										database::XconvgemmSingle,
-																										database::XconvgemmDouble,
-																										database::XconvgemmComplexSingle,
-																										database::XconvgemmComplexDouble,
-																										database::CopyHalf,
-																										database::CopySingle,
-																										database::CopyDouble,
-																										database::CopyComplexSingle,
-																										database::CopyComplexDouble,
-																										database::PadHalf,
-																										database::PadSingle,
-																										database::PadDouble,
-																										database::PadComplexSingle,
-																										database::PadComplexDouble,
-																										database::TransposeHalf,
-																										database::TransposeSingle,
-																										database::TransposeDouble,
-																										database::TransposeComplexSingle,
-																										database::TransposeComplexDouble,
-																										database::PadtransposeHalf,
-																										database::PadtransposeSingle,
-																										database::PadtransposeDouble,
-																										database::PadtransposeComplexSingle,
-																										database::PadtransposeComplexDouble,
-																										database::InvertHalf,
-																										database::InvertSingle,
-																										database::InvertDouble,
-																										database::InvertComplexSingle,
-																										database::InvertComplexDouble,
-																										database::GemmRoutineHalf,
-																										database::GemmRoutineSingle,
-																										database::GemmRoutineDouble,
-																										database::GemmRoutineComplexSingle,
-																										database::GemmRoutineComplexDouble,
-																										database::TrsvRoutineHalf,
-																										database::TrsvRoutineSingle,
-																										database::TrsvRoutineDouble,
-																										database::TrsvRoutineComplexSingle,
-																										database::TrsvRoutineComplexDouble};
+	if (database.size() == 0)
+	{
+		database = std::vector<database::DatabaseEntry>{
+			database::XaxpyHalf,
+			database::XaxpySingle,
+			database::XaxpyDouble,
+			database::XaxpyComplexSingle,
+			database::XaxpyComplexDouble,
+			database::XdotHalf,
+			database::XdotSingle,
+			database::XdotDouble,
+			database::XdotComplexSingle,
+			database::XdotComplexDouble,
+			database::XgemvHalf,
+			database::XgemvSingle,
+			database::XgemvDouble,
+			database::XgemvComplexSingle,
+			database::XgemvComplexDouble,
+			database::XgemvFastHalf,
+			database::XgemvFastSingle,
+			database::XgemvFastDouble,
+			database::XgemvFastComplexSingle,
+			database::XgemvFastComplexDouble,
+			database::XgemvFastRotHalf,
+			database::XgemvFastRotSingle,
+			database::XgemvFastRotDouble,
+			database::XgemvFastRotComplexSingle,
+			database::XgemvFastRotComplexDouble,
+			database::XgerHalf,
+			database::XgerSingle,
+			database::XgerDouble,
+			database::XgerComplexSingle,
+			database::XgerComplexDouble,
+			database::XgemmHalf,
+			database::XgemmSingle,
+			database::XgemmDouble,
+			database::XgemmComplexSingle,
+			database::XgemmComplexDouble,
+			database::XgemmDirectHalf,
+			database::XgemmDirectSingle,
+			database::XgemmDirectDouble,
+			database::XgemmDirectComplexSingle,
+			database::XgemmDirectComplexDouble,
+			database::XconvgemmHalf,
+			database::XconvgemmSingle,
+			database::XconvgemmDouble,
+			database::XconvgemmComplexSingle,
+			database::XconvgemmComplexDouble,
+			database::CopyHalf,
+			database::CopySingle,
+			database::CopyDouble,
+			database::CopyComplexSingle,
+			database::CopyComplexDouble,
+			database::PadHalf,
+			database::PadSingle,
+			database::PadDouble,
+			database::PadComplexSingle,
+			database::PadComplexDouble,
+			database::TransposeHalf,
+			database::TransposeSingle,
+			database::TransposeDouble,
+			database::TransposeComplexSingle,
+			database::TransposeComplexDouble,
+			database::PadtransposeHalf,
+			database::PadtransposeSingle,
+			database::PadtransposeDouble,
+			database::PadtransposeComplexSingle,
+			database::PadtransposeComplexDouble,
+			database::InvertHalf,
+			database::InvertSingle,
+			database::InvertDouble,
+			database::InvertComplexSingle,
+			database::InvertComplexDouble,
+			database::GemmRoutineHalf,
+			database::GemmRoutineSingle,
+			database::GemmRoutineDouble,
+			database::GemmRoutineComplexSingle,
+			database::GemmRoutineComplexDouble,
+			database::TrsvRoutineHalf,
+			database::TrsvRoutineSingle,
+			database::TrsvRoutineDouble,
+			database::TrsvRoutineComplexSingle,
+			database::TrsvRoutineComplexDouble};
 	}
 
 	// Finds device information
@@ -144,12 +238,26 @@ Database::Database(const Device& device, const std::string& kernel_name, const P
 	// Prints the obtained information in verbose mode
 	log_debug("Device type '" + device_type + "'; vendor '" + device_vendor + "'");
 	log_debug("Device name '" + device_name + "'; architecture '" + device_architecture + "'");
-
+	
+	// search through new database implementation if possible
+	auto search_result = database::Parameters();
+	tart::DType dt = precisionToDataType(precision);
+	
+	uint32_t vendorID = database::kDefaultVendorID;
+	uint32_t deviceID = database::kDefaultDeviceID;
+	search_result = Search(kernel_name, vendorID, deviceID, dt, {newDatabase});
+	if (search_result.size() != 0)
+	{
+		parameters_->insert(search_result.begin(), search_result.end());
+		return;
+	}
+	
+	// then fall back to the old database. for now.
+	
 	// Sets the databases to search through
 	auto databases = std::list<std::vector<database::DatabaseEntry>>{overlay, database};
 
 	// Searches potentially multiple databases
-	auto search_result = database::Parameters();
 	for (auto& db : databases) {
 		search_result = Search(kernel_name, device_vendor, device_type, device_name, device_architecture, precision, db);
 		if (search_result.size() != 0) {
@@ -221,6 +329,25 @@ database::Parameters Database::Search(const std::string& this_kernel, const std:
 	return database::Parameters();
 }
 
+database::Parameters Database::Search(
+	const std::string& this_kernel, const uint32_t vendorID,
+	const uint32_t deviceID, const tart::DType& dtype,
+	const std::vector<database::NewDatabaseEntry>& db) const
+{
+	// Selects the right kernel
+	for (auto& db : db)
+	{
+		if (db.kernel == this_kernel && db.precision == dtype)
+		{
+			// Searches for the right vendor and device type, or selects the default if unavailable
+			return SearchVendorAndType(vendorID, deviceID, db.vendors, db.parameter_names);
+		}
+	}
+
+	// If we reached this point, the entry was not found in this database
+	return database::Parameters();
+}
+
 database::Parameters Database::SearchVendorAndType(const std::string& target_vendor, const std::string& target_type,
 																									 const std::string& this_device, const std::string& this_architecture,
 																									 const std::vector<database::DatabaseVendor>& vendors,
@@ -239,6 +366,24 @@ database::Parameters Database::SearchVendorAndType(const std::string& target_ven
 				return parameters;
 			}
 			return SearchArchitecture("default", this_device, vendor.architectures, parameter_names);
+		}
+	}
+	return database::Parameters();
+}
+
+database::Parameters Database::SearchVendorAndType(const uint32_t targetVendorID,
+		const uint32_t targetDeviceID,
+		const std::vector<database::NewDatabaseVendor>& vendors,
+		const std::vector<std::string>& parameter_names) const
+{
+	for (auto& vendor : vendors)
+	{
+		if (vendor.vendorID == targetVendorID || vendor.vendorID == database::kDefaultVendorID)
+		{
+			log_debug(std::string("Found architectures of vendor "));
+
+			// Searches the architecture; if unavailable returns the vendor's default parameters
+			return SearchDevice(targetDeviceID, vendor.devices, parameter_names);
 		}
 	}
 	return database::Parameters();
@@ -280,6 +425,35 @@ database::Parameters Database::SearchDevice(const std::string& target_device,
 				return database::Parameters();
 			}	// ERROR
 			for (auto i = size_t{0}; i < parameter_names.size(); ++i) {
+				parameters[parameter_names[i]] = static_cast<size_t>(device.parameters[i]);
+			}
+			return parameters;
+		}
+	}
+	return database::Parameters();
+}
+
+database::Parameters Database::SearchDevice(
+	const uint32_t targetDeviceID,
+	const std::vector<database::NewDatabaseDevice>& devices,
+	const std::vector<std::string>& parameter_names) const
+{
+	for (auto& device : devices)
+	{
+		if (device.deviceID == targetDeviceID || device.deviceID == database::kDefaultDeviceID)
+		{
+			log_debug("Found parameters for device");
+
+			// Sets the parameters accordingly
+			auto parameters = database::Parameters();
+			if (parameter_names.size() > device.parameters.size())
+			{
+				// this should not happen
+				throw std::invalid_argument("parameter size mismatch");
+				return database::Parameters();
+			}
+			for (size_t i = 0; i < parameter_names.size(); i += 1)
+			{
 				parameters[parameter_names[i]] = static_cast<size_t>(device.parameters[i]);
 			}
 			return parameters;

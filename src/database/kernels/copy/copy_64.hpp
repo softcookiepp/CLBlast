@@ -9,6 +9,22 @@
 #include "database/kernels/copy/copy.hpp"
 namespace clblast {
 namespace database {
+	
+const NewDatabaseEntry NewDbCopyDouble = 
+{
+	"Copy", tart::dtypes::float64, {"COPY_DIMX", "COPY_DIMY", "COPY_VW", "COPY_WPT"},
+	{ // vendors
+		{ // default vendor
+			kDefaultVendorID,
+			{ // devices
+				{ // default device
+					kDeviceNameDefault, kDefaultDeviceID,
+					Params{ 8, 8, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+				}
+			}
+		}
+	}
+};
 
 const DatabaseEntry CopyDouble = {
   "Copy", tart::dtypes::float64, {"COPY_DIMX", "COPY_DIMY", "COPY_VW", "COPY_WPT"}, {

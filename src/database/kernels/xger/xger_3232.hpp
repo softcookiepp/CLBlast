@@ -10,6 +10,22 @@
 namespace clblast {
 namespace database {
 
+const NewDatabaseEntry NewDbXgerComplexSingle = 
+{
+	"Xger", tart::dtypes::complex64, {"WGS1", "WGS2", "WPT"},
+	{ // vendors
+		{ // default vendor
+			kDefaultVendorID,
+			{ // devices
+				{ // default device
+					kDeviceNameDefault, kDefaultDeviceID,
+					Params{ 4, 32, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+				}
+			}
+		}
+	}
+};
+
 const DatabaseEntry XgerComplexSingle = {
   "Xger", tart::dtypes::complex64, {"WGS1", "WGS2", "WPT"}, {
     { // AMD GPUs

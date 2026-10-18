@@ -66,7 +66,6 @@ Database::Database(const Device& device, const std::string& kernel_name, const P
 			database::NewDbXdotDouble,
 			database::NewDbXdotComplexSingle,
 			database::NewDbXdotComplexDouble,
-		#if 0
 			database::NewDbXgemvHalf,
 			database::NewDbXgemvSingle,
 			database::NewDbXgemvDouble,
@@ -87,6 +86,7 @@ Database::Database(const Device& device, const std::string& kernel_name, const P
 			database::NewDbXgerDouble,
 			database::NewDbXgerComplexSingle,
 			database::NewDbXgerComplexDouble,
+		#if 0
 			database::NewDbXgemmHalf,
 			database::NewDbXgemmSingle,
 			database::NewDbXgemmDouble,

@@ -9,6 +9,22 @@
 #include "database/kernels/xgemv_fast/xgemv_fast.hpp"
 namespace clblast {
 namespace database {
+	
+const NewDatabaseEntry NewDbXgemvFastHalf = 
+{
+	"Xgemv", tart::dtypes::float16, {"VW2", "WGS2", "WPT2"},
+	{ // vendors
+		{ // default vendor
+			kDefaultVendorID,
+			{ // devices
+				{ // default device
+					kDeviceNameDefault, kDefaultDeviceID,
+					Params{ 1, 32, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+				}
+			}
+		}
+	}
+};
 
 const DatabaseEntry XgemvFastHalf = {
   "XgemvFast", tart::dtypes::float16, {"VW2", "WGS2", "WPT2"}, {

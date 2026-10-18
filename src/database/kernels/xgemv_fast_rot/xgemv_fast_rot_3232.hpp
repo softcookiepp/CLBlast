@@ -10,6 +10,22 @@
 namespace clblast {
 namespace database {
 
+const NewDatabaseEntry NewDbXgemvFastRotComplexSingle = 
+{
+	"Xgemv", tart::dtypes::complex64, {"VW3", "WGS3", "WPT3"},
+	{ // vendors
+		{ // default vendor
+			kDefaultVendorID,
+			{ // devices
+				{ // default device
+					kDeviceNameDefault, kDefaultDeviceID,
+					Params{ 1, 16, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+				}
+			}
+		}
+	}
+};
+
 const DatabaseEntry XgemvFastRotComplexSingle = {
   "XgemvFastRot", tart::dtypes::complex64, {"VW3", "WGS3", "WPT3"}, {
     { // AMD GPUs

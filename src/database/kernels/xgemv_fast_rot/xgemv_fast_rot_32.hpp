@@ -10,6 +10,22 @@
 namespace clblast {
 namespace database {
 
+const NewDatabaseEntry NewDbXgemvFastRotSingle = 
+{
+	"Xgemv", tart::dtypes::float32, {"VW3", "WGS3", "WPT3"},
+	{ // vendors
+		{ // default vendor
+			kDefaultVendorID,
+			{ // devices
+				{ // default device
+					kDeviceNameDefault, kDefaultDeviceID,
+					Params{ 4, 16, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+				}
+			}
+		}
+	}
+};
+
 const DatabaseEntry XgemvFastRotSingle = {
   "XgemvFastRot", tart::dtypes::float32, {"VW3", "WGS3", "WPT3"}, {
     { // AMD GPUs

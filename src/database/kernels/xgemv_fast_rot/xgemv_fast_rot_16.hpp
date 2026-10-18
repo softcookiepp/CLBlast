@@ -9,6 +9,22 @@
 #include "database/kernels/xgemv_fast_rot/xgemv_fast_rot.hpp"
 namespace clblast {
 namespace database {
+	
+const NewDatabaseEntry NewDbXgemvFastRotHalf = 
+{
+	"Xgemv", tart::dtypes::float16, {"VW3", "WGS3", "WPT3"},
+	{ // vendors
+		{ // default vendor
+			kDefaultVendorID,
+			{ // devices
+				{ // default device
+					kDeviceNameDefault, kDefaultDeviceID,
+					Params{ 8, 32, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+				}
+			}
+		}
+	}
+};
 
 const DatabaseEntry XgemvFastRotHalf = {
   "XgemvFastRot", tart::dtypes::float16, {"VW3", "WGS3", "WPT3"}, {

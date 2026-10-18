@@ -10,6 +10,22 @@
 namespace clblast {
 namespace database {
 
+const NewDatabaseEntry NewDbGemmRoutineComplexDouble = 
+{
+	"GemmRoutine", tart::dtypes::complex128, {"XGEMM_MIN_INDIRECT_SIZE"},
+	{ // vendors
+		{ // default vendor
+			kDefaultVendorID,
+			{ // devices
+				{ // default device
+					kDeviceNameDefault, kDefaultDeviceID,
+					Params{ 1024, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+				}
+			}
+		}
+	}
+};
+
 const DatabaseEntry GemmRoutineComplexDouble = {
   "GemmRoutine", tart::dtypes::complex128, {"XGEMM_MIN_INDIRECT_SIZE"}, {
     { // AMD GPUs

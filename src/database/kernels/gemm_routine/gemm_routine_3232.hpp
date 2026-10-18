@@ -9,6 +9,22 @@
 #include "database/kernels/gemm_routine/gemm_routine.hpp"
 namespace clblast {
 namespace database {
+	
+const NewDatabaseEntry NewDbGemmRoutineComplexSingle = 
+{
+	"GemmRoutine", tart::dtypes::complex64, {"XGEMM_MIN_INDIRECT_SIZE"},
+	{ // vendors
+		{ // default vendor
+			kDefaultVendorID,
+			{ // devices
+				{ // default device
+					kDeviceNameDefault, kDefaultDeviceID,
+					Params{ 1088, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+				}
+			}
+		}
+	}
+};
 
 const DatabaseEntry GemmRoutineComplexSingle = {
   "GemmRoutine", tart::dtypes::complex64, {"XGEMM_MIN_INDIRECT_SIZE"}, {

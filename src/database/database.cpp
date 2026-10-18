@@ -107,7 +107,7 @@ Database::Database(const Device& device, const std::string& kernel_name, const P
 			database::NewDbCopySingle,
 			database::NewDbCopyDouble,
 			database::NewDbCopyComplexSingle,
-			database::NewDbCopyComplexDouble
+			database::NewDbCopyComplexDouble,
 		#if 0
 			database::NewDbPadHalf,
 			database::NewDbPadSingle,
@@ -129,11 +129,13 @@ Database::Database(const Device& device, const std::string& kernel_name, const P
 			database::NewDbInvertDouble,
 			database::NewDbInvertComplexSingle,
 			database::NewDbInvertComplexDouble,
+		#endif
 			database::NewDbGemmRoutineHalf,
 			database::NewDbGemmRoutineSingle,
 			database::NewDbGemmRoutineDouble,
 			database::NewDbGemmRoutineComplexSingle,
-			database::NewDbGemmRoutineComplexDouble,
+			database::NewDbGemmRoutineComplexDouble
+		#if 0
 			database::NewDbTrsvRoutineHalf,
 			database::NewDbTrsvRoutineSingle,
 			database::NewDbTrsvRoutineDouble,

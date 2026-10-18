@@ -18,5 +18,12 @@ extern const DatabaseEntry GemmRoutineComplexSingle;
 extern const DatabaseEntry GemmRoutineDouble;
 extern const DatabaseEntry GemmRoutineComplexDouble;
 
+// up
+extern const NewDatabaseEntry NewDbGemmRoutineHalf;
+extern const NewDatabaseEntry NewDbGemmRoutineSingle;
+extern const NewDatabaseEntry NewDbGemmRoutineComplexSingle;
+extern const NewDatabaseEntry NewDbGemmRoutineDouble;
+extern const NewDatabaseEntry NewDbGemmRoutineComplexDouble;
+
 } // namespace database
 } // namespace clblast

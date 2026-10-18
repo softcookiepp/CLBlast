@@ -10,6 +10,22 @@
 namespace clblast {
 namespace database {
 
+const NewDatabaseEntry NewDbXdotComplexDouble = 
+{
+	"Xdot", tart::dtypes::complex128, {"WGS1", "WGS2"},
+	{ // vendors
+		{ // default vendor
+			kDefaultVendorID,
+			{ // devices
+				{ // default device
+					kDeviceNameDefault, kDefaultDeviceID,
+					Params{ 256, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+				}
+			}
+		}
+	}
+};
+
 const DatabaseEntry XdotComplexDouble = {
   "Xdot", tart::dtypes::complex128, {"WGS1", "WGS2"}, {
     { // AMD GPUs

@@ -61,12 +61,12 @@ Database::Database(const Device& device, const std::string& kernel_name, const P
 			database::NewDbXaxpyDouble,
 			database::NewDbXaxpyComplexSingle,
 			database::NewDbXaxpyComplexDouble,
-		#if 0
 			database::NewDbXdotHalf,
 			database::NewDbXdotSingle,
 			database::NewDbXdotDouble,
 			database::NewDbXdotComplexSingle,
 			database::NewDbXdotComplexDouble,
+		#if 0
 			database::NewDbXgemvHalf,
 			database::NewDbXgemvSingle,
 			database::NewDbXgemvDouble,
@@ -378,6 +378,7 @@ database::Parameters Database::SearchVendorAndType(const uint32_t targetVendorID
 		const std::vector<database::NewDatabaseVendor>& vendors,
 		const std::vector<std::string>& parameter_names) const
 {
+	database::Parameters params;
 	for (auto& vendor : vendors)
 	{
 		if (vendor.vendorID == targetVendorID || vendor.vendorID == database::kDefaultVendorID)
@@ -385,7 +386,8 @@ database::Parameters Database::SearchVendorAndType(const uint32_t targetVendorID
 			log_debug(std::string("Found architectures of vendor "));
 
 			// Searches the architecture; if unavailable returns the vendor's default parameters
-			return SearchDevice(targetDeviceID, vendor.devices, parameter_names);
+			params = SearchDevice(targetDeviceID, vendor.devices, parameter_names);
+			if (params.size() > 0) return params;
 		}
 	}
 	return database::Parameters();

@@ -9,6 +9,22 @@
 #include "database/kernels/xdot/xdot.hpp"
 namespace clblast {
 namespace database {
+	
+const NewDatabaseEntry NewDbXdotSingle = 
+{
+	"Xdot", tart::dtypes::float32, {"WGS1", "WGS2"},
+	{ // vendors
+		{ // default vendor
+			kDefaultVendorID,
+			{ // devices
+				{ // default device
+					kDeviceNameDefault, kDefaultDeviceID,
+					Params{ 256, 128, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+				}
+			}
+		}
+	}
+};
 
 const DatabaseEntry XdotSingle = {
   "Xdot", tart::dtypes::float32, {"WGS1", "WGS2"}, {

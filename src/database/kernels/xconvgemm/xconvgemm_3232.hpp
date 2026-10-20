@@ -10,6 +10,22 @@
 namespace clblast {
 namespace database {
 
+const NewDatabaseEntry NewDbXconvgemmComplexSingle = 
+{
+	"Xconvgemm", tart::dtypes::complex64, {"KWID", "MDIMAD", "MDIMCD", "NDIMBD", "NDIMCD", "PADA", "PADB", "VWMD", "VWND", "WGD"},
+	{ // vendors
+		{ // default vendor
+			kDefaultVendorID,
+			{ // devices
+				{ // default device
+					kDeviceNameDefault, kDefaultDeviceID,
+					Params{ 1, 8, 16, 8, 8, 0, 0, 1, 1, 16, 0, 0, 0, 0, 0, 0 }
+				}
+			}
+		}
+	}
+};
+
 const DatabaseEntry XconvgemmComplexSingle = {
   "Xconvgemm", tart::dtypes::complex64, {"KWID", "MDIMAD", "MDIMCD", "NDIMBD", "NDIMCD", "PADA", "PADB", "VWMD", "VWND", "WGD"}, {
     { // Default

@@ -10,6 +10,22 @@
 namespace clblast {
 namespace database {
 
+const NewDatabaseEntry NewDbXconvgemmDouble = 
+{
+	"Xconvgemm", tart::dtypes::float64, {"KWID", "MDIMAD", "MDIMCD", "NDIMBD", "NDIMCD", "PADA", "PADB", "VWMD", "VWND", "WGD"},
+	{ // vendors
+		{ // default vendor
+			kDefaultVendorID,
+			{ // devices
+				{ // default device
+					kDeviceNameDefault, kDefaultDeviceID,
+					Params{ 1, 16, 16, 32, 8, 0, 0, 2, 1, 32, 0, 0, 0, 0, 0, 0 }
+				}
+			}
+		}
+	}
+};
+
 const DatabaseEntry XconvgemmDouble = {
   "Xconvgemm", tart::dtypes::float64, {"KWID", "MDIMAD", "MDIMCD", "NDIMBD", "NDIMCD", "PADA", "PADB", "VWMD", "VWND", "WGD"}, {
     { // AMD GPUs

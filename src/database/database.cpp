@@ -96,13 +96,11 @@ Database::Database(const Device& device, const std::string& kernel_name, const P
 			database::NewDbXgemmDirectDouble,
 			database::NewDbXgemmDirectComplexSingle,
 			database::NewDbXgemmDirectComplexDouble,
-		#if 0
 			database::NewDbXconvgemmHalf,
 			database::NewDbXconvgemmSingle,
 			database::NewDbXconvgemmDouble,
 			database::NewDbXconvgemmComplexSingle,
 			database::NewDbXconvgemmComplexDouble,
-		#endif
 			database::NewDbCopyHalf,
 			database::NewDbCopySingle,
 			database::NewDbCopyDouble,

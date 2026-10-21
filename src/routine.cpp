@@ -74,7 +74,7 @@ Routine::Routine(Queue& queue, EventPointer event, const std::string& name,
 			mEntryPointNames(entryPointNames),
 			mDevice(queue())
 {
-	InitDatabase(device_, kernel_names, precision, userDatabase, db_);
+	InitDatabase(device_, kernel_names, precisionToDataType(precision), userDatabase, db_);
 	InitProgram(source);
 }
 
@@ -88,7 +88,7 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 
 	// Queries the cache to see whether or not the program (context-specific) is already there
 	bool has_program;
-	program_ = ProgramCache::Instance().Get(ProgramKeyRef{device_(), precision_, routine_info}, &has_program);
+	program_ = ProgramCache::Instance().Get(ProgramKeyRef{device_(), precisionToDataType(precision_), routine_info}, &has_program);
 	if (has_program)
 	{
 		return;
@@ -148,12 +148,12 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 
 	program_ = CompileFromSource(dummy, precision_, routine_name_, device_, options, 0, false, kernelSources);
 	
-	ProgramCache::Instance().Store(ProgramKey{device_(), precision_, routine_info},
+	ProgramCache::Instance().Store(ProgramKey{device_(), precisionToDataType(precision_), routine_info},
 																 std::shared_ptr<Program>{program_});
 }
 
 void Routine::InitDatabase(const Device& device, const std::vector<std::string>& kernel_names,
-	const Precision precision, const std::vector<database::NewDatabaseEntry>& userDatabase, Databases& db)
+	const tart::DType& precision, const std::vector<database::NewDatabaseEntry>& userDatabase, Databases& db)
 {
 	const auto platform_id = 0;
 	for (const auto& kernel_name : kernel_names)

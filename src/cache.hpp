@@ -60,8 +60,8 @@ class Cache {
 
 // The key struct for the cache of compiled OpenCL programs (context-dependent)
 // Order of fields: context, device_id, precision, routine_name (smaller fields first)
-typedef std::tuple<RawDeviceID, Precision, std::string> ProgramKey;
-typedef std::tuple<const RawDeviceID&, const Precision&, const std::string&> ProgramKeyRef;
+typedef std::tuple<RawDeviceID, tart::DType, std::string> ProgramKey;
+typedef std::tuple<const RawDeviceID&, const tart::DType&, const std::string&> ProgramKeyRef;
 
 typedef Cache<ProgramKey, std::shared_ptr<Program>> ProgramCache;
 
@@ -74,8 +74,8 @@ class Database;
 
 // The key struct for the cache of database maps.
 // Order of fields: platform_id, device_id, precision, kernel_name (smaller fields first)
-typedef std::tuple<tart::DeviceUUID, Precision, std::string> DatabaseKey;
-typedef std::tuple<const tart::DeviceUUID&, const Precision&, const std::string&> DatabaseKeyRef;
+typedef std::tuple<tart::DeviceUUID, tart::DType, std::string> DatabaseKey;
+typedef std::tuple<const tart::DeviceUUID&, const tart::DType&, const std::string&> DatabaseKeyRef;
 
 typedef Cache<DatabaseKey, Database> DatabaseCache;
 

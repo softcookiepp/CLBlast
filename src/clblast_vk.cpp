@@ -1735,7 +1735,7 @@ StatusCode GemmTempBufferSize(const Layout layout, const Transpose a_transpose, 
 		const auto device = queue_cpp.GetDevice();
 		const auto kernel_names = std::vector<std::string>{"Xgemm", "GemmRoutine"};
 		Databases db(kernel_names);
-		Routine::InitDatabase(device, kernel_names, PrecisionValue<T>(), {}, db);
+		Routine::InitDatabase(device, kernel_names, tart::getDType<T>(), {}, db);
 
 		// Computes the buffer size
 		if (Xgemm<T>::UseDirectKernel(m, n, k, db["XGEMM_MIN_INDIRECT_SIZE"])) {

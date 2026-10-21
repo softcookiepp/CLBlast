@@ -39,7 +39,7 @@ class Database {
 	Database() = default;
 
 	// The constructor with a user-provided database overlay (potentially an empty vector)
-	explicit Database(const tart::device_ptr& device, const std::string& kernel_name, const Precision precision,
+	explicit Database(const tart::device_ptr& device, const std::string& kernel_name, const tart::DType& dt,
 										const std::vector<database::NewDatabaseEntry>& overlay);
 
 	// Accessor of values by key

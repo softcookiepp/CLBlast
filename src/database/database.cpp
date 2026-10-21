@@ -49,7 +49,7 @@ const std::string Database::kDeviceVendorAll = "default";
 
 // Constructor, computing device properties and populating the parameter-vector from the database.
 // This takes an optional overlay database in case of custom tuning or custom kernels.
-Database::Database(const tart::device_ptr& device, const std::string& kernel_name, const Precision precision,
+Database::Database(const tart::device_ptr& device, const std::string& kernel_name, const tart::DType& dt,
 		 const std::vector<database::NewDatabaseEntry>& overlay)
 	: parameters_(std::make_shared<database::Parameters>())
 {
@@ -142,7 +142,6 @@ Database::Database(const tart::device_ptr& device, const std::string& kernel_nam
 	
 	// search through new database implementation if possible
 	auto search_result = database::Parameters();
-	tart::DType dt = precisionToDataType(precision);
 	
 	uint32_t vendorID = device->getMetadata().physicalDeviceProperties.vendorID;
 	uint32_t deviceID = device->getMetadata().physicalDeviceProperties.deviceID;

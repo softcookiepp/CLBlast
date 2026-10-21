@@ -32,8 +32,7 @@ class Routine {
  public:
 	// Initializes db_, fetching cached database or building one
 	static void InitDatabase(const Device& device, const std::vector<std::string>& kernel_names,
-													 const Precision precision, const std::vector<database::NewDatabaseEntry>& userDatabase,
-													 Databases& db);
+		const tart::DType& precision, const std::vector<database::NewDatabaseEntry>& userDatabase, Databases& db);
 
 	// Base class constructor. The user database is an optional extra database to override the
 	// built-in database.

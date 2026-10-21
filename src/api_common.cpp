@@ -146,10 +146,10 @@ StatusCode RetrieveParameters(const RawDeviceID device, const std::string& kerne
 		// Retrieves the database values
 		auto in_cache = false;
 		auto database =
-				DatabaseCache::Instance().Get(DatabaseKeyRef{device->getMetadata().deviceUUID, precision, kernel_name}, &in_cache);
+				DatabaseCache::Instance().Get(DatabaseKeyRef{device->getMetadata().deviceUUID, precisionToDataType(precision), kernel_name}, &in_cache);
 		if (!in_cache) {
 			log_debug("Searching database for kernel '" + kernel_name + "'");
-			database = Database(device_cpp(), kernel_name, precision, {});
+			database = Database(device_cpp(), kernel_name, precisionToDataType(precision), {});
 		}
 
 		// Retrieves the parameters

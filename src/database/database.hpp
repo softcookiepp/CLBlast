@@ -33,14 +33,14 @@ class Database {
 	static const std::string kDeviceVendorAll;
 
 	// The database consists of separate database entries, stored together in a vector
-	static std::vector<database::DatabaseEntry> database;
+
 	static std::vector<database::NewDatabaseEntry> newDatabase;
 
 	Database() = default;
 
 	// The constructor with a user-provided database overlay (potentially an empty vector)
-	explicit Database(const Device& device, const std::string& kernel_name, const Precision precision,
-										const std::vector<database::DatabaseEntry>& overlay);
+	explicit Database(const tart::device_ptr& device, const std::string& kernel_name, const Precision precision,
+										const std::vector<database::NewDatabaseEntry>& overlay);
 
 	// Accessor of values by key
 	size_t operator[](const std::string& key) const { return parameters_->find(key)->second; }
@@ -56,36 +56,16 @@ class Database {
 
  private:
 	// Search method functions, returning a set of parameters (possibly empty)
-	database::Parameters Search(const std::string& this_kernel, const std::string& this_vendor,
-															const std::string& this_type, const std::string& this_device,
-															const std::string& this_architecture, const Precision this_precision,
-															const std::vector<database::DatabaseEntry>& db) const;
-	
 	database::Parameters Search(const std::string& this_kernel, const uint32_t vendorID,
 		const uint32_t deviceID,
 		const tart::DType& dtype,
 		const std::vector<database::NewDatabaseEntry>& db) const;
 	
 	database::Parameters SearchDevice(
-		const std::string& target_device,
-		const std::vector<database::DatabaseDevice>& devices,
-		const std::vector<std::string>& parameter_names) const;
-	
-	database::Parameters SearchDevice(
 		const uint32_t targetDeviceID,
 		const std::vector<database::NewDatabaseDevice>& devices,
 		const std::vector<std::string>& parameter_names) const;
 		
-	database::Parameters SearchArchitecture(
-		const std::string& target_architecture, const std::string& this_device,
-		const std::vector<database::DatabaseArchitecture>& architectures,
-		const std::vector<std::string>& parameter_names) const;
-	database::Parameters SearchVendorAndType(
-		const std::string& target_vendor, const std::string& target_type,
-		const std::string& this_device, const std::string& this_architecture,
-		const std::vector<database::DatabaseVendor>& vendors,
-		const std::vector<std::string>& parameter_names) const;
-	// new
 	database::Parameters SearchVendorAndType(
 		const uint32_t targetVendorID, const uint32_t deviceID,
 		const std::vector<database::NewDatabaseVendor>& vendors,

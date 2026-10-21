@@ -32,7 +32,7 @@ class Routine {
  public:
 	// Initializes db_, fetching cached database or building one
 	static void InitDatabase(const Device& device, const std::vector<std::string>& kernel_names,
-													 const Precision precision, const std::vector<database::DatabaseEntry>& userDatabase,
+													 const Precision precision, const std::vector<database::NewDatabaseEntry>& userDatabase,
 													 Databases& db);
 
 	// Base class constructor. The user database is an optional extra database to override the
@@ -41,11 +41,8 @@ class Routine {
 	// NOTE: the caller must provide the same userDatabase for each combination of device, precision
 	// and routine list, otherwise the caching logic will break.
 	explicit Routine(Queue& queue, EventPointer event, const std::string& name, const std::vector<std::string>& routines,
-									 const Precision precision, const std::vector<database::DatabaseEntry>& userDatabase,
-									 std::initializer_list<const char*> source
-#if VULKAN_API
-					, std::vector<std::string> entryPointNames = {}
-#endif
+									 const Precision precision, const std::vector<database::NewDatabaseEntry>& userDatabase,
+									 std::initializer_list<const char*> source, std::vector<std::string> entryPointNames = {}
 									 );
 
 	// List of kernel-routine look-ups

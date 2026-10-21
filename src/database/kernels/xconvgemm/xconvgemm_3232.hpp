@@ -26,17 +26,5 @@ const NewDatabaseEntry NewDbXconvgemmComplexSingle =
 	}
 };
 
-const DatabaseEntry XconvgemmComplexSingle = {
-  "Xconvgemm", tart::dtypes::complex64, {"KWID", "MDIMAD", "MDIMCD", "NDIMBD", "NDIMCD", "PADA", "PADB", "VWMD", "VWND", "WGD"}, {
-    { // Default
-      kDeviceTypeAll, "default", {
-        { "default", {
-          { kDeviceNameDefault                                        , Params{ 1, 8, 16, 8, 8, 0, 0, 1, 1, 16, 0, 0, 0, 0, 0, 0 } },
-        } },
-      }
-    },
-  }
-};
-
 } // namespace database
 } // namespace clblast

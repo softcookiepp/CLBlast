@@ -12,13 +12,6 @@
 namespace clblast {
 namespace database {
 
-extern const DatabaseEntry XaxpyHalf;
-extern const DatabaseEntry XaxpySingle;
-extern const DatabaseEntry XaxpyComplexSingle;
-extern const DatabaseEntry XaxpyDouble;
-extern const DatabaseEntry XaxpyComplexDouble;
-
-// new implementation
 extern const NewDatabaseEntry NewDbXaxpyHalf;
 extern const NewDatabaseEntry NewDbXaxpySingle;
 extern const NewDatabaseEntry NewDbXaxpyComplexSingle;

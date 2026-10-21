@@ -63,11 +63,7 @@ const std::unordered_map<std::string, const std::vector<std::string>> Routine::r
 // The constructor does all heavy work, errors are returned as exceptions
 Routine::Routine(Queue& queue, EventPointer event, const std::string& name,
 	const std::vector<std::string>& kernel_names, const Precision precision,
-	const std::vector<database::DatabaseEntry>& userDatabase, std::initializer_list<const char*> source
-#if VULKAN_API
-	, std::vector<std::string> entryPointNames
-#endif
-	)
+	const std::vector<database::NewDatabaseEntry>& userDatabase, std::initializer_list<const char*> source, std::vector<std::string> entryPointNames)
 		: precision_(precision),
 			routine_name_(name),
 			kernel_names_(kernel_names),
@@ -157,7 +153,7 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 }
 
 void Routine::InitDatabase(const Device& device, const std::vector<std::string>& kernel_names,
-	const Precision precision, const std::vector<database::DatabaseEntry>& userDatabase, Databases& db)
+	const Precision precision, const std::vector<database::NewDatabaseEntry>& userDatabase, Databases& db)
 {
 	const auto platform_id = 0;
 	for (const auto& kernel_name : kernel_names)
@@ -169,18 +165,16 @@ void Routine::InitDatabase(const Device& device, const std::vector<std::string>&
 		if (has_db) {
 			continue;
 		}
-#if 1
 		DatabaseKey thisKey = {device()->getMetadata().deviceUUID, precision, kernel_name};
 		
 		if (sCreatedDatabase && thisKey == sFirstDatabaseKey)
 			throw std::runtime_error("Should have created the database by now, but it was not found!");
 		sCreatedDatabase = true;
 		sFirstDatabaseKey = thisKey;
-#endif
 
 		// Builds the parameter database for this device and routine set and stores it in the cache
 		log_debug("Searching database for kernel '" + kernel_name + "'");
-		db(kernel_name) = Database(device, kernel_name, precision, userDatabase);
+		db(kernel_name) = Database(device(), kernel_name, precision, userDatabase);
 		DatabaseCache::Instance().Store(DatabaseKey{device()->getMetadata().deviceUUID, precision, kernel_name},
 																		Database{db(kernel_name)});
 	}

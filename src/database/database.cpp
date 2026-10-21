@@ -39,7 +39,7 @@
 namespace clblast {
 // =================================================================================================
 
-std::vector<database::DatabaseEntry> Database::database = std::vector<database::DatabaseEntry>{};
+
 std::vector<database::NewDatabaseEntry> Database::newDatabase = {};
 
 // The default values
@@ -49,10 +49,11 @@ const std::string Database::kDeviceVendorAll = "default";
 
 // Constructor, computing device properties and populating the parameter-vector from the database.
 // This takes an optional overlay database in case of custom tuning or custom kernels.
-Database::Database(const Device& device, const std::string& kernel_name, const Precision precision,
-									 const std::vector<database::DatabaseEntry>& overlay)
+Database::Database(const tart::device_ptr& device, const std::string& kernel_name, const Precision precision,
+		 const std::vector<database::NewDatabaseEntry>& overlay)
 	: parameters_(std::make_shared<database::Parameters>())
 {
+	// Initializes the static variable on first use. At this point we are sure all global variables are initialized
 	if (newDatabase.size() == 0)
 	{
 		newDatabase = std::vector<database::NewDatabaseEntry>{
@@ -139,108 +140,12 @@ Database::Database(const Device& device, const std::string& kernel_name, const P
 		};
 	}
 	
-	// Initializes the static variable on first use. At this point we are sure all global variables are initialized
-	if (database.size() == 0)
-	{
-		database = std::vector<database::DatabaseEntry>{
-			database::XaxpyHalf,
-			database::XaxpySingle,
-			database::XaxpyDouble,
-			database::XaxpyComplexSingle,
-			database::XaxpyComplexDouble,
-			database::XdotHalf,
-			database::XdotSingle,
-			database::XdotDouble,
-			database::XdotComplexSingle,
-			database::XdotComplexDouble,
-			database::XgemvHalf,
-			database::XgemvSingle,
-			database::XgemvDouble,
-			database::XgemvComplexSingle,
-			database::XgemvComplexDouble,
-			database::XgemvFastHalf,
-			database::XgemvFastSingle,
-			database::XgemvFastDouble,
-			database::XgemvFastComplexSingle,
-			database::XgemvFastComplexDouble,
-			database::XgemvFastRotHalf,
-			database::XgemvFastRotSingle,
-			database::XgemvFastRotDouble,
-			database::XgemvFastRotComplexSingle,
-			database::XgemvFastRotComplexDouble,
-			database::XgerHalf,
-			database::XgerSingle,
-			database::XgerDouble,
-			database::XgerComplexSingle,
-			database::XgerComplexDouble,
-			database::XgemmHalf,
-			database::XgemmSingle,
-			database::XgemmDouble,
-			database::XgemmComplexSingle,
-			database::XgemmComplexDouble,
-			database::XgemmDirectHalf,
-			database::XgemmDirectSingle,
-			database::XgemmDirectDouble,
-			database::XgemmDirectComplexSingle,
-			database::XgemmDirectComplexDouble,
-			database::XconvgemmHalf,
-			database::XconvgemmSingle,
-			database::XconvgemmDouble,
-			database::XconvgemmComplexSingle,
-			database::XconvgemmComplexDouble,
-			database::CopyHalf,
-			database::CopySingle,
-			database::CopyDouble,
-			database::CopyComplexSingle,
-			database::CopyComplexDouble,
-			database::PadHalf,
-			database::PadSingle,
-			database::PadDouble,
-			database::PadComplexSingle,
-			database::PadComplexDouble,
-			database::TransposeHalf,
-			database::TransposeSingle,
-			database::TransposeDouble,
-			database::TransposeComplexSingle,
-			database::TransposeComplexDouble,
-			database::PadtransposeHalf,
-			database::PadtransposeSingle,
-			database::PadtransposeDouble,
-			database::PadtransposeComplexSingle,
-			database::PadtransposeComplexDouble,
-			database::InvertHalf,
-			database::InvertSingle,
-			database::InvertDouble,
-			database::InvertComplexSingle,
-			database::InvertComplexDouble,
-			database::GemmRoutineHalf,
-			database::GemmRoutineSingle,
-			database::GemmRoutineDouble,
-			database::GemmRoutineComplexSingle,
-			database::GemmRoutineComplexDouble,
-			database::TrsvRoutineHalf,
-			database::TrsvRoutineSingle,
-			database::TrsvRoutineDouble,
-			database::TrsvRoutineComplexSingle,
-			database::TrsvRoutineComplexDouble};
-	}
-
-	// Finds device information
-	const auto device_type = GetDeviceType(device);
-	const auto device_vendor = GetDeviceVendor(device);
-	const auto device_architecture = GetDeviceArchitecture(device);
-	const auto device_name = GetDeviceName(device);
-
-	// Prints the obtained information in verbose mode
-	log_debug("Device type '" + device_type + "'; vendor '" + device_vendor + "'");
-	log_debug("Device name '" + device_name + "'; architecture '" + device_architecture + "'");
-	
 	// search through new database implementation if possible
 	auto search_result = database::Parameters();
 	tart::DType dt = precisionToDataType(precision);
 	
-	uint32_t vendorID = database::kDefaultVendorID;
-	uint32_t deviceID = database::kDefaultDeviceID;
+	uint32_t vendorID = device->getMetadata().physicalDeviceProperties.vendorID;
+	uint32_t deviceID = device->getMetadata().physicalDeviceProperties.deviceID;
 	search_result = Search(kernel_name, vendorID, deviceID, dt, {newDatabase});
 	if (search_result.size() != 0)
 	{
@@ -249,18 +154,6 @@ Database::Database(const Device& device, const std::string& kernel_name, const P
 	}
 	
 	// then fall back to the old database. for now.
-	
-	// Sets the databases to search through
-	auto databases = std::list<std::vector<database::DatabaseEntry>>{overlay, database};
-
-	// Searches potentially multiple databases
-	for (auto& db : databases) {
-		search_result = Search(kernel_name, device_vendor, device_type, device_name, device_architecture, precision, db);
-		if (search_result.size() != 0) {
-			parameters_->insert(search_result.begin(), search_result.end());
-			break;
-		}
-	}
 
 	if (search_result.size() == 0) {
 		throw RuntimeErrorCode(StatusCode::kDatabaseError);
@@ -299,32 +192,6 @@ std::vector<std::string> Database::GetParameterNames() const {
 // =================================================================================================
 
 // Searches a particular database for the right kernel and precision
-database::Parameters Database::Search(const std::string& this_kernel, const std::string& this_vendor,
-	const std::string& this_type, const std::string& this_device,
-	const std::string& this_architecture, const Precision this_precision,
-	const std::vector<database::DatabaseEntry>& this_database) const
-{
-	// Selects the right kernel
-	tart::DType dt = precisionToDataType(this_precision);
-	for (auto& db : this_database)
-	{
-		if (db.kernel == this_kernel && db.precision == dt)
-		{
-			// Searches for the right vendor and device type, or selects the default if unavailable
-			auto parameters =
-					SearchVendorAndType(this_vendor, this_type, this_device, this_architecture, db.vendors, db.parameter_names);
-			if (parameters.size() != 0) {
-				return parameters;
-			}
-			return SearchVendorAndType(kDeviceVendorAll, database::kDeviceTypeAll, this_device, this_architecture, db.vendors,
-																 db.parameter_names);
-		}
-	}
-
-	// If we reached this point, the entry was not found in this database
-	return database::Parameters();
-}
-
 database::Parameters Database::Search(
 	const std::string& this_kernel, const uint32_t vendorID,
 	const uint32_t deviceID, const tart::DType& dtype,
@@ -339,31 +206,9 @@ database::Parameters Database::Search(
 			return SearchVendorAndType(vendorID, deviceID, db.vendors, db.parameter_names);
 		}
 	}
+	throw std::runtime_error("meep!");
 
 	// If we reached this point, the entry was not found in this database
-	return database::Parameters();
-}
-
-database::Parameters Database::SearchVendorAndType(const std::string& target_vendor, const std::string& target_type,
-																									 const std::string& this_device, const std::string& this_architecture,
-																									 const std::vector<database::DatabaseVendor>& vendors,
-																									 const std::vector<std::string>& parameter_names) const {
-	for (auto& vendor : vendors) {
-		if ((vendor.name == target_vendor) && (vendor.type == target_type)) {
-			log_debug(std::string("Found architectures of vendor '")
-										.append(target_vendor)
-										.append("' and type '")
-										.append(target_type)
-										.append("'"));
-
-			// Searches the architecture; if unavailable returns the vendor's default parameters
-			auto parameters = SearchArchitecture(this_architecture, this_device, vendor.architectures, parameter_names);
-			if (parameters.size() != 0) {
-				return parameters;
-			}
-			return SearchArchitecture("default", this_device, vendor.architectures, parameter_names);
-		}
-	}
 	return database::Parameters();
 }
 
@@ -384,50 +229,7 @@ database::Parameters Database::SearchVendorAndType(const uint32_t targetVendorID
 			if (params.size() > 0) return params;
 		}
 	}
-	return database::Parameters();
-}
-
-database::Parameters Database::SearchArchitecture(const std::string& target_architecture,
-																									const std::string& this_device,
-																									const std::vector<database::DatabaseArchitecture>& architectures,
-																									const std::vector<std::string>& parameter_names) const {
-	for (auto& architecture : architectures) {
-		if (architecture.name == target_architecture) {
-			log_debug("Found devices of architecture type '" + target_architecture + "'");
-
-			// Searches the device; if unavailable returns the architecture's default parameters
-			auto parameters = SearchDevice(this_device, architecture.devices, parameter_names);
-			if (parameters.size() != 0) {
-				return parameters;
-			}
-			return SearchDevice("default", architecture.devices, parameter_names);
-		}
-	}
-	return database::Parameters();
-}
-
-database::Parameters Database::SearchDevice(const std::string& target_device,
-		const std::vector<database::DatabaseDevice>& devices,
-		const std::vector<std::string>& parameter_names) const
-{
-	for (auto& device : devices) {
-		const auto device_name = CharArrayToString(device.name);
-		// Cuts off 'target_device' string at 50 since the database cuts off as well
-		const auto target_device_cut_off = (target_device.length() > 50) ? target_device.substr(0, 50) : target_device;
-		if (device_name == target_device_cut_off) {
-			log_debug("Found parameters for device type '" + target_device_cut_off + "'");
-
-			// Sets the parameters accordingly
-			auto parameters = database::Parameters();
-			if (parameter_names.size() > device.parameters.size()) {
-				return database::Parameters();
-			}	// ERROR
-			for (auto i = size_t{0}; i < parameter_names.size(); ++i) {
-				parameters[parameter_names[i]] = static_cast<size_t>(device.parameters[i]);
-			}
-			return parameters;
-		}
-	}
+	throw std::runtime_error("meep!");
 	return database::Parameters();
 }
 
@@ -457,6 +259,7 @@ database::Parameters Database::SearchDevice(
 			return parameters;
 		}
 	}
+	throw std::runtime_error("meep!");
 	return database::Parameters();
 }
 

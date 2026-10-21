@@ -26,17 +26,5 @@ const NewDatabaseEntry NewDbTrsvRoutineHalf =
 	}
 };
 
-const DatabaseEntry TrsvRoutineHalf = {
-  "TrsvRoutine", tart::dtypes::float16, {"TRSV_BLOCK_SIZE"}, {
-    { // Default
-      kDeviceTypeAll, "default", {
-        { "default", {
-          { kDeviceNameDefault                                        , Params{ 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } },
-        } },
-      }
-    },
-  }
-};
-
 } // namespace database
 } // namespace clblast

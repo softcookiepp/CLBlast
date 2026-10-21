@@ -38,39 +38,8 @@ using Params = std::array<size_t, 16>;	// parameters as stored in database
 // Type alias after extracting from the database (sorted map for improved code readability)
 using Parameters = std::map<std::string, size_t>;	// parameters after reading from DB
 
-// The OpenCL device types
-const std::string kDeviceTypeCPU = "CPU";
-const std::string kDeviceTypeGPU = "GPU";
-const std::string kDeviceTypeAccelerator = "accelerator";
-const std::string kDeviceTypeAll = "default";
+// default name
 const Name kDeviceNameDefault = {"default"};
-
-struct DatabaseDevice
-{
-	Name name;
-	Params parameters;	// parameter values
-};
-
-struct DatabaseArchitecture
-{
-	std::string name;
-	std::vector<DatabaseDevice> devices;
-};
-
-struct DatabaseVendor
-{
-	std::string type;
-	std::string name;
-	std::vector<DatabaseArchitecture> architectures;
-};
-
-struct DatabaseEntry
-{
-	std::string kernel;
-	tart::DType precision;
-	std::vector<std::string> parameter_names;
-	std::vector<DatabaseVendor> vendors;
-};
 
 // Vulkan has no way of determining architecture that I am aware of.
 // There are also efficiencies to be gained by not using any strings for searching through nested arrays

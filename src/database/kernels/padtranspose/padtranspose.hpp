@@ -12,12 +12,6 @@
 namespace clblast {
 namespace database {
 
-extern const DatabaseEntry PadtransposeHalf;
-extern const DatabaseEntry PadtransposeSingle;
-extern const DatabaseEntry PadtransposeComplexSingle;
-extern const DatabaseEntry PadtransposeDouble;
-extern const DatabaseEntry PadtransposeComplexDouble;
-
 extern const NewDatabaseEntry NewDbPadtransposeHalf;
 extern const NewDatabaseEntry NewDbPadtransposeSingle;
 extern const NewDatabaseEntry NewDbPadtransposeComplexSingle;

@@ -12,13 +12,6 @@
 namespace clblast {
 namespace database {
 
-extern const DatabaseEntry CopyHalf;
-extern const DatabaseEntry CopySingle;
-extern const DatabaseEntry CopyComplexSingle;
-extern const DatabaseEntry CopyDouble;
-extern const DatabaseEntry CopyComplexDouble;
-
-// new implementation
 extern const NewDatabaseEntry NewDbCopyHalf;
 extern const NewDatabaseEntry NewDbCopySingle;
 extern const NewDatabaseEntry NewDbCopyComplexSingle;

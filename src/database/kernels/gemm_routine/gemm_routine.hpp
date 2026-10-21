@@ -11,14 +11,7 @@
 
 namespace clblast {
 namespace database {
-
-extern const DatabaseEntry GemmRoutineHalf;
-extern const DatabaseEntry GemmRoutineSingle;
-extern const DatabaseEntry GemmRoutineComplexSingle;
-extern const DatabaseEntry GemmRoutineDouble;
-extern const DatabaseEntry GemmRoutineComplexDouble;
-
-// up
+	
 extern const NewDatabaseEntry NewDbGemmRoutineHalf;
 extern const NewDatabaseEntry NewDbGemmRoutineSingle;
 extern const NewDatabaseEntry NewDbGemmRoutineComplexSingle;

@@ -12,12 +12,6 @@
 namespace clblast {
 namespace database {
 
-extern const DatabaseEntry XgemmHalf;
-extern const DatabaseEntry XgemmSingle;
-extern const DatabaseEntry XgemmComplexSingle;
-extern const DatabaseEntry XgemmDouble;
-extern const DatabaseEntry XgemmComplexDouble;
-
 extern const NewDatabaseEntry NewDbXgemmHalf;
 extern const NewDatabaseEntry NewDbXgemmSingle;
 extern const NewDatabaseEntry NewDbXgemmComplexSingle;

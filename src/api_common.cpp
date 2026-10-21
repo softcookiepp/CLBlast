@@ -149,7 +149,7 @@ StatusCode RetrieveParameters(const RawDeviceID device, const std::string& kerne
 				DatabaseCache::Instance().Get(DatabaseKeyRef{device->getMetadata().deviceUUID, precision, kernel_name}, &in_cache);
 		if (!in_cache) {
 			log_debug("Searching database for kernel '" + kernel_name + "'");
-			database = Database(device_cpp, kernel_name, precision, {});
+			database = Database(device_cpp(), kernel_name, precision, {});
 		}
 
 		// Retrieves the parameters
@@ -165,56 +165,61 @@ StatusCode RetrieveParameters(const RawDeviceID device, const std::string& kerne
 
 // Overrides the tuning parameters for this device-precision-kernel combination
 StatusCode OverrideParameters(const RawDeviceID device, const std::string& kernel_name, const Precision precision,
-															const std::unordered_map<std::string, size_t>& parameters) {
-	try {
-		// Retrieves the device name
-		const auto device_cpp = Device(device);
-		const auto platform_id = 0;
-		const auto device_name = GetDeviceName(device_cpp);
+															const std::unordered_map<std::string, size_t>& parameters)
+{
+	#if 1
+		throw std::runtime_error("needs reimplementation");
+	#else
+		try {
+			// Retrieves the device name
+			const auto device_cpp = Device(device);
+			const auto platform_id = 0;
+			const auto device_name = GetDeviceName(device_cpp);
 
-		// Retrieves the current database values to verify whether the new ones are complete
-		auto in_cache = false;
-		auto current_database =
-				DatabaseCache::Instance().Get(DatabaseKeyRef{device->getMetadata().deviceUUID, precision, kernel_name}, &in_cache);
-		if (!in_cache) {
-			log_debug("Searching database for kernel '" + kernel_name + "'");
-			current_database = Database(device_cpp, kernel_name, precision, {});
-		}
+			// Retrieves the current database values to verify whether the new ones are complete
+			auto in_cache = false;
+			auto current_database =
+					DatabaseCache::Instance().Get(DatabaseKeyRef{device->getMetadata().deviceUUID, precision, kernel_name}, &in_cache);
+			if (!in_cache) {
+				log_debug("Searching database for kernel '" + kernel_name + "'");
+				current_database = Database(device_cpp, kernel_name, precision, {});
+			}
 
-		// Verifies the parameters size
-		const auto current_parameter_names = current_database.GetParameterNames();
-		if (current_parameter_names.size() > parameters.size()) {
-			return StatusCode::kMissingOverrideParameter;
-		}
-
-		// Retrieves the names and values separately and in the same order as the existing database
-		auto parameter_values = database::Params{0};
-		auto i = size_t{0};
-		for (const auto& current_param : current_parameter_names) {
-			if (parameters.find(current_param) == parameters.end()) {
+			// Verifies the parameters size
+			const auto current_parameter_names = current_database.GetParameterNames();
+			if (current_parameter_names.size() > parameters.size()) {
 				return StatusCode::kMissingOverrideParameter;
 			}
-			const auto parameter_value = parameters.at(current_param);
-			parameter_values[i] = parameter_value;
-			++i;
+
+			// Retrieves the names and values separately and in the same order as the existing database
+			auto parameter_values = database::Params{0};
+			auto i = size_t{0};
+			for (const auto& current_param : current_parameter_names) {
+				if (parameters.find(current_param) == parameters.end()) {
+					return StatusCode::kMissingOverrideParameter;
+				}
+				const auto parameter_value = parameters.at(current_param);
+				parameter_values[i] = parameter_value;
+				++i;
+			}
+
+			// Creates a small custom database based on the provided parameters
+			const auto database_device = database::DatabaseDevice{database::kDeviceNameDefault, parameter_values};
+			const auto database_architecture = database::DatabaseArchitecture{"default", {database_device}};
+			const auto database_vendor = database::DatabaseVendor{database::kDeviceTypeAll, "default", {database_architecture}};
+			const auto database_entry =
+					database::DatabaseEntry{kernel_name, precisionToDataType(precision), current_parameter_names, {database_vendor}};
+			const auto database_entries = std::vector<database::DatabaseEntry>{database_entry};
+			const auto database = Database(device_cpp, kernel_name, precision, database_entries);
+
+			// Removes the old database entry and stores the new one in the cache
+			DatabaseCache::Instance().Remove(DatabaseKey{device->getMetadata().deviceUUID, precision, kernel_name});
+			DatabaseCache::Instance().Store(DatabaseKey{device->getMetadata().deviceUUID, precision, kernel_name}, Database(database));
+
+		} catch (...) {
+			return DispatchException();
 		}
-
-		// Creates a small custom database based on the provided parameters
-		const auto database_device = database::DatabaseDevice{database::kDeviceNameDefault, parameter_values};
-		const auto database_architecture = database::DatabaseArchitecture{"default", {database_device}};
-		const auto database_vendor = database::DatabaseVendor{database::kDeviceTypeAll, "default", {database_architecture}};
-		const auto database_entry =
-				database::DatabaseEntry{kernel_name, precisionToDataType(precision), current_parameter_names, {database_vendor}};
-		const auto database_entries = std::vector<database::DatabaseEntry>{database_entry};
-		const auto database = Database(device_cpp, kernel_name, precision, database_entries);
-
-		// Removes the old database entry and stores the new one in the cache
-		DatabaseCache::Instance().Remove(DatabaseKey{device->getMetadata().deviceUUID, precision, kernel_name});
-		DatabaseCache::Instance().Store(DatabaseKey{device->getMetadata().deviceUUID, precision, kernel_name}, Database(database));
-
-	} catch (...) {
-		return DispatchException();
-	}
+	#endif
 	return StatusCode::kSuccess;
 }
 

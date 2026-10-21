@@ -12,12 +12,6 @@
 namespace clblast {
 namespace database {
 
-extern const DatabaseEntry TrsvRoutineHalf;
-extern const DatabaseEntry TrsvRoutineSingle;
-extern const DatabaseEntry TrsvRoutineComplexSingle;
-extern const DatabaseEntry TrsvRoutineDouble;
-extern const DatabaseEntry TrsvRoutineComplexDouble;
-
 extern const NewDatabaseEntry NewDbTrsvRoutineHalf;
 extern const NewDatabaseEntry NewDbTrsvRoutineSingle;
 extern const NewDatabaseEntry NewDbTrsvRoutineComplexSingle;

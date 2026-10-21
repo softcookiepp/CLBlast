@@ -10,6 +10,22 @@
 namespace clblast {
 namespace database {
 
+const NewDatabaseEntry NewDbTrsvRoutineSingle = 
+{
+	"TrsvRoutine", tart::dtypes::float32, {"TRSV_BLOCK_SIZE"},
+	{ // vendors
+		{ // default vendor
+			kDefaultVendorID,
+			{ // devices
+				{ // default device
+					kDeviceNameDefault, kDefaultDeviceID,
+					Params{ 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+				}
+			}
+		}
+	}
+};
+
 const DatabaseEntry TrsvRoutineSingle = {
   "TrsvRoutine", tart::dtypes::float32, {"TRSV_BLOCK_SIZE"}, {
     { // AMD GPUs

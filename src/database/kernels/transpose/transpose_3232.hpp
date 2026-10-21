@@ -10,6 +10,22 @@
 namespace clblast {
 namespace database {
 
+const NewDatabaseEntry NewDbTransposeComplexSingle = 
+{
+	"Transpose", tart::dtypes::complex64, {"TRA_DIM", "TRA_PAD", "TRA_SHUFFLE", "TRA_WPT"},
+	{ // vendors
+		{ // default vendor
+			kDefaultVendorID,
+			{ // devices
+				{ // default device
+					kDeviceNameDefault, kDefaultDeviceID,
+					Params{ 4, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+				}
+			}
+		}
+	}
+};
+
 const DatabaseEntry TransposeComplexSingle = {
   "Transpose", tart::dtypes::complex64, {"TRA_DIM", "TRA_PAD", "TRA_SHUFFLE", "TRA_WPT"}, {
     { // AMD GPUs

@@ -9,6 +9,22 @@
 #include "database/kernels/transpose/transpose.hpp"
 namespace clblast {
 namespace database {
+	
+const NewDatabaseEntry NewDbTransposeSingle = 
+{
+	"Transpose", tart::dtypes::float32, {"TRA_DIM", "TRA_PAD", "TRA_SHUFFLE", "TRA_WPT"},
+	{ // vendors
+		{ // default vendor
+			kDefaultVendorID,
+			{ // devices
+				{ // default device
+					kDeviceNameDefault, kDefaultDeviceID,
+					Params{ 4, 0, 1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+				}
+			}
+		}
+	}
+};
 
 const DatabaseEntry TransposeSingle = {
   "Transpose", tart::dtypes::float32, {"TRA_DIM", "TRA_PAD", "TRA_SHUFFLE", "TRA_WPT"}, {

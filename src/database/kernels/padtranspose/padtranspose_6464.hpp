@@ -10,6 +10,22 @@
 namespace clblast {
 namespace database {
 
+const NewDatabaseEntry NewDbPadtransposeComplexDouble = 
+{
+	"Padtranspose", tart::dtypes::complex128, {"PADTRA_PAD", "PADTRA_TILE", "PADTRA_WPT"},
+	{ // vendors
+		{ // default vendor
+			kDefaultVendorID,
+			{ // devices
+				{ // default device
+					kDeviceNameDefault, kDefaultDeviceID,
+					Params{ 0, 8, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+				}
+			}
+		}
+	}
+};
+
 const DatabaseEntry PadtransposeComplexDouble = {
   "Padtranspose", tart::dtypes::complex128, {"PADTRA_PAD", "PADTRA_TILE", "PADTRA_WPT"}, {
     { // AMD GPUs

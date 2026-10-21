@@ -10,6 +10,22 @@
 namespace clblast {
 namespace database {
 
+const NewDatabaseEntry NewDbTrsvRoutineHalf = 
+{
+	"TrsvRoutine", tart::dtypes::float16, {"TRSV_BLOCK_SIZE"},
+	{ // vendors
+		{ // default vendor
+			kDefaultVendorID,
+			{ // devices
+				{ // default device
+					kDeviceNameDefault, kDefaultDeviceID,
+					Params{ 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+				}
+			}
+		}
+	}
+};
+
 const DatabaseEntry TrsvRoutineHalf = {
   "TrsvRoutine", tart::dtypes::float16, {"TRSV_BLOCK_SIZE"}, {
     { // Default

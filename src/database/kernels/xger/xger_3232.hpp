@@ -12,13 +12,14 @@ namespace database {
 
 const NewDatabaseEntry NewDbXgerComplexSingle = 
 {
-	"Xger", tart::dtypes::complex64, {"WGS1", "WGS2", "WPT"},
+	"Xger", tart::dtypes::complex64, {}, {"WGS1", "WGS2", "WPT"},
 	{ // vendors
 		{ // default vendor
 			kDefaultVendorID,
 			{ // devices
 				{ // default device
 					kDeviceNameDefault, kDefaultDeviceID,
+					Params{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
 					Params{ 4, 32, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 				}
 			}

@@ -39,8 +39,12 @@ class Database {
 	Database() = default;
 
 	// The constructor with a user-provided database overlay (potentially an empty vector)
-	explicit Database(const tart::device_ptr& device, const std::string& kernel_name, const tart::DType& dt,
-										const std::vector<database::NewDatabaseEntry>& overlay);
+	explicit Database(const tart::device_ptr& device, const std::string& kernel_name, const tart::DType& dt
+		#if 1
+			);
+		#else
+			, const std::vector<database::NewDatabaseEntry>& overlay);
+		#endif
 
 	// Accessor of values by key
 	size_t operator[](const std::string& key) const { return parameters_->find(key)->second; }
@@ -64,12 +68,14 @@ class Database {
 	database::Parameters SearchDevice(
 		const uint32_t targetDeviceID,
 		const std::vector<database::NewDatabaseDevice>& devices,
-		const std::vector<std::string>& parameter_names) const;
+		const std::vector<std::string>& def_names,
+		const std::vector<std::string>& spec_names) const;
 		
 	database::Parameters SearchVendorAndType(
 		const uint32_t targetVendorID, const uint32_t deviceID,
 		const std::vector<database::NewDatabaseVendor>& vendors,
-		const std::vector<std::string>& parameter_names) const;
+		const std::vector<std::string>& def_names,
+		const std::vector<std::string>& spec_names) const;
 
 	// Helper to convert from database format to proper types
 	std::string CharArrayToString(const database::Name char_array) const;

@@ -12,13 +12,13 @@ namespace database {
 
 const NewDatabaseEntry NewDbPadtransposeComplexDouble = 
 {
-	"Padtranspose", tart::dtypes::complex128, {"PADTRA_PAD", "PADTRA_TILE", "PADTRA_WPT"},
+	"Padtranspose", tart::dtypes::complex128, {"PADTRA_WPT"}, {"PADTRA_PAD", "PADTRA_TILE"},
 	{ // vendors
 		{ // default vendor
 			kDefaultVendorID,
 			{ // devices
 				{ // default device
-					kDeviceNameDefault, kDefaultDeviceID,
+					kDeviceNameDefault, kDefaultDeviceID, {2},
 					Params{ 0, 8, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 				}
 			}

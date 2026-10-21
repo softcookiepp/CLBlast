@@ -12,13 +12,13 @@ namespace database {
 	
 const NewDatabaseEntry NewDbGemmRoutineComplexSingle = 
 {
-	"GemmRoutine", tart::dtypes::complex64, {"XGEMM_MIN_INDIRECT_SIZE"},
+	"GemmRoutine", tart::dtypes::complex64, {}, {"XGEMM_MIN_INDIRECT_SIZE"},
 	{ // vendors
 		{ // default vendor
 			kDefaultVendorID,
 			{ // devices
 				{ // default device
-					kDeviceNameDefault, kDefaultDeviceID,
+					kDeviceNameDefault, kDefaultDeviceID, {},
 					Params{ 1088, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 				}
 			}

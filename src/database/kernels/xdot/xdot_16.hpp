@@ -12,13 +12,13 @@ namespace database {
 	
 const NewDatabaseEntry NewDbXdotHalf = 
 {
-	"Xdot", tart::dtypes::float16, {"WGS1", "WGS2"},
+	"Xdot", tart::dtypes::float16, {}, {"WGS1", "WGS2"},
 	{ // vendors
 		{ // default vendor
 			kDefaultVendorID,
 			{ // devices
 				{ // default device
-					kDeviceNameDefault, kDefaultDeviceID,
+					kDeviceNameDefault, kDefaultDeviceID, {},
 					Params{ 256, 64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 				}
 			}

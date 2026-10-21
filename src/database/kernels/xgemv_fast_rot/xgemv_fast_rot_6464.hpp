@@ -12,14 +12,15 @@ namespace database {
 
 const NewDatabaseEntry NewDbXgemvFastRotComplexDouble = 
 {
-	"XgemvFastRot", tart::dtypes::complex128, {"VW3", "WGS3", "WPT3"},
+	"XgemvFastRot", tart::dtypes::complex128, {"VW3"}, {"WGS3", "WPT3"},
 	{ // vendors
 		{ // default vendor
 			kDefaultVendorID,
 			{ // devices
 				{ // default device
 					kDeviceNameDefault, kDefaultDeviceID,
-					Params{ 1, 16, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+					Params{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+					Params{ 16, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 				}
 			}
 		}

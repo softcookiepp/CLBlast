@@ -12,14 +12,14 @@ namespace database {
 	
 const NewDatabaseEntry NewDbXaxpyDouble = 
 {
-	"Xaxpy", tart::dtypes::float64, {"VW", "WGS", "WPT"},
+	"Xaxpy", tart::dtypes::float64, {"VW"}, {"WGS", "WPT"},
 	{ // vendors
 		{ // default vendor
 			kDefaultVendorID,
 			{ // devices
 				{ // default device
-					kDeviceNameDefault, kDefaultDeviceID,
-					Params{ 2, 64, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+					kDeviceNameDefault, kDefaultDeviceID, { 2 },
+					Params{ 64, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 				}
 			}
 		}

@@ -12,13 +12,13 @@ namespace database {
 
 const NewDatabaseEntry NewDbPadtransposeHalf = 
 {
-	"Padtranspose", tart::dtypes::float16, {"PADTRA_PAD", "PADTRA_TILE", "PADTRA_WPT"},
+	"Padtranspose", tart::dtypes::float16, {"PADTRA_WPT"}, {"PADTRA_PAD", "PADTRA_TILE"},
 	{ // vendors
 		{ // default vendor
 			kDefaultVendorID,
 			{ // devices
 				{ // default device
-					kDeviceNameDefault, kDefaultDeviceID,
+					kDeviceNameDefault, kDefaultDeviceID, {1},
 					Params{ 0, 8, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 				}
 			}

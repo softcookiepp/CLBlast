@@ -12,14 +12,14 @@ namespace database {
 
 const NewDatabaseEntry NewDbXconvgemmSingle = 
 {
-	"Xconvgemm", tart::dtypes::float32, {"KWID", "MDIMAD", "MDIMCD", "NDIMBD", "NDIMCD", "PADA", "PADB", "VWMD", "VWND", "WGD"},
+	"Xconvgemm", tart::dtypes::float32, {"VWMD", "VWND"}, {"KWID", "MDIMAD", "MDIMCD", "NDIMBD", "NDIMCD", "PADA", "PADB", "VWMD", "VWND", "WGD"},
 	{ // vendors
 		{ // default vendor
 			kDefaultVendorID,
 			{ // devices
 				{ // default device
-					kDeviceNameDefault, kDefaultDeviceID,
-					Params{ 1, 8, 16, 8, 8, 0, 0, 1, 1, 16, 0, 0, 0, 0, 0, 0 }
+					kDeviceNameDefault, kDefaultDeviceID, { 1, 1 },
+					Params{ 1, 8, 16, 8, 8, 0, 0, 16, 0, 0, 0, 0, 0, 0 }
 				}
 			}
 		}

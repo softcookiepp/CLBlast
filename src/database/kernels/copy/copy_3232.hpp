@@ -12,14 +12,14 @@ namespace database {
 	
 const NewDatabaseEntry NewDbCopyComplexSingle = 
 {
-	"Copy", tart::dtypes::complex64, {"COPY_DIMX", "COPY_DIMY", "COPY_VW", "COPY_WPT"},
+	"Copy", tart::dtypes::complex64, {"COPY_VW"}, {"COPY_DIMX", "COPY_DIMY", "COPY_WPT"},
 	{ // vendors
 		{ // default vendor
 			kDefaultVendorID,
 			{ // devices
 				{ // default device
-					kDeviceNameDefault, kDefaultDeviceID,
-					Params{ 8, 8, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+					kDeviceNameDefault, kDefaultDeviceID, {1},
+					Params{ 8, 8, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 				}
 			}
 		}

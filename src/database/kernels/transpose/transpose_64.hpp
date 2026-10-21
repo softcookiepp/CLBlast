@@ -12,13 +12,13 @@ namespace database {
 
 const NewDatabaseEntry NewDbTransposeDouble = 
 {
-	"Transpose", tart::dtypes::float64, {"TRA_DIM", "TRA_PAD", "TRA_SHUFFLE", "TRA_WPT"},
+	"Transpose", tart::dtypes::float64, {"TRA_WPT"}, {"TRA_DIM", "TRA_PAD", "TRA_SHUFFLE"},
 	{ // vendors
 		{ // default vendor
 			kDefaultVendorID,
 			{ // devices
 				{ // default device
-					kDeviceNameDefault, kDefaultDeviceID,
+					kDeviceNameDefault, kDefaultDeviceID, {4},
 					Params{ 4, 0, 1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 				}
 			}

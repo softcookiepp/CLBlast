@@ -12,13 +12,13 @@ namespace database {
 
 const NewDatabaseEntry NewDbPadHalf = 
 {
-	"Pad", tart::dtypes::float16, {"PAD_DIMX", "PAD_DIMY", "PAD_WPTX", "PAD_WPTY"},
+	"Pad", tart::dtypes::float16, {}, {"PAD_DIMX", "PAD_DIMY", "PAD_WPTX", "PAD_WPTY"},
 	{ // vendors
 		{ // default vendor
 			kDefaultVendorID,
 			{ // devices
 				{ // default device
-					kDeviceNameDefault, kDefaultDeviceID,
+					kDeviceNameDefault, kDefaultDeviceID, {},
 					Params{ 32, 8, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 				}
 			}

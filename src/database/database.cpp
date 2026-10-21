@@ -49,8 +49,7 @@ const std::string Database::kDeviceVendorAll = "default";
 
 // Constructor, computing device properties and populating the parameter-vector from the database.
 // This takes an optional overlay database in case of custom tuning or custom kernels.
-Database::Database(const tart::device_ptr& device, const std::string& kernel_name, const tart::DType& dt,
-		 const std::vector<database::NewDatabaseEntry>& overlay)
+Database::Database(const tart::device_ptr& device, const std::string& kernel_name, const tart::DType& dt)
 	: parameters_(std::make_shared<database::Parameters>())
 {
 	// Initializes the static variable on first use. At this point we are sure all global variables are initialized
@@ -149,11 +148,8 @@ Database::Database(const tart::device_ptr& device, const std::string& kernel_nam
 	if (search_result.size() != 0)
 	{
 		parameters_->insert(search_result.begin(), search_result.end());
-		return;
 	}
 	
-	// then fall back to the old database. for now.
-
 	if (search_result.size() == 0) {
 		throw RuntimeErrorCode(StatusCode::kDatabaseError);
 	}
@@ -202,7 +198,7 @@ database::Parameters Database::Search(
 		if (db.kernel == this_kernel && db.precision == dtype)
 		{
 			// Searches for the right vendor and device type, or selects the default if unavailable
-			return SearchVendorAndType(vendorID, deviceID, db.vendors, db.parameter_names);
+			return SearchVendorAndType(vendorID, deviceID, db.vendors, db.def_names, db.spec_names);
 		}
 	}
 	throw std::runtime_error("meep!");
@@ -214,7 +210,8 @@ database::Parameters Database::Search(
 database::Parameters Database::SearchVendorAndType(const uint32_t targetVendorID,
 		const uint32_t targetDeviceID,
 		const std::vector<database::NewDatabaseVendor>& vendors,
-		const std::vector<std::string>& parameter_names) const
+		const std::vector<std::string>& def_names,
+		const std::vector<std::string>& spec_names) const
 {
 	database::Parameters params;
 	for (auto& vendor : vendors)
@@ -224,7 +221,7 @@ database::Parameters Database::SearchVendorAndType(const uint32_t targetVendorID
 			log_debug(std::string("Found architectures of vendor "));
 
 			// Searches the architecture; if unavailable returns the vendor's default parameters
-			params = SearchDevice(targetDeviceID, vendor.devices, parameter_names);
+			params = SearchDevice(targetDeviceID, vendor.devices, def_names, spec_names);
 			if (params.size() > 0) return params;
 		}
 	}
@@ -235,7 +232,8 @@ database::Parameters Database::SearchVendorAndType(const uint32_t targetVendorID
 database::Parameters Database::SearchDevice(
 	const uint32_t targetDeviceID,
 	const std::vector<database::NewDatabaseDevice>& devices,
-	const std::vector<std::string>& parameter_names) const
+	const std::vector<std::string>& def_names,
+	const std::vector<std::string>& spec_names) const
 {
 	for (auto& device : devices)
 	{
@@ -245,15 +243,20 @@ database::Parameters Database::SearchDevice(
 
 			// Sets the parameters accordingly
 			auto parameters = database::Parameters();
-			if (parameter_names.size() > device.parameters.size())
+			if (spec_names.size() > device.specs.size() || def_names.size() > device.defs.size())
 			{
 				// this should not happen
 				throw std::invalid_argument("parameter size mismatch");
 				return database::Parameters();
 			}
-			for (size_t i = 0; i < parameter_names.size(); i += 1)
+			// this will be changed later.
+			for (size_t i = 0; i < def_names.size(); i += 1)
 			{
-				parameters[parameter_names[i]] = static_cast<size_t>(device.parameters[i]);
+				parameters[def_names[i]] = static_cast<size_t>(device.defs[i]);
+			}
+			for (size_t i = 0; i < spec_names.size(); i += 1)
+			{
+				parameters[spec_names[i]] = static_cast<size_t>(device.specs[i]);
 			}
 			return parameters;
 		}

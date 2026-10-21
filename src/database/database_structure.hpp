@@ -33,10 +33,20 @@ namespace database {
 
 // Type alias for the database storage (arrays for fast compilation/efficiency)
 using Name = std::array<char, 51>;			// name as stored in database (50 chars + string terminator)
-using Params = std::array<size_t, 16>;	// parameters as stored in database
+using Params = std::vector<size_t>;	// parameters as stored in database
 
-// Type alias after extracting from the database (sorted map for improved code readability)
-using Parameters = std::map<std::string, size_t>;	// parameters after reading from DB
+#if 0
+	// now that defs and specs will be separated...
+	struct Parameters
+	{
+		std::map<std::string, uint32_t> defs;
+		std::map<std::string, uint32_t> specs;
+		size_t size() const { return defs.size() + specs.size(); }
+	};
+#else
+	// Type alias after extracting from the database (sorted map for improved code readability)
+	using Parameters = std::map<std::string, size_t>;	// parameters after reading from DB
+#endif
 
 // default name
 const Name kDeviceNameDefault = {"default"};
@@ -50,7 +60,9 @@ struct NewDatabaseDevice
 {
 	Name name;
 	uint32_t deviceID;
-	Params parameters;	// parameter values
+	//Params parameters;	// parameter values
+	Params defs; // define-based parameters
+	Params specs; // specialization constants
 };
 
 struct NewDatabaseVendor
@@ -63,7 +75,8 @@ struct NewDatabaseEntry
 {
 	std::string kernel;
 	tart::DType precision;
-	std::vector<std::string> parameter_names;
+	std::vector<std::string> def_names;
+	std::vector<std::string> spec_names;
 	std::vector<NewDatabaseVendor> vendors;
 };
 

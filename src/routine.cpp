@@ -174,7 +174,7 @@ void Routine::InitDatabase(const Device& device, const std::vector<std::string>&
 
 		// Builds the parameter database for this device and routine set and stores it in the cache
 		log_debug("Searching database for kernel '" + kernel_name + "'");
-		db(kernel_name) = Database(device(), kernel_name, precision, userDatabase);
+		db(kernel_name) = Database(device(), kernel_name, precision);//, userDatabase);
 		DatabaseCache::Instance().Store(DatabaseKey{device()->getMetadata().deviceUUID, precision, kernel_name},
 																		Database{db(kernel_name)});
 	}

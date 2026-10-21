@@ -12,13 +12,13 @@ namespace database {
 
 const NewDatabaseEntry NewDbPadComplexSingle = 
 {
-	"Pad", tart::dtypes::complex64, {"PAD_DIMX", "PAD_DIMY", "PAD_WPTX", "PAD_WPTY"},
+	"Pad", tart::dtypes::complex64, {}, {"PAD_DIMX", "PAD_DIMY", "PAD_WPTX", "PAD_WPTY"},
 	{ // vendors
 		{ // default vendor
 			kDefaultVendorID,
 			{ // devices
 				{ // default device
-					kDeviceNameDefault, kDefaultDeviceID,
+					kDeviceNameDefault, kDefaultDeviceID, {},
 					Params{ 8, 16, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 				}
 			}

@@ -12,13 +12,13 @@ namespace database {
 
 const NewDatabaseEntry NewDbTrsvRoutineSingle = 
 {
-	"TrsvRoutine", tart::dtypes::float32, {"TRSV_BLOCK_SIZE"},
+	"TrsvRoutine", tart::dtypes::float32, {}, {"TRSV_BLOCK_SIZE"},
 	{ // vendors
 		{ // default vendor
 			kDefaultVendorID,
 			{ // devices
 				{ // default device
-					kDeviceNameDefault, kDefaultDeviceID,
+					kDeviceNameDefault, kDefaultDeviceID, {},
 					Params{ 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 				}
 			}

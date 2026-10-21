@@ -12,13 +12,13 @@ namespace database {
 
 const NewDatabaseEntry NewDbXgemvSingle = 
 {
-	"Xgemv", tart::dtypes::float32, {"WGS1", "WPT1"},
+	"Xgemv", tart::dtypes::float32, {}, {"WGS1", "WPT1"},
 	{ // vendors
 		{ // default vendor
 			kDefaultVendorID,
 			{ // devices
 				{ // default device
-					kDeviceNameDefault, kDefaultDeviceID,
+					kDeviceNameDefault, kDefaultDeviceID, {},
 					Params{ 64, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 				}
 			}

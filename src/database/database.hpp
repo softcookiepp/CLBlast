@@ -29,9 +29,6 @@ namespace clblast {
 // See comment at top of file for a description of the class
 class Database {
  public:
-	// The OpenCL device vendors
-	static const std::string kDeviceVendorAll;
-
 	// The database consists of separate database entries, stored together in a vector
 
 	static std::vector<database::NewDatabaseEntry> newDatabase;
@@ -45,10 +42,20 @@ class Database {
 		#else
 			, const std::vector<database::NewDatabaseEntry>& overlay);
 		#endif
-
+	
+	bool hasDef(const std::string& key) const { return mDefs.count(key) != 0; };
+	bool hasSpec(const std::string& key) const { return mSpecs.count(key) != 0; };
+	
 	// Accessor of values by key
-	size_t operator[](const std::string& key) const { return parameters_->find(key)->second; }
-	bool exists(const std::string& key) const { return (parameters_->count(key) == 1); }
+	size_t operator[](const std::string& key) const
+	{
+		if (hasDef(key))
+			return mDefs.find(key)->second;
+		else if (hasSpec(key))
+			return mSpecs.find(key)->second;
+		throw std::runtime_error("database does not contain the specified key");
+		return 0;
+	}
 
 	// Obtain a list of OpenCL pre-processor defines based on the parameters
 	std::string GetDefines() const;
@@ -63,25 +70,28 @@ class Database {
 	database::Parameters Search(const std::string& this_kernel, const uint32_t vendorID,
 		const uint32_t deviceID,
 		const tart::DType& dtype,
-		const std::vector<database::NewDatabaseEntry>& db) const;
+		const std::vector<database::NewDatabaseEntry>& db);
 	
 	database::Parameters SearchDevice(
 		const uint32_t targetDeviceID,
 		const std::vector<database::NewDatabaseDevice>& devices,
 		const std::vector<std::string>& def_names,
-		const std::vector<std::string>& spec_names) const;
+		const std::vector<std::string>& spec_names);
 		
 	database::Parameters SearchVendorAndType(
 		const uint32_t targetVendorID, const uint32_t deviceID,
 		const std::vector<database::NewDatabaseVendor>& vendors,
 		const std::vector<std::string>& def_names,
-		const std::vector<std::string>& spec_names) const;
+		const std::vector<std::string>& spec_names);
 
 	// Helper to convert from database format to proper types
 	std::string CharArrayToString(const database::Name char_array) const;
 
 	// Found parameters suitable for this device/kernel
 	std::shared_ptr<database::Parameters> parameters_;
+	
+	std::map<std::string, uint32_t> mDefs;
+	std::map<std::string, uint32_t> mSpecs;
 };
 
 // =================================================================================================
@@ -95,10 +105,16 @@ class Databases {
 	Database& operator()(const std::string& kernel_name) { return databases_[kernel_name]; }
 
 	// Retrieves a parameter from the database
-	size_t operator[](const std::string& key) const {
+	#if 0
+		size_t get(const std::string& key) const
+	#else
+		size_t operator[](const std::string& key) const
+	#endif
+	{
 		for (const auto& kernel_name : kernel_names_) {
 			const auto& kernel_db = databases_.find(kernel_name)->second;
-			if (kernel_db.exists(key)) {
+			if (kernel_db.hasSpec(key) || kernel_db.hasDef(key))
+			{
 				return kernel_db[key];
 			}
 		}

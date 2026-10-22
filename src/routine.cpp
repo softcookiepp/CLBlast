@@ -84,6 +84,7 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 	for (const auto& kernel_name : kernel_names_) {
 		routine_info += "_" + kernel_name + db_(kernel_name).GetValuesString();
 	}
+	std::cout << routine_info << std::endl;
 	log_debug(routine_info);
 
 	// Queries the cache to see whether or not the program (context-specific) is already there

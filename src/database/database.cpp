@@ -39,11 +39,7 @@
 namespace clblast {
 // =================================================================================================
 
-
 std::vector<database::NewDatabaseEntry> Database::newDatabase = {};
-
-// The default values
-const std::string Database::kDeviceVendorAll = "default";
 
 // =================================================================================================
 
@@ -160,8 +156,9 @@ Database::Database(const tart::device_ptr& device, const std::string& kernel_nam
 // Returns a list of OpenCL pre-processor defines in string form
 std::string Database::GetDefines() const {
 	std::string defines{};
-	for (auto& parameter : *parameters_) {
-		defines += "#define " + parameter.first + " " + ToString(parameter.second) + "\n";
+	for (auto& parameter : mDefs)
+	{
+		defines += "#define " + parameter.first + " " + ToString(static_cast<size_t>(parameter.second)) + "\n";
 	}
 	return defines;
 }
@@ -190,7 +187,7 @@ std::vector<std::string> Database::GetParameterNames() const {
 database::Parameters Database::Search(
 	const std::string& this_kernel, const uint32_t vendorID,
 	const uint32_t deviceID, const tart::DType& dtype,
-	const std::vector<database::NewDatabaseEntry>& db) const
+	const std::vector<database::NewDatabaseEntry>& db)
 {
 	// Selects the right kernel
 	for (auto& db : db)
@@ -211,7 +208,7 @@ database::Parameters Database::SearchVendorAndType(const uint32_t targetVendorID
 		const uint32_t targetDeviceID,
 		const std::vector<database::NewDatabaseVendor>& vendors,
 		const std::vector<std::string>& def_names,
-		const std::vector<std::string>& spec_names) const
+		const std::vector<std::string>& spec_names)
 {
 	database::Parameters params;
 	for (auto& vendor : vendors)
@@ -233,7 +230,7 @@ database::Parameters Database::SearchDevice(
 	const uint32_t targetDeviceID,
 	const std::vector<database::NewDatabaseDevice>& devices,
 	const std::vector<std::string>& def_names,
-	const std::vector<std::string>& spec_names) const
+	const std::vector<std::string>& spec_names)
 {
 	for (auto& device : devices)
 	{
@@ -253,10 +250,12 @@ database::Parameters Database::SearchDevice(
 			for (size_t i = 0; i < def_names.size(); i += 1)
 			{
 				parameters[def_names[i]] = static_cast<size_t>(device.defs[i]);
+				mDefs[def_names[i]] = static_cast<uint32_t>(device.defs[i]);
 			}
 			for (size_t i = 0; i < spec_names.size(); i += 1)
 			{
 				parameters[spec_names[i]] = static_cast<size_t>(device.specs[i]);
+				mSpecs[spec_names[i]] = static_cast<uint32_t>(device.specs[i]);
 			}
 			return parameters;
 		}

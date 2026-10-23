@@ -1088,9 +1088,6 @@ realV MultiplyAddVector(realV cvec, const real aval, const realV bvec)
 
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library.
-#ifdef WGS2
-	#undef WGS2
-#endif
 #define WGS2 WGS
 
 // =================================================================================================

@@ -22,14 +22,7 @@
 // 2: For the fast version see xgemv_fast.glsl
 
 // 3: For the fast rotated version
-#ifdef WGS3
-	#undef WGS3	// The local work-group size
-#endif
 layout(constant_id = 0) const int WGS3 = 64;
-
-#ifdef WPT3
-	#undef WPT3	// The tile-size
-#endif
 layout(constant_id = 1) const int WPT3 = 64;
 
 #ifndef VW3

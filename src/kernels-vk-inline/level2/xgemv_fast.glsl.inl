@@ -508,14 +508,7 @@ R"(
 // 1: For the full version, see 'xgemv.glsl'
 
 // 2: For the fast version
-#ifdef WGS2
-	#undef WGS2
-#endif
 layout(constant_id = 0) const int WGS2 = 64;
-
-#ifdef WPT2
-	#undef WPT2
-#endif
 layout(constant_id = 1) const int WPT2 = 1;
 
 #ifndef VW2

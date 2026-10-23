@@ -46,7 +46,6 @@ std::vector<database::NewDatabaseEntry> Database::newDatabase = {};
 // Constructor, computing device properties and populating the parameter-vector from the database.
 // This takes an optional overlay database in case of custom tuning or custom kernels.
 Database::Database(const tart::device_ptr& device, const std::string& kernel_name, const tart::DType& dt)
-	: parameters_(std::make_shared<database::Parameters>())
 {
 	// Initializes the static variable on first use. At this point we are sure all global variables are initialized
 	if (newDatabase.size() == 0)
@@ -141,10 +140,6 @@ Database::Database(const tart::device_ptr& device, const std::string& kernel_nam
 	uint32_t vendorID = device->getMetadata().physicalDeviceProperties.vendorID;
 	uint32_t deviceID = device->getMetadata().physicalDeviceProperties.deviceID;
 	search_result = Search(kernel_name, vendorID, deviceID, dt, {newDatabase});
-	if (search_result.size() != 0)
-	{
-		parameters_->insert(search_result.begin(), search_result.end());
-	}
 	
 	if (search_result.size() == 0) {
 		throw RuntimeErrorCode(StatusCode::kDatabaseError);
@@ -166,17 +161,24 @@ std::string Database::GetDefines() const {
 // ... or just the values as string
 std::string Database::GetValuesString() const {
 	std::string defines{};
-	for (auto& parameter : *parameters_) {
-		defines += "_" + ToString(parameter.second);
+	for (auto& def : mDefs)
+	{
+		defines += "_" + std::to_string(def.second);
 	}
 	return defines;
 }
 
 // Retrieves the names of all the parameters
-std::vector<std::string> Database::GetParameterNames() const {
+std::vector<std::string> Database::GetParameterNames() const
+{
 	auto parameter_names = std::vector<std::string>();
-	for (auto& parameter : *parameters_) {
-		parameter_names.push_back(parameter.first);
+	for (auto& p : mDefs)
+	{
+		parameter_names.push_back(p.first);
+	}
+	for (auto& p : mSpecs)
+	{
+		parameter_names.push_back(p.first);
 	}
 	return parameter_names;
 }

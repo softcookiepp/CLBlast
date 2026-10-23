@@ -153,10 +153,10 @@ StatusCode RetrieveParameters(const RawDeviceID device, const std::string& kerne
 		}
 
 		// Retrieves the parameters
-		for (const auto& parameter : database.GetParameters()) {
-			parameters[parameter.first] = parameter.second;
-		}
-
+		for (const auto& p : database.getDefs())
+			parameters[p.first] = static_cast<size_t>(p.second);
+		for (const auto& p : database.getSpecs())
+			parameters[p.first] = static_cast<size_t>(p.second);
 	} catch (...) {
 		return DispatchException();
 	}

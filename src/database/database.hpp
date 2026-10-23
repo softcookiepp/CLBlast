@@ -46,6 +46,9 @@ class Database {
 	bool hasDef(const std::string& key) const { return mDefs.count(key) != 0; };
 	bool hasSpec(const std::string& key) const { return mSpecs.count(key) != 0; };
 	
+	const std::map<std::string, uint32_t> getDefs() const { return mDefs; }
+	const std::map<std::string, uint32_t> getSpecs() const { return mSpecs; }
+	
 	// Accessor of values by key
 	size_t operator[](const std::string& key) const
 	{
@@ -63,7 +66,6 @@ class Database {
 	// Retrieves the values or names of all the parameters
 	std::string GetValuesString() const;
 	std::vector<std::string> GetParameterNames() const;
-	const database::Parameters& GetParameters() const { return *parameters_; }
 
  private:
 	// Search method functions, returning a set of parameters (possibly empty)
@@ -88,8 +90,6 @@ class Database {
 	std::string CharArrayToString(const database::Name char_array) const;
 
 	// Found parameters suitable for this device/kernel
-	std::shared_ptr<database::Parameters> parameters_;
-	
 	std::map<std::string, uint32_t> mDefs;
 	std::map<std::string, uint32_t> mSpecs;
 };

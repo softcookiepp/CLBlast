@@ -18,9 +18,6 @@
 #include "level1.glsl"
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library.
-#ifdef WGS1
-	#undef WGS1
-#endif
 #define WGS1 WGS
 
 // =================================================================================================

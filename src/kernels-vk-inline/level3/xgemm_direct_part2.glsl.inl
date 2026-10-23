@@ -705,44 +705,13 @@ R"(
 #endif
 
 #if USE_SPEC_CONSTANTS == 1
-	#ifdef WGD
-		#undef WGD
-	#endif
 	layout(constant_id = 0) const int WGD = 8; // Tile-size in dimension M, N, and K (e.g. 8, 16, 32, 64)
-	
-	#ifdef MDIMCD
-		#undef MDIMCD
-	#endif
 	layout(constant_id = 1) const int MDIMCD = 8;// Threads per workgroup in M-dimension (e.g. 8, 16, 32)
-	
-	#ifdef NDIMCD
-		#undef NDIMCD
-	#endif
 	layout(constant_id = 2) const int NDIMCD = 8; // Threads per workgroup in N-dimension (e.g. 8, 16, 32)
-	
-	#ifdef MDIMAD
-		#undef MDIMAD
-	#endif
 	layout(constant_id = 3) const int MDIMAD = 8; // Re-shaped tile dimension of matrix A: KDIMAD * MDIMAD
-	
-	#ifdef NDIMBD
-		#undef NDIMBD
-	#endif
 	layout(constant_id = 4) const int NDIMBD = 8; // Re-shaped tile dimension of matrix B: KDIMBD * NDIMBD
-	
-	#ifdef KWID
-		#undef KWID
-	#endif
 	layout(constant_id = 5) const int KWID = 1; // Unroll factor of the WGD loop (smaller or equal than WGD)
-	
-	#ifdef PADA
-		#undef PADA
-	#endif
 	layout(constant_id = 6) const int PADA = 1; // Local memory padding for matrix A
-	
-	#ifdef PADB
-		#undef PADB
-	#endif
 	layout(constant_id = 7) const int PADB = 1; // Local memory padding for matrix B
 #else
 	#ifndef WGD

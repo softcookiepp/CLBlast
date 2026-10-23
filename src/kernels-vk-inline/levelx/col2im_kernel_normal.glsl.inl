@@ -505,16 +505,8 @@ R"(
 
 // Work-group size parameters re-used from the 'copy' kernel
 
-#ifdef COPY_DIMX
-	#undef COPY_DIMX
-#endif
 layout(constant_id = 0) const int COPY_DIMX = 8; // Local workgroup size in the first dimension (w)
-
-#ifdef COPY_DIMY
-	#undef COPY_DIMY
-#endif
 layout(constant_id = 1) const int COPY_DIMY = 8; // Local workgroup size in the second dimension (h)
-
 layout(constant_id = 2) const bool KERNEL_FLIP = false; // whether or not to use the flip kernel
 
 // =================================================================================================

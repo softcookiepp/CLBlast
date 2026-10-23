@@ -520,16 +520,8 @@ R"(
 
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library.
-#ifdef WGS 
-	#undef WGS
-#endif
 layout(constant_id = 0) const int WGS = 64; // The local work-group size
-
-#ifdef WPT
-	#undef WPT
-#endif
 layout(constant_id = 1) const int WPT = 1; // The amount of work-per-thread
-
 
 #ifndef VW
 	#define VW 1			 // Vector width of vectors X and Y
@@ -543,9 +535,6 @@ layout(constant_id = 1) const int WPT = 1; // The amount of work-per-thread
 
 // Data-widths
 #if USE_SPEC_FOR_VW
-	#ifdef VW
-		#undef VW
-	#endif
 	layout(constant_id = 2) const int VW = 1;
 	
 	struct real1 { real s[1]; };

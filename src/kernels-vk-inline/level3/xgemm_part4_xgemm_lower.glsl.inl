@@ -756,63 +756,21 @@ R"(
 #define USE_SPECIALIZATION_CONSTANTS 1
 
 #if USE_SPECIALIZATION_CONSTANTS
-	#ifdef GEMMK
-		#undef GEMMK		
-	#endif
 	layout(constant_id = 0) const int GEMMK = 0; // Kernel to choose: 0 regular, 1 with 2D register tiling
-	#ifdef MWG
-		#undef MWG	
-	#endif
 	layout(constant_id = 1) const int MWG = 8; // Tile-size in dimension M (e.g. 64, 128)
-	#ifdef NWG
-		#undef NWG
-	#endif
 	layout(constant_id = 2) const int NWG = 8; // Tile-size in dimension N (e.g. 64, 128)
-	#ifdef KWG
-		#undef KWG
-	#endif
 	layout(constant_id = 3) const int KWG = 8; // Tile-size in dimension K (e.g. 8, 16)
-	#ifdef MDIMC
-		#undef MDIMC
-	#endif
 	layout(constant_id = 4) const int MDIMC = 8; // Threads per workgroup in M-dimension (e.g. 8, 16, 32)
-	#ifdef NDIMC
-		#undef NDIMC
-	#endif
 	layout(constant_id = 5) const int NDIMC = 8; // Threads per workgroup in N-dimension (e.g. 8, 16, 32)
-	#ifdef MDIMA
-		#undef MDIMA
-	#endif
 	layout(constant_id = 6) const int MDIMA = 8; // Re-shaped tile dimension of matrix A: KDIMA * MDIMA (kernel 0 only)
-	#ifdef NDIMB
-		#undef NDIMB
-	#endif
 	layout(constant_id = 7) const int NDIMB = 8; // Re-shaped tile dimension of matrix B: KDIMB * NDIMB (kernel 0 only)
-	#ifdef KWI
-		#undef KWI
-	#endif
 	layout(constant_id = 8) const int KWI = 1; // Unroll factor of the KWG loop (smaller or equal than KWG)
 	#if 0 // this determines type, will not be possible to use as a specialization constant yet.
-		#ifdef VWM
-			#undef VWM
-		#endif
 		layout(constant_id = -1) const int VWM = 1; // Vector width of matrices A and C
-		#ifdef VWN
-			#undef VWN
-		#endif
 		layout(constant_id = -1) const int VWN = 1; // Vector width of matrix B
 	#endif
-	#ifdef STRM
-		#undef STRM
-	#endif
 	layout(constant_id = 9) const int STRM = 0; // Use strided access within a thread in the M-dimension (1) or not (0) (kernel 0 only)
-	#ifdef STRN
-		#undef STRN
-	#endif
 	layout(constant_id = 10) const int STRN = 0; // Use strided access within a thread in the N-dimension (1) or not (0) (kernel 0 only)
-	#ifdef SA
-		#undef SA
-	#endif
 	layout(constant_id = 11) const int SA = 0; // Use local/shared memory to cache matrix A (1) or not (0) (kernel 0 only)
 	#ifdef SB
 		#undef SB

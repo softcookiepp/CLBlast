@@ -522,19 +522,8 @@ R"(
 	#define LEVEL2_USE_SPEC 0
 #endif
 #if LEVEL2_USE_SPEC
-	#ifdef WGS1
-		#undef WGS1		// The local work-group size in first dimension
-	#endif
 	layout(constant_id = 0) const int WGS1 = 8;
-	
-	#ifdef WGS2
-		#undef WGS2		// The local work-group size in second dimension
-	#endif
 	layout(constant_id = 1) const int WGS2 = 8;
-	
-	#ifdef WPT
-		#undef WPT		 // The amount of work-per-thread in both dimensions
-	#endif
 	layout(constant_id = 2) const int WPT = 1;
 #else
 	#ifndef WGS1

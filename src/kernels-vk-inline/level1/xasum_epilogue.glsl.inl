@@ -505,10 +505,6 @@ R"(
 
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library.
-
-#ifdef WGS2
-	#undef WGS2
-#endif
 layout(constant_id = 0) const int WGS2 = 62; // The local work-group size of the epilogue kernel
 
 // =================================================================================================

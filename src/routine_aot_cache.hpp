@@ -4,7 +4,7 @@
 #include "clblast_vk.h"
 #include <cstdint>
 
-
+#include "routines.hpp"
 
 namespace clblast
 {

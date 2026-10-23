@@ -19,15 +19,11 @@
 //
 #include "xgemm_part3.glsl"
 // =================================================================================================
-#if USE_SPECIALIZATION_CONSTANTS
-	layout(
-		local_size_x_id = 4, // MDIMC,
-		local_size_y_id = 5, // NDIMC,
-		local_size_z = 1
-		) in;
-#else
-	layout(local_size_x = MDIMC, local_size_y = NDIMC, local_size_z = 1) in;
-#endif
+layout(
+	local_size_x_id = 4, // MDIMC,
+	local_size_y_id = 5, // NDIMC,
+	local_size_z = 1
+	) in;
 
 layout(push_constant, std430) uniform XgemmBatched
 {

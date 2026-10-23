@@ -11,20 +11,15 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
-#define USE_SPECIALIZATION_CONSTANTS 1
 #include "xgemm_part3.glsl"
 // The upper-triangular and lower-triangular kernels are only used in special cases
 
 // Main entry point of the kernel. This is the lower-triangular version.
-#if USE_SPECIALIZATION_CONSTANTS
-	layout(
+layout(
 		local_size_x_id = 4, // MDIMC,
 		local_size_y_id = 5, // NDIMC,
 		local_size_z = 1
-		) in;
-#else
-	layout(local_size_x = MDIMC, local_size_y = NDIMC, local_size_z = 1) in;
-#endif
+	) in;
 
 layout(push_constant, std430) uniform XgemmLower
 {

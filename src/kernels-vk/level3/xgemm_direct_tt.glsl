@@ -11,7 +11,6 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
-#define USE_SPEC_CONSTANTS_FOR_TRANSPOSE 1
 #include "xgemm_direct_part3_batched.glsl"
 // =================================================================================================
 
@@ -53,11 +52,7 @@ void main()
 #endif
 		c_offset, c_ld,
 		//alm, blm,
-		#if USE_SPEC_CONSTANTS_FOR_TRANSPOSE
-			TRANSPOSE_A, TRANSPOSE_B,
-		#else
-			0, 1,
-		#endif
+		TRANSPOSE_A, TRANSPOSE_B,
 		c_transpose, a_conjugate, b_conjugate);
 }
 

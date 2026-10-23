@@ -501,7 +501,6 @@ R"(
 
 // =================================================================================================
 
-#define LEVEL2_USE_SPEC 1
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
@@ -518,84 +517,45 @@ R"(
 
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library.
-#ifndef LEVEL2_USE_SPEC
-	#define LEVEL2_USE_SPEC 0
-#endif
-#if LEVEL2_USE_SPEC
-	layout(constant_id = 0) const int WGS1 = 8;
-	layout(constant_id = 1) const int WGS2 = 8;
-	layout(constant_id = 2) const int WPT = 1;
-#else
-	#ifndef WGS1
-		#define WGS1 8		// The local work-group size in first dimension
-	#endif
-	#ifndef WGS2
-		#define WGS2 8		// The local work-group size in second dimension
-	#endif
-	#ifndef WPT
-		#define WPT 1		 // The amount of work-per-thread in both dimensions
-	#endif
-#endif
+layout(constant_id = 0) const int WGS1 = 8;
+layout(constant_id = 1) const int WGS2 = 8;
+layout(constant_id = 2) const int WPT = 1;
 
 // these will eventually be converted to specialization constants, but now I am too lazy
-#if LEVEL2_USE_SPEC
-	#ifdef ROUTINE_HPR
-		#undef ROUTINE_HPR
-	#endif
-	layout(constant_id = 3) const int ROUTINE_HPR = 0;
-	
-	#ifdef ROUTINE_SPR
-		#undef ROUTINE_SPR
-	#endif
-	layout(constant_id = 4) const int ROUTINE_SPR = 0;
-	
-	#ifdef ROUTINE_GERC
-		#undef ROUTINE_GERC
-	#endif
-	layout(constant_id = 5) const int ROUTINE_GERC = 0;
-	
-	#ifdef ROUTINE_HER
-		#undef ROUTINE_HER
-	#endif
-	layout(constant_id = 6) const int ROUTINE_HER = 0;
-	
-	#ifdef ROUTINE_HER2
-		#undef ROUTINE_HER2
-	#endif
-	layout(constant_id = 7) const int ROUTINE_HER2 = 0;
-	
-	#ifdef ROUTINE_HPR2
-		#undef ROUTINE_HPR2
-	#endif
-	layout(constant_id = 8) const int ROUTINE_HPR2 = 0;
-	
-	#ifdef ROUTINE_SPR2
-		#undef ROUTINE_SPR2
-	#endif
-	layout(constant_id = 9) const int ROUTINE_SPR2 = 0;
-#else
-	#ifndef ROUTINE_HPR
-		#define ROUTINE_HPR 0
-	#endif
-	#ifndef ROUTINE_SPR
-		#define ROUTINE_SPR 0
-	#endif
-	#ifndef ROUTINE_GERC
-		#define ROUTINE_GERC 0
-	#endif
-	#ifndef ROUTINE_HER
-		#define ROUTINE_HER 0
-	#endif
-	#ifndef ROUTINE_HER2
-		#define ROUTINE_HER2 0
-	#endif
-	#ifndef ROUTINE_HPR2
-		#define ROUTINE_HPR2 0
-	#endif
-	#ifndef ROUTINE_SPR2
-		#define ROUTINE_SPR2 0
-	#endif
+#ifdef ROUTINE_HPR
+	#undef ROUTINE_HPR
 #endif
+layout(constant_id = 3) const int ROUTINE_HPR = 0;
+
+#ifdef ROUTINE_SPR
+	#undef ROUTINE_SPR
+#endif
+layout(constant_id = 4) const int ROUTINE_SPR = 0;
+
+#ifdef ROUTINE_GERC
+	#undef ROUTINE_GERC
+#endif
+layout(constant_id = 5) const int ROUTINE_GERC = 0;
+
+#ifdef ROUTINE_HER
+	#undef ROUTINE_HER
+#endif
+layout(constant_id = 6) const int ROUTINE_HER = 0;
+
+#ifdef ROUTINE_HER2
+	#undef ROUTINE_HER2
+#endif
+layout(constant_id = 7) const int ROUTINE_HER2 = 0;
+
+#ifdef ROUTINE_HPR2
+	#undef ROUTINE_HPR2
+#endif
+layout(constant_id = 8) const int ROUTINE_HPR2 = 0;
+
+#ifdef ROUTINE_SPR2
+	#undef ROUTINE_SPR2
+#endif
+layout(constant_id = 9) const int ROUTINE_SPR2 = 0;
 
 // =================================================================================================
 
@@ -762,11 +722,7 @@ real MatrixUpdate2Impl(const int id1, const int id2, const int max1, const int m
 // =================================================================================================
 
 // Regular version of the rank-1 matrix update kernel (GER, GERU, GERC)
-#if LEVEL2_USE_SPEC
-	layout(local_size_x_id = 0, local_size_y_id = 1) in;
-#else
-	layout(local_size_x = WGS1, local_size_y = WGS2, local_size_z = 1) in;
-#endif
+layout(local_size_x_id = 0, local_size_y_id = 1) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) readonly buffer xgm_buf { real xgm[]; };

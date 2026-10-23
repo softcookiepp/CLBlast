@@ -683,11 +683,7 @@ R"(
 #if 1 //defined(ROUTINE_TRMM)
 
 // Same as above, but now the matrix' data is stored in the upper-triangle
-#if LEVEL3_USE_SPEC == 1
-	layout(local_size_x_id = 3, local_size_y_id = 4) in;
-#else
-	layout(local_size_x = PAD_DIMX, local_size_y = PAD_DIMY, local_size_z = 1) in;
-#endif
+layout(local_size_x_id = 3, local_size_y_id = 4) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) readonly buffer src_buf { real src[]; };

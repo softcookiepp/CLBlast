@@ -687,15 +687,8 @@ R"(
 // =================================================================================================
 
 #if USE_BDA == 0
-	#if 0
-		layout(binding = 0, std430) buffer src_offsets_buf { int src_offsets[]; };
-		layout(binding = 1, std430) buffer src_buf { real src[]; };
-		layout(binding = 2, std430) buffer dest_offsets_buf { int dest_offsets[]; };
-		layout(binding = 3, std430) buffer dest_buf { real dest[]; };
-	#else
-		layout(binding = 0, std430) buffer src_buf { real src[]; };
-		layout(binding = 1, std430) buffer dest_buf { real dest[]; };
-	#endif
+	layout(binding = 0, std430) buffer src_buf { real src[]; };
+	layout(binding = 1, std430) buffer dest_buf { real dest[]; };
 #endif
 
 // Copies a matrix from source to destination. The output is padded with zero values in case the

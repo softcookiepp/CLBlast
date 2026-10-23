@@ -13,9 +13,7 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
-#ifndef ROUTINE_GEMMBATCHED
-	#define ROUTINE_GEMMBATCHED
-#endif
+
 #define LEVEL3_USE_SPEC 1
 
 // =================================================================================================
@@ -264,10 +262,9 @@ R"(
 
 // =================================================================================================
 
-// Don't use the non-IEEE754 compliant OpenCL built-in mad() instruction per default. For specific
-// devices, this is enabled (see src/routine.cpp).
+// actually use this, we are in Vulkan now after all!
 #ifndef USE_CL_MAD
-	#define USE_CL_MAD 0
+	#define USE_CL_MAD 1
 #endif
 
 // By default the workgroup size requirement is enabled. For Qualcomm devices the workgroup size 
@@ -764,7 +761,6 @@ void _CopyPadMatrix(const int src_one, const int src_two,
 // =================================================================================================
 
 // =================================================================================================
-#if 1//def ROUTINE_GEMMBATCHED
 
 // Batched version of the above
 layout(local_size_x_id = 3, local_size_y_id = 4, local_size_z = 1) in;
@@ -803,9 +799,6 @@ void main()
 		alpha, do_conjugate);
 }
 
-
-
-#endif
 // =================================================================================================
 
 // End of the C++11 raw string literal

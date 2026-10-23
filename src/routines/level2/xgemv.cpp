@@ -27,7 +27,7 @@ namespace clblast
 // Constructor: forwards to base class constructor
 template <typename T>
 Xgemv<T>::Xgemv(Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Xgemv", "XgemvFast", "XgemvFastRot", "TrsvRoutine"}, PrecisionValue<T>(), {},
+		: Routine(queue, event, name, {"Xgemv", "XgemvFast", "XgemvFastRot", "TrsvRoutine"}, precisionToDataType(PrecisionValue<T>()), {},
 							{
 	#include "../../kernels-vk-inline/level2/xgemv.glsl.inl"
 	,

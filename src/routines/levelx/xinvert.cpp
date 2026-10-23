@@ -31,7 +31,7 @@ namespace clblast {
 // Constructor: forwards to base class constructor
 template <typename T>
 Xinvert<T>::Xinvert(Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Invert"}, PrecisionValue<T>(), {},
+		: Routine(queue, event, name, {"Invert"}, precisionToDataType(PrecisionValue<T>()), {},
 							{
 	#include "../../kernels-vk-inline/level3/level3_fill_matrix.glsl.inl"
 	,

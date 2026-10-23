@@ -25,7 +25,7 @@ namespace clblast {
 // Constructor: forwards to base class constructor
 template <typename T>
 Xamax<T>::Xamax(Queue& queue, EventPointer event, const std::string& name)
-	: Routine(queue, event, name, {"Xdot"}, PrecisionValue<T>(), {},
+	: Routine(queue, event, name, {"Xdot"}, precisionToDataType(PrecisionValue<T>()), {},
 		{
 			#include "../../kernels-vk-inline/level1/xamax.glsl.inl"
 			,

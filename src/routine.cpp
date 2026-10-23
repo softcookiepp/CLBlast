@@ -62,9 +62,10 @@ const std::unordered_map<std::string, const std::vector<std::string>> Routine::r
 
 // The constructor does all heavy work, errors are returned as exceptions
 Routine::Routine(Queue& queue, EventPointer event, const std::string& name,
-	const std::vector<std::string>& kernel_names, const Precision precision,
+	const std::vector<std::string>& kernel_names, const tart::DType& dtype,
 	const std::vector<database::NewDatabaseEntry>& userDatabase, std::initializer_list<const char*> source, std::vector<std::string> entryPointNames)
-		: precision_(precision),
+		: 
+			mDtype(dtype),
 			routine_name_(name),
 			kernel_names_(kernel_names),
 			queue_(queue),
@@ -74,7 +75,7 @@ Routine::Routine(Queue& queue, EventPointer event, const std::string& name,
 			mEntryPointNames(entryPointNames),
 			mDevice(queue())
 {
-	InitDatabase(device_, kernel_names, precisionToDataType(precision), userDatabase, db_);
+	InitDatabase(device_, kernel_names, dtype, userDatabase, db_);
 	InitProgram(source);
 }
 
@@ -89,7 +90,7 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 
 	// Queries the cache to see whether or not the program (context-specific) is already there
 	bool has_program;
-	program_ = ProgramCache::Instance().Get(ProgramKeyRef{device_(), precisionToDataType(precision_), routine_info}, &has_program);
+	program_ = ProgramCache::Instance().Get(ProgramKeyRef{device_(), mDtype, routine_info}, &has_program);
 	if (has_program)
 	{
 		return;
@@ -98,22 +99,20 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 
 	// Sets the build options from an environmental variable (if set)
 	auto options = std::vector<std::string>();
-	const auto environment_variable = std::getenv("CLBLAST_BUILD_OPTIONS");
-	if (environment_variable != nullptr) {
-		options.push_back(std::string(environment_variable));
-	}
 
 	// Otherwise, the kernel will be compiled and program will be built. Both the binary and the
 	// program will be added to the cache.
 
+	// TODO: move these elsewhere to eliminate repetition
 	// Inspects whether or not FP64 is supported in case of double precision
-	if ((precision_ == Precision::kDouble && !PrecisionSupported<double>(device_)) ||
-			(precision_ == Precision::kComplexDouble && !PrecisionSupported<double2>(device_))) {
+	if ( (mDtype == tart::dtypes::float64 || mDtype == tart::dtypes::complex128) 
+		&& !device_()->getMetadata().double_)
+	{
 		throw RuntimeErrorCode(StatusCode::kNoDoublePrecision);
 	}
-
 	// As above, but for FP16 (half precision)
-	if (precision_ == Precision::kHalf && !PrecisionSupported<half>(device_)) {
+	if (mDtype == tart::dtypes::float64 && !device_()->getMetadata().half_)
+	{
 		throw RuntimeErrorCode(StatusCode::kNoHalfPrecision);
 	}
 
@@ -147,9 +146,9 @@ void Routine::InitProgram(std::initializer_list<const char*> source) {
 
 	
 
-	program_ = CompileFromSource(dummy, precision_, routine_name_, device_, options, 0, false, kernelSources);
+	program_ = CompileFromSource(dummy, mDtype, routine_name_, device_, options, 0, false, kernelSources);
 	
-	ProgramCache::Instance().Store(ProgramKey{device_(), precisionToDataType(precision_), routine_info},
+	ProgramCache::Instance().Store(ProgramKey{device_(), mDtype, routine_info},
 																 std::shared_ptr<Program>{program_});
 }
 

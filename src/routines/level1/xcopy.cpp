@@ -26,7 +26,7 @@ namespace clblast {
 // Constructor: forwards to base class constructor
 template <typename T>
 Xcopy<T>::Xcopy(Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Xaxpy"}, PrecisionValue<T>(), {},
+		: Routine(queue, event, name, {"Xaxpy"}, precisionToDataType(PrecisionValue<T>()), {},
 							{
 	#include "../../kernels-vk-inline/level1/xcopy.glsl.inl"
 	,

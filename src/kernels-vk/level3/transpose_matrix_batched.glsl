@@ -1,7 +1,4 @@
 #version 450
-#ifndef ROUTINE_GEMMBATCHED
-	#define ROUTINE_GEMMBATCHED
-#endif
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
@@ -23,7 +20,6 @@
 #include "level3.glsl"
 #include "transpose_matrix_batched_impl.glsl"
 // =================================================================================================
-#if 1//def ROUTINE_GEMMBATCHED
 
 // Batched version of the above
 layout(push_constant) uniform TransposeMatrixBatched
@@ -61,8 +57,6 @@ void main()
 #endif
 		alpha, 0, 0, 0);
 }
-
-#endif
 
 // =================================================================================================
 

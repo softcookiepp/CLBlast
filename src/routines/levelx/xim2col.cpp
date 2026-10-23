@@ -25,7 +25,7 @@ namespace clblast {
 // Constructor: forwards to base class constructor
 template <typename T>
 Xim2col<T>::Xim2col(Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Copy"}, PrecisionValue<T>(), {},
+		: Routine(queue, event, name, {"Copy"}, precisionToDataType(PrecisionValue<T>()), {},
 							{
 	#include "../../kernels-vk-inline/levelx/im2col_kernel_normal.glsl.inl"
 							}

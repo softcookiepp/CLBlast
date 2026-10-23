@@ -1,7 +1,4 @@
 #version 450
-#ifndef ROUTINE_GEMMBATCHED
-	#define ROUTINE_GEMMBATCHED
-#endif
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
@@ -22,7 +19,6 @@
 #define LEVEL3_USE_SPEC 1
 #include "transpose_pad_matrix_batched_impl.glsl"
 // =================================================================================================
-#if 1//def ROUTINE_GEMMBATCHED
 
 // Batched version of the above
 layout(push_constant) uniform TransposePadMatrixBatched
@@ -61,7 +57,6 @@ void main()
 		alpha, do_conjugate);
 }
 
-#endif
 // =================================================================================================
 
 // End of the C++11 raw string literal

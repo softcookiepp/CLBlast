@@ -1,7 +1,4 @@
 #version 450
-#ifndef ROUTINE_GEMMSTRIDEDBATCHED
-	#define ROUTINE_GEMMSTRIDEDBATCHED
-#endif
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):

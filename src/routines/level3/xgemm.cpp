@@ -27,7 +27,7 @@ namespace clblast {
 template <typename T>
 Xgemm<T>::Xgemm(Queue& queue, EventPointer event, const std::string& name)
 		: Routine(queue, event, name, {"Copy", "Pad", "Transpose", "Padtranspose", "Xgemm", "XgemmDirect", "GemmRoutine"},
-							PrecisionValue<T>(), {},
+							precisionToDataType(PrecisionValue<T>()), {},
 							{
 	#include "../../kernels-vk-inline/level3/copy_fast.glsl.inl"
 	,

@@ -20,7 +20,7 @@ namespace clblast {
 // =================================================================================================
 
 // Compiles a program from source code
-std::shared_ptr<Program> CompileFromSource(const std::string& source_string, const Precision precision,
+std::shared_ptr<Program> CompileFromSource(const std::string& source_string, const tart::DType& dtype,
 		const std::string& routine_name, const Device& device,
 		std::vector<std::string>& options,
 		const size_t run_preprocessor,	// 0: platform dependent, 1: always, 2: never
@@ -32,14 +32,42 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 		)
 {
 	auto header_string = std::string{""};
+	
+	// small hack until the kernel-side precision enums get changed
+	uint32_t precision;
+	switch(dtype())
+	{
+		case tart::DataType::eFloat16:
+		{
+			precision = 16;
+			break;
+		}
+		case tart::DataType::eFloat32:
+		{
+			precision = 32;
+			break;
+		}
+		case tart::DataType::eFloat64:
+		{
+			precision = 64;
+			break;
+		}
+		case tart::DataType::eComplex64:
+		{
+			precision = 3232;
+			break;
+		}
+		case tart::DataType::eComplex128:
+		{
+			precision = 6464;
+			break;
+		}
+	}
 
-	header_string += "#define PRECISION " + ToString(static_cast<int>(precision)) + "\n";
+	header_string += "#define PRECISION " + std::to_string(precision) + "\n";
 
 	// Adds the name of the routine as a define
 	header_string += "#define ROUTINE_" + routine_name + " 1\n";
-
-	// Just use this on every device, no point in not doing it
-	header_string += "#define USE_CL_MAD 1\n";
 
 	// For specific devices, use staggered/shuffled workgroup indices.
 	if (device()->getMetadata().physicalDeviceProperties.vendorID == tart::VendorID::eAMD)
@@ -102,14 +130,14 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 	return program;
 }
 #if VULKAN_API
-std::shared_ptr<Program> CompileFromSource(const std::string& source_string, const Precision precision,
+std::shared_ptr<Program> CompileFromSource(const std::string& source_string, const tart::DType& dtype,
                                            const std::string& routine_name, const Device& device,
                                            std::vector<std::string>& options,
                                            const size_t run_preprocessor,  // 0: platform dependent, 1: always, 2: never
                                            const bool silent)
 {
 	std::map<std::string, std::string> dummyMap;
-	return CompileFromSource(source_string, precision, routine_name, device,
+	return CompileFromSource(source_string, dtype, routine_name, device,
                                            options,
                                            run_preprocessor,
                                             silent, dummyMap);

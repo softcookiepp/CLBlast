@@ -26,7 +26,7 @@ namespace clblast {
 // Constructor: forwards to base class constructor
 template <typename T>
 Xsyrk<T>::Xsyrk(Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Copy", "Pad", "Transpose", "Padtranspose", "Xgemm"}, PrecisionValue<T>(), {},
+		: Routine(queue, event, name, {"Copy", "Pad", "Transpose", "Padtranspose", "Xgemm"}, precisionToDataType(PrecisionValue<T>()), {},
 							{
 	#include "../../kernels-vk-inline/level3/copy_fast.glsl.inl"
 	,

@@ -118,6 +118,7 @@
 	layout(constant_id = 12) const int PADTRA_PAD = 0;
 	
 #else
+	#error "everything should be using specialization constants for level3"
 	// For the 'fast' copy kernel
 	#ifndef COPY_DIMX
 		#define COPY_DIMX 8			// Local workgroup size in the first dimension (x)

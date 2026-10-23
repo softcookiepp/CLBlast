@@ -40,7 +40,7 @@ class Routine {
 	// NOTE: the caller must provide the same userDatabase for each combination of device, precision
 	// and routine list, otherwise the caching logic will break.
 	explicit Routine(Queue& queue, EventPointer event, const std::string& name, const std::vector<std::string>& routines,
-									 const Precision precision, const std::vector<database::NewDatabaseEntry>& userDatabase,
+									 const tart::DType& dtype, const std::vector<database::NewDatabaseEntry>& userDatabase,
 									 std::initializer_list<const char*> source, std::vector<std::string> entryPointNames = {}
 									 );
 
@@ -60,7 +60,7 @@ class Routine {
 
  protected:
 	// Non-static variable for the precision
-	const Precision precision_;
+	const tart::DType mDtype;
 
 	// The routine's name and the corresponding kernels
 	const std::string routine_name_;

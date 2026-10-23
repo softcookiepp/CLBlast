@@ -17,9 +17,6 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
-#ifndef ROUTINE_GEMMBATCHED
-	#define ROUTINE_GEMMBATCHED
-#endif
 #define LEVEL3_USE_SPEC 1
 
 // =================================================================================================
@@ -268,10 +265,9 @@ R"(
 
 // =================================================================================================
 
-// Don't use the non-IEEE754 compliant OpenCL built-in mad() instruction per default. For specific
-// devices, this is enabled (see src/routine.cpp).
+// actually use this, we are in Vulkan now after all!
 #ifndef USE_CL_MAD
-	#define USE_CL_MAD 0
+	#define USE_CL_MAD 1
 #endif
 
 // By default the workgroup size requirement is enabled. For Qualcomm devices the workgroup size 

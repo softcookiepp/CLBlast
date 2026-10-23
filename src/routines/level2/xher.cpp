@@ -26,7 +26,7 @@ namespace clblast {
 // Constructor: forwards to base class constructor
 template <typename T, typename U>
 Xher<T, U>::Xher(Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Xger"}, PrecisionValue<T>(), {},
+		: Routine(queue, event, name, {"Xger"}, precisionToDataType(PrecisionValue<T>()), {},
 							{
 	#include "../../kernels-vk-inline/level2/xher.glsl.inl"
 							}

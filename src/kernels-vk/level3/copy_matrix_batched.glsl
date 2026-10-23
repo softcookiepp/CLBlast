@@ -19,9 +19,6 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
-#ifndef ROUTINE_GEMMBATCHED
-	#define ROUTINE_GEMMBATCHED
-#endif
 #define LEVEL3_USE_SPEC 1
 #include "copy_matrix_batched_impl.glsl"
 // =================================================================================================

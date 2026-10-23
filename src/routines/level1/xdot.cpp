@@ -26,7 +26,7 @@ namespace clblast {
 #if 0
 	// Constructor: forwards to base class constructor
 	Xdot::Xdot(Queue& queue, EventPointer event, const std::string& name)
-			: Routine(queue, event, name, {"Xdot"}, PrecisionValue<T>(), {},
+			: Routine(queue, event, name, {"Xdot"}, precisionToDataType(PrecisionValue<T>()), {},
 		{
 			#include "../../kernels-vk-inline/level1/xdot.glsl.inl"
 			,
@@ -126,7 +126,7 @@ namespace clblast {
 	// Constructor: forwards to base class constructor
 	template <typename T>
 	Xdot<T>::Xdot(Queue& queue, EventPointer event, const std::string& name)
-			: Routine(queue, event, name, {"Xdot"}, PrecisionValue<T>(), {},
+			: Routine(queue, event, name, {"Xdot"}, precisionToDataType(PrecisionValue<T>()), {},
 		{
 			#include "../../kernels-vk-inline/level1/xdot.glsl.inl"
 			,

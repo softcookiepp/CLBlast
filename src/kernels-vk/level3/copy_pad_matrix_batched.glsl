@@ -15,13 +15,10 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
-#ifndef ROUTINE_GEMMBATCHED
-	#define ROUTINE_GEMMBATCHED
-#endif
+
 #define LEVEL3_USE_SPEC 1
 #include "copy_pad_matrix_batched_impl.glsl"
 // =================================================================================================
-#if 1//def ROUTINE_GEMMBATCHED
 
 // Batched version of the above
 layout(local_size_x_id = 3, local_size_y_id = 4, local_size_z = 1) in;
@@ -60,9 +57,6 @@ void main()
 		alpha, do_conjugate);
 }
 
-
-
-#endif
 // =================================================================================================
 
 // End of the C++11 raw string literal

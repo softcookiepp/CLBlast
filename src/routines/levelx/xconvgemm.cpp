@@ -29,7 +29,7 @@ namespace clblast {
 // Constructor: forwards to base class constructor
 template <typename T>
 Xconvgemm<T>::Xconvgemm(Queue& queue, EventPointer event, const std::string& name, const ConvGemmMethod method)
-		: Routine(queue, event, name, {"Xconvgemm"}, PrecisionValue<T>(), {},
+		: Routine(queue, event, name, {"Xconvgemm"}, precisionToDataType(PrecisionValue<T>()), {},
 							{
 	// regular kernel
 	#include "../../kernels-vk-inline/levelx/xconvgemm_part2_xconvgemm_kernel.glsl.inl"

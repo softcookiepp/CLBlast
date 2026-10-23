@@ -18,19 +18,8 @@
 // this kernel file is used outside of the CLBlast library.
 
 // 1: For the full version of the kernel
-#ifdef WGS1
-	#undef WGS1
-#endif
 layout(constant_id = 0) const int WGS1 = 64;
-
-#ifdef WPT1
-	#undef WPT1
-#endif
 layout(constant_id = 1) const int WPT1 = 1;
-
-#ifdef UNROLL1
-	#undef UNROLL1
-#endif
 layout(constant_id = 2) const int UNROLL1 = 32;
 
 #ifdef ROUTINE_GBMV

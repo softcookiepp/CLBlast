@@ -52,8 +52,8 @@ void Xcopy<T>::DoCopy(const size_t n, const Buffer<T>& x_buffer, const size_t x_
 	}
 
 	// Tests the vectors for validity
-	TestVectorX(n, x_buffer, x_offset, x_inc);
-	TestVectorY(n, y_buffer, y_offset, y_inc);
+	TestVectorX(mDtype, n, x_buffer(), x_offset, x_inc);
+	TestVectorY(mDtype, n, y_buffer(), y_offset, y_inc);
 
 	// Determines whether or not the fast-version can be used
 	// TODO: it may be possible to use pure transfer operations if we are doing this via Vulkan.

@@ -89,7 +89,7 @@ void Xher<T, U>::DoHer(const Layout layout, const Triangle triangle, const size_
 	} else {
 		TestMatrixA(n, n, a_buffer, a_offset, a_ld);
 	}
-	TestVectorX(n, x_buffer, x_offset, x_inc);
+	TestVectorX(mDtype, n, x_buffer(), x_offset, x_inc);
 
 	// If alpha is zero an update is not required
 	if (alpha == U{0}) {

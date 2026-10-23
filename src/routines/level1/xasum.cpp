@@ -54,8 +54,8 @@ void Xasum<T>::DoAsum(const size_t n, const Buffer<T>& asum_buffer, const size_t
 	}
 
 	// Tests the vectors for validity
-	TestVectorX(n, x_buffer, x_offset, x_inc);
-	TestVectorScalar(1, asum_buffer, asum_offset);
+	TestVectorX(mDtype, n, x_buffer(), x_offset, x_inc);
+	TestVectorScalar(mDtype, 1, asum_buffer(), asum_offset);
 
 	// Retrieves the Xasum kernels from the compiled binary
 	Kernel kernel1Old(program_, "Xasum");

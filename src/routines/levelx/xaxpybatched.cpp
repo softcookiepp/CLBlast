@@ -57,8 +57,8 @@ void XaxpyBatched<T>::DoAxpyBatched(const size_t n, const std::vector<T>& alphas
 
 	// Tests the vectors for validity
 	for (auto batch = size_t{0}; batch < batch_count; ++batch) {
-		TestVectorX(n, x_buffer, x_offsets[batch], x_inc);
-		TestVectorY(n, y_buffer, y_offsets[batch], y_inc);
+		TestVectorX(mDtype, n, x_buffer(), x_offsets[batch], x_inc);
+		TestVectorY(mDtype, n, y_buffer(), y_offsets[batch], y_inc);
 	}
 
 	// Upload the arguments to the device

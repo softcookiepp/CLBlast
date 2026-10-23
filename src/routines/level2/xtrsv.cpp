@@ -96,7 +96,7 @@ void Xtrsv<T>::DoTrsv(const Layout layout, const Triangle triangle, const Transp
 
 	// Tests the matrix and vector
 	TestMatrixA(n, n, a_buffer, a_offset, a_ld);
-	TestVectorX(n, b_buffer, b_offset, b_inc);
+	TestVectorX(this->mDtype, n, b_buffer(), b_offset, b_inc);
 	
 	
 

@@ -68,8 +68,8 @@ void Xher2<T>::DoHer2(const Layout layout, const Triangle triangle, const size_t
 	} else {
 		TestMatrixA(n, n, a_buffer, a_offset, a_ld);
 	}
-	TestVectorX(n, x_buffer, x_offset, x_inc);
-	TestVectorY(n, y_buffer, y_offset, y_inc);
+	TestVectorX(mDtype, n, x_buffer(), x_offset, x_inc);
+	TestVectorY(mDtype, n, y_buffer(), y_offset, y_inc);
 
 	// Retrieves the kernel from the compiled binary
 	auto kernelOld = Kernel(program_, "Xher2");

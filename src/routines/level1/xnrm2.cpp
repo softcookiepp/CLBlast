@@ -50,8 +50,8 @@ void Xnrm2<T>::DoNrm2(const size_t n, const Buffer<T>& nrm2_buffer, const size_t
 	}
 
 	// Tests the vectors for validity
-	TestVectorX(n, x_buffer, x_offset, x_inc);
-	TestVectorScalar(1, nrm2_buffer, nrm2_offset);
+	TestVectorX(mDtype, n, x_buffer(), x_offset, x_inc);
+	TestVectorScalar(mDtype, 1, nrm2_buffer(), nrm2_offset);
 
 	// Retrieves the Xnrm2 kernels from the compiled binary
 	Kernel kernel1Old(program_, "Xnrm2");

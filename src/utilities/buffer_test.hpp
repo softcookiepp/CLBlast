@@ -88,52 +88,13 @@ void TestMatrixAP(const size_t n, const Buffer<T>& buffer, const size_t offset) 
 // =================================================================================================
 
 // Tests vector 'X' for validity
-template <typename T>
-void TestVectorX(const size_t n, const Buffer<T>& buffer, const size_t offset, const size_t inc) {
-	if (inc == 0) {
-		throw BLASError(StatusCode::kInvalidIncrementX);
-	}
-	try {
-		const auto required_size = ((n - 1) * inc + 1 + offset) * sizeof(T);
-		if (buffer.GetSize() < required_size) {
-			throw BLASError(StatusCode::kInsufficientMemoryX);
-		}
-	} catch (const Error<std::runtime_error>& e) {
-		throw BLASError(StatusCode::kInvalidVectorX, e.what());
-	}
-}
+void TestVectorX(const tart::DType& dtype, const size_t n, const tart::buffer_ptr& buffer, const size_t offset, const size_t inc);
 
 // Tests vector 'Y' for validity
-template <typename T>
-void TestVectorY(const size_t n, const Buffer<T>& buffer, const size_t offset, const size_t inc) {
-	if (inc == 0) {
-		throw BLASError(StatusCode::kInvalidIncrementY);
-	}
-	try {
-		const auto required_size = ((n - 1) * inc + 1 + offset) * sizeof(T);
-		if (buffer.GetSize() < required_size) {
-			throw BLASError(StatusCode::kInsufficientMemoryY);
-		}
-	} catch (const Error<std::runtime_error>& e) {
-		throw BLASError(StatusCode::kInvalidVectorY, e.what());
-	}
-}
+void TestVectorY(const tart::DType& dtype, const size_t n, const tart::buffer_ptr& buffer, const size_t offset, const size_t inc);
 
 // Tests vector 'Z' for validity
-template <typename T>
-void TestVectorZ(const size_t n, const Buffer<T>& buffer, const size_t offset, const size_t inc) {
-	if (inc == 0) {
-		throw BLASError(StatusCode::kInvalidIncrementZ);
-	}
-	try {
-		const auto required_size = ((n - 1) * inc + 1 + offset) * sizeof(T);
-		if (buffer.GetSize() < required_size) {
-			throw BLASError(StatusCode::kInsufficientMemoryZ);
-		}
-	} catch (const Error<std::runtime_error>& e) {
-		throw BLASError(StatusCode::kInvalidVectorZ, e.what());
-	}
-}
+void TestVectorZ(const tart::DType& dtype, const size_t n, const tart::buffer_ptr& buffer, const size_t offset, const size_t inc);
 
 // =================================================================================================
 

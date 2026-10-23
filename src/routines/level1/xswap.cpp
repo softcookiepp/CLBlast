@@ -50,8 +50,8 @@ void Xswap<T>::DoSwap(const size_t n, const Buffer<T>& x_buffer, const size_t x_
 	}
 
 	// Tests the vectors for validity
-	TestVectorX(n, x_buffer, x_offset, x_inc);
-	TestVectorY(n, y_buffer, y_offset, y_inc);
+	TestVectorX(mDtype, n, x_buffer(), x_offset, x_inc);
+	TestVectorY(mDtype, n, y_buffer(), y_offset, y_inc);
 
 	// Determines whether or not the fast-version can be used
 	bool use_fast_kernel = (x_offset == 0) && (x_inc == 1) && (y_offset == 0) && (y_inc == 1) &&

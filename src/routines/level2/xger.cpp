@@ -62,8 +62,8 @@ void Xger<T>::DoGer(const Layout layout, const size_t m, const size_t n, const T
 
 	// Tests the matrix and the vectors for validity
 	TestMatrixA(a_one, a_two, a_buffer, a_offset, a_ld);
-	TestVectorX(m, x_buffer, x_offset, x_inc);
-	TestVectorY(n, y_buffer, y_offset, y_inc);
+	TestVectorX(mDtype, m, x_buffer(), x_offset, x_inc);
+	TestVectorY(mDtype, n, y_buffer(), y_offset, y_inc);
 
 	// Retrieves the kernel from the compiled binary
 	auto kernelOld = Kernel(program_, "Xger");

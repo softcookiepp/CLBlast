@@ -55,7 +55,7 @@ void Xscal<T>::DoScal(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 	}
 
 	// Tests the vector for validity
-	TestVectorX(n, x_buffer, x_offset, x_inc);
+	TestVectorX(mDtype, n, x_buffer(), x_offset, x_inc);
 
 	// Determines whether or not the fast-version can be used
 	bool use_fast_kernel = (x_offset == 0) && (x_inc == 1) && IsMultiple(n, db_["WGS"] * db_["WPT"] * db_["VW"]);

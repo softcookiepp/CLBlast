@@ -49,9 +49,9 @@ namespace clblast {
 		}
 
 		// Tests the vectors for validity
-		TestVectorX(n, x_buffer, x_offset, x_inc);
-		TestVectorY(n, y_buffer, y_offset, y_inc);
-		TestVectorScalar(1, dot_buffer, dot_offset);
+		TestVectorX(mDtype, n, x_buffer(), x_offset, x_inc);
+		TestVectorY(mDtype, n, y_buffer(), y_offset, y_inc);
+		TestVectorScalar(tart::getDtype<T>(), 1, dot_buffer, dot_offset);
 
 		// Retrieves the Xdot kernels from the compiled binary
 		Kernel kernel1Old(program_, "Xdot");
@@ -149,9 +149,9 @@ namespace clblast {
 		}
 
 		// Tests the vectors for validity
-		TestVectorX(n, x_buffer, x_offset, x_inc);
-		TestVectorY(n, y_buffer, y_offset, y_inc);
-		TestVectorScalar(1, dot_buffer, dot_offset);
+		TestVectorX(mDtype, n, x_buffer(), x_offset, x_inc);
+		TestVectorY(mDtype, n, y_buffer(), y_offset, y_inc);
+		TestVectorScalar(this->mDtype, 1, dot_buffer(), dot_offset);
 
 		// Retrieves the Xdot kernels from the compiled binary
 		Kernel kernel1Old(program_, "Xdot");

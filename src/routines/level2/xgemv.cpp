@@ -119,8 +119,8 @@ void Xgemv<T>::MatVec(const Layout layout, const Transpose a_transpose, const si
 	} else {
 		TestMatrixA(a_one, a_two, a_buffer, a_offset, a_ld);
 	}
-	TestVectorX(n_real, x_buffer, x_offset, x_inc);
-	TestVectorY(m_real, y_buffer, y_offset, y_inc);
+	TestVectorX(mDtype, n_real, x_buffer(), x_offset, x_inc);
+	TestVectorY(mDtype, m_real, y_buffer(), y_offset, y_inc);
 
 	// Determines whether or not the fast-version can be used
 	fast_kernel = fast_kernel && (a_offset == 0) && (a_rotated == 0) && (a_conjugate == 0) &&

@@ -53,9 +53,9 @@ void Xhad<T>::DoHad(const size_t n, const T alpha, const Buffer<T>& x_buffer, co
 	}
 
 	// Tests the vectors for validity
-	TestVectorX(n, x_buffer, x_offset, x_inc);
-	TestVectorY(n, y_buffer, y_offset, y_inc);
-	TestVectorZ(n, z_buffer, z_offset, z_inc);
+	TestVectorX(mDtype, n, x_buffer(), x_offset, x_inc);
+	TestVectorY(mDtype, n, y_buffer(), y_offset, y_inc);
+	TestVectorZ(mDtype, n, z_buffer(), z_offset, z_inc);
 
 	// Determines whether or not the fast-version can be used
 	const auto use_faster_kernel = (x_offset == 0) && (x_inc == 1) && (y_offset == 0) && (y_inc == 1) &&

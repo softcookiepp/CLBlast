@@ -51,7 +51,7 @@ void Xamax<T>::DoAmax(const size_t n, const Buffer<unsigned int>& imax_buffer, c
 	}
 
 	// Tests the vectors for validity
-	TestVectorX(n, x_buffer, x_offset, x_inc);
+	TestVectorX(mDtype, n, x_buffer(), x_offset, x_inc);
 	TestVectorIndex(1, imax_buffer, imax_offset);
 
 	// Retrieves the Xamax kernels from the compiled binary

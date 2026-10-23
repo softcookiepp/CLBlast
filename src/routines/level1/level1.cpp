@@ -29,4 +29,52 @@ void TestVectorScalar(const tart::DType& dtype, const size_t n, const tart::buff
 	}
 }
 
+// Tests vector 'X' for validity
+void TestVectorX(const tart::DType& dtype, const size_t n, const tart::buffer_ptr& buffer, const size_t offset, const size_t inc)
+{
+	if (inc == 0) {
+		throw BLASError(StatusCode::kInvalidIncrementX);
+	}
+	try {
+		const auto required_size = ((n - 1) * inc + 1 + offset) * dtype.size();
+		if (buffer->getSize() < required_size) {
+			throw BLASError(StatusCode::kInsufficientMemoryX);
+		}
+	} catch (const Error<std::runtime_error>& e) {
+		throw BLASError(StatusCode::kInvalidVectorX, e.what());
+	}
+}
+
+// Tests vector 'Y' for validity
+void TestVectorY(const tart::DType& dtype, const size_t n, const tart::buffer_ptr& buffer, const size_t offset, const size_t inc)
+{
+	if (inc == 0) {
+		throw BLASError(StatusCode::kInvalidIncrementY);
+	}
+	try {
+		const auto required_size = ((n - 1) * inc + 1 + offset) * dtype.size();
+		if (buffer->getSize() < required_size) {
+			throw BLASError(StatusCode::kInsufficientMemoryY);
+		}
+	} catch (const Error<std::runtime_error>& e) {
+		throw BLASError(StatusCode::kInvalidVectorY, e.what());
+	}
+}
+
+// Tests vector 'Z' for validity
+void TestVectorZ(const tart::DType& dtype, const size_t n, const tart::buffer_ptr& buffer, const size_t offset, const size_t inc)
+{
+	if (inc == 0) {
+		throw BLASError(StatusCode::kInvalidIncrementZ);
+	}
+	try {
+		const auto required_size = ((n - 1) * inc + 1 + offset) * dtype.size();
+		if (buffer->getSize() < required_size) {
+			throw BLASError(StatusCode::kInsufficientMemoryZ);
+		}
+	} catch (const Error<std::runtime_error>& e) {
+		throw BLASError(StatusCode::kInvalidVectorZ, e.what());
+	}
+}
+
 } // namespace clblast

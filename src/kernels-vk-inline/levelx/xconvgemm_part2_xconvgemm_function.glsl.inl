@@ -733,46 +733,14 @@ R"(
 // this kernel file is used outside of the CLBlast library. Note that all parameters here have a
 // suffix 'D' to denote that they are for the 'direct' version of the GEMM kernel.
 
-#ifndef USE_SPEC_CONSTANTS
-	#define USE_SPEC_CONSTANTS 1
-#endif
-
-#if USE_SPEC_CONSTANTS == 1
-	layout(constant_id = 0) const int WGD = 8; // Tile-size in dimension M, N, and K (e.g. 8, 16, 32, 64)
-	layout(constant_id = 1) const int MDIMCD = 8;// Threads per workgroup in M-dimension (e.g. 8, 16, 32)
-	layout(constant_id = 2) const int NDIMCD = 8; // Threads per workgroup in N-dimension (e.g. 8, 16, 32)
-	layout(constant_id = 3) const int MDIMAD = 8; // Re-shaped tile dimension of matrix A: KDIMAD * MDIMAD
-	layout(constant_id = 4) const int NDIMBD = 8; // Re-shaped tile dimension of matrix B: KDIMBD * NDIMBD
-	layout(constant_id = 5) const int KWID = 1; // Unroll factor of the WGD loop (smaller or equal than WGD)
-	layout(constant_id = 6) const int PADA = 1; // Local memory padding for matrix A
-	layout(constant_id = 7) const int PADB = 1; // Local memory padding for matrix B
-#else
-	#ifndef WGD
-		#define WGD 8			// Tile-size in dimension M, N, and K (e.g. 8, 16, 32, 64)
-	#endif
-	#ifndef MDIMCD
-		#define MDIMCD 8		// Threads per workgroup in M-dimension (e.g. 8, 16, 32)
-	#endif
-	#ifndef NDIMCD
-		#define NDIMCD 8		// Threads per workgroup in N-dimension (e.g. 8, 16, 32)
-	#endif
-	#ifndef MDIMAD
-		#define MDIMAD 8		// Re-shaped tile dimension of matrix A: KDIMAD * MDIMAD
-	#endif
-	#ifndef NDIMBD
-		#define NDIMBD 8		// Re-shaped tile dimension of matrix B: KDIMBD * NDIMBD
-	#endif
-	#ifndef KWID
-		#define KWID 1			// Unroll factor of the WGD loop (smaller or equal than WGD)
-	#endif
-	#ifndef PADA
-		#define PADA 1			// Local memory padding for matrix A
-	#endif
-	#ifndef PADB
-		#define PADB 1			// Local memory padding for matrix B
-	#endif
-#endif
-
+layout(constant_id = 0) const int WGD = 8; // Tile-size in dimension M, N, and K (e.g. 8, 16, 32, 64)
+layout(constant_id = 1) const int MDIMCD = 8;// Threads per workgroup in M-dimension (e.g. 8, 16, 32)
+layout(constant_id = 2) const int NDIMCD = 8; // Threads per workgroup in N-dimension (e.g. 8, 16, 32)
+layout(constant_id = 3) const int MDIMAD = 8; // Re-shaped tile dimension of matrix A: KDIMAD * MDIMAD
+layout(constant_id = 4) const int NDIMBD = 8; // Re-shaped tile dimension of matrix B: KDIMBD * NDIMBD
+layout(constant_id = 5) const int KWID = 1; // Unroll factor of the WGD loop (smaller or equal than WGD)
+layout(constant_id = 6) const int PADA = 1; // Local memory padding for matrix A
+layout(constant_id = 7) const int PADB = 1; // Local memory padding for matrix B
 layout(constant_id = 8) const int TRANSPOSE_A = 0;
 layout(constant_id = 9) const int TRANSPOSE_B = 0;
 

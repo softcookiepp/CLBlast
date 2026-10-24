@@ -22,3 +22,24 @@
 #include "xtpmv.cpp"
 #include "xtrmv.cpp"
 #include "xtrsv.cpp"
+
+namespace clblast
+{
+
+void TestMatrixAP(const tart::DType& dtype, const size_t n, const tart::buffer_ptr& buffer, const size_t offset)
+{
+	try
+	{
+		const auto required_size = (((n * (n + 1)) / 2) + offset) * dtype.size();
+		if (buffer->getSize() < required_size)
+		{
+			throw BLASError(StatusCode::kInsufficientMemoryA);
+		}
+	}
+	catch (const Error<std::runtime_error>& e)
+	{
+		throw BLASError(StatusCode::kInvalidMatrixA, e.what());
+	}
+}
+
+} // namespace clblast

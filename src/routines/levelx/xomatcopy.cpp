@@ -95,8 +95,8 @@ void Xomatcopy<T>::DoOmatcopy(const Layout layout, const Transpose a_transpose, 
 	// Also tests that the leading dimensions of:
 	//		matrix A cannot be less than N when rotated, or less than M when not-rotated
 	//		matrix B cannot be less than M when rotated, or less than N when not-rotated
-	TestMatrixA(a_one, a_two, a_buffer, a_offset, a_ld);
-	TestMatrixB(b_one, b_two, b_buffer, b_offset, b_ld);
+	TestMatrixA(mDtype, a_one, a_two, a_buffer(), a_offset, a_ld);
+	TestMatrixB(mDtype, b_one, b_two, b_buffer(), b_offset, b_ld);
 
 	PadCopyTransposeMatrix(db_, a_one, a_two, a_ld, a_offset, a_buffer, b_one,
 												 b_two, b_ld, b_offset, b_buffer, alpha, program_, false, transpose, conjugate);

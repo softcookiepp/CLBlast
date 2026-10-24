@@ -108,14 +108,14 @@ void Xconvgemm<T>::DoConvgemm(const KernelMode kernel_mode, const size_t channel
 	const auto result_stride = num_kernels * output_h * output_w;
 
 	// Tests the matrices for validity
-	TestMatrixB(patch_size, num_kernels, kernel_buffer, kernel_offset, patch_size);
+	TestMatrixB(mDtype, patch_size, num_kernels, kernel_buffer(), kernel_offset, patch_size);
 	for (auto batch = size_t{0}; batch < batch_count; ++batch) {
 		if (method_ == ConvGemmMethod::kWithIm2Col) {
-			TestMatrixA(num_patches, patch_size, col_buffer, col_stride * batch, num_patches);
+			TestMatrixA(mDtype, num_patches, patch_size, col_buffer(), col_stride * batch, num_patches);
 		} else {
 			// TODO: check for valid image tensor
 		}
-		TestMatrixC(num_patches, num_kernels, result_buffer, result_offset + result_stride * batch, num_patches);
+		TestMatrixC(mDtype, num_patches, num_kernels, result_buffer(), result_offset + result_stride * batch, num_patches);
 	}
 	
 	// Retrieves the proper XgemmDirect kernel from the compiled binary

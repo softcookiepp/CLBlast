@@ -61,7 +61,7 @@ void Xger<T>::DoGer(const Layout layout, const size_t m, const size_t n, const T
 	const auto a_two = (a_is_rowmajor) ? m : n;
 
 	// Tests the matrix and the vectors for validity
-	TestMatrixA(a_one, a_two, a_buffer, a_offset, a_ld);
+	TestMatrixA(mDtype, a_one, a_two, a_buffer(), a_offset, a_ld);
 	TestVectorX(mDtype, m, x_buffer(), x_offset, x_inc);
 	TestVectorY(mDtype, n, y_buffer(), y_offset, y_inc);
 

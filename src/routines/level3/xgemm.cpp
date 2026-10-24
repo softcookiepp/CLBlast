@@ -122,9 +122,9 @@ void Xgemm<T>::DoGemm(const Layout layout, const Transpose a_transpose, const Tr
 	//		matrix A cannot be less than K when rotated, or less than M when not-rotated
 	//		matrix B cannot be less than N when rotated, or less than K when not-rotated
 	//		matrix C cannot be less than N when rotated, or less than M when not-rotated
-	TestMatrixA(a_one, a_two, a_buffer, a_offset, a_ld);
-	TestMatrixB(b_one, b_two, b_buffer, b_offset, b_ld);
-	TestMatrixC(c_one, c_two, c_buffer, c_offset, c_ld);
+	TestMatrixA(mDtype, a_one, a_two, a_buffer(), a_offset, a_ld);
+	TestMatrixB(mDtype, b_one, b_two, b_buffer(), b_offset, b_ld);
+	TestMatrixC(mDtype, c_one, c_two, c_buffer(), c_offset, c_ld);
 
 	// get working sequence
 	

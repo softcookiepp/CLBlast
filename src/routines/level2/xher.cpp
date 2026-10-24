@@ -85,9 +85,9 @@ void Xher<T, U>::DoHer(const Layout layout, const Triangle triangle, const size_
 
 	// Tests the matrix and the vectors for validity
 	if (packed) {
-		TestMatrixAP(n, a_buffer, a_offset);
+		TestMatrixAP(mDtype, n, a_buffer(), a_offset);
 	} else {
-		TestMatrixA(n, n, a_buffer, a_offset, a_ld);
+		TestMatrixA(mDtype, n, n, a_buffer(), a_offset, a_ld);
 	}
 	TestVectorX(mDtype, n, x_buffer(), x_offset, x_inc);
 

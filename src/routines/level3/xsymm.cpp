@@ -45,7 +45,7 @@ void Xsymm<T>::DoSymm(const Layout layout, const Side side, const Triangle trian
 	auto k = (side == Side::kLeft) ? m : n;
 
 	// Checks for validity of the squared A matrix
-	TestMatrixA(k, k, a_buffer, a_offset, a_ld);
+	TestMatrixA(this->mDtype, k, k, a_buffer(), a_offset, a_ld);
 
 	// Determines which kernel to run based on the layout (the Xgemm kernel assumes column-major as
 	// default) and on whether we are dealing with an upper or lower triangle of the symmetric matrix

@@ -85,10 +85,10 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 	const auto k = (side == Side::kLeft) ? m : n;
 
 	// Checks for validity of the triangular A matrix
-	TestMatrixA(k, k, a_buffer, a_offset, a_ld);
+	TestMatrixA(this->mDtype, k, k, a_buffer(), a_offset, a_ld);
 
 	// Checks for validity of the input B matrix
-	TestMatrixB(m, n, b_buffer, b_offset, b_ld);
+	TestMatrixB(this->mDtype, m, n, b_buffer(), b_offset, b_ld);
 	
 	// get the sequence if applicable
 	

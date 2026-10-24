@@ -130,9 +130,9 @@ void Xherk<T, U>::HerkAB(const Layout layout, const Triangle triangle, const Tra
 	// space. Also tests that the leading dimensions of:
 	//		matrix A cannot be less than N when rotated, or less than K when not-rotated
 	//		matrix C cannot be less than N
-	TestMatrixA(a_one, a_two, a_buffer, a_offset, a_ld);
-	TestMatrixB(b_one, b_two, b_buffer, b_offset, b_ld);
-	TestMatrixC(n, n, c_buffer, c_offset, c_ld);
+	TestMatrixA(mDtype, a_one, a_two, a_buffer(), a_offset, a_ld);
+	TestMatrixB(mDtype, b_one, b_two, b_buffer(), b_offset, b_ld);
+	TestMatrixC(mDtype, n, n, c_buffer(), c_offset, c_ld);
 
 	// Calculates the ceiled versions of n and k
 	auto n_ceiled = Ceil(Ceil(n, db_["MWG"]), db_["NWG"]);

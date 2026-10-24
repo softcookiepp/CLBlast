@@ -115,9 +115,9 @@ void Xgemv<T>::MatVec(const Layout layout, const Transpose a_transpose, const si
 
 	// Tests the matrix and the vectors for validity
 	if (packed) {
-		TestMatrixAP(n, a_buffer, a_offset);
+		TestMatrixAP(mDtype, n, a_buffer(), a_offset);
 	} else {
-		TestMatrixA(a_one, a_two, a_buffer, a_offset, a_ld);
+		TestMatrixA(mDtype, a_one, a_two, a_buffer(), a_offset, a_ld);
 	}
 	TestVectorX(mDtype, n_real, x_buffer(), x_offset, x_inc);
 	TestVectorY(mDtype, m_real, y_buffer(), y_offset, y_inc);

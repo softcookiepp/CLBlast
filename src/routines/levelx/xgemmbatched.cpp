@@ -93,9 +93,9 @@ void XgemmBatched<T>::DoGemmBatched(const Layout layout, const Transpose a_trans
 														 a_do_transpose, b_do_transpose, c_do_transpose, a_conjugate, b_conjugate, gemm_kernel_id);
 
 	// Tests the matrices for validity
-	TestBatchedMatrixA(a_one, a_two, a_buffer, a_offsets, a_ld, false);	// don't test for invalid LD
-	TestBatchedMatrixB(b_one, b_two, b_buffer, b_offsets, b_ld, false);	// don't test for invalid LD
-	TestBatchedMatrixC(c_one, c_two, c_buffer, c_offsets, c_ld);
+	TestBatchedMatrixA(this->mDtype, a_one, a_two, a_buffer(), a_offsets, a_ld, false);	// don't test for invalid LD
+	TestBatchedMatrixB(this->mDtype, b_one, b_two, b_buffer(), b_offsets, b_ld, false);	// don't test for invalid LD
+	TestBatchedMatrixC(this->mDtype, c_one, c_two, c_buffer(), c_offsets, c_ld);
 
 	// Upload the scalar arguments to the device
 	auto alphas_device = Buffer<T>(this->mDevice, batch_count);

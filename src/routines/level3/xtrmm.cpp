@@ -45,12 +45,12 @@ void Xtrmm<T>::DoTrmm(const Layout layout, const Side side, const Triangle trian
 	auto k = (side == Side::kLeft) ? m : n;
 
 	// Checks for validity of the triangular A matrix
-	TestMatrixA(k, k, a_buffer, a_offset, a_ld);
+	TestMatrixA(this->mDtype, k, k, a_buffer(), a_offset, a_ld);
 
 	// Checks for validity of the input/output B matrix
 	const auto b_one = (layout == Layout::kRowMajor) ? n : m;
 	const auto b_two = (layout == Layout::kRowMajor) ? m : n;
-	TestMatrixB(b_one, b_two, b_buffer, b_offset, b_ld);
+	TestMatrixB(this->mDtype, b_one, b_two, b_buffer(), b_offset, b_ld);
 
 	// Creates a copy of B to avoid overwriting input in GEMM while computing output
 	const auto b_size = (b_ld * (b_two - 1) + b_one + b_offset);

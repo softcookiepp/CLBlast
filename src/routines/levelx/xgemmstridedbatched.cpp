@@ -140,9 +140,9 @@ void XgemmStridedBatched<T>::DoGemmStridedBatched(const Layout layout, const Tra
 														 a_do_transpose, b_do_transpose, c_do_transpose, a_conjugate, b_conjugate, gemm_kernel_id);
 
 	// Tests the matrices for validity
-	TestStridedBatchedMatrixA(a_one, a_two, a_buffer, a_offset, a_stride, batch_count, a_ld);
-	TestStridedBatchedMatrixB(b_one, b_two, b_buffer, b_offset, b_stride, batch_count, b_ld);
-	TestStridedBatchedMatrixC(c_one, c_two, c_buffer, c_offset, c_stride, batch_count, c_ld);
+	TestStridedBatchedMatrixA(this->mDtype, a_one, a_two, a_buffer(), a_offset, a_stride, batch_count, a_ld);
+	TestStridedBatchedMatrixB(this->mDtype, b_one, b_two, b_buffer(), b_offset, b_stride, batch_count, b_ld);
+	TestStridedBatchedMatrixC(this->mDtype, c_one, c_two, c_buffer(), c_offset, c_stride, batch_count, c_ld);
 
 	// Selects which version of the batched GEMM to run
 	if (do_gemm_direct) {	// single generic kernel

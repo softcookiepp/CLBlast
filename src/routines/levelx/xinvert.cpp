@@ -122,8 +122,8 @@ void Xinvert<T>::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle 
 	}
 
 	// Checks for validity of the source and destination matrices
-	TestMatrixA(n, n, src, offset, ld_src);
-	TestMatrixB(block_size, num_blocks * block_size, dest, 0, block_size);
+	TestMatrixA(mDtype, n, n, src(), offset, ld_src);
+	TestMatrixB(mDtype, block_size, num_blocks * block_size, dest(), 0, block_size);
 
 	// Determines which kernels to run based on the layout (the kernels assume column-major as
 	// default) and on whether we are dealing with an upper or lower triangle of the triangular matrix

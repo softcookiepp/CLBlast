@@ -20,18 +20,17 @@ namespace clblast {
 // =================================================================================================
 
 // See comment at top of file for a description of the class
-template <typename T>
 class Xdotc : public Xdot {
  public:
   // Uses the regular Xdot routine
   using Xdot::DoDot;
 
   // Constructor
-  Xdotc(Queue& queue, EventPointer event, const std::string& name = "DOTC");
+  Xdotc(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "DOTC");
 
   // Templated-precision implementation of the routine
-  void DoDotc(const size_t n, const Buffer<T>& dot_buffer, const size_t dot_offset, const Buffer<T>& x_buffer,
-              const size_t x_offset, const size_t x_inc, const Buffer<T>& y_buffer, const size_t y_offset,
+  void DoDotc(const size_t n, const tart::buffer_ptr& dot_buffer, const size_t dot_offset, const tart::buffer_ptr& x_buffer,
+              const size_t x_offset, const size_t x_inc, const tart::buffer_ptr& y_buffer, const size_t y_offset,
               const size_t y_inc);
 };
 

@@ -266,8 +266,8 @@ StatusCode Dotc(const size_t n, tart::buffer_ptr dot_buffer, const size_t dot_of
 								const size_t y_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xdotc<T>(queue_cpp, event);
-		routine.DoDotc(n, Buffer<T>(dot_buffer), dot_offset, Buffer<T>(x_buffer), x_offset, x_inc, Buffer<T>(y_buffer),
+		auto routine = Xdotc(tart::getDType<T>(), queue_cpp, event);
+		routine.DoDotc(n, dot_buffer, dot_offset, x_buffer, x_offset, x_inc, y_buffer,
 									 y_offset, y_inc);
 		return StatusCode::kSuccess;
 	} catch (...) {

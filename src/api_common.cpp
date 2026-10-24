@@ -78,7 +78,7 @@ void FillCacheForPrecision(Queue& queue) {
 		FillCacheForPrecision<Complex>(queue);
 
 		// Runs all the level 1 set-up functions that don't support all precisions
-		Xdotu<Complex>(queue, nullptr);
+		Xdotu(tart::getDType<Complex>(), queue, nullptr);
 		Xdotc(tart::getDType<Complex>(), queue, nullptr);
 
 		// Runs all the level 2 set-up functions that don't support all precisions

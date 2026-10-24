@@ -21,7 +21,7 @@ namespace clblast {
 
 // Constructor: forwards to base class constructor
 template <typename T>
-Xdotu<T>::Xdotu(Queue& queue, EventPointer event, const std::string& name) : Xdot<T>(queue, event, name) {}
+Xdotu<T>::Xdotu(Queue& queue, EventPointer event, const std::string& name) : Xdot(tart::getDType<T>(), queue, event, name) {}
 
 // =================================================================================================
 
@@ -31,7 +31,7 @@ void Xdotu<T>::DoDotu(const size_t n, const Buffer<T>& dot_buffer, const size_t 
 											const size_t x_offset, const size_t x_inc, const Buffer<T>& y_buffer, const size_t y_offset,
 											const size_t y_inc)
 {
-	DoDot(n, dot_buffer, dot_offset, x_buffer, x_offset, x_inc, y_buffer, y_offset, y_inc, false);
+	DoDot(n, dot_buffer(), dot_offset, x_buffer(), x_offset, x_inc, y_buffer(), y_offset, y_inc, false);
 }
 
 // =================================================================================================

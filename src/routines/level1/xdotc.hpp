@@ -21,10 +21,10 @@ namespace clblast {
 
 // See comment at top of file for a description of the class
 template <typename T>
-class Xdotc : public Xdot<T> {
+class Xdotc : public Xdot {
  public:
   // Uses the regular Xdot routine
-  using Xdot<T>::DoDot;
+  using Xdot::DoDot;
 
   // Constructor
   Xdotc(Queue& queue, EventPointer event, const std::string& name = "DOTC");

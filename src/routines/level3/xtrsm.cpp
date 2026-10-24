@@ -90,8 +90,6 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 	// Checks for validity of the input B matrix
 	TestMatrixB(this->mDtype, m, n, b_buffer(), b_offset, b_ld);
 	
-	// get the sequence if applicable
-	
 
 	// Creates a copy of B to avoid overwriting input in GEMM while computing output
 	const auto b_size = b_ld * (n - 1) + m + b_offset;

@@ -39,7 +39,7 @@ void FillCacheForPrecision(Queue& queue) {
 		Xscal<Type>(queue, nullptr);
 		Xcopy<Type>(queue, nullptr);
 		Xaxpy<Type>(queue, nullptr);
-		Xdot<Type>(queue, nullptr);
+		Xdot(tart::getDType<Type>(), queue, nullptr);
 		Xnrm2<Type>(queue, nullptr);
 		Xasum<Type>(queue, nullptr);
 		Xsum<Type>(queue, nullptr);

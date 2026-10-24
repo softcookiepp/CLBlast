@@ -222,8 +222,8 @@ StatusCode Dot(const size_t n, tart::buffer_ptr dot_buffer, const size_t dot_off
 							 tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xdot<T>(queue_cpp, event);
-		routine.DoDot(n, Buffer<T>(dot_buffer), dot_offset, Buffer<T>(x_buffer), x_offset, x_inc, Buffer<T>(y_buffer),
+		auto routine = Xdot(tart::getDType<T>(), queue_cpp, event);
+		routine.DoDot(n, dot_buffer, dot_offset, x_buffer, x_offset, x_inc, y_buffer,
 									y_offset, y_inc, false);
 		return StatusCode::kSuccess;
 	} catch (...) {

@@ -263,8 +263,8 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	kernel->setArg(0, static_cast<int>(m_ceiled));
 	kernel->setArg(1, static_cast<int>(n_ceiled));
 	kernel->setArg(2, static_cast<int>(k_ceiled));
-	kernel->setArg(3, GetRealArg(alpha));
-	kernel->setArg(4, GetRealArg(beta));
+	setScalarArg(kernel, 3, alpha);
+	setScalarArg(kernel, 4, beta);
 	kernel->setArg(5, a_temp());
 	kernel->setArg(6, b_temp());
 	kernel->setArg(7, c_temp());

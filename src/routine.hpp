@@ -78,6 +78,30 @@ class Routine {
 	// Connection to the database for all the device-specific parameters
 	Databases db_;
 	
+	// Sets kernel argument correctly for complex data types
+	template <typename T>
+	void setScalarArg(const tart::kernel_ptr& kernel, const uint32_t argIndex, const std::complex<T> arg)
+	{
+		if (mDtype == tart::dtypes::complex64)
+			kernel->setArg(argIndex, static_cast<std::complex<float>>(arg));
+		else if (mDtype == tart::dtypes::complex128)
+			kernel->setArg(argIndex, static_cast<std::complex<double>>(arg));
+		else
+			throw std::invalid_argument("data type not implemented");
+	}
+	
+	// Sets kernel argument correctly for non-complex data types
+	template <typename T>
+	void setScalarArg(const tart::kernel_ptr& kernel, const uint32_t argIndex, const T arg)
+	{
+		if (mDtype == tart::dtypes::float16 || mDtype == tart::dtypes::float32)
+			kernel->setArg(argIndex, static_cast<float>(arg));
+		else if (mDtype == tart::dtypes::float64)
+			kernel->setArg(argIndex, static_cast<double>(arg));
+		else
+			throw std::invalid_argument("data type not implemented");
+	}
+	
 #if VULKAN_API
 	std::vector<std::string> mEntryPointNames;
 	static DatabaseKey sFirstDatabaseKey;

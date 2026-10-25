@@ -72,7 +72,7 @@ void Xger<T>::DoGer(const Layout layout, const size_t m, const size_t n, const T
 	// Sets the kernel arguments
 	kernel->setArg(0, static_cast<int>(a_one));
 	kernel->setArg(1, static_cast<int>(a_two));
-	kernel->setArg(2, GetRealArg(alpha));
+	setScalarArg(kernel, 2, alpha);
 	kernel->setArg(3, x_buffer());
 	kernel->setArg(4, static_cast<int>(x_offset));
 	kernel->setArg(5, static_cast<int>(x_inc));

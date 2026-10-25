@@ -105,7 +105,7 @@ void Xher<T, U>::DoHer(const Layout layout, const Triangle triangle, const size_
 	
 	// Sets the kernel arguments
 	kernel->setArg(0, static_cast<int>(n));
-	kernel->setArg(1, GetRealArg(matching_alpha));
+	setScalarArg(kernel, 1, (matching_alpha));
 	kernel->setArg(2, x_buffer());
 	kernel->setArg(3, static_cast<int>(x_offset));
 	kernel->setArg(4, static_cast<int>(x_inc));

@@ -74,12 +74,12 @@ void Xaxpy<T>::DoAxpy(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 		if (use_faster_kernel || use_fastest_kernel)
 		{
 			if (!use_fastest_kernel) kernel->setArg(0, static_cast<int>(n));
-			kernel->setArg(1, GetRealArg(alpha));
+			setScalarArg(kernel, 1, alpha);
 			kernel->setArg(2, x_buffer()->getAddress());
 			kernel->setArg(3, y_buffer()->getAddress());
 		} else {
 			kernel->setArg(0, static_cast<int>(n));
-			kernel->setArg(1, GetRealArg(alpha));
+			setScalarArg(kernel, 1, alpha);
 			kernel->setArg(2, x_buffer()->getAddress() );
 			kernel->setArg(3, static_cast<int>(x_offset));
 			kernel->setArg(4, static_cast<int>(x_inc));
@@ -94,12 +94,12 @@ void Xaxpy<T>::DoAxpy(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 		if (use_faster_kernel || use_fastest_kernel)
 		{
 			if (!use_fastest_kernel) kernel->setArg(0, static_cast<int>(n));
-			kernel->setArg(1, GetRealArg(alpha));
+			setScalarArg(kernel, 1, alpha);
 			kernel->setArg(2, x_buffer());
 			kernel->setArg(3, y_buffer());
 		} else {
 			kernel->setArg(0, static_cast<int>(n));
-			kernel->setArg(1, GetRealArg(alpha));
+			setScalarArg(kernel, 1, alpha);
 			kernel->setArg(2, x_buffer());
 			kernel->setArg(3, static_cast<int>(x_offset));
 			kernel->setArg(4, static_cast<int>(x_inc));

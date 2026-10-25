@@ -72,15 +72,15 @@ void Xhad<T>::DoHad(const size_t n, const T alpha, const Buffer<T>& x_buffer, co
 	// Sets the kernel arguments
 	if (use_faster_kernel || use_fastest_kernel) {
 		kernel->setArg(0, static_cast<int>(n));
-		kernel->setArg(1, GetRealArg(alpha));
-		kernel->setArg(2, GetRealArg(beta));
+		setScalarArg(kernel, 1, alpha);
+		setScalarArg(kernel, 2, (beta));
 		kernel->setArg(3, x_buffer());
 		kernel->setArg(4, y_buffer());
 		kernel->setArg(5, z_buffer());
 	} else {
 		kernel->setArg(0, static_cast<int>(n));
-		kernel->setArg(1, GetRealArg(alpha));
-		kernel->setArg(2, GetRealArg(beta));
+		setScalarArg(kernel, 1, (alpha));
+		setScalarArg(kernel, 2, (beta));
 		kernel->setArg(3, x_buffer());
 		kernel->setArg(4, static_cast<int>(x_offset));
 		kernel->setArg(5, static_cast<int>(x_inc));

@@ -156,8 +156,8 @@ void Xgemv<T>::MatVec(const Layout layout, const Transpose a_transpose, const si
 		// some are unused if fast_kernel or fast_kernel_rot is true
 		kernel->setArg(0, static_cast<int>(m_real));
 		kernel->setArg(1, static_cast<int>(n_real));
-		kernel->setArg(2, GetRealArg(alpha));
-		kernel->setArg(3, GetRealArg(beta));
+		setScalarArg(kernel, 2, alpha);
+		setScalarArg(kernel, 3, beta);
 		//kernel->setArg(4, static_cast<int>(a_rotated));
 		kernel->setArg(5, a_buffer());
 		//kernel->setArg(6, static_cast<int>(a_offset));
@@ -179,8 +179,8 @@ void Xgemv<T>::MatVec(const Layout layout, const Transpose a_transpose, const si
 		// Sets the kernel arguments
 		kernel->setArg(0, static_cast<int>(m_real));
 		kernel->setArg(1, static_cast<int>(n_real));
-		kernel->setArg(2, GetRealArg(alpha));
-		kernel->setArg(3, GetRealArg(beta));
+		setScalarArg(kernel, 2, alpha);
+		setScalarArg(kernel, 3, beta);
 		kernel->setArg(4, static_cast<int>(a_rotated));
 		kernel->setArg(5, a_buffer());
 		kernel->setArg(6, static_cast<int>(a_offset));

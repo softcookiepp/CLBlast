@@ -327,8 +327,8 @@ void Xgemm<T>::GemmDirect(const size_t m, const size_t n, const size_t k, const 
 	kernel->setArg(0, static_cast<int>(m));
 	kernel->setArg(1, static_cast<int>(n));
 	kernel->setArg(2, static_cast<int>(k));
-	kernel->setArg(3, GetRealArg(alpha));
-	kernel->setArg(4, GetRealArg(beta));
+	setScalarArg(kernel, 3, alpha);
+	setScalarArg(kernel, 4, beta);
 	kernel->setArg(5, a_buffer());
 	kernel->setArg(6, static_cast<int>(a_offset));
 	kernel->setArg(7, static_cast<int>(a_ld));

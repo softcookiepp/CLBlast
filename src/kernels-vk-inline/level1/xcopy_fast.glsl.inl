@@ -224,12 +224,17 @@ R"(
 
 // Converts a 'real argument' value to a 'real' value as passed to the kernel. Normally there is no
 // conversion, but half-precision is not supported as kernel argument so it is converted from float.
-#if PRECISION == 16
-	#define real_arg float 
-	#define GetRealArg(x) float16_t(x)
-#else
-	#define real_arg real 
+#if 1
+	#define real_arg real
 	#define GetRealArg(x) real(x)
+#else
+	#if PRECISION == 16
+		#define real_arg float 
+		#define GetRealArg(x) float16_t(x)
+	#else
+		#define real_arg real 
+		#define GetRealArg(x) real(x)
+	#endif
 #endif
 
 //#elif PRECISION == 64
@@ -727,12 +732,17 @@ R"(
 
 // Converts a 'real argument' value to a 'real' value as passed to the kernel. Normally there is no
 // conversion, but half-precision is not supported as kernel argument so it is converted from float.
-#if PRECISION == 16
-	#define real_arg float 
-	#define GetRealArg(x) float16_t(x)
-#else
-	#define real_arg real 
+#if 1
+	#define real_arg real
 	#define GetRealArg(x) real(x)
+#else
+	#if PRECISION == 16
+		#define real_arg float 
+		#define GetRealArg(x) float16_t(x)
+	#else
+		#define real_arg real 
+		#define GetRealArg(x) real(x)
+	#endif
 #endif
 
 //#elif PRECISION == 64

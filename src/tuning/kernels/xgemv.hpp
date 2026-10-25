@@ -124,8 +124,8 @@ void XgemvSetArguments(const int V, Kernel& kernel, const Arguments<T>& args, st
   auto a_rotated = (V == 3) ? 1 : 0;
   kernel.SetArgument(0, static_cast<int>(args.m));
   kernel.SetArgument(1, static_cast<int>(args.n));
-  kernel.SetArgument(2, GetRealArg(args.alpha));
-  kernel.SetArgument(3, GetRealArg(args.beta));
+  kernel.get()->setArgAs(tart::getDType<T>(), 2, (args.alpha));
+  kernel.get()->setArgAs(tart::getDType<T>(), 3, (args.beta));
   kernel.SetArgument(4, a_rotated);
   kernel.SetArgument(5, buffers[2]());  // 2 == A matrix
   kernel.SetArgument(6, 0);

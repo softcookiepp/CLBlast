@@ -96,8 +96,8 @@ LocalMemSizeInfo XaxpyComputeLocalMemSize(const int) {
 // Sets the kernel's arguments
 template <typename T>
 void XaxpySetArguments(const int, Kernel& kernel, const Arguments<T>& args, std::vector<Buffer<T>>& buffers) {
-	//kernel.SetArgument(0, static_cast<int>(args.n));
-	kernel.SetArgument(1, GetRealArg(args.alpha));
+	kernel.SetArgument(0, static_cast<int>(args.n));
+	kernel.get()->setArgAs(tart::getDType<T>(), 1, (args.alpha));
 	kernel.SetArgument(2, buffers[0]());	// 0 == X vector
 	kernel.SetArgument(3, buffers[1]());	// 1 == Y vector
 }

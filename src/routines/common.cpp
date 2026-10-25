@@ -73,7 +73,7 @@ void FillMatrix(const std::shared_ptr<Program> program, const size_t m, const si
 	kernel->setArg(2, static_cast<int>(ld));
 	kernel->setArg(3, static_cast<int>(offset));
 	kernel->setArg(4, dest());
-	kernel->setArg(5, GetRealArg(constant_value));
+	kernel->setArgAs(tart::getDType<T>(), 5, (constant_value));
 	auto local = std::vector<uint32_t>{local_size, 1};
 	auto global = std::vector<uint32_t>{Ceil(m, local_size) / local_size, n};
 	kernel->enqueue(global, {});
@@ -101,7 +101,7 @@ void FillVector(const std::shared_ptr<Program> program, const size_t n, const si
 	kernel->setArg(1, static_cast<int>(inc));
 	kernel->setArg(2, static_cast<int>(offset));
 	kernel->setArg(3, dest());
-	kernel->setArg(4, GetRealArg(constant_value));
+	kernel->setArgAs(tart::getDType<T>(), 4, (constant_value));
 	auto local = std::vector<uint32_t>{local_size};
 	auto global = std::vector<uint32_t>{Ceil(n, local_size) / local_size};
 	kernel->enqueue(global, {});

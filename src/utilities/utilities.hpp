@@ -25,6 +25,7 @@
 #include "utilities/msvc.hpp"  // IWYU pragma: export
 
 namespace clblast {
+
 // =================================================================================================
 
 // Shorthands for half-precision

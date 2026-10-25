@@ -77,7 +77,7 @@ void Xher2<T>::DoHer2(const Layout layout, const Triangle triangle, const size_t
 	
 	// Sets the kernel arguments
 	kernel->setArg(0, static_cast<int>(n));
-	setScalarArg(kernel, 1, (alpha));
+	kernel->setArgAs(mDtype, 1, (alpha));
 	kernel->setArg(2, x_buffer());
 	kernel->setArg(3, static_cast<int>(x_offset));
 	kernel->setArg(4, static_cast<int>(x_inc));

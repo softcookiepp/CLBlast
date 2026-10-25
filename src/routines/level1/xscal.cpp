@@ -75,13 +75,13 @@ void Xscal<T>::DoScal(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 		if (use_fast_kernel)
 		{
 			kernel->setArg(0, static_cast<int>(n));
-			setScalarArg(kernel, 1, (alpha));
+			kernel->setArgAs(mDtype, 1, (alpha));
 			kernel->setArg(2, x_buffer()->getAddress());
 		}
 		else
 		{
 			kernel->setArg(0, static_cast<int>(n));
-			setScalarArg(kernel, 1, (alpha));
+			kernel->setArgAs(mDtype, 1, (alpha));
 			kernel->setArg(2, x_buffer()->getAddress());
 			kernel->setArg(3, static_cast<int>(x_offset));
 			kernel->setArg(4, static_cast<int>(x_inc));
@@ -94,13 +94,13 @@ void Xscal<T>::DoScal(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 		if (use_fast_kernel)
 		{
 			kernel->setArg(0, static_cast<int>(n));
-			setScalarArg(kernel, 1, (alpha));
+			kernel->setArgAs(mDtype, 1, (alpha));
 			kernel->setArg(2, x_buffer());
 		}
 		else
 		{
 			kernel->setArg(0, static_cast<int>(n));
-			setScalarArg(kernel, 1, (alpha));
+			kernel->setArgAs(mDtype, 1, (alpha));
 			kernel->setArg(2, x_buffer());
 			kernel->setArg(3, static_cast<int>(x_offset));
 			kernel->setArg(4, static_cast<int>(x_inc));
@@ -110,11 +110,11 @@ void Xscal<T>::DoScal(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 	// Sets the kernel arguments
 	if (use_fast_kernel) {
 		kernel->setArg(0, static_cast<int>(n));
-		setScalarArg(kernel, 1, (alpha));
+		kernel->setArgAs(mDtype, 1, (alpha));
 		kernel->setArg(2, x_buffer());
 	} else {
 		kernel->setArg(0, static_cast<int>(n));
-		setScalarArg(kernel, 1, (alpha));
+		kernel->setArgAs(mDtype, 1, (alpha));
 		kernel->setArg(2, x_buffer());
 		kernel->setArg(3, static_cast<int>(x_offset));
 		kernel->setArg(4, static_cast<int>(x_inc));

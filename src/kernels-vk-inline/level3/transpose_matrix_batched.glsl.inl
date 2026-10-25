@@ -1,6 +1,3 @@
-#ifndef ROUTINE_GEMMBATCHED
-	#define ROUTINE_GEMMBATCHED
-#endif
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
@@ -136,6 +133,7 @@ R"(
 	layout(constant_id = 12) const int PADTRA_PAD = 0;
 	
 #else
+	#error "everything should be using specialization constants for level3"
 	// For the 'fast' copy kernel
 	#ifndef COPY_DIMX
 		#define COPY_DIMX 8			// Local workgroup size in the first dimension (x)
@@ -425,12 +423,17 @@ R"(
 
 // Converts a 'real argument' value to a 'real' value as passed to the kernel. Normally there is no
 // conversion, but half-precision is not supported as kernel argument so it is converted from float.
-#if PRECISION == 16
-	#define real_arg float 
-	#define GetRealArg(x) float16_t(x)
-#else
-	#define real_arg real 
+#if 1
+	#define real_arg real
 	#define GetRealArg(x) real(x)
+#else
+	#if PRECISION == 16
+		#define real_arg float 
+		#define GetRealArg(x) float16_t(x)
+	#else
+		#define real_arg real 
+		#define GetRealArg(x) real(x)
+	#endif
 #endif
 
 //#elif PRECISION == 64
@@ -822,6 +825,7 @@ R"(
 	layout(constant_id = 12) const int PADTRA_PAD = 0;
 	
 #else
+	#error "everything should be using specialization constants for level3"
 	// For the 'fast' copy kernel
 	#ifndef COPY_DIMX
 		#define COPY_DIMX 8			// Local workgroup size in the first dimension (x)
@@ -987,7 +991,6 @@ void _TransposeMatrix(
 // =================================================================================================
 
 // =================================================================================================
-#if 1//def ROUTINE_GEMMBATCHED
 
 // Batched version of the above
 layout(push_constant) uniform TransposeMatrixBatched
@@ -1025,8 +1028,6 @@ void main()
 #endif
 		alpha, 0, 0, 0);
 }
-
-#endif
 
 // =================================================================================================
 

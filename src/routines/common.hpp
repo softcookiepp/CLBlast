@@ -20,6 +20,7 @@
 #include "database/database.hpp"
 #include "utilities/backend.hpp"
 #include "utilities/utilities.hpp"
+#include "routine.hpp"
 
 namespace clblast {
 // =================================================================================================
@@ -100,7 +101,7 @@ void PadCopyTransposeMatrix(const Databases& db,
 		kernel->setArg(0, static_cast<int>(src_ld));
 		kernel->setArg(1, src());
 		kernel->setArg(2, dest());
-		kernel->setArg(3, GetRealArg(alpha));
+		kernel->setArgAs(tart::getDType<T>(), 3, alpha);
 	} 
 	else
 	{
@@ -114,7 +115,7 @@ void PadCopyTransposeMatrix(const Databases& db,
 		kernel->setArg(7, static_cast<int>(dest_ld));
 		kernel->setArg(8, static_cast<int>(dest_offset));
 		kernel->setArg(9, dest());
-		kernel->setArg(10, GetRealArg(alpha));
+		kernel->setArgAs(tart::getDType<T>(), 10, (alpha));
 		if (pad_kernel)
 		{
 			kernel->setArg(11, static_cast<int>(do_conjugate));

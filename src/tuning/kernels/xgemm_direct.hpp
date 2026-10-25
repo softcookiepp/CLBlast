@@ -141,8 +141,8 @@ void XgemmDirectSetArguments(const int, Kernel& kernel, const Arguments<T>& args
   kernel.SetArgument(0, static_cast<int>(args.m));
   kernel.SetArgument(1, static_cast<int>(args.n));
   kernel.SetArgument(2, static_cast<int>(args.k));
-  kernel.SetArgument(3, GetRealArg(args.alpha));
-  kernel.SetArgument(4, GetRealArg(args.beta));
+  kernel.get()->setArgAs(tart::getDType<T>(), 3, (args.alpha));
+  kernel.get()->setArgAs(tart::getDType<T>(), 4, (args.beta));
   kernel.SetArgument(5, buffers[2]());               // 2 == A matrix
   kernel.SetArgument(6, 0);                          // a_offset
   kernel.SetArgument(7, static_cast<int>(args.k));   // a_ld

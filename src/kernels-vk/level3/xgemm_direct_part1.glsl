@@ -17,7 +17,6 @@
 #define XGEMM_DIRECT_PART1_GLSL
 
 #include "../common.glsl"
-#include "level3.glsl"
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library. Note that all parameters here have a
 // suffix 'D' to denote that they are for the 'direct' version of the GEMM kernel.

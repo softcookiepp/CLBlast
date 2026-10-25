@@ -88,7 +88,7 @@ template <typename T>
 void XgerSetArguments(const int, Kernel& kernel, const Arguments<T>& args, std::vector<Buffer<T>>& buffers) {
   kernel.SetArgument(0, static_cast<int>(args.m));
   kernel.SetArgument(1, static_cast<int>(args.n));
-  kernel.SetArgument(2, GetRealArg(args.alpha));
+  kernel.get()->setArgAs(tart::getDType<T>(), 2, (args.alpha));
   kernel.SetArgument(3, buffers[0]());               // 0 == X vector
   kernel.SetArgument(4, 0);                          // x_offset
   kernel.SetArgument(5, 1);                          // x_increment

@@ -190,8 +190,8 @@ void Xsyrk<T>::SyrkAB(const Layout layout, const Triangle triangle, const Transp
 	// Sets the kernel arguments
 	kernel->setArg(0, static_cast<int>(n_ceiled));
 	kernel->setArg(1, static_cast<int>(k_ceiled));
-	setScalarArg(kernel, 2, (alpha));
-	setScalarArg(kernel, 3, (beta));
+	kernel->setArgAs(mDtype, 2, (alpha));
+	kernel->setArgAs(mDtype, 3, (beta));
 	kernel->setArg(4, a_temp());
 	kernel->setArg(5, b_temp());
 	kernel->setArg(6, c_temp());

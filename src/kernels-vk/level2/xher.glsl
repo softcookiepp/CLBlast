@@ -40,7 +40,7 @@ layout(push_constant) uniform Xher
 
 void main()
 {
-	const real alpha = GetRealArg(arg_alpha);
+	const real alpha = (arg_alpha);
 	const bool is_upper = bool(is_upper);
 	const bool is_rowmajor = bool(is_rowmajor);
 

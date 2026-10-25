@@ -44,7 +44,7 @@ layout(push_constant) uniform CopyPadMatrix
 
 void main()
 {
-	const real alpha = GetRealArg(arg_alpha);
+	const real alpha = (arg_alpha);
 	_CopyPadMatrix(src_one, src_two, src_ld, src_offset,
 		#if USE_BDA
 			src,

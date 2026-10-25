@@ -59,8 +59,8 @@ layout(push_constant) uniform Xhad
 
 void main()
 {
-	const real alpha = GetRealArg(arg_alpha);
-	const real beta = GetRealArg(arg_beta);
+	const real alpha = (arg_alpha);
+	const real beta = (arg_beta);
 	
 	// Loops over the work that needs to be done (allows for an arbitrary number of threads)
 	for (int id = get_global_id(0); id < n; id += get_global_size(0)) {

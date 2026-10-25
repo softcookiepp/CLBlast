@@ -36,7 +36,7 @@ layout(push_constant) uniform FillVector
 
 void main()
 {
-	const real value = GetRealArg(arg_value);
+	const real value = (arg_value);
 	const int tid = get_global_id(0);
 	if (tid < n)
 	{

@@ -340,8 +340,8 @@ shared real xlm[WGS1];
 
 void main()
 {
-	const real alpha = GetRealArg(arg_alpha);
-	const real beta = GetRealArg(arg_beta);
+	const real alpha = (arg_alpha);
+	const real beta = (arg_beta);
 
 	// Local memory for the vector X
 	//__local real xlm[WGS1];

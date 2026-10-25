@@ -154,6 +154,7 @@ void Xinvert<T>::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle 
 	const auto local_invert = std::vector<size_t>{internal_block_size};
 	auto global_invert = std::vector<uint32_t>{num_internal_blocks * internal_block_size};
 	global_invert[0] = global_invert[0] / local_invert[0];
+	
 	kernel->enqueue(global_invert, {});
 	if (internal_block_size == block_size) {
 		//event_wait_list.push_back(base_kernel_event);

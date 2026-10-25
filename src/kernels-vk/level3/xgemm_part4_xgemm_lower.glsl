@@ -35,8 +35,8 @@ layout(push_constant, std430) uniform XgemmLower
 
 void main()
 {
-	const real alpha = GetRealArg(arg_alpha);
-	const real beta = GetRealArg(arg_beta);
+	const real alpha = (arg_alpha);
+	const real beta = (arg_beta);
 
 	// Skip these threads if they do not contain threads contributing to the lower-triangle
 	if (GetGroupID1()*NWG > (GetGroupID0() + 1)*MWG) {

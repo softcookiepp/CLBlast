@@ -18,6 +18,9 @@
 #define COPY_MATRIX_IMPL_GLSL
 
 #include "../common.glsl"
+#ifndef LEVEL3_USE_SPEC
+	#define LEVEL3_USE_SPEC 1
+#endif
 #include "level3.glsl"
 // =================================================================================================
 

@@ -73,8 +73,8 @@ void XgemmDirect(const int kSizeM, const int kSizeN, const int kSizeK, const rea
 		const int a_transpose, const int b_transpose, const int c_transpose,
 		const int a_conjugate, const int b_conjugate)
 {
-	const real alpha = GetRealArg(arg_alpha);
-	const real beta = GetRealArg(arg_beta);
+	const real alpha = (arg_alpha);
+	const real beta = (arg_beta);
 
 	// Extra pointers to scalar versions of global memory
 #if USE_BDA

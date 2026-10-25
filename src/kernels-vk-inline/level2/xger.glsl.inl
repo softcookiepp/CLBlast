@@ -219,25 +219,9 @@ R"(
 	//
 #endif
 
-// Converts a 'real argument' value to a 'real' value as passed to the kernel. Normally there is no
-// conversion, but half-precision is not supported as kernel argument so it is converted from float.
-#if 1
-	#define real_arg real
-	#define GetRealArg(x) real(x)
-#else
-	#if PRECISION == 16
-		#define real_arg float 
-		#define GetRealArg(x) float16_t(x)
-	#else
-		#define real_arg real 
-		#define GetRealArg(x) real(x)
-	#endif
-#endif
-
-//#elif PRECISION == 64
-//	// lets see if this makes our life easier...
-//	#define real_arg float
-//	#define GetRealArg(x) double(x)
+// Vulkan will let you put anything in the push constants, so there is no point in real_arg existing anymore.
+// It will be removed shortly
+#define real_arg real
 
 // Pointers to local memory objects (using a define because CUDA doesn't need them)
 #ifndef LOCAL_PTR
@@ -759,7 +743,7 @@ layout(push_constant) uniform Xger
 
 void main()
 {
-	const real alpha = GetRealArg(arg_alpha);
+	const real alpha = (arg_alpha);
 
 	// Register storage for X and Y
 	real xvalues[WPT];

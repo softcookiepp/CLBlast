@@ -45,7 +45,7 @@ layout(push_constant, std430) uniform Xher2
 
 void main()
 {
-	const real alpha = GetRealArg(arg_alpha);
+	const real alpha = (arg_alpha);
 
 	// Register storage for X and Y
 	real xvalues[WPT];

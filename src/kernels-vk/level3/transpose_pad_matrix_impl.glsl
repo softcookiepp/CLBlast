@@ -19,6 +19,9 @@
 #define TRANSPOSE_PAD_MATRIX_IMPL
 
 #include "../common.glsl"
+#ifndef LEVEL3_USE_SPEC
+	#define LEVEL3_USE_SPEC 1
+#endif
 #include "level3.glsl"
 // =================================================================================================
 

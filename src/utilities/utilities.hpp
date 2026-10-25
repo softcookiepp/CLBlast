@@ -340,21 +340,6 @@ void PopulateVector(std::vector<T>& vector, std::mt19937& mt, std::uniform_real_
 
 // =================================================================================================
 
-// Converts a 'real' value to a 'real argument' value to be passed to a kernel. Normally there is
-// no conversion, but half-precision is not supported as kernel argument so it is converted to float.
-template <typename T>
-struct RealArg {
-  using Type = T;
-};
-template <>
-struct RealArg<half> {
-  using Type = float;
-};
-template <typename T>
-typename RealArg<T>::Type GetRealArg(const T value);
-
-// =================================================================================================
-
 // Rounding functions
 size_t CeilDiv(const size_t x, const size_t y);
 size_t Ceil(const size_t x, const size_t y);

@@ -477,38 +477,6 @@ void PopulateVector(std::vector<tart::float16_t>& vector, std::mt19937& mt, std:
 
 // =================================================================================================
 
-// Converts a 'real' value to a 'real argument' value to be passed to a kernel. Normally there is
-// no conversion, but half-precision is not supported as kernel argument so it is converted to float.
-template <>
-typename RealArg<tart::float16_t>::Type GetRealArg(const tart::float16_t value) {
-	return tart::toFloat(value);
-}
-template <>
-typename RealArg<float>::Type GetRealArg(const float value) {
-	return value;
-}
-#if 0
-template <>
-typename RealArg<double>::Type GetRealArg(const double value) {
-	return static_cast<float>(value);
-}
-#else
-template <>
-typename RealArg<double>::Type GetRealArg(const double value) {
-	return value;
-}
-#endif
-template <>
-typename RealArg<float2>::Type GetRealArg(const float2 value) {
-	return value;
-}
-template <>
-typename RealArg<double2>::Type GetRealArg(const double2 value) {
-	return value;
-}
-
-// =================================================================================================
-
 // Rounding functions performing ceiling and division operations
 size_t CeilDiv(const size_t x, const size_t y) { return 1 + ((x - 1) / y); }
 size_t Ceil(const size_t x, const size_t y) { return CeilDiv(x, y) * y; }

@@ -54,7 +54,6 @@
 #define INVERT_DIAGONAL_BLOCKS_PART1_TRIPLE_MATMUL_GLSL
 
 #include "../common.glsl"
-#include "level3.glsl"
 // =================================================================================================
 #if 1//defined(ROUTINE_INVERT)
 

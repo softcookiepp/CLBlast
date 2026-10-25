@@ -39,7 +39,7 @@ layout(push_constant) uniform XaxpyFastest
 };
 void main()
 {
-	const real alpha = GetRealArg(arg_alpha);
+	const real alpha = (arg_alpha);
 
 	[[unroll]]
 	for (int _w = 0; _w < WPT; _w += 1)

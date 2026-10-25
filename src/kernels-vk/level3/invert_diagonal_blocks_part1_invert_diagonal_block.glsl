@@ -52,7 +52,6 @@
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
 #include "../common.glsl"
-#include "level3.glsl"
 // =================================================================================================
 #if 1//defined(ROUTINE_INVERT)
 

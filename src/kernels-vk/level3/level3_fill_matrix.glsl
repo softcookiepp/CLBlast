@@ -88,7 +88,7 @@ layout(push_constant) uniform FillMatrix
 };
 void main()
 {
-	const real value = GetRealArg(arg_value);
+	const real value = (arg_value);
 	const int id_one = get_global_id(0);
 	const int id_two = get_global_id(1);
 	if (id_one < m && id_two < n) {

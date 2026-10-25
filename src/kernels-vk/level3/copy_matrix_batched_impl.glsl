@@ -17,6 +17,9 @@
 #ifndef COPY_MATRIX_BATCHED_IMPL_GLSL
 #define COPY_MATRIX_BATCHED_IMPL_GLSL
 #include "../common.glsl"
+#ifndef LEVEL3_USE_SPEC
+	#define LEVEL3_USE_SPEC 1
+#endif
 #include "level3.glsl"
 // =================================================================================================
 

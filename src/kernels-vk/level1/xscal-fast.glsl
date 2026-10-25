@@ -39,7 +39,7 @@ layout(push_constant, std430) uniform XscalFast
 // XscalFast
 void main()
 {
-	const real alpha = GetRealArg(arg_alpha);
+	const real alpha = (arg_alpha);
 	for (int _w = 0; _w < WPT; _w += 1)
 	{
 		const int id = _w*get_global_size(0) + get_global_id(0);

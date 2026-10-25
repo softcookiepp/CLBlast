@@ -18,6 +18,9 @@
 //R"(
 #define LEVEL3_USE_SPEC 1
 #include "level3.glsl"
+#ifndef LEVEL3_USE_SPEC
+	#define LEVEL3_USE_SPEC 1
+#endif
 #include "transpose_matrix_batched_impl.glsl"
 // =================================================================================================
 

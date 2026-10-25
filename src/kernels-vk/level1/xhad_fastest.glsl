@@ -56,8 +56,8 @@ void main()
 {
 	if (!(n % VW == 0 && n % WPT == 0 && n % WGS == 0) ) return;
 	
-	const real alpha = GetRealArg(arg_alpha);
-	const real beta = GetRealArg(arg_beta);
+	const real alpha = (arg_alpha);
+	const real beta = (arg_beta);
 
 	[[unroll]]
 	for (int _w = 0; _w < WPT; _w += 1)

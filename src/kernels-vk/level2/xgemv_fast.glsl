@@ -95,8 +95,8 @@ void main()
 	if (!(m % WGS2 == 0 && n % WGS2 == 0 && a_ld % VW2 == 0)) return;
 	
 	
-	const real alpha = GetRealArg(arg_alpha);
-	const real beta = GetRealArg(arg_beta);
+	const real alpha = (arg_alpha);
+	const real beta = (arg_beta);
 
 	// Local memory for the vector X
 	//__local real xlm[WGS2];

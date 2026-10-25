@@ -37,8 +37,8 @@ layout(push_constant, std430) uniform Xgemm
 
 void main()
 {
-	const real alpha = GetRealArg(arg_alpha);
-	const real beta = GetRealArg(arg_beta);
+	const real alpha = (arg_alpha);
+	const real beta = (arg_beta);
 
 	// Adds the offsets (in case of use of a single temporary buffer for A, B, and C)
 	#if USE_BDA

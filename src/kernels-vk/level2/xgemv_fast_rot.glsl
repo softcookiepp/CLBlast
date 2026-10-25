@@ -97,8 +97,8 @@ void main()
 {
 	if ( !(m % WGS3 == 0 && n % WGS3 == 0 && a_ld % VW3 == 0) ) return;
 	
-	const real alpha = GetRealArg(arg_alpha);
-	const real beta = GetRealArg(arg_beta);
+	const real alpha = (arg_alpha);
+	const real beta = (arg_beta);
 
 	const int lid = int(gl_LocalInvocationID[0]);
 	const int lid_mod = lid % (WPT3/VW3);

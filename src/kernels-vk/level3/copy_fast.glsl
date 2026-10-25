@@ -55,7 +55,7 @@ void main()
 {
 	if (ld % COPY_VW != 0) return;
 
-	const real alpha = GetRealArg(arg_alpha);
+	const real alpha = (arg_alpha);
 	UNROLL(COPY_WPT)
 	for (int _w_one = 0; _w_one < COPY_WPT; _w_one += 1) {
 		const int id_one = get_global_id(0);

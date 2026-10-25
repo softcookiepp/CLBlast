@@ -55,8 +55,8 @@ void main()
 {
 	if (!(n % VW == 0 && n % WPT == 0)) return;
 	
-	const real alpha = GetRealArg(arg_alpha);
-	const real beta = GetRealArg(arg_beta);
+	const real alpha = (arg_alpha);
+	const real beta = (arg_beta);
 
 	const int num_desired_threads = n / (VW * WPT);
 

@@ -45,7 +45,7 @@ layout(push_constant) uniform Xaxpy
 
 void main()
 {
-	const real alpha = GetRealArg(arg_alpha);
+	const real alpha = (arg_alpha);
 
 	// Loops over the work that needs to be done (allows for an arbitrary number of threads)
 	for (int id = get_global_id(0); id < n; id += get_global_size(0))

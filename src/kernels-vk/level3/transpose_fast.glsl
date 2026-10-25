@@ -58,7 +58,7 @@ shared realT tile[TRA_WPT*TRA_DIM][TRA_DIM + TRA_PAD];
 
 void main()
 {
-	const real alpha = GetRealArg(arg_alpha);
+	const real alpha = (arg_alpha);
 
 	// Sets the group identifiers. They might be 'shuffled' around to distribute work in a different
 	// way over workgroups, breaking memory-bank dependencies.

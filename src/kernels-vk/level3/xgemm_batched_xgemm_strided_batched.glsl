@@ -41,8 +41,8 @@ layout(push_constant, std430) uniform XgemmStridedBatched
 void main()
 {
 	const int batch = get_group_id(2);
-	const real alpha = GetRealArg(arg_alpha);
-	const real beta = GetRealArg(arg_beta);
+	const real alpha = (arg_alpha);
+	const real beta = (arg_beta);
 
 	// Sets the offsets
 	const int a_offset = batch * a_one * a_two;

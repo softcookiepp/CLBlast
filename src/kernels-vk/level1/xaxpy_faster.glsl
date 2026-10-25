@@ -112,7 +112,7 @@ layout(push_constant) uniform XaxpyFaster
 
 void main()
 {
-	const real alpha = GetRealArg(arg_alpha);
+	const real alpha = (arg_alpha);
 
 	const int num_usefull_threads = n / (VW * WPT);
 	if (get_global_id(0) < num_usefull_threads) {

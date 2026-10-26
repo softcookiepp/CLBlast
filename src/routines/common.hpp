@@ -23,18 +23,12 @@
 #include "routine.hpp"
 
 namespace clblast {
-// =================================================================================================
-
-// Enqueues a kernel, waits for completion, and checks for errors
-void RunKernel(Kernel& kernel, Queue& queue, const Device& device, std::vector<size_t> global,
-							 const std::vector<size_t>& local);
 
 // =================================================================================================
 
 // Sets all elements of a matrix to a constant value
-template <typename T>
-void FillMatrix(const std::shared_ptr<Program> program, const size_t m, const size_t n, const size_t ld,
-								const size_t offset, const Buffer<T>& dest, const T constant_value, const size_t local_size);
+void FillMatrix(const tart::DType& dtype, const std::shared_ptr<Program> program, const size_t m, const size_t n, const size_t ld,
+	const size_t offset, const tart::buffer_ptr& dest, const tart::Scalar constant_value, const size_t local_size);
 
 // Sets all elements of a vector to a constant value
 template <typename T>

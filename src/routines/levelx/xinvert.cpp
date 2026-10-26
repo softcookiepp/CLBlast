@@ -135,8 +135,8 @@ void Xinvert<T>::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle 
 	
 
 	// Fills the output buffer with zeros
-	FillMatrix(program_, block_size,
-						 num_blocks * block_size, block_size, 0, dest, ConstantZero<T>(), 16);
+	FillMatrix(mDtype, program_, block_size,
+						 num_blocks * block_size, block_size, 0, dest(), ConstantZero<T>(), 16);
 	//event_wait_list.push_back(fill_matrix_event);
 	//device_()->enqueueBarrier({dest()});
 

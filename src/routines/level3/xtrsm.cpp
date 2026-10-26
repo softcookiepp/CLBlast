@@ -108,8 +108,8 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 	auto a_inv_buffer = Buffer<T>(this->mDevice, a_inv_size);
 
 	// Fills the output buffer with zeros
-	FillMatrix(program_, x_one, x_two, x_ld, x_offset,
-						 x_buffer, ConstantZero<T>(), 16);
+	FillMatrix(this->mDtype, program_, x_one, x_two, x_ld, x_offset,
+						 x_buffer(), ConstantZero<T>(), 16);
 
 	// Inverts the diagonal blocks
 	auto inverter = Xinvert<T>(queue_, nullptr);

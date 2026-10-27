@@ -43,8 +43,8 @@ Xaxpy<T>::Xaxpy(Queue& queue, EventPointer event, const std::string& name)
 
 // The main routine
 template <typename T>
-void Xaxpy<T>::DoAxpy(const size_t n, const T alpha, const Buffer<T>& x_buffer, const size_t x_offset,
-											const size_t x_inc, const Buffer<T>& y_buffer, const size_t y_offset, const size_t y_inc)
+void Xaxpy<T>::DoAxpy(const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& x_buffer, const size_t x_offset,
+	const size_t x_inc, const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc)
 {
 	// Makes sure all dimensions are larger than zero
 	if (n == 0) {
@@ -52,8 +52,8 @@ void Xaxpy<T>::DoAxpy(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 	}
 
 	// Tests the vectors for validity
-	TestVectorX(mDtype, n, x_buffer(), x_offset, x_inc);
-	TestVectorY(mDtype, n, y_buffer(), y_offset, y_inc);
+	TestVectorX(mDtype, n, x_buffer, x_offset, x_inc);
+	TestVectorY(mDtype, n, y_buffer, y_offset, y_inc);
 
 	// Determines whether or not the fast-version can be used
 	const auto use_faster_kernel = (x_offset == 0) && (x_inc == 1) && (y_offset == 0) && (y_inc == 1) && IsMultiple(n, db_["WPT"] * db_["VW"]);
@@ -75,15 +75,15 @@ void Xaxpy<T>::DoAxpy(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 		{
 			if (!use_fastest_kernel) kernel->setArg(0, static_cast<int>(n));
 			kernel->setArgAs(mDtype, 1, alpha);
-			kernel->setArg(2, x_buffer()->getAddress());
-			kernel->setArg(3, y_buffer()->getAddress());
+			kernel->setArg(2, x_buffer->getAddress());
+			kernel->setArg(3, y_buffer->getAddress());
 		} else {
 			kernel->setArg(0, static_cast<int>(n));
 			kernel->setArgAs(mDtype, 1, alpha);
-			kernel->setArg(2, x_buffer()->getAddress() );
+			kernel->setArg(2, x_buffer->getAddress() );
 			kernel->setArg(3, static_cast<int>(x_offset));
 			kernel->setArg(4, static_cast<int>(x_inc));
-			kernel->setArg(5, y_buffer()->getAddress() );
+			kernel->setArg(5, y_buffer->getAddress() );
 			kernel->setArg(6, static_cast<int>(y_offset));
 			kernel->setArg(7, static_cast<int>(y_inc));
 		}
@@ -95,15 +95,15 @@ void Xaxpy<T>::DoAxpy(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 		{
 			if (!use_fastest_kernel) kernel->setArg(0, static_cast<int>(n));
 			kernel->setArgAs(mDtype, 1, alpha);
-			kernel->setArg(2, x_buffer());
-			kernel->setArg(3, y_buffer());
+			kernel->setArg(2, x_buffer);
+			kernel->setArg(3, y_buffer);
 		} else {
 			kernel->setArg(0, static_cast<int>(n));
 			kernel->setArgAs(mDtype, 1, alpha);
-			kernel->setArg(2, x_buffer());
+			kernel->setArg(2, x_buffer);
 			kernel->setArg(3, static_cast<int>(x_offset));
 			kernel->setArg(4, static_cast<int>(x_inc));
-			kernel->setArg(5, y_buffer());
+			kernel->setArg(5, y_buffer);
 			kernel->setArg(6, static_cast<int>(y_offset));
 			kernel->setArg(7, static_cast<int>(y_inc));
 		}

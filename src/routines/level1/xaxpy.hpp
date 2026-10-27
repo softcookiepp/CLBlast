@@ -27,8 +27,8 @@ class Xaxpy : public Routine {
   Xaxpy(Queue& queue, EventPointer event, const std::string& name = "AXPY");
 
   // Templated-precision implementation of the routine
-  void DoAxpy(const size_t n, const T alpha, const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc,
-              const Buffer<T>& y_buffer, const size_t y_offset, const size_t y_inc);
+  void DoAxpy(const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
+              const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc);
 };
 
 // =================================================================================================

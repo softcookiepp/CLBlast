@@ -20,14 +20,13 @@ namespace clblast {
 // =================================================================================================
 
 // See comment at top of file for a description of the class
-template <typename T>
 class Xnrm2 : public Routine {
  public:
   // Constructor
-  Xnrm2(Queue& queue, EventPointer event, const std::string& name = "NRM2");
+  Xnrm2(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "NRM2");
 
   // Templated-precision implementation of the routine
-  void DoNrm2(const size_t n, const Buffer<T>& nrm2_buffer, const size_t nrm2_offset, const Buffer<T>& x_buffer,
+  void DoNrm2(const size_t n, const tart::buffer_ptr& nrm2_buffer, const size_t nrm2_offset, const tart::buffer_ptr& x_buffer,
               const size_t x_offset, const size_t x_inc);
 };
 

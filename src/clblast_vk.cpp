@@ -289,8 +289,8 @@ StatusCode Nrm2(const size_t n, tart::buffer_ptr nrm2_buffer, const size_t nrm2_
 								const size_t x_offset, const size_t x_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xnrm2<T>(queue_cpp, event);
-		routine.DoNrm2(n, Buffer<T>(nrm2_buffer), nrm2_offset, Buffer<T>(x_buffer), x_offset, x_inc);
+		auto routine = Xnrm2(tart::getDType<T>(), queue_cpp, event);
+		routine.DoNrm2(n, nrm2_buffer, nrm2_offset, x_buffer, x_offset, x_inc);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();

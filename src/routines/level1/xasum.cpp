@@ -65,7 +65,7 @@ void Xasum<T>::DoAsum(const size_t n, const Buffer<T>& asum_buffer, const size_t
 	
 	// Creates the buffer for intermediate values
 	auto temp_size = 2 * db_["WGS2"];
-	auto temp_buffer = Buffer<T>(this->mDevice, temp_size);
+	auto temp_buffer = this->mDevice->allocateBuffer(temp_size*this->mDtype.size());
 
 	// Sets the kernel arguments
 	#if VULKAN_USE_BDA
@@ -78,15 +78,15 @@ void Xasum<T>::DoAsum(const size_t n, const Buffer<T>& asum_buffer, const size_t
 		kernel1->setArg(2, static_cast<int>(x_offset));
 		kernel1->setArg(3, static_cast<int>(x_inc));
 		if (meta.bda)
-			kernel1->setArg(4, temp_buffer()->getAddress());
+			kernel1->setArg(4, temp_buffer->getAddress());
 		else
-			kernel1->setArg(4, temp_buffer());
+			kernel1->setArg(4, temp_buffer);
 	#else
 		kernel1->setArg(0, static_cast<int>(n));
 		kernel1->setArg(1, x_buffer());
 		kernel1->setArg(2, static_cast<int>(x_offset));
 		kernel1->setArg(3, static_cast<int>(x_inc));
-		kernel1->setArg(4, temp_buffer());
+		kernel1->setArg(4, temp_buffer);
 	#endif
 
 	// Launches the main kernel
@@ -96,17 +96,17 @@ void Xasum<T>::DoAsum(const size_t n, const Buffer<T>& asum_buffer, const size_t
 #if VULKAN_USE_BDA
 	if (meta.bda)
 	{
-		kernel2->setArg(0, temp_buffer()->getAddress());
+		kernel2->setArg(0, temp_buffer->getAddress());
 		kernel2->setArg(1, asum_buffer()->getAddress());
 	}
 	else
 	{
-		kernel2->setArg(0, temp_buffer());
+		kernel2->setArg(0, temp_buffer);
 		kernel2->setArg(1, asum_buffer());
 	}
 	kernel2->setArg(2, static_cast<int>(asum_offset));
 #else
-	kernel2->setArg(0, temp_buffer());
+	kernel2->setArg(0, temp_buffer);
 	kernel2->setArg(1, asum_buffer());
 	kernel2->setArg(2, static_cast<int>(asum_offset));
 #endif

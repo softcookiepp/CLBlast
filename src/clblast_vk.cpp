@@ -197,7 +197,7 @@ StatusCode Axpy(const size_t n, const T alpha, const tart::buffer_ptr x_buffer, 
 								tart::buffer_ptr y_buffer, const size_t y_offset, const size_t y_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xaxpy<T>(queue_cpp, event);
+		auto routine = Xaxpy(tart::getDType<T>(), queue_cpp, event);
 		routine.DoAxpy(n, alpha, x_buffer, x_offset, x_inc, y_buffer, y_offset, y_inc);
 		return StatusCode::kSuccess;
 	} catch (...) {

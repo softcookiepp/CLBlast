@@ -24,9 +24,8 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-template <typename T>
-Xaxpy<T>::Xaxpy(Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Xaxpy"}, precisionToDataType(PrecisionValue<T>()), {},
+Xaxpy::Xaxpy(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
+		: Routine(queue, event, name, {"Xaxpy"}, dtype, {},
 							{
 	#include "../../kernels-vk-inline/level1/xaxpy.glsl.inl"
 	,
@@ -42,8 +41,7 @@ Xaxpy<T>::Xaxpy(Queue& queue, EventPointer event, const std::string& name)
 // =================================================================================================
 
 // The main routine
-template <typename T>
-void Xaxpy<T>::DoAxpy(const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& x_buffer, const size_t x_offset,
+void Xaxpy::DoAxpy(const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& x_buffer, const size_t x_offset,
 	const size_t x_inc, const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc)
 {
 	// Makes sure all dimensions are larger than zero
@@ -126,15 +124,6 @@ void Xaxpy<T>::DoAxpy(const size_t n, const tart::Scalar& alpha, const tart::buf
 	}
 	kernel->enqueue(global, {db_["WGS"], db_["WPT"]});
 }
-
-// =================================================================================================
-
-// Compiles the templated class
-template class Xaxpy<half>;
-template class Xaxpy<float>;
-template class Xaxpy<double>;
-template class Xaxpy<float2>;
-template class Xaxpy<double2>;
 
 // =================================================================================================
 }	// namespace clblast

@@ -1,7 +1,7 @@
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
-//   Cedric Nugteren <www.cedricnugteren.nl>
+//	 Cedric Nugteren <www.cedricnugteren.nl>
 //
 // This file implements the Xsbmv routine. It is based on the generalized mat-vec multiplication
 // routine (Xgemv). The Xsbmv class inherits from the templated class Xgemv, allowing it to call the
@@ -25,21 +25,21 @@ namespace clblast {
 template <typename T>
 class Xsbmv : public Xgemv<T> {
  public:
-  // Uses the generic matrix-vector routine
-  using Xgemv<T>::MatVec;
+	// Uses the generic matrix-vector routine
+	using Xgemv<T>::MatVec;
 
-  // Constructor
-  Xsbmv(Queue& queue, EventPointer event, const std::string& name = "SBMV");
+	// Constructor
+	Xsbmv(Queue& queue, EventPointer event, const std::string& name = "SBMV");
 
-  // Templated-precision implementation of the routine
-  void DoSbmv(const Layout layout, const Triangle triangle, const size_t n, const size_t k, const T alpha,
-              const Buffer<T>& a_buffer, const size_t a_offset, const size_t a_ld, const Buffer<T>& x_buffer,
-              const size_t x_offset, const size_t x_inc, const T beta, const Buffer<T>& y_buffer, const size_t y_offset,
-              const size_t y_inc);
+	// Templated-precision implementation of the routine
+	void DoSbmv(const Layout layout, const Triangle triangle, const size_t n, const size_t k, const T alpha,
+							const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& x_buffer,
+							const size_t x_offset, const size_t x_inc, const T beta, const tart::buffer_ptr& y_buffer, const size_t y_offset,
+							const size_t y_inc);
 };
 
 // =================================================================================================
-}  // namespace clblast
+}	// namespace clblast
 
 // CLBLAST_ROUTINES_XSBMV_H_
 #endif

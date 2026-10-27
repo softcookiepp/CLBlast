@@ -34,7 +34,7 @@ class Xtpmv : public Xgemv<T> {
 
 	// Templated-precision implementation of the routine
 	void DoTpmv(const Layout layout, const Triangle triangle, const Transpose a_transpose, const Diagonal diagonal,
-							const size_t n, const Buffer<T>& ap_buffer, const size_t ap_offset, const Buffer<T>& x_buffer,
+							const size_t n, const tart::buffer_ptr& ap_buffer, const size_t ap_offset, const tart::buffer_ptr& x_buffer,
 							const size_t x_offset, const size_t x_inc);
 };
 

@@ -444,8 +444,8 @@ StatusCode Gemv(const Layout layout, const Transpose a_transpose, const size_t m
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = Xgemv<T>(queue_cpp, event);
-		routine.DoGemv(layout, a_transpose, m, n, alpha, Buffer<T>(a_buffer), a_offset, a_ld, Buffer<T>(x_buffer), x_offset,
-									 x_inc, beta, Buffer<T>(y_buffer), y_offset, y_inc);
+		routine.DoGemv(layout, a_transpose, m, n, alpha, a_buffer, a_offset, a_ld, x_buffer, x_offset,
+									 x_inc, beta, y_buffer, y_offset, y_inc);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -481,8 +481,8 @@ StatusCode Gbmv(const Layout layout, const Transpose a_transpose, const size_t m
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = Xgbmv<T>(queue_cpp, event);
-		routine.DoGbmv(layout, a_transpose, m, n, kl, ku, alpha, Buffer<T>(a_buffer), a_offset, a_ld, Buffer<T>(x_buffer),
-									 x_offset, x_inc, beta, Buffer<T>(y_buffer), y_offset, y_inc);
+		routine.DoGbmv(layout, a_transpose, m, n, kl, ku, alpha, (a_buffer), a_offset, a_ld, (x_buffer),
+									 x_offset, x_inc, beta, (y_buffer), y_offset, y_inc);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -518,8 +518,8 @@ StatusCode Hemv(const Layout layout, const Triangle triangle, const size_t n, co
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = Xhemv<T>(queue_cpp, event);
-		routine.DoHemv(layout, triangle, n, alpha, Buffer<T>(a_buffer), a_offset, a_ld, Buffer<T>(x_buffer), x_offset,
-									 x_inc, beta, Buffer<T>(y_buffer), y_offset, y_inc);
+		routine.DoHemv(layout, triangle, n, alpha, (a_buffer), a_offset, a_ld, (x_buffer), x_offset,
+									 x_inc, beta, (y_buffer), y_offset, y_inc);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -543,8 +543,8 @@ StatusCode Hbmv(const Layout layout, const Triangle triangle, const size_t n, co
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = Xhbmv<T>(queue_cpp, event);
-		routine.DoHbmv(layout, triangle, n, k, alpha, Buffer<T>(a_buffer), a_offset, a_ld, Buffer<T>(x_buffer), x_offset,
-									 x_inc, beta, Buffer<T>(y_buffer), y_offset, y_inc);
+		routine.DoHbmv(layout, triangle, n, k, alpha, (a_buffer), a_offset, a_ld, (x_buffer), x_offset,
+									 x_inc, beta, (y_buffer), y_offset, y_inc);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -567,8 +567,8 @@ StatusCode Hpmv(const Layout layout, const Triangle triangle, const size_t n, co
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = Xhpmv<T>(queue_cpp, event);
-		routine.DoHpmv(layout, triangle, n, alpha, Buffer<T>(ap_buffer), ap_offset, Buffer<T>(x_buffer), x_offset, x_inc,
-									 beta, Buffer<T>(y_buffer), y_offset, y_inc);
+		routine.DoHpmv(layout, triangle, n, alpha, (ap_buffer), ap_offset, (x_buffer), x_offset, x_inc,
+									 beta, (y_buffer), y_offset, y_inc);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -590,8 +590,8 @@ StatusCode Symv(const Layout layout, const Triangle triangle, const size_t n, co
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = Xsymv<T>(queue_cpp, event);
-		routine.DoSymv(layout, triangle, n, alpha, Buffer<T>(a_buffer), a_offset, a_ld, Buffer<T>(x_buffer), x_offset,
-									 x_inc, beta, Buffer<T>(y_buffer), y_offset, y_inc);
+		routine.DoSymv(layout, triangle, n, alpha, (a_buffer), a_offset, a_ld, (x_buffer), x_offset,
+									 x_inc, beta, (y_buffer), y_offset, y_inc);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -618,8 +618,8 @@ StatusCode Sbmv(const Layout layout, const Triangle triangle, const size_t n, co
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = Xsbmv<T>(queue_cpp, event);
-		routine.DoSbmv(layout, triangle, n, k, alpha, Buffer<T>(a_buffer), a_offset, a_ld, Buffer<T>(x_buffer), x_offset,
-									 x_inc, beta, Buffer<T>(y_buffer), y_offset, y_inc);
+		routine.DoSbmv(layout, triangle, n, k, alpha, (a_buffer), a_offset, a_ld, (x_buffer), x_offset,
+									 x_inc, beta, (y_buffer), y_offset, y_inc);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -646,8 +646,8 @@ StatusCode Spmv(const Layout layout, const Triangle triangle, const size_t n, co
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = Xspmv<T>(queue_cpp, event);
-		routine.DoSpmv(layout, triangle, n, alpha, Buffer<T>(ap_buffer), ap_offset, Buffer<T>(x_buffer), x_offset, x_inc,
-									 beta, Buffer<T>(y_buffer), y_offset, y_inc);
+		routine.DoSpmv(layout, triangle, n, alpha, (ap_buffer), ap_offset, (x_buffer), x_offset, x_inc,
+									 beta, (y_buffer), y_offset, y_inc);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -671,7 +671,7 @@ StatusCode Trmv(const Layout layout, const Triangle triangle, const Transpose a_
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = Xtrmv<T>(queue_cpp, event);
-		routine.DoTrmv(layout, triangle, a_transpose, diagonal, n, Buffer<T>(a_buffer), a_offset, a_ld, Buffer<T>(x_buffer),
+		routine.DoTrmv(layout, triangle, a_transpose, diagonal, n, (a_buffer), a_offset, a_ld, (x_buffer),
 									 x_offset, x_inc);
 		return StatusCode::kSuccess;
 	} catch (...) {
@@ -702,8 +702,8 @@ StatusCode Tbmv(const Layout layout, const Triangle triangle, const Transpose a_
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = Xtbmv<T>(queue_cpp, event);
-		routine.DoTbmv(layout, triangle, a_transpose, diagonal, n, k, Buffer<T>(a_buffer), a_offset, a_ld,
-									 Buffer<T>(x_buffer), x_offset, x_inc);
+		routine.DoTbmv(layout, triangle, a_transpose, diagonal, n, k, (a_buffer), a_offset, a_ld,
+			(x_buffer), x_offset, x_inc);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -733,7 +733,7 @@ StatusCode Tpmv(const Layout layout, const Triangle triangle, const Transpose a_
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = Xtpmv<T>(queue_cpp, event);
-		routine.DoTpmv(layout, triangle, a_transpose, diagonal, n, Buffer<T>(ap_buffer), ap_offset, Buffer<T>(x_buffer),
+		routine.DoTpmv(layout, triangle, a_transpose, diagonal, n, (ap_buffer), ap_offset, (x_buffer),
 									 x_offset, x_inc);
 		return StatusCode::kSuccess;
 	} catch (...) {

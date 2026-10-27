@@ -69,9 +69,9 @@ Xgemv<T>::Xgemv(Queue& queue, EventPointer event, const std::string& name)
 
 // The main routine
 template <typename T>
-void Xgemv<T>::DoGemv(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const T alpha,
-											const Buffer<T>& a_buffer, const size_t a_offset, const size_t a_ld, const Buffer<T>& x_buffer,
-											const size_t x_offset, const size_t x_inc, const T beta, const Buffer<T>& y_buffer,
+void Xgemv<T>::DoGemv(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const tart::Scalar& alpha,
+											const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& x_buffer,
+											const size_t x_offset, const size_t x_inc, const tart::Scalar& beta, const tart::buffer_ptr& y_buffer,
 											const size_t y_offset, const size_t y_inc) {
 	// Performs the matrix-vector multiplication
 	MatVec(layout, a_transpose, m, n, alpha, a_buffer, a_offset, a_ld, x_buffer, x_offset, x_inc, beta, y_buffer,
@@ -82,9 +82,9 @@ void Xgemv<T>::DoGemv(const Layout layout, const Transpose a_transpose, const si
 
 // The generic implementation, also suited for other (non general) matrix-vector multiplications
 template <typename T>
-void Xgemv<T>::MatVec(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const T alpha,
-											const Buffer<T>& a_buffer, const size_t a_offset, const size_t a_ld, const Buffer<T>& x_buffer,
-											const size_t x_offset, const size_t x_inc, const T beta, const Buffer<T>& y_buffer,
+void Xgemv<T>::MatVec(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const tart::Scalar& alpha,
+											const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& x_buffer,
+											const size_t x_offset, const size_t x_inc, const tart::Scalar& beta, const tart::buffer_ptr& y_buffer,
 											const size_t y_offset, const size_t y_inc, bool fast_kernel, bool fast_kernel_rot,
 											const size_t parameter, const bool packed, const size_t kl, const size_t ku) {
 	// Makes sure all dimensions are larger than zero
@@ -115,12 +115,12 @@ void Xgemv<T>::MatVec(const Layout layout, const Transpose a_transpose, const si
 
 	// Tests the matrix and the vectors for validity
 	if (packed) {
-		TestMatrixAP(mDtype, n, a_buffer(), a_offset);
+		TestMatrixAP(mDtype, n, a_buffer, a_offset);
 	} else {
-		TestMatrixA(mDtype, a_one, a_two, a_buffer(), a_offset, a_ld);
+		TestMatrixA(mDtype, a_one, a_two, a_buffer, a_offset, a_ld);
 	}
-	TestVectorX(mDtype, n_real, x_buffer(), x_offset, x_inc);
-	TestVectorY(mDtype, m_real, y_buffer(), y_offset, y_inc);
+	TestVectorX(mDtype, n_real, x_buffer, x_offset, x_inc);
+	TestVectorY(mDtype, m_real, y_buffer, y_offset, y_inc);
 
 	// Determines whether or not the fast-version can be used
 	fast_kernel = fast_kernel && (a_offset == 0) && (a_rotated == 0) && (a_conjugate == 0) &&
@@ -159,13 +159,13 @@ void Xgemv<T>::MatVec(const Layout layout, const Transpose a_transpose, const si
 		kernel->setArgAs(mDtype, 2, alpha);
 		kernel->setArgAs(mDtype, 3, beta);
 		//kernel->setArg(4, static_cast<int>(a_rotated));
-		kernel->setArg(5, a_buffer());
+		kernel->setArg(5, a_buffer);
 		//kernel->setArg(6, static_cast<int>(a_offset));
 		kernel->setArg(7, static_cast<int>(a_ld));
-		kernel->setArg(8, x_buffer());
+		kernel->setArg(8, x_buffer);
 		kernel->setArg(9, static_cast<int>(x_offset));
 		kernel->setArg(10, static_cast<int>(x_inc));
-		kernel->setArg(11, y_buffer());
+		kernel->setArg(11, y_buffer);
 		kernel->setArg(12, static_cast<int>(y_offset));
 		kernel->setArg(13, static_cast<int>(y_inc));
 		//kernel->setArg(14, static_cast<int>(a_conjugate));
@@ -182,13 +182,13 @@ void Xgemv<T>::MatVec(const Layout layout, const Transpose a_transpose, const si
 		kernel->setArgAs(mDtype, 2, alpha);
 		kernel->setArgAs(mDtype, 3, beta);
 		kernel->setArg(4, static_cast<int>(a_rotated));
-		kernel->setArg(5, a_buffer());
+		kernel->setArg(5, a_buffer);
 		kernel->setArg(6, static_cast<int>(a_offset));
 		kernel->setArg(7, static_cast<int>(a_ld));
-		kernel->setArg(8, x_buffer());
+		kernel->setArg(8, x_buffer);
 		kernel->setArg(9, static_cast<int>(x_offset));
 		kernel->setArg(10, static_cast<int>(x_inc));
-		kernel->setArg(11, y_buffer());
+		kernel->setArg(11, y_buffer);
 		kernel->setArg(12, static_cast<int>(y_offset));
 		kernel->setArg(13, static_cast<int>(y_inc));
 		kernel->setArg(14, static_cast<int>(a_conjugate));

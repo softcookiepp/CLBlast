@@ -136,8 +136,8 @@ void Xtrsv<T>::DoTrsv(const Layout layout, const Triangle triangle, const Transp
 			const auto gemv_m = (a_transpose == Transpose::kNo) ? block_size : i;
 			const auto gemv_n = (a_transpose == Transpose::kNo) ? i : block_size;
 			auto gemv = Xgemv<T>(queue_, nullptr);
-			gemv.DoGemv(layout, a_transpose, gemv_m, gemv_n, ConstantOne<T>(), a_buffer, a_offset + extra_offset_a, a_ld,
-									x_buffer, x_offset + extra_offset_x, x_inc, ConstantOne<T>(), x_buffer, x_offset + extra_offset_b,
+			gemv.DoGemv(layout, a_transpose, gemv_m, gemv_n, ConstantOne<T>(), a_buffer(), a_offset + extra_offset_a, a_ld,
+									x_buffer(), x_offset + extra_offset_x, x_inc, ConstantOne<T>(), x_buffer(), x_offset + extra_offset_b,
 									x_inc);
 			//device_()->enqueueBarrier({x_buffer(), a_buffer()});
 		}

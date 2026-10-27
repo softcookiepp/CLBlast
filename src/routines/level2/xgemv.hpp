@@ -38,15 +38,15 @@ class Xgemv : public Routine
 	Xgemv(Queue& queue, EventPointer event, const std::string& name = "GEMV");
 
 	// Templated-precision implementation of the routine
-	void DoGemv(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const T alpha,
-							const Buffer<T>& a_buffer, const size_t a_offset, const size_t a_ld, const Buffer<T>& x_buffer,
-							const size_t x_offset, const size_t x_inc, const T beta, const Buffer<T>& y_buffer, const size_t y_offset,
+	void DoGemv(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const tart::Scalar& alpha,
+							const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& x_buffer,
+							const size_t x_offset, const size_t x_inc, const tart::Scalar& beta, const tart::buffer_ptr& y_buffer, const size_t y_offset,
 							const size_t y_inc);
 
 	// Generic version used also for other matrix-vector multiplications
-	void MatVec(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const T alpha,
-							const Buffer<T>& a_buffer, const size_t a_offset, const size_t a_ld, const Buffer<T>& x_buffer,
-							const size_t x_offset, const size_t x_inc, const T beta, const Buffer<T>& y_buffer, const size_t y_offset,
+	void MatVec(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const tart::Scalar& alpha,
+							const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& x_buffer,
+							const size_t x_offset, const size_t x_inc, const tart::Scalar& beta, const tart::buffer_ptr& y_buffer, const size_t y_offset,
 							const size_t y_inc, bool fast_kernel, bool fast_kernel_rot, const size_t parameter, const bool packed,
 							const size_t kl, const size_t ku);
 };

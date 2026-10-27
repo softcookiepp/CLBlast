@@ -36,7 +36,7 @@ void FillCacheForPrecision(Queue& queue) {
 	try {
 		// Runs all the level 1 set-up functions that support all precisions
 		Xswap<Type>(queue, nullptr);
-		Xscal<Type>(queue, nullptr);
+		Xscal(tart::getDType<Type>(), queue, nullptr);
 		Xcopy(tart::getDType<Type>(), queue, nullptr);
 		Xaxpy(tart::getDType<Type>(), queue, nullptr);
 		Xdot(tart::getDType<Type>(), queue, nullptr);

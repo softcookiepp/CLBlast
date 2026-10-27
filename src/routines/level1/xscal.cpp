@@ -24,16 +24,12 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-template <typename T>
-Xscal<T>::Xscal(Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Xaxpy"}, precisionToDataType(PrecisionValue<T>()), {},
+Xscal::Xscal(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
+		: Routine(queue, event, name, {"Xaxpy"}, dtype, {},
 							{
 	#include "../../kernels-vk-inline/level1/xscal.glsl.inl"
 	,
 	#include "../../kernels-vk-inline/level1/xscal-fast.glsl.inl"
-	#include "../../kernels/level1/level1.opencl"
-	// (comment to prevent auto-re-ordering)
-	#include "../../kernels/level1/xscal.opencl"
 							}
 ,
 		{"Xscal", "XscalFast"}
@@ -44,8 +40,7 @@ Xscal<T>::Xscal(Queue& queue, EventPointer event, const std::string& name)
 // =================================================================================================
 
 // The main routine
-template <typename T>
-void Xscal<T>::DoScal(const size_t n, const T alpha, const Buffer<T>& x_buffer, const size_t x_offset,
+void Xscal::DoScal(const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& x_buffer, const size_t x_offset,
 											const size_t x_inc)
 {
 	// Makes sure all dimensions are larger than zero
@@ -55,7 +50,7 @@ void Xscal<T>::DoScal(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 	}
 
 	// Tests the vector for validity
-	TestVectorX(mDtype, n, x_buffer(), x_offset, x_inc);
+	TestVectorX(mDtype, n, x_buffer, x_offset, x_inc);
 
 	// Determines whether or not the fast-version can be used
 	bool use_fast_kernel = (x_offset == 0) && (x_inc == 1) && IsMultiple(n, db_["WGS"] * db_["WPT"] * db_["VW"]);
@@ -76,13 +71,13 @@ void Xscal<T>::DoScal(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 		{
 			kernel->setArg(0, static_cast<int>(n));
 			kernel->setArgAs(mDtype, 1, (alpha));
-			kernel->setArg(2, x_buffer()->getAddress());
+			kernel->setArg(2, x_buffer->getAddress());
 		}
 		else
 		{
 			kernel->setArg(0, static_cast<int>(n));
 			kernel->setArgAs(mDtype, 1, (alpha));
-			kernel->setArg(2, x_buffer()->getAddress());
+			kernel->setArg(2, x_buffer->getAddress());
 			kernel->setArg(3, static_cast<int>(x_offset));
 			kernel->setArg(4, static_cast<int>(x_inc));
 		}
@@ -95,13 +90,13 @@ void Xscal<T>::DoScal(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 		{
 			kernel->setArg(0, static_cast<int>(n));
 			kernel->setArgAs(mDtype, 1, (alpha));
-			kernel->setArg(2, x_buffer());
+			kernel->setArg(2, x_buffer);
 		}
 		else
 		{
 			kernel->setArg(0, static_cast<int>(n));
 			kernel->setArgAs(mDtype, 1, (alpha));
-			kernel->setArg(2, x_buffer());
+			kernel->setArg(2, x_buffer);
 			kernel->setArg(3, static_cast<int>(x_offset));
 			kernel->setArg(4, static_cast<int>(x_inc));
 		}
@@ -111,11 +106,11 @@ void Xscal<T>::DoScal(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 	if (use_fast_kernel) {
 		kernel->setArg(0, static_cast<int>(n));
 		kernel->setArgAs(mDtype, 1, (alpha));
-		kernel->setArg(2, x_buffer());
+		kernel->setArg(2, x_buffer);
 	} else {
 		kernel->setArg(0, static_cast<int>(n));
 		kernel->setArgAs(mDtype, 1, (alpha));
-		kernel->setArg(2, x_buffer());
+		kernel->setArg(2, x_buffer);
 		kernel->setArg(3, static_cast<int>(x_offset));
 		kernel->setArg(4, static_cast<int>(x_inc));
 	}
@@ -135,15 +130,6 @@ void Xscal<T>::DoScal(const size_t n, const T alpha, const Buffer<T>& x_buffer, 
 	kernel->enqueue(global, {db_["WGS"], db_["WPT"]});
 	
 }
-
-// =================================================================================================
-
-// Compiles the templated class
-template class Xscal<half>;
-template class Xscal<float>;
-template class Xscal<double>;
-template class Xscal<float2>;
-template class Xscal<double2>;
 
 // =================================================================================================
 }	// namespace clblast

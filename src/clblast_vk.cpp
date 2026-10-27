@@ -149,8 +149,8 @@ StatusCode Scal(const size_t n, const T alpha, tart::buffer_ptr x_buffer, const 
 								tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xscal<T>(queue_cpp, event);
-		routine.DoScal(n, alpha, Buffer<T>(x_buffer), x_offset, x_inc);
+		auto routine = Xscal(tart::getDType<T>(), queue_cpp, event);
+		routine.DoScal(n, alpha, x_buffer, x_offset, x_inc);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();

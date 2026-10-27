@@ -20,14 +20,13 @@ namespace clblast {
 // =================================================================================================
 
 // See comment at top of file for a description of the class
-template <typename T>
 class Xscal : public Routine {
  public:
   // Constructor
-  Xscal(Queue& queue, EventPointer event, const std::string& name = "SCAL");
+  Xscal(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "SCAL");
 
   // Templated-precision implementation of the routine
-  void DoScal(const size_t n, const T alpha, const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc);
+  void DoScal(const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc);
 };
 
 // =================================================================================================

@@ -24,9 +24,8 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-template <typename T>
-Xcopy<T>::Xcopy(Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Xaxpy"}, precisionToDataType(PrecisionValue<T>()), {},
+Xcopy::Xcopy(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
+		: Routine(queue, event, name, {"Xaxpy"}, dtype, {},
 							{
 	#include "../../kernels-vk-inline/level1/xcopy.glsl.inl"
 	,
@@ -41,9 +40,8 @@ Xcopy<T>::Xcopy(Queue& queue, EventPointer event, const std::string& name)
 // =================================================================================================
 
 // The main routine
-template <typename T>
-void Xcopy<T>::DoCopy(const size_t n, const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc,
-											const Buffer<T>& y_buffer, const size_t y_offset, const size_t y_inc)
+void Xcopy::DoCopy(const size_t n, const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
+	const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc)
 {
 	// Makes sure all dimensions are larger than zero
 	if (n == 0) 
@@ -52,8 +50,8 @@ void Xcopy<T>::DoCopy(const size_t n, const Buffer<T>& x_buffer, const size_t x_
 	}
 
 	// Tests the vectors for validity
-	TestVectorX(mDtype, n, x_buffer(), x_offset, x_inc);
-	TestVectorY(mDtype, n, y_buffer(), y_offset, y_inc);
+	TestVectorX(mDtype, n, x_buffer, x_offset, x_inc);
+	TestVectorY(mDtype, n, y_buffer, y_offset, y_inc);
 
 	// Determines whether or not the fast-version can be used
 	// TODO: it may be possible to use pure transfer operations if we are doing this via Vulkan.
@@ -72,16 +70,16 @@ void Xcopy<T>::DoCopy(const size_t n, const Buffer<T>& x_buffer, const size_t x_
 	if (use_fast_kernel)
 	{
 		kernel->setArg(0, static_cast<int>(n));
-		kernel->setArg(1, x_buffer());
-		kernel->setArg(2, y_buffer());
+		kernel->setArg(1, x_buffer);
+		kernel->setArg(2, y_buffer);
 	}
 	else
 	{
 		kernel->setArg(0, static_cast<int>(n));
-		kernel->setArg(1, x_buffer());
+		kernel->setArg(1, x_buffer);
 		kernel->setArg(2, static_cast<int>(x_offset));
 		kernel->setArg(3, static_cast<int>(x_inc));
-		kernel->setArg(4, y_buffer());
+		kernel->setArg(4, y_buffer);
 		kernel->setArg(5, static_cast<int>(y_offset));
 		kernel->setArg(6, static_cast<int>(y_inc));
 	}
@@ -98,15 +96,6 @@ void Xcopy<T>::DoCopy(const size_t n, const Buffer<T>& x_buffer, const size_t x_
 	}
 	kernel->enqueue(global, {db_["WGS"], db_["WPT"]});
 }
-
-// =================================================================================================
-
-// Compiles the templated class
-template class Xcopy<half>;
-template class Xcopy<float>;
-template class Xcopy<double>;
-template class Xcopy<float2>;
-template class Xcopy<double2>;
 
 // =================================================================================================
 }	// namespace clblast

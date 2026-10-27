@@ -173,8 +173,8 @@ StatusCode Copy(const size_t n, const tart::buffer_ptr x_buffer, const size_t x_
 								const size_t y_offset, const size_t y_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xcopy<T>(queue_cpp, event);
-		routine.DoCopy(n, Buffer<T>(x_buffer), x_offset, x_inc, Buffer<T>(y_buffer), y_offset, y_inc);
+		auto routine = Xcopy(tart::getDType<T>(), queue_cpp, event);
+		routine.DoCopy(n, x_buffer, x_offset, x_inc, y_buffer, y_offset, y_inc);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();

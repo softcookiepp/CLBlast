@@ -43,9 +43,10 @@ void FillCacheForPrecision(Queue& queue) {
 		Xnrm2<Type>(queue, nullptr);
 		Xasum<Type>(queue, nullptr);
 		Xsum<Type>(queue, nullptr);
-		Xamax<Type>(queue, nullptr);
-		Xmax<Type>(queue, nullptr);
-		Xmin<Type>(queue, nullptr);
+		Xamax(tart::getDType<Type>(), queue, nullptr);
+		Xamin(tart::getDType<Type>(), queue, nullptr);
+		Xmax(tart::getDType<Type>(), queue, nullptr);
+		Xmin(tart::getDType<Type>(), queue, nullptr);
 
 		// Runs all the level 2 set-up functions that support all precisions
 		Xgemv<Type>(queue, nullptr);

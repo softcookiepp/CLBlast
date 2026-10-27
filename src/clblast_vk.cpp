@@ -361,8 +361,8 @@ StatusCode Amax(const size_t n, tart::buffer_ptr imax_buffer, const size_t imax_
 								const size_t x_offset, const size_t x_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xamax<T>(queue_cpp, event);
-		routine.DoAmax(n, Buffer<unsigned int>(imax_buffer), imax_offset, Buffer<T>(x_buffer), x_offset, x_inc);
+		auto routine = Xamax(tart::getDType<T>(), queue_cpp, event);
+		routine.DoAmax(n, imax_buffer, imax_offset, x_buffer, x_offset, x_inc);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -385,8 +385,8 @@ StatusCode Amin(const size_t n, tart::buffer_ptr imin_buffer, const size_t imin_
 								const size_t x_offset, const size_t x_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xamin<T>(queue_cpp, event);
-		routine.DoAmin(n, Buffer<unsigned int>(imin_buffer), imin_offset, Buffer<T>(x_buffer), x_offset, x_inc);
+		auto routine = Xamin(tart::getDType<T>(), queue_cpp, event);
+		routine.DoAmin(n, imin_buffer, imin_offset, x_buffer, x_offset, x_inc);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -409,8 +409,8 @@ StatusCode Max(const size_t n, tart::buffer_ptr imax_buffer, const size_t imax_o
 							 const size_t x_offset, const size_t x_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xmax<T>(queue_cpp, event);
-		routine.DoMax(n, Buffer<unsigned int>(imax_buffer), imax_offset, Buffer<T>(x_buffer), x_offset, x_inc);
+		auto routine = Xmax(tart::getDType<T>(), queue_cpp, event);
+		routine.DoMax(n, imax_buffer, imax_offset, x_buffer, x_offset, x_inc);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -433,8 +433,8 @@ StatusCode Min(const size_t n, tart::buffer_ptr imin_buffer, const size_t imin_o
 							 const size_t x_offset, const size_t x_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xmin<T>(queue_cpp, event);
-		routine.DoMin(n, Buffer<unsigned int>(imin_buffer), imin_offset, Buffer<T>(x_buffer), x_offset, x_inc);
+		auto routine = Xmin(tart::getDType<T>(), queue_cpp, event);
+		routine.DoMin(n, imin_buffer, imin_offset, x_buffer, x_offset, x_inc);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();

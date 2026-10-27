@@ -23,9 +23,8 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-template <typename T>
-Xamax<T>::Xamax(Queue& queue, EventPointer event, const std::string& name)
-	: Routine(queue, event, name, {"Xdot"}, precisionToDataType(PrecisionValue<T>()), {},
+Xamax::Xamax(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
+	: Routine(queue, event, name, {"Xdot"}, dtype, {},
 		{
 			#include "../../kernels-vk-inline/level1/xamax.glsl.inl"
 			,
@@ -42,17 +41,16 @@ Xamax<T>::Xamax(Queue& queue, EventPointer event, const std::string& name)
 // =================================================================================================
 
 // The main routine
-template <typename T>
-void Xamax<T>::DoAmax(const size_t n, const Buffer<unsigned int>& imax_buffer, const size_t imax_offset,
-											const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc) {
+void Xamax::DoAmax(const size_t n, const tart::buffer_ptr& imax_buffer, const size_t imax_offset,
+											const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc) {
 	// Makes sure all dimensions are larger than zero
 	if (n == 0) {
 		throw BLASError(StatusCode::kInvalidDimension);
 	}
 
 	// Tests the vectors for validity
-	TestVectorX(mDtype, n, x_buffer(), x_offset, x_inc);
-	TestVectorIndex(mDtype, 1, imax_buffer(), imax_offset);
+	TestVectorX(mDtype, n, x_buffer, x_offset, x_inc);
+	TestVectorIndex(mDtype, 1, imax_buffer, imax_offset);
 
 	// Retrieves the Xamax kernels from the compiled binary
 	auto kernel1Old = Kernel(program_, "Xamax");
@@ -62,8 +60,8 @@ void Xamax<T>::DoAmax(const size_t n, const Buffer<unsigned int>& imax_buffer, c
 
 	// Creates the buffer for intermediate values
 	auto temp_size = 2 * db_["WGS2"];
-	auto temp_buffer1 = Buffer<T>(mDevice, temp_size);
-	auto temp_buffer2 = Buffer<unsigned int>(mDevice, temp_size);
+	auto temp_buffer1 = mDevice->allocateBuffer(temp_size*mDtype.size());
+	auto temp_buffer2 = mDevice->allocateBuffer(temp_size*sizeof(uint32_t));
 
 	// Sets the kernel arguments
 #if VULKAN_USE_BDA
@@ -71,21 +69,21 @@ void Xamax<T>::DoAmax(const size_t n, const Buffer<unsigned int>& imax_buffer, c
 	if (meta.bda)
 	{
 		kernel1->setArg(0, static_cast<int>(n));
-		kernel1->setArg(1, x_buffer()->getAddress() + x_offset*sizeof(T));
+		kernel1->setArg(1, x_buffer->getAddress() + x_offset*mDtype.size());
 		kernel1->setArg(2, static_cast<int>(0));
 		kernel1->setArg(3, static_cast<int>(x_inc));
-		kernel1->setArg(4, temp_buffer1()->getAddress());
-		kernel1->setArg(5, temp_buffer2()->getAddress());
+		kernel1->setArg(4, temp_buffer1->getAddress());
+		kernel1->setArg(5, temp_buffer2->getAddress());
 	}
 	else
 #endif
 	{
 		kernel1->setArg(0, static_cast<int>(n));
-		kernel1->setArg(1, x_buffer());
+		kernel1->setArg(1, x_buffer);
 		kernel1->setArg(2, static_cast<int>(x_offset));
 		kernel1->setArg(3, static_cast<int>(x_inc));
-		kernel1->setArg(4, temp_buffer1());
-		kernel1->setArg(5, temp_buffer2());
+		kernel1->setArg(4, temp_buffer1);
+		kernel1->setArg(5, temp_buffer2);
 	}
 
 	// Launches the main kernel
@@ -101,14 +99,14 @@ void Xamax<T>::DoAmax(const size_t n, const Buffer<unsigned int>& imax_buffer, c
 
 	// Sets the arguments for the epilogue kernel
 #if VULKAN_USE_BDA
-	kernel2->setArg(0, temp_buffer1()->getAddress());
-	kernel2->setArg(1, temp_buffer2()->getAddress());
-	kernel2->setArg(2, imax_buffer()->getAddress());
+	kernel2->setArg(0, temp_buffer1->getAddress());
+	kernel2->setArg(1, temp_buffer2->getAddress());
+	kernel2->setArg(2, imax_buffer->getAddress());
 	kernel2->setArg(3, static_cast<int>(imax_offset));
 #else
-	kernel2->setArg(0, temp_buffer1());
-	kernel2->setArg(1, temp_buffer2());
-	kernel2->setArg(2, imax_buffer());
+	kernel2->setArg(0, temp_buffer1);
+	kernel2->setArg(1, temp_buffer2);
+	kernel2->setArg(2, imax_buffer);
 	kernel2->setArg(3, static_cast<int>(imax_offset));
 #endif
 
@@ -118,15 +116,6 @@ void Xamax<T>::DoAmax(const size_t n, const Buffer<unsigned int>& imax_buffer, c
 	auto local2 = std::vector<size_t>{db_["WGS2"]};
 	kernel2->enqueue(global2, {db_["WGS2"]});
 }
-
-// =================================================================================================
-
-// Compiles the templated class
-template class Xamax<half>;
-template class Xamax<float>;
-template class Xamax<double>;
-template class Xamax<float2>;
-template class Xamax<double2>;
 
 // =================================================================================================
 }	// namespace clblast

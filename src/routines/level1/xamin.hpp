@@ -20,19 +20,18 @@ namespace clblast {
 // =================================================================================================
 
 // See comment at top of file for a description of the class
-template <typename T>
-class Xamin : public Xamax<T> {
+class Xamin : public Xamax {
  public:
   // Members and methods from the base class
-  using Xamax<T>::DoAmax;
+  using Xamax::DoAmax;
 
   // Constructor
-  Xamin(Queue& queue, EventPointer event, const std::string& name = "AMIN") : Xamax<T>(queue, event, name) {}
+  Xamin(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "AMIN") : Xamax(dtype, queue, event, name) {}
 
   // Forwards to the regular max-absolute version. The implementation difference is realised in the
   // kernel through a pre-processor macro based on the name of the routine.
-  void DoAmin(const size_t n, const Buffer<unsigned int>& imin_buffer, const size_t imin_offset,
-              const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc) {
+  void DoAmin(const size_t n, const tart::buffer_ptr& imin_buffer, const size_t imin_offset,
+              const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc) {
     DoAmax(n, imin_buffer, imin_offset, x_buffer, x_offset, x_inc);
   }
 };

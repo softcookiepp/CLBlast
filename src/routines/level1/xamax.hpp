@@ -21,7 +21,6 @@ namespace clblast
 // =================================================================================================
 
 // See comment at top of file for a description of the class
-template <typename T>
 class Xamax : public Routine
 {
 	
@@ -30,11 +29,11 @@ class Xamax : public Routine
 	uint32_t mAmin;
  public:
 	// Constructor
-	Xamax(Queue& queue, EventPointer event, const std::string& name = "AMAX");
+	Xamax(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "AMAX");
 
 	// Templated-precision implementation of the routine
-	void DoAmax(const size_t n, const Buffer<unsigned int>& imax_buffer, const size_t imax_offset,
-							const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc);
+	void DoAmax(const size_t n, const tart::buffer_ptr& imax_buffer, const size_t imax_offset,
+							const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc);
 };
 
 // =================================================================================================

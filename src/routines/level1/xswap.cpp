@@ -24,9 +24,8 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-template <typename T>
-Xswap<T>::Xswap(Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Xaxpy"}, precisionToDataType(PrecisionValue<T>()), {},
+Xswap::Xswap(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
+		: Routine(queue, event, name, {"Xaxpy"}, dtype, {},
 							{
 	#include "../../kernels-vk-inline/level1/xswap.glsl.inl"
 	,
@@ -40,9 +39,8 @@ Xswap<T>::Xswap(Queue& queue, EventPointer event, const std::string& name)
 // =================================================================================================
 
 // The main routine
-template <typename T>
-void Xswap<T>::DoSwap(const size_t n, const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc,
-											const Buffer<T>& y_buffer, const size_t y_offset, const size_t y_inc)
+void Xswap::DoSwap(const size_t n, const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
+	const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc)
 {
 	// Makes sure all dimensions are larger than zero
 	if (n == 0) {
@@ -50,8 +48,8 @@ void Xswap<T>::DoSwap(const size_t n, const Buffer<T>& x_buffer, const size_t x_
 	}
 
 	// Tests the vectors for validity
-	TestVectorX(mDtype, n, x_buffer(), x_offset, x_inc);
-	TestVectorY(mDtype, n, y_buffer(), y_offset, y_inc);
+	TestVectorX(mDtype, n, x_buffer, x_offset, x_inc);
+	TestVectorY(mDtype, n, y_buffer, y_offset, y_inc);
 
 	// Determines whether or not the fast-version can be used
 	bool use_fast_kernel = (x_offset == 0) && (x_inc == 1) && (y_offset == 0) && (y_inc == 1) &&
@@ -74,16 +72,16 @@ void Xswap<T>::DoSwap(const size_t n, const Buffer<T>& x_buffer, const size_t x_
 		if (use_fast_kernel)
 		{
 			kernel->setArg(0, static_cast<int>(n));
-			kernel->setArg(1, x_buffer());
-			kernel->setArg(2, y_buffer());
+			kernel->setArg(1, x_buffer);
+			kernel->setArg(2, y_buffer);
 		}
 		else
 		{
 			kernel->setArg(0, static_cast<int>(n));
-			kernel->setArg(1, x_buffer()->getAddress());
+			kernel->setArg(1, x_buffer->getAddress());
 			kernel->setArg(2, static_cast<int>(x_offset));
 			kernel->setArg(3, static_cast<int>(x_inc));
-			kernel->setArg(4, y_buffer()->getAddress());
+			kernel->setArg(4, y_buffer->getAddress());
 			kernel->setArg(5, static_cast<int>(y_offset));
 			kernel->setArg(6, static_cast<int>(y_inc));
 		}
@@ -94,16 +92,16 @@ void Xswap<T>::DoSwap(const size_t n, const Buffer<T>& x_buffer, const size_t x_
 		if (use_fast_kernel)
 		{
 			kernel->setArg(0, static_cast<int>(n));
-			kernel->setArg(1, x_buffer());
-			kernel->setArg(2, y_buffer());
+			kernel->setArg(1, x_buffer);
+			kernel->setArg(2, y_buffer);
 		}
 		else
 		{
 			kernel->setArg(0, static_cast<int>(n));
-			kernel->setArg(1, x_buffer());
+			kernel->setArg(1, x_buffer);
 			kernel->setArg(2, static_cast<int>(x_offset));
 			kernel->setArg(3, static_cast<int>(x_inc));
-			kernel->setArg(4, y_buffer());
+			kernel->setArg(4, y_buffer);
 			kernel->setArg(5, static_cast<int>(y_offset));
 			kernel->setArg(6, static_cast<int>(y_inc));
 		}
@@ -111,14 +109,14 @@ void Xswap<T>::DoSwap(const size_t n, const Buffer<T>& x_buffer, const size_t x_
 #else
 	if (use_fast_kernel) {
 		kernel->setArg(0, static_cast<int>(n));
-		kernel->setArg(1, x_buffer());
-		kernel->setArg(2, y_buffer());
+		kernel->setArg(1, x_buffer);
+		kernel->setArg(2, y_buffer);
 	} else {
 		kernel->setArg(0, static_cast<int>(n));
-		kernel->setArg(1, x_buffer());
+		kernel->setArg(1, x_buffer);
 		kernel->setArg(2, static_cast<int>(x_offset));
 		kernel->setArg(3, static_cast<int>(x_inc));
-		kernel->setArg(4, y_buffer());
+		kernel->setArg(4, y_buffer);
 		kernel->setArg(5, static_cast<int>(y_offset));
 		kernel->setArg(6, static_cast<int>(y_inc));
 	}
@@ -140,15 +138,6 @@ void Xswap<T>::DoSwap(const size_t n, const Buffer<T>& x_buffer, const size_t x_
 	}
 	kernel->enqueue(global, {db_["WGS"], db_["WPT"]});
 }
-
-// =================================================================================================
-
-// Compiles the templated class
-template class Xswap<half>;
-template class Xswap<float>;
-template class Xswap<double>;
-template class Xswap<float2>;
-template class Xswap<double2>;
 
 // =================================================================================================
 }	// namespace clblast

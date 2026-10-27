@@ -95,26 +95,6 @@ template StatusCode PUBLIC_API Rotm<float>(const size_t, tart::buffer_ptr, const
 template StatusCode PUBLIC_API Rotm<double>(const size_t, tart::buffer_ptr, const size_t, const size_t, tart::buffer_ptr, const size_t,
 																						const size_t, tart::buffer_ptr, const size_t, tart::device_ptr, const EventPointer& event);
 
-
-StatusCode Swap(
-	tart::DataType dtype,
-	const size_t n,
-	tart::buffer_ptr x_buffer,
-	const size_t x_offset,
-	const size_t x_inc,
-	tart::buffer_ptr y_buffer,
-	const size_t y_offset,
-	const size_t y_inc,
-	tart::device_ptr queue,
-	const EventPointer& event)
-{
-	auto queue_cpp = Queue(queue);
-	// using float for now so it compiles, but this will have to be changed later.
-	auto routine = Xswap<float>(queue_cpp, nullptr); // no events for now
-	routine.DoSwap(n, Buffer<float>(x_buffer), x_offset, x_inc, Buffer<float>(y_buffer), y_offset, y_inc);
-	return StatusCode::kSuccess;
-}
-
 // Swap two vectors: SSWAP/DSWAP/CSWAP/ZSWAP/HSWAP
 template <typename T>
 StatusCode Swap(const size_t n, tart::buffer_ptr x_buffer, const size_t x_offset, const size_t x_inc, tart::buffer_ptr y_buffer,
@@ -123,8 +103,8 @@ StatusCode Swap(const size_t n, tart::buffer_ptr x_buffer, const size_t x_offset
 	try
 	{
 		auto queue_cpp = Queue(queue);
-		auto routine = Xswap<T>(queue_cpp, event);
-		routine.DoSwap(n, Buffer<T>(x_buffer), x_offset, x_inc, Buffer<T>(y_buffer), y_offset, y_inc);
+		auto routine = Xswap(tart::getDType<T>(), queue_cpp, event);
+		routine.DoSwap(n, x_buffer, x_offset, x_inc, y_buffer, y_offset, y_inc);
 		return StatusCode::kSuccess;
 	}
 	catch (...)

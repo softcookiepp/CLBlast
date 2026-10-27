@@ -21,7 +21,7 @@ namespace clblast {
 
 // Constructor: forwards to base class constructor
 template <typename T>
-Xhbmv<T>::Xhbmv(Queue& queue, EventPointer event, const std::string& name) : Xgemv<T>(queue, event, name) {}
+Xhbmv<T>::Xhbmv(Queue& queue, EventPointer event, const std::string& name) : Xgemv(tart::getDType<T>(), queue, event, name) {}
 
 // =================================================================================================
 

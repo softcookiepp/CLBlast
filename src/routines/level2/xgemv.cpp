@@ -25,9 +25,8 @@ namespace clblast
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-template <typename T>
-Xgemv<T>::Xgemv(Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Xgemv", "XgemvFast", "XgemvFastRot", "TrsvRoutine"}, precisionToDataType(PrecisionValue<T>()), {},
+Xgemv::Xgemv(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
+		: Routine(queue, event, name, {"Xgemv", "XgemvFast", "XgemvFastRot", "TrsvRoutine"}, dtype, {},
 							{
 	#include "../../kernels-vk-inline/level2/xgemv.glsl.inl"
 	,
@@ -68,8 +67,7 @@ Xgemv<T>::Xgemv(Queue& queue, EventPointer event, const std::string& name)
 // =================================================================================================
 
 // The main routine
-template <typename T>
-void Xgemv<T>::DoGemv(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const tart::Scalar& alpha,
+void Xgemv::DoGemv(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const tart::Scalar& alpha,
 											const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& x_buffer,
 											const size_t x_offset, const size_t x_inc, const tart::Scalar& beta, const tart::buffer_ptr& y_buffer,
 											const size_t y_offset, const size_t y_inc) {
@@ -81,12 +79,11 @@ void Xgemv<T>::DoGemv(const Layout layout, const Transpose a_transpose, const si
 // =================================================================================================
 
 // The generic implementation, also suited for other (non general) matrix-vector multiplications
-template <typename T>
-void Xgemv<T>::MatVec(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const tart::Scalar& alpha,
-											const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& x_buffer,
-											const size_t x_offset, const size_t x_inc, const tart::Scalar& beta, const tart::buffer_ptr& y_buffer,
-											const size_t y_offset, const size_t y_inc, bool fast_kernel, bool fast_kernel_rot,
-											const size_t parameter, const bool packed, const size_t kl, const size_t ku) {
+void Xgemv::MatVec(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const tart::Scalar& alpha,
+							const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& x_buffer,
+							const size_t x_offset, const size_t x_inc, const tart::Scalar& beta, const tart::buffer_ptr& y_buffer, const size_t y_offset,
+							const size_t y_inc, bool fast_kernel, bool fast_kernel_rot, const size_t parameter, const bool packed,
+							const size_t kl, const size_t ku) {
 	// Makes sure all dimensions are larger than zero
 	if (m == 0 || n == 0) {
 		throw BLASError(StatusCode::kInvalidDimension);
@@ -236,15 +233,6 @@ void Xgemv<T>::MatVec(const Layout layout, const Transpose a_transpose, const si
 	}
 	kernel->enqueue(global, spec);
 }
-
-// =================================================================================================
-
-// Compiles the templated class
-template class Xgemv<half>;
-template class Xgemv<float>;
-template class Xgemv<double>;
-template class Xgemv<float2>;
-template class Xgemv<double2>;
 
 // =================================================================================================
 }	// namespace clblast

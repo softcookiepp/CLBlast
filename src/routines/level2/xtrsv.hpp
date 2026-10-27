@@ -23,15 +23,15 @@ namespace clblast {
 
 // See comment at top of file for a description of the class
 template <typename T>
-class Xtrsv : public Xgemv<T> {
+class Xtrsv : public Xgemv {
  public:
 	// Uses the generic matrix-vector routine
-	using Xgemv<T>::queue_;
-	using Xgemv<T>::device_;
-	using Xgemv<T>::db_;
-	using Xgemv<T>::program_;
-	using Xgemv<T>::event_;
-	using Xgemv<T>::DoGemv;
+	using Xgemv::queue_;
+	using Xgemv::device_;
+	using Xgemv::db_;
+	using Xgemv::program_;
+	using Xgemv::event_;
+	using Xgemv::DoGemv;
 
 	// Constructor
 	Xtrsv(Queue& queue, EventPointer event, const std::string& name = "TRSV");

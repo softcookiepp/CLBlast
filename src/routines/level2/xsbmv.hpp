@@ -23,10 +23,10 @@ namespace clblast {
 
 // See comment at top of file for a description of the class
 template <typename T>
-class Xsbmv : public Xgemv<T> {
+class Xsbmv : public Xgemv {
  public:
 	// Uses the generic matrix-vector routine
-	using Xgemv<T>::MatVec;
+	using Xgemv::MatVec;
 
 	// Constructor
 	Xsbmv(Queue& queue, EventPointer event, const std::string& name = "SBMV");

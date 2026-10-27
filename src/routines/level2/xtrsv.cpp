@@ -26,7 +26,7 @@ namespace clblast {
 
 // Constructor: forwards to base class constructor
 template <typename T>
-Xtrsv<T>::Xtrsv(Queue& queue, EventPointer event, const std::string& name) : Xgemv<T>(queue, event, name) {}
+Xtrsv<T>::Xtrsv(Queue& queue, EventPointer event, const std::string& name) : Xgemv(tart::getDType<T>(), queue, event, name) {}
 
 // =================================================================================================
 
@@ -135,7 +135,7 @@ void Xtrsv<T>::DoTrsv(const Layout layout, const Triangle triangle, const Transp
 		if (i > 0) {
 			const auto gemv_m = (a_transpose == Transpose::kNo) ? block_size : i;
 			const auto gemv_n = (a_transpose == Transpose::kNo) ? i : block_size;
-			auto gemv = Xgemv<T>(queue_, nullptr);
+			auto gemv = Xgemv(this->mDtype, queue_, nullptr);
 			gemv.DoGemv(layout, a_transpose, gemv_m, gemv_n, ConstantOne<T>(), a_buffer(), a_offset + extra_offset_a, a_ld,
 									x_buffer(), x_offset + extra_offset_x, x_inc, ConstantOne<T>(), x_buffer(), x_offset + extra_offset_b,
 									x_inc);

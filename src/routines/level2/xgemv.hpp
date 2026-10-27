@@ -20,7 +20,6 @@ namespace clblast {
 // =================================================================================================
 
 // See comment at top of file for a description of the class
-template <typename T>
 class Xgemv : public Routine
 {
 	uint32_t mGBMV = 0;
@@ -35,7 +34,7 @@ class Xgemv : public Routine
 	uint32_t mTPMV = 0;
  public:
 	// Constructor
-	Xgemv(Queue& queue, EventPointer event, const std::string& name = "GEMV");
+	Xgemv(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "GEMV");
 
 	// Templated-precision implementation of the routine
 	void DoGemv(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const tart::Scalar& alpha,

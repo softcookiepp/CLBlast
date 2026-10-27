@@ -20,18 +20,17 @@ namespace clblast {
 // =================================================================================================
 
 // See comment at top of file for a description of the class
-template <typename T>
-class Xsum : public Xasum<T> {
+class Xsum : public Xasum {
  public:
 	// Members and methods from the base class
-	using Xasum<T>::DoAsum;
+	using Xasum::DoAsum;
 
 	// Constructor
-	Xsum(Queue& queue, EventPointer event, const std::string& name = "SUM") : Xasum<T>(queue, event, name) {}
+	Xsum(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "SUM") : Xasum(dtype, queue, event, name) {}
 
 	// Forwards to the regular absolute version. The implementation difference is realised in the
 	// kernel through a pre-processor macro based on the name of the routine.
-	void DoSum(const size_t n, const Buffer<T>& sum_buffer, const size_t sum_offset, const Buffer<T>& x_buffer,
+	void DoSum(const size_t n, const tart::buffer_ptr& sum_buffer, const size_t sum_offset, const tart::buffer_ptr& x_buffer,
 						 const size_t x_offset, const size_t x_inc)
 	{
 		DoAsum(n, sum_buffer, sum_offset, x_buffer, x_offset, x_inc);

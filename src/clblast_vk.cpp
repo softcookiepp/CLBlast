@@ -313,8 +313,8 @@ StatusCode Asum(const size_t n, tart::buffer_ptr asum_buffer, const size_t asum_
 								const size_t x_offset, const size_t x_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xasum<T>(queue_cpp, event);
-		routine.DoAsum(n, Buffer<T>(asum_buffer), asum_offset, Buffer<T>(x_buffer), x_offset, x_inc);
+		auto routine = Xasum(tart::getDType<T>(), queue_cpp, event);
+		routine.DoAsum(n, asum_buffer, asum_offset, x_buffer, x_offset, x_inc);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -337,8 +337,8 @@ StatusCode Sum(const size_t n, tart::buffer_ptr sum_buffer, const size_t sum_off
 							 const size_t x_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xsum<T>(queue_cpp, event);
-		routine.DoSum(n, Buffer<T>(sum_buffer), sum_offset, Buffer<T>(x_buffer), x_offset, x_inc);
+		auto routine = Xsum(tart::getDType<T>(), queue_cpp, event);
+		routine.DoSum(n, sum_buffer, sum_offset, x_buffer, x_offset, x_inc);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();

@@ -24,9 +24,8 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-template <typename T>
-Xasum<T>::Xasum(Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Xdot"}, precisionToDataType(PrecisionValue<T>()), {},
+Xasum::Xasum(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
+		: Routine(queue, event, name, {"Xdot"}, dtype, {},
 							{
 	#include "../../kernels-vk-inline/level1/xasum.glsl.inl"
 	,
@@ -43,8 +42,7 @@ Xasum<T>::Xasum(Queue& queue, EventPointer event, const std::string& name)
 // =================================================================================================
 
 // The main routine
-template <typename T>
-void Xasum<T>::DoAsum(const size_t n, const Buffer<T>& asum_buffer, const size_t asum_offset, const Buffer<T>& x_buffer,
+void Xasum::DoAsum(const size_t n, const tart::buffer_ptr& asum_buffer, const size_t asum_offset, const tart::buffer_ptr& x_buffer,
 											const size_t x_offset, const size_t x_inc)
 {
 	// Makes sure all dimensions are larger than zero
@@ -54,8 +52,8 @@ void Xasum<T>::DoAsum(const size_t n, const Buffer<T>& asum_buffer, const size_t
 	}
 
 	// Tests the vectors for validity
-	TestVectorX(mDtype, n, x_buffer(), x_offset, x_inc);
-	TestVectorScalar(mDtype, 1, asum_buffer(), asum_offset);
+	TestVectorX(mDtype, n, x_buffer, x_offset, x_inc);
+	TestVectorScalar(mDtype, 1, asum_buffer, asum_offset);
 
 	// Retrieves the Xasum kernels from the compiled binary
 	Kernel kernel1Old(program_, "Xasum");
@@ -83,7 +81,7 @@ void Xasum<T>::DoAsum(const size_t n, const Buffer<T>& asum_buffer, const size_t
 			kernel1->setArg(4, temp_buffer);
 	#else
 		kernel1->setArg(0, static_cast<int>(n));
-		kernel1->setArg(1, x_buffer());
+		kernel1->setArg(1, x_buffer);
 		kernel1->setArg(2, static_cast<int>(x_offset));
 		kernel1->setArg(3, static_cast<int>(x_inc));
 		kernel1->setArg(4, temp_buffer);
@@ -107,22 +105,13 @@ void Xasum<T>::DoAsum(const size_t n, const Buffer<T>& asum_buffer, const size_t
 	kernel2->setArg(2, static_cast<int>(asum_offset));
 #else
 	kernel2->setArg(0, temp_buffer);
-	kernel2->setArg(1, asum_buffer());
+	kernel2->setArg(1, asum_buffer);
 	kernel2->setArg(2, static_cast<int>(asum_offset));
 #endif
 
 	// Launches the epilogue kernel
 	kernel2->enqueue({1, 1, 1}, {db_["WGS2"]});
 }
-
-// =================================================================================================
-
-// Compiles the templated class
-template class Xasum<half>;
-template class Xasum<float>;
-template class Xasum<double>;
-template class Xasum<float2>;
-template class Xasum<double2>;
 
 // =================================================================================================
 }	// namespace clblast

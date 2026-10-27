@@ -20,16 +20,15 @@ namespace clblast {
 // =================================================================================================
 
 // See comment at top of file for a description of the class
-template <typename T>
 class Xasum : public Routine
 {
 	uint32_t mSum;
  public:
 	// Constructor
-	Xasum(Queue& queue, EventPointer event, const std::string& name = "ASUM");
+	Xasum(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "ASUM");
 
 	// Templated-precision implementation of the routine
-	void DoAsum(const size_t n, const Buffer<T>& asum_buffer, const size_t asum_offset, const Buffer<T>& x_buffer,
+	void DoAsum(const size_t n, const tart::buffer_ptr& asum_buffer, const size_t asum_offset, const tart::buffer_ptr& x_buffer,
 							const size_t x_offset, const size_t x_inc);
 };
 

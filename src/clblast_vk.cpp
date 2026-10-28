@@ -670,7 +670,7 @@ StatusCode Trmv(const Layout layout, const Triangle triangle, const Transpose a_
 								const size_t x_offset, const size_t x_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xtrmv<T>(queue_cpp, event);
+		auto routine = Xtrmv(tart::getDType<T>(), queue_cpp, event);
 		routine.DoTrmv(layout, triangle, a_transpose, diagonal, n, (a_buffer), a_offset, a_ld, (x_buffer),
 									 x_offset, x_inc);
 		return StatusCode::kSuccess;

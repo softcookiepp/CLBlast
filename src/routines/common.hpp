@@ -31,9 +31,8 @@ void FillMatrix(const tart::DType& dtype, const std::shared_ptr<Program> program
 	const size_t offset, const tart::buffer_ptr& dest, const tart::Scalar constant_value, const size_t local_size);
 
 // Sets all elements of a vector to a constant value
-template <typename T>
-void FillVector(const std::shared_ptr<Program> program, const size_t n, const size_t inc, const size_t offset,
-								const Buffer<T>& dest, const T constant_value, const size_t local_size);
+void FillVector(const tart::DType& dtype, const std::shared_ptr<Program> program, const size_t n, const size_t inc, const size_t offset,
+	const tart::buffer_ptr& dest, const tart::Scalar& constant_value, const size_t local_size);
 
 // =================================================================================================
 

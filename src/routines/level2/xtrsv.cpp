@@ -25,16 +25,14 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-template <typename T>
-Xtrsv<T>::Xtrsv(Queue& queue, EventPointer event, const std::string& name) : Xgemv(tart::getDType<T>(), queue, event, name) {}
+Xtrsv::Xtrsv(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) : Xgemv(dtype, queue, event, name) {}
 
 // =================================================================================================
 
-template <typename T>
-void Xtrsv<T>::Substitution(const Layout layout, const Triangle triangle, const Transpose a_transpose,
-	const Diagonal diagonal, const size_t n, const Buffer<T>& a_buffer, const size_t a_offset,
-	const size_t a_ld, const Buffer<T>& b_buffer, const size_t b_offset, const size_t b_inc,
-	const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc)
+void Xtrsv::Substitution(const Layout layout, const Triangle triangle, const Transpose a_transpose,
+	const Diagonal diagonal, const size_t n, const tart::buffer_ptr& a_buffer, const size_t a_offset,
+	const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_inc,
+	const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc)
 {
 	if (n > db_["TRSV_BLOCK_SIZE"]) {
 		throw BLASError(StatusCode::kUnexpectedError);
@@ -59,13 +57,13 @@ void Xtrsv<T>::Substitution(const Layout layout, const Triangle triangle, const 
 	
 	// Sets the kernel arguments
 	kernel->setArg(0, static_cast<int>(n));
-	kernel->setArg(1, a_buffer());
+	kernel->setArg(1, a_buffer);
 	kernel->setArg(2, static_cast<int>(a_offset));
 	kernel->setArg(3, static_cast<int>(a_ld));
-	kernel->setArg(4, b_buffer());
+	kernel->setArg(4, b_buffer);
 	kernel->setArg(5, static_cast<int>(b_offset));
 	kernel->setArg(6, static_cast<int>(b_inc));
-	kernel->setArg(7, x_buffer());
+	kernel->setArg(7, x_buffer);
 	kernel->setArg(8, static_cast<int>(x_offset));
 	kernel->setArg(9, static_cast<int>(x_inc));
 	kernel->setArg(10, static_cast<int>(is_transposed));
@@ -79,10 +77,9 @@ void Xtrsv<T>::Substitution(const Layout layout, const Triangle triangle, const 
 // =================================================================================================
 
 // The main routine
-template <typename T>
-void Xtrsv<T>::DoTrsv(const Layout layout, const Triangle triangle, const Transpose a_transpose,
-	const Diagonal diagonal, const size_t n, const Buffer<T>& a_buffer, const size_t a_offset,
-	const size_t a_ld, const Buffer<T>& b_buffer, const size_t b_offset, const size_t b_inc)
+void Xtrsv::DoTrsv(const Layout layout, const Triangle triangle, const Transpose a_transpose,
+	const Diagonal diagonal, const size_t n, const tart::buffer_ptr& a_buffer, const size_t a_offset,
+	const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_inc)
 {
 	// Makes sure all dimensions are larger than zero
 	if (n == 0) {
@@ -95,8 +92,8 @@ void Xtrsv<T>::DoTrsv(const Layout layout, const Triangle triangle, const Transp
 	}
 
 	// Tests the matrix and vector
-	TestMatrixA(this->mDtype, n, n, a_buffer(), a_offset, a_ld);
-	TestVectorX(this->mDtype, n, b_buffer(), b_offset, b_inc);
+	TestMatrixA(this->mDtype, n, n, a_buffer, a_offset, a_ld);
+	TestVectorX(this->mDtype, n, b_buffer, b_offset, b_inc);
 	
 	
 
@@ -105,11 +102,11 @@ void Xtrsv<T>::DoTrsv(const Layout layout, const Triangle triangle, const Transp
 	const auto x_offset = b_offset;
 	const auto x_inc = b_inc;
 	const auto x_size = (1 + (n - 1) * x_inc) + x_offset;
-	auto x_buffer = Buffer<T>(this->mDevice, x_size);
-	device_()->enqueueCopyBuffer(x_buffer(), b_buffer(), 0, 0, x_size*sizeof(T));
+	auto x_buffer = this->mDevice->allocateBuffer(x_size*this->mDtype.size());
+	device_()->enqueueCopyBuffer(x_buffer, b_buffer, 0, 0, x_size*this->mDtype.size());
 
 	// Fills the output buffer with zeros
-	FillVector(program_, n, x_inc, x_offset, x_buffer, ConstantZero<T>(), 16);
+	FillVector(this->mDtype, program_, n, x_inc, x_offset, x_buffer, tart::Scalar::zero(), 16);
 
 	// Derives properties based on the arguments
 	const auto is_upper = ((triangle == Triangle::kUpper && a_transpose == Transpose::kNo) ||
@@ -136,31 +133,17 @@ void Xtrsv<T>::DoTrsv(const Layout layout, const Triangle triangle, const Transp
 			const auto gemv_m = (a_transpose == Transpose::kNo) ? block_size : i;
 			const auto gemv_n = (a_transpose == Transpose::kNo) ? i : block_size;
 			auto gemv = Xgemv(this->mDtype, queue_, nullptr);
-			gemv.DoGemv(layout, a_transpose, gemv_m, gemv_n, ConstantOne<T>(), a_buffer(), a_offset + extra_offset_a, a_ld,
-									x_buffer(), x_offset + extra_offset_x, x_inc, ConstantOne<T>(), x_buffer(), x_offset + extra_offset_b,
+			gemv.DoGemv(layout, a_transpose, gemv_m, gemv_n, tart::Scalar::one(), a_buffer, a_offset + extra_offset_a, a_ld,
+									x_buffer, x_offset + extra_offset_x, x_inc, tart::Scalar::one(), x_buffer, x_offset + extra_offset_b,
 									x_inc);
-			//device_()->enqueueBarrier({x_buffer(), a_buffer()});
 		}
-
-		// Runs the triangular substitution for the block size
 		Substitution(layout, triangle, a_transpose, diagonal, block_size, a_buffer, a_offset + col + col * a_ld, a_ld,
 								 b_buffer, b_offset + col * b_inc, b_inc, x_buffer, x_offset + col * x_inc, x_inc);
-		//sub_event.WaitForCompletion();
-		//device_()->enqueueBarrier( {x_buffer(), b_buffer(), a_buffer()} );
 	}
 
 	// Retrieves the results
-	device_()->enqueueCopyBuffer(b_buffer(), x_buffer(), 0, 0, x_size*sizeof(T));
+	device_()->enqueueCopyBuffer(b_buffer, x_buffer, 0, 0, x_size*this->mDtype.size());
 }
-
-// =================================================================================================
-
-// Compiles the templated class
-template class Xtrsv<half>;
-template class Xtrsv<float>;
-template class Xtrsv<double>;
-template class Xtrsv<float2>;
-template class Xtrsv<double2>;
 
 // =================================================================================================
 }	// namespace clblast

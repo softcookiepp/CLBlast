@@ -38,32 +38,20 @@ void FillMatrix(const tart::DType& dtype, const std::shared_ptr<Program> program
 }
 
 // Sets all elements of a vector to a constant value
-template <typename T>
-void FillVector(const std::shared_ptr<Program> program, const size_t n, const size_t inc, const size_t offset,
-								const Buffer<T>& dest, const T constant_value, const size_t local_size) {
+void FillVector(const tart::DType& dtype, const std::shared_ptr<Program> program, const size_t n, const size_t inc, const size_t offset,
+	const tart::buffer_ptr& dest, const tart::Scalar& constant_value, const size_t local_size)
+{
 	Kernel kernelOld(program, "FillVector");
 	tart::kernel_ptr kernel = kernelOld.get();
 	kernel->setArg(0, static_cast<int>(n));
 	kernel->setArg(1, static_cast<int>(inc));
 	kernel->setArg(2, static_cast<int>(offset));
-	kernel->setArg(3, dest());
-	kernel->setArgAs(tart::getDType<T>(), 4, (constant_value));
+	kernel->setArg(3, dest);
+	kernel->setArgAs(dtype, 4, (constant_value));
 	auto local = std::vector<uint32_t>{local_size};
 	auto global = std::vector<uint32_t>{Ceil(n, local_size) / local_size};
 	kernel->enqueue(global, {});
 }
-
-// Compiles the above function
-template void FillVector<half>(const std::shared_ptr<Program>, const size_t, const size_t, const size_t, const Buffer<half>&,
-	const half, const size_t);
-template void FillVector<float>(const std::shared_ptr<Program>, const size_t, const size_t, const size_t,
-	const Buffer<float>&, const float, const size_t);
-template void FillVector<double>(const std::shared_ptr<Program>, const size_t, const size_t, const size_t,
-	const Buffer<double>&, const double, const size_t);
-template void FillVector<float2>(const std::shared_ptr<Program>, const size_t, const size_t, const size_t,
-	const Buffer<float2>&, const float2, const size_t);
-template void FillVector<double2>(const std::shared_ptr<Program>, const size_t, const size_t, const size_t,
-	const Buffer<double2>&, const double2, const size_t);
 
 // =================================================================================================
 }	// namespace clblast

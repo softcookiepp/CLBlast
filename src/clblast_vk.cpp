@@ -763,8 +763,8 @@ StatusCode Trsv(const Layout layout, const Triangle triangle, const Transpose a_
 								const size_t x_offset, const size_t x_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xtrsv<T>(queue_cpp, event);
-		routine.DoTrsv(layout, triangle, a_transpose, diagonal, n, Buffer<T>(a_buffer), a_offset, a_ld, Buffer<T>(x_buffer),
+		auto routine = Xtrsv(tart::getDType<T>(), queue_cpp, event);
+		routine.DoTrsv(layout, triangle, a_transpose, diagonal, n, (a_buffer), a_offset, a_ld, (x_buffer),
 									 x_offset, x_inc);
 		return StatusCode::kSuccess;
 	} catch (...) {

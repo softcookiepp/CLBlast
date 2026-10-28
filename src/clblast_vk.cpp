@@ -645,7 +645,7 @@ StatusCode Spmv(const Layout layout, const Triangle triangle, const size_t n, co
 								tart::buffer_ptr y_buffer, const size_t y_offset, const size_t y_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xspmv<T>(queue_cpp, event);
+		auto routine = Xspmv(tart::getDType<T>(), queue_cpp, event);
 		routine.DoSpmv(layout, triangle, n, alpha, (ap_buffer), ap_offset, (x_buffer), x_offset, x_inc,
 									 beta, (y_buffer), y_offset, y_inc);
 		return StatusCode::kSuccess;

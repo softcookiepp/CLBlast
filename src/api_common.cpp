@@ -88,7 +88,7 @@ void FillCacheForPrecision(Queue& queue) {
 		Xhpmv(tart::getDType<Complex>(), queue, nullptr);
 		Xsymv(tart::getDType<Real>(), queue, nullptr);
 		Xsbmv<Real>(queue, nullptr);
-		Xspmv<Real>(queue, nullptr);
+		Xspmv(tart::getDType<Real>(), queue, nullptr);
 		Xtrmv(tart::getDType<Real>(), queue, nullptr);
 		Xtrmv(tart::getDType<Complex>(), queue, nullptr);
 		Xger(tart::getDType<Real>(), queue, nullptr);

@@ -85,7 +85,7 @@ void FillCacheForPrecision(Queue& queue) {
 		// Runs all the level 2 set-up functions that don't support all precisions
 		Xhemv(tart::getDType<Complex>(), queue, nullptr);
 		Xhbmv(tart::getDType<Complex>(), queue, nullptr);
-		Xhpmv<Complex>(queue, nullptr);
+		Xhpmv(tart::getDType<Complex>(), queue, nullptr);
 		Xsymv<Real>(queue, nullptr);
 		Xsbmv<Real>(queue, nullptr);
 		Xspmv<Real>(queue, nullptr);

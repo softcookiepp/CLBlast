@@ -50,7 +50,7 @@ void FillCacheForPrecision(Queue& queue) {
 
 		// Runs all the level 2 set-up functions that support all precisions
 		Xgemv(tart::getDType<Type>(), queue, nullptr);
-		Xgbmv<Type>(queue, nullptr);
+		Xgbmv(tart::getDType<Type>(), queue, nullptr);
 		Xtrmv<Type>(queue, nullptr);
 		Xtbmv<Type>(queue, nullptr);
 		Xtpmv(tart::getDType<Type>(), queue, nullptr);

@@ -480,7 +480,7 @@ StatusCode Gbmv(const Layout layout, const Transpose a_transpose, const size_t m
 								const size_t y_offset, const size_t y_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xgbmv<T>(queue_cpp, event);
+		auto routine = Xgbmv(tart::getDType<T>(), queue_cpp, event);
 		routine.DoGbmv(layout, a_transpose, m, n, kl, ku, alpha, (a_buffer), a_offset, a_ld, (x_buffer),
 									 x_offset, x_inc, beta, (y_buffer), y_offset, y_inc);
 		return StatusCode::kSuccess;

@@ -22,19 +22,18 @@ namespace clblast {
 // =================================================================================================
 
 // See comment at top of file for a description of the class
-template <typename T>
 class Xgbmv : public Xgemv {
  public:
 	// Uses the generic matrix-vector routine
 	using Xgemv::MatVec;
 
 	// Constructor
-	Xgbmv(Queue& queue, EventPointer event, const std::string& name = "GBMV");
+	Xgbmv(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "GBMV");
 
 	// Templated-precision implementation of the routine
 	void DoGbmv(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const size_t kl,
-							const size_t ku, const T alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
-							const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc, const T beta,
+							const size_t ku, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
+							const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc, const tart::Scalar& beta,
 							const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc);
 };
 

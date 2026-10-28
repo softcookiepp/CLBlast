@@ -20,17 +20,15 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-template <typename T>
-Xgbmv<T>::Xgbmv(Queue& queue, EventPointer event, const std::string& name) : Xgemv(tart::getDType<T>(), queue, event, name) {}
+Xgbmv::Xgbmv(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) : Xgemv(dtype, queue, event, name) {}
 
 // =================================================================================================
 
 // The main routine
-template <typename T>
-void Xgbmv<T>::DoGbmv(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const size_t kl,
-											const size_t ku, const T alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
+void Xgbmv::DoGbmv(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const size_t kl,
+											const size_t ku, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
 											const size_t a_ld, const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
-											const T beta, const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc)
+											const tart::Scalar& beta, const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc)
 {
 	// Reverses the upper and lower band count
 	auto rotated = (layout == Layout::kRowMajor);
@@ -44,15 +42,6 @@ void Xgbmv<T>::DoGbmv(const Layout layout, const Transpose a_transpose, const si
 	MatVec(layout, a_transpose, m, n, alpha, a_buffer, a_offset, a_ld, x_buffer, x_offset, x_inc, beta, y_buffer,
 				 y_offset, y_inc, fast_kernels, fast_kernels, 0, false, kl_real, ku_real);
 }
-
-// =================================================================================================
-
-// Compiles the templated class
-template class Xgbmv<half>;
-template class Xgbmv<float>;
-template class Xgbmv<double>;
-template class Xgbmv<float2>;
-template class Xgbmv<double2>;
 
 // =================================================================================================
 }	// namespace clblast

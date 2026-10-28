@@ -20,25 +20,17 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-template <typename T>
-Xgeru<T>::Xgeru(Queue& queue, EventPointer event, const std::string& name) : Xger<T>(queue, event, name) {}
+Xgeru::Xgeru(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) : Xger(dtype, queue, event, name) {}
 
 // =================================================================================================
 
 // The main routine
-template <typename T>
-void Xgeru<T>::DoGeru(const Layout layout, const size_t m, const size_t n, const T alpha, const Buffer<T>& x_buffer,
-                      const size_t x_offset, const size_t x_inc, const Buffer<T>& y_buffer, const size_t y_offset,
-                      const size_t y_inc, const Buffer<T>& a_buffer, const size_t a_offset, const size_t a_ld) {
+void Xgeru::DoGeru(const Layout layout, const size_t m, const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& x_buffer,
+                      const size_t x_offset, const size_t x_inc, const tart::buffer_ptr& y_buffer, const size_t y_offset,
+                      const size_t y_inc, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld) {
   // Regular Ger operation on complex data
   DoGer(layout, m, n, alpha, x_buffer, x_offset, x_inc, y_buffer, y_offset, y_inc, a_buffer, a_offset, a_ld);
 }
-
-// =================================================================================================
-
-// Compiles the templated class
-template class Xgeru<float2>;
-template class Xgeru<double2>;
 
 // =================================================================================================
 }  // namespace clblast

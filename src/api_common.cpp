@@ -91,9 +91,9 @@ void FillCacheForPrecision(Queue& queue) {
 		Xspmv<Real>(queue, nullptr);
 		Xtrmv<Real>(queue, nullptr);
 		Xtrmv<Complex>(queue, nullptr);
-		Xger<Real>(queue, nullptr);
-		Xgeru<Complex>(queue, nullptr);
-		Xgerc<Complex>(queue, nullptr);
+		Xger(tart::getDType<Real>(), queue, nullptr);
+		Xgeru(tart::getDType<Complex>(), queue, nullptr);
+		Xgerc(tart::getDType<Complex>(), queue, nullptr);
 		Xher<Complex, Real>(queue, nullptr);
 		Xhpr<Complex, Real>(queue, nullptr);
 		Xher2<Complex>(queue, nullptr);

@@ -20,19 +20,18 @@ namespace clblast {
 // =================================================================================================
 
 // See comment at top of file for a description of the class
-template <typename T>
-class Xgerc : public Xger<T> {
+class Xgerc : public Xger {
  public:
   // Uses the regular Xger routine
-  using Xger<T>::DoGer;
+  using Xger::DoGer;
 
   // Constructor
-  Xgerc(Queue& queue, EventPointer event, const std::string& name = "GERC");
+  Xgerc(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "GERC");
 
   // Templated-precision implementation of the routine
-  void DoGerc(const Layout layout, const size_t m, const size_t n, const T alpha, const Buffer<T>& x_buffer,
-              const size_t x_offset, const size_t x_inc, const Buffer<T>& y_buffer, const size_t y_offset,
-              const size_t y_inc, const Buffer<T>& a_buffer, const size_t a_offset, const size_t a_ld);
+  void DoGerc(const Layout layout, const size_t m, const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& x_buffer,
+              const size_t x_offset, const size_t x_inc, const tart::buffer_ptr& y_buffer, const size_t y_offset,
+              const size_t y_inc, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld);
 };
 
 // =================================================================================================

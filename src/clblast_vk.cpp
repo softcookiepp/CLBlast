@@ -830,9 +830,9 @@ StatusCode Ger(const Layout layout, const size_t m, const size_t n, const T alph
 							 const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xger<T>(queue_cpp, event);
-		routine.DoGer(layout, m, n, alpha, Buffer<T>(x_buffer), x_offset, x_inc, Buffer<T>(y_buffer), y_offset, y_inc,
-									Buffer<T>(a_buffer), a_offset, a_ld);
+		auto routine = Xger(tart::getDType<T>(), queue_cpp, event);
+		routine.DoGer(layout, m, n, alpha, (x_buffer), x_offset, x_inc, (y_buffer), y_offset, y_inc,
+									(a_buffer), a_offset, a_ld);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -856,9 +856,9 @@ StatusCode Geru(const Layout layout, const size_t m, const size_t n, const T alp
 								const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xgeru<T>(queue_cpp, event);
-		routine.DoGeru(layout, m, n, alpha, Buffer<T>(x_buffer), x_offset, x_inc, Buffer<T>(y_buffer), y_offset, y_inc,
-									 Buffer<T>(a_buffer), a_offset, a_ld);
+		auto routine = Xgeru(tart::getDType<T>(), queue_cpp, event);
+		routine.DoGeru(layout, m, n, alpha, (x_buffer), x_offset, x_inc, (y_buffer), y_offset, y_inc,
+									 (a_buffer), a_offset, a_ld);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -879,9 +879,9 @@ StatusCode Gerc(const Layout layout, const size_t m, const size_t n, const T alp
 								const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xgerc<T>(queue_cpp, event);
-		routine.DoGerc(layout, m, n, alpha, Buffer<T>(x_buffer), x_offset, x_inc, Buffer<T>(y_buffer), y_offset, y_inc,
-									 Buffer<T>(a_buffer), a_offset, a_ld);
+		auto routine = Xgerc(tart::getDType<T>(), queue_cpp, event);
+		routine.DoGerc(layout, m, n, alpha, (x_buffer), x_offset, x_inc, (y_buffer), y_offset, y_inc,
+									 (a_buffer), a_offset, a_ld);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();

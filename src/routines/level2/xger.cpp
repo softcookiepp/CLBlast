@@ -24,9 +24,8 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-template <typename T>
-Xger<T>::Xger(Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Xger"}, precisionToDataType(PrecisionValue<T>()), {},
+Xger::Xger(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
+		: Routine(queue, event, name, {"Xger"}, dtype, {},
 							{
 	#include "../../kernels-vk-inline/level2/xger.glsl.inl"
 			}
@@ -46,10 +45,9 @@ Xger<T>::Xger(Queue& queue, EventPointer event, const std::string& name)
 // =================================================================================================
 
 // The main routine
-template <typename T>
-void Xger<T>::DoGer(const Layout layout, const size_t m, const size_t n, const T alpha, const Buffer<T>& x_buffer,
-										const size_t x_offset, const size_t x_inc, const Buffer<T>& y_buffer, const size_t y_offset,
-										const size_t y_inc, const Buffer<T>& a_buffer, const size_t a_offset, const size_t a_ld) {
+void Xger::DoGer(const Layout layout, const size_t m, const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& x_buffer,
+										const size_t x_offset, const size_t x_inc, const tart::buffer_ptr& y_buffer, const size_t y_offset,
+										const size_t y_inc, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld) {
 	// Makes sure all dimensions are larger than zero
 	if (m == 0 || n == 0) {
 		throw BLASError(StatusCode::kInvalidDimension);
@@ -61,9 +59,9 @@ void Xger<T>::DoGer(const Layout layout, const size_t m, const size_t n, const T
 	const auto a_two = (a_is_rowmajor) ? m : n;
 
 	// Tests the matrix and the vectors for validity
-	TestMatrixA(mDtype, a_one, a_two, a_buffer(), a_offset, a_ld);
-	TestVectorX(mDtype, m, x_buffer(), x_offset, x_inc);
-	TestVectorY(mDtype, n, y_buffer(), y_offset, y_inc);
+	TestMatrixA(mDtype, a_one, a_two, a_buffer, a_offset, a_ld);
+	TestVectorX(mDtype, m, x_buffer, x_offset, x_inc);
+	TestVectorY(mDtype, n, y_buffer, y_offset, y_inc);
 
 	// Retrieves the kernel from the compiled binary
 	auto kernelOld = Kernel(program_, "Xger");
@@ -73,13 +71,13 @@ void Xger<T>::DoGer(const Layout layout, const size_t m, const size_t n, const T
 	kernel->setArg(0, static_cast<int>(a_one));
 	kernel->setArg(1, static_cast<int>(a_two));
 	kernel->setArgAs(mDtype, 2, alpha);
-	kernel->setArg(3, x_buffer());
+	kernel->setArg(3, x_buffer);
 	kernel->setArg(4, static_cast<int>(x_offset));
 	kernel->setArg(5, static_cast<int>(x_inc));
-	kernel->setArg(6, y_buffer());
+	kernel->setArg(6, y_buffer);
 	kernel->setArg(7, static_cast<int>(y_offset));
 	kernel->setArg(8, static_cast<int>(y_inc));
-	kernel->setArg(9, a_buffer());
+	kernel->setArg(9, a_buffer);
 	kernel->setArg(10, static_cast<int>(a_offset));
 	kernel->setArg(11, static_cast<int>(a_ld));
 	kernel->setArg(12, static_cast<int>(a_is_rowmajor));
@@ -100,15 +98,6 @@ void Xger<T>::DoGer(const Layout layout, const size_t m, const size_t n, const T
 		mSPR2
 	});
 }
-
-// =================================================================================================
-
-// Compiles the templated class
-template class Xger<half>;
-template class Xger<float>;
-template class Xger<double>;
-template class Xger<float2>;
-template class Xger<double2>;
 
 // =================================================================================================
 }	// namespace clblast

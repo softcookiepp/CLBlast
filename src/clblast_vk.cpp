@@ -701,7 +701,7 @@ StatusCode Tbmv(const Layout layout, const Triangle triangle, const Transpose a_
 								tart::buffer_ptr x_buffer, const size_t x_offset, const size_t x_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xtbmv<T>(queue_cpp, event);
+		auto routine = Xtbmv(tart::getDType<T>(), queue_cpp, event);
 		routine.DoTbmv(layout, triangle, a_transpose, diagonal, n, k, (a_buffer), a_offset, a_ld,
 			(x_buffer), x_offset, x_inc);
 		return StatusCode::kSuccess;

@@ -21,14 +21,12 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-template <typename T>
-Xtbmv<T>::Xtbmv(Queue& queue, EventPointer event, const std::string& name) : Xgemv(tart::getDType<T>(), queue, event, name) {}
+Xtbmv::Xtbmv(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) : Xgemv(dtype, queue, event, name) {}
 
 // =================================================================================================
 
 // The main routine
-template <typename T>
-void Xtbmv<T>::DoTbmv(const Layout layout, const Triangle triangle, const Transpose a_transpose,
+void Xtbmv::DoTbmv(const Layout layout, const Triangle triangle, const Transpose a_transpose,
 											const Diagonal diagonal, const size_t n, const size_t k, const tart::buffer_ptr& a_buffer,
 											const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& x_buffer, const size_t x_offset,
 											const size_t x_inc) {
@@ -49,8 +47,8 @@ void Xtbmv<T>::DoTbmv(const Layout layout, const Triangle triangle, const Transp
 	// ROUTINE_TBMV define.
 	auto fast_kernels = false;
 	try {
-		MatVec(layout, a_transpose, n, n, ConstantOne<T>(), a_buffer, a_offset, a_ld, scratch_buffer, x_offset, x_inc,
-					 ConstantZero<T>(), x_buffer, x_offset, x_inc, fast_kernels, fast_kernels, parameter, false, k, 0);
+		MatVec(layout, a_transpose, n, n, tart::Scalar::one(), a_buffer, a_offset, a_ld, scratch_buffer, x_offset, x_inc,
+					 tart::Scalar::zero(), x_buffer, x_offset, x_inc, fast_kernels, fast_kernels, parameter, false, k, 0);
 	} catch (BLASError& e) {
 		// Returns the proper error code (renames vector Y to X)
 		switch (e.status()) {
@@ -65,15 +63,6 @@ void Xtbmv<T>::DoTbmv(const Layout layout, const Triangle triangle, const Transp
 		}
 	}
 }
-
-// =================================================================================================
-
-// Compiles the templated class
-template class Xtbmv<half>;
-template class Xtbmv<float>;
-template class Xtbmv<double>;
-template class Xtbmv<float2>;
-template class Xtbmv<double2>;
 
 // =================================================================================================
 }	// namespace clblast

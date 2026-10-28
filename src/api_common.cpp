@@ -96,18 +96,18 @@ void FillCacheForPrecision(Queue& queue) {
 		Xgerc(tart::getDType<Complex>(), queue, nullptr);
 		Xher<Complex, Real>(queue, nullptr);
 		Xhpr<Complex, Real>(queue, nullptr);
-		Xher2<Complex>(queue, nullptr);
-		Xhpr2<Complex>(queue, nullptr);
+		Xher2(tart::getDType<Complex>(), queue, nullptr);
+		Xhpr2(tart::getDType<Complex>(), queue, nullptr);
 		Xsyr<Real>(queue, nullptr);
 		Xspr<Real>(queue, nullptr);
-		Xsyr2<Real>(queue, nullptr);
-		Xspr2<Real>(queue, nullptr);
+		Xsyr2(tart::getDType<Real>(), queue, nullptr);
+		Xspr2(tart::getDType<Real>(), queue, nullptr);
 
 		// Runs all the level 3 set-up functions that don't support all precisions
 		Xhemm<Complex>(queue, nullptr);
 		Xherk<Complex, Real>(queue, nullptr);
 		Xher2k<Complex, Real>(queue, nullptr);
-		Xspr2<Real>(queue, nullptr);
+		Xspr2(tart::getDType<Real>(), queue, nullptr);
 
 	} catch (const RuntimeErrorCode& e) {
 		if (e.status() != StatusCode::kNoDoublePrecision && e.status() != StatusCode::kNoHalfPrecision) {

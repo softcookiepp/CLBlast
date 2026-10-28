@@ -946,9 +946,9 @@ StatusCode Her2(const Layout layout, const Triangle triangle, const size_t n, co
 								const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xher2<T>(queue_cpp, event);
-		routine.DoHer2(layout, triangle, n, alpha, Buffer<T>(x_buffer), x_offset, x_inc, Buffer<T>(y_buffer), y_offset,
-									 y_inc, Buffer<T>(a_buffer), a_offset, a_ld, false);
+		auto routine = Xher2(tart::getDType<T>(), queue_cpp, event);
+		routine.DoHer2(layout, triangle, n, alpha, (x_buffer), x_offset, x_inc, (y_buffer), y_offset,
+									 y_inc, (a_buffer), a_offset, a_ld, false);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -969,9 +969,9 @@ StatusCode Hpr2(const Layout layout, const Triangle triangle, const size_t n, co
 								const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xhpr2<T>(queue_cpp, event);
-		routine.DoHpr2(layout, triangle, n, alpha, Buffer<T>(x_buffer), x_offset, x_inc, Buffer<T>(y_buffer), y_offset,
-									 y_inc, Buffer<T>(ap_buffer), ap_offset);
+		auto routine = Xhpr2(tart::getDType<T>(), queue_cpp, event);
+		routine.DoHpr2(layout, triangle, n, alpha, (x_buffer), x_offset, x_inc, (y_buffer), y_offset,
+									 y_inc, (ap_buffer), ap_offset);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1041,9 +1041,9 @@ StatusCode Syr2(const Layout layout, const Triangle triangle, const size_t n, co
 								const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xsyr2<T>(queue_cpp, event);
-		routine.DoSyr2(layout, triangle, n, alpha, Buffer<T>(x_buffer), x_offset, x_inc, Buffer<T>(y_buffer), y_offset,
-									 y_inc, Buffer<T>(a_buffer), a_offset, a_ld);
+		auto routine = Xsyr2(tart::getDType<T>(), queue_cpp, event);
+		routine.DoSyr2(layout, triangle, n, alpha, (x_buffer), x_offset, x_inc, (y_buffer), y_offset,
+									 y_inc, (a_buffer), a_offset, a_ld);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1067,9 +1067,9 @@ StatusCode Spr2(const Layout layout, const Triangle triangle, const size_t n, co
 								const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xspr2<T>(queue_cpp, event);
-		routine.DoSpr2(layout, triangle, n, alpha, Buffer<T>(x_buffer), x_offset, x_inc, Buffer<T>(y_buffer), y_offset,
-									 y_inc, Buffer<T>(ap_buffer), ap_offset);
+		auto routine = Xspr2(tart::getDType<T>(), queue_cpp, event);
+		routine.DoSpr2(layout, triangle, n, alpha, (x_buffer), x_offset, x_inc, (y_buffer), y_offset,
+									 y_inc, (ap_buffer), ap_offset);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();

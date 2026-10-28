@@ -24,9 +24,8 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-template <typename T>
-Xher2<T>::Xher2(Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Xger"}, precisionToDataType(PrecisionValue<T>()), {},
+Xher2::Xher2(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
+		: Routine(queue, event, name, {"Xger"}, dtype, {},
 							{
 	#include "../../kernels-vk-inline/level2/xher2.glsl.inl"
 							}
@@ -46,11 +45,10 @@ Xher2<T>::Xher2(Queue& queue, EventPointer event, const std::string& name)
 // =================================================================================================
 
 // The main routine
-template <typename T>
-void Xher2<T>::DoHer2(const Layout layout, const Triangle triangle, const size_t n, const T alpha,
-											const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc, const Buffer<T>& y_buffer,
-											const size_t y_offset, const size_t y_inc, const Buffer<T>& a_buffer, const size_t a_offset,
-											const size_t a_ld, const bool packed)
+void Xher2::DoHer2(const Layout layout, const Triangle triangle, const size_t n, const tart::Scalar& alpha,
+	const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc, const tart::buffer_ptr& y_buffer,
+	const size_t y_offset, const size_t y_inc, const tart::buffer_ptr& a_buffer, const size_t a_offset,
+	const size_t a_ld, const bool packed)
 {
 	// Makes sure the dimensions are larger than zero
 	if (n == 0) {
@@ -64,12 +62,12 @@ void Xher2<T>::DoHer2(const Layout layout, const Triangle triangle, const size_t
 
 	// Tests the matrix and the vectors for validity
 	if (packed) {
-		TestMatrixAP(mDtype, n, a_buffer(), a_offset);
+		TestMatrixAP(mDtype, n, a_buffer, a_offset);
 	} else {
-		TestMatrixA(mDtype, n, n, a_buffer(), a_offset, a_ld);
+		TestMatrixA(mDtype, n, n, a_buffer, a_offset, a_ld);
 	}
-	TestVectorX(mDtype, n, x_buffer(), x_offset, x_inc);
-	TestVectorY(mDtype, n, y_buffer(), y_offset, y_inc);
+	TestVectorX(mDtype, n, x_buffer, x_offset, x_inc);
+	TestVectorY(mDtype, n, y_buffer, y_offset, y_inc);
 
 	// Retrieves the kernel from the compiled binary
 	auto kernelOld = Kernel(program_, "Xher2");
@@ -78,13 +76,13 @@ void Xher2<T>::DoHer2(const Layout layout, const Triangle triangle, const size_t
 	// Sets the kernel arguments
 	kernel->setArg(0, static_cast<int>(n));
 	kernel->setArgAs(mDtype, 1, (alpha));
-	kernel->setArg(2, x_buffer());
+	kernel->setArg(2, x_buffer);
 	kernel->setArg(3, static_cast<int>(x_offset));
 	kernel->setArg(4, static_cast<int>(x_inc));
-	kernel->setArg(5, y_buffer());
+	kernel->setArg(5, y_buffer);
 	kernel->setArg(6, static_cast<int>(y_offset));
 	kernel->setArg(7, static_cast<int>(y_inc));
-	kernel->setArg(8, a_buffer());
+	kernel->setArg(8, a_buffer);
 	kernel->setArg(9, static_cast<int>(a_offset));
 	kernel->setArg(10, static_cast<int>(a_ld));
 	kernel->setArg(11, static_cast<int>(is_upper));
@@ -105,15 +103,6 @@ void Xher2<T>::DoHer2(const Layout layout, const Triangle triangle, const size_t
 		mSPR2
 	});
 }
-
-// =================================================================================================
-
-// Compiles the templated class
-template class Xher2<half>;
-template class Xher2<float>;
-template class Xher2<double>;
-template class Xher2<float2>;
-template class Xher2<double2>;
 
 // =================================================================================================
 }	// namespace clblast

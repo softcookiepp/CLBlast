@@ -20,19 +20,18 @@ namespace clblast {
 // =================================================================================================
 
 // See comment at top of file for a description of the class
-template <typename T>
-class Xhpr2 : public Xher2<T> {
+class Xhpr2 : public Xher2 {
  public:
   // Uses the regular Xher2 routine
-  using Xher2<T>::DoHer2;
+  using Xher2::DoHer2;
 
   // Constructor
-  Xhpr2(Queue& queue, EventPointer event, const std::string& name = "HPR2");
+  Xhpr2(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "HPR2");
 
   // Templated-precision implementation of the routine
-  void DoHpr2(const Layout layout, const Triangle triangle, const size_t n, const T alpha, const Buffer<T>& x_buffer,
-              const size_t x_offset, const size_t x_inc, const Buffer<T>& y_buffer, const size_t y_offset,
-              const size_t y_inc, const Buffer<T>& ap_buffer, const size_t ap_offset);
+  void DoHpr2(const Layout layout, const Triangle triangle, const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& x_buffer,
+              const size_t x_offset, const size_t x_inc, const tart::buffer_ptr& y_buffer, const size_t y_offset,
+              const size_t y_inc, const tart::buffer_ptr& ap_buffer, const size_t ap_offset);
 };
 
 // =================================================================================================

@@ -21,14 +21,12 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-template <typename T>
-Xtpmv<T>::Xtpmv(Queue& queue, EventPointer event, const std::string& name) : Xgemv(tart::getDType<T>(), queue, event, name) {}
+Xtpmv::Xtpmv(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) : Xgemv(dtype, queue, event, name) {}
 
 // =================================================================================================
 
 // The main routine
-template <typename T>
-void Xtpmv<T>::DoTpmv(const Layout layout, const Triangle triangle, const Transpose a_transpose,
+void Xtpmv::DoTpmv(const Layout layout, const Triangle triangle, const Transpose a_transpose,
 											const Diagonal diagonal, const size_t n, const tart::buffer_ptr& ap_buffer, const size_t ap_offset,
 											const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc) {
 	// Creates a copy of X: a temporary scratch buffer
@@ -48,8 +46,8 @@ void Xtpmv<T>::DoTpmv(const Layout layout, const Triangle triangle, const Transp
 	// ROUTINE_TPMV define.
 	auto fast_kernels = false;
 	try {
-		MatVec(layout, a_transpose, n, n, ConstantOne<T>(), ap_buffer, ap_offset, n, scratch_buffer, x_offset, x_inc,
-					 ConstantZero<T>(), x_buffer, x_offset, x_inc, fast_kernels, fast_kernels, parameter, true, 0, 0);
+		MatVec(layout, a_transpose, n, n, tart::Scalar((double)1.0), ap_buffer, ap_offset, n, scratch_buffer, x_offset, x_inc,
+			tart::Scalar((double)0.0), x_buffer, x_offset, x_inc, fast_kernels, fast_kernels, parameter, true, 0, 0);
 	} catch (BLASError& e) {
 		// Returns the proper error code (renames vector Y to X)
 		switch (e.status()) {
@@ -64,15 +62,6 @@ void Xtpmv<T>::DoTpmv(const Layout layout, const Triangle triangle, const Transp
 		}
 	}
 }
-
-// =================================================================================================
-
-// Compiles the templated class
-template class Xtpmv<half>;
-template class Xtpmv<float>;
-template class Xtpmv<double>;
-template class Xtpmv<float2>;
-template class Xtpmv<double2>;
 
 // =================================================================================================
 }	// namespace clblast

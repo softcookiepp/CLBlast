@@ -732,7 +732,7 @@ StatusCode Tpmv(const Layout layout, const Triangle triangle, const Transpose a_
 								const size_t x_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xtpmv<T>(queue_cpp, event);
+		auto routine = Xtpmv(tart::getDType<T>(), queue_cpp, event);
 		routine.DoTpmv(layout, triangle, a_transpose, diagonal, n, (ap_buffer), ap_offset, (x_buffer),
 									 x_offset, x_inc);
 		return StatusCode::kSuccess;

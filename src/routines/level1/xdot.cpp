@@ -60,7 +60,7 @@ void Xdot::DoDot(const size_t n, const tart::buffer_ptr& dot_buffer, const size_
 
 	// Creates the buffer for intermediate values
 	auto temp_size = 2 * db_["WGS2"] * mDtype.size();
-	auto temp_buffer = x_buffer->getDevice()->allocateBuffer(temp_size);//Buffer<T>(this->mDevice, temp_size);
+	auto temp_buffer = x_buffer->getDevice()->allocateBuffer(temp_size);
 	
 	// Sets the kernel arguments
 #if VULKAN_USE_BDA

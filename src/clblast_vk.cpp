@@ -517,7 +517,7 @@ StatusCode Hemv(const Layout layout, const Triangle triangle, const size_t n, co
 								tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xhemv<T>(queue_cpp, event);
+		auto routine = Xhemv(tart::getDType<T>(), queue_cpp, event);
 		routine.DoHemv(layout, triangle, n, alpha, (a_buffer), a_offset, a_ld, (x_buffer), x_offset,
 									 x_inc, beta, (y_buffer), y_offset, y_inc);
 		return StatusCode::kSuccess;
@@ -542,7 +542,7 @@ StatusCode Hbmv(const Layout layout, const Triangle triangle, const size_t n, co
 								const size_t y_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xhbmv<T>(queue_cpp, event);
+		auto routine = Xhbmv(tart::getDType<T>(), queue_cpp, event);
 		routine.DoHbmv(layout, triangle, n, k, alpha, (a_buffer), a_offset, a_ld, (x_buffer), x_offset,
 									 x_inc, beta, (y_buffer), y_offset, y_inc);
 		return StatusCode::kSuccess;

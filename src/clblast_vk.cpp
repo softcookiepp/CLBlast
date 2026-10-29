@@ -617,7 +617,7 @@ StatusCode Sbmv(const Layout layout, const Triangle triangle, const size_t n, co
 								const size_t y_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xsbmv<T>(queue_cpp, event);
+		auto routine = Xsbmv(tart::getDType<T>(), queue_cpp, event);
 		routine.DoSbmv(layout, triangle, n, k, alpha, (a_buffer), a_offset, a_ld, (x_buffer), x_offset,
 									 x_inc, beta, (y_buffer), y_offset, y_inc);
 		return StatusCode::kSuccess;

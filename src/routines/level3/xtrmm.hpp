@@ -38,8 +38,8 @@ class Xtrmm : public Xgemm<T> {
 
 	// Templated-precision implementation of the routine
 	void DoTrmm(const Layout layout, const Side side, const Triangle triangle, const Transpose a_transpose,
-							const Diagonal diagonal, const size_t m, const size_t n, const T alpha, const Buffer<T>& a_buffer,
-							const size_t a_offset, const size_t a_ld, const Buffer<T>& b_buffer, const size_t b_offset,
+							const Diagonal diagonal, const size_t m, const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer,
+							const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset,
 							const size_t b_ld);
 };
 

@@ -1100,9 +1100,9 @@ StatusCode Gemm(const Layout layout, const Transpose a_transpose, const Transpos
 		auto queue_cpp = Queue(queue);
 		auto routine = Xgemm<T>(queue_cpp, event);
 		const auto temp_buffer_provided = temp_buffer != nullptr;
-		auto temp_buffer_cpp = temp_buffer_provided ? Buffer<T>(temp_buffer) : Buffer<T>(nullptr);
-		routine.DoGemm(layout, a_transpose, b_transpose, m, n, k, alpha, Buffer<T>(a_buffer), a_offset, a_ld,
-									 Buffer<T>(b_buffer), b_offset, b_ld, beta, Buffer<T>(c_buffer), c_offset, c_ld, temp_buffer_cpp,
+		auto temp_buffer_cpp = temp_buffer_provided ? (temp_buffer) : (nullptr);
+		routine.DoGemm(layout, a_transpose, b_transpose, m, n, k, alpha, (a_buffer), a_offset, a_ld,
+									 (b_buffer), b_offset, b_ld, beta, (c_buffer), c_offset, c_ld, temp_buffer_cpp,
 									 temp_buffer_provided);
 		return StatusCode::kSuccess;
 	} catch (...) {
@@ -1139,8 +1139,8 @@ StatusCode Symm(const Layout layout, const Side side, const Triangle triangle, c
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = Xsymm<T>(queue_cpp, event);
-		routine.DoSymm(layout, side, triangle, m, n, alpha, Buffer<T>(a_buffer), a_offset, a_ld, Buffer<T>(b_buffer),
-									 b_offset, b_ld, beta, Buffer<T>(c_buffer), c_offset, c_ld);
+		routine.DoSymm(layout, side, triangle, m, n, alpha, (a_buffer), a_offset, a_ld, (b_buffer),
+									 b_offset, b_ld, beta, (c_buffer), c_offset, c_ld);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1176,8 +1176,8 @@ StatusCode Hemm(const Layout layout, const Side side, const Triangle triangle, c
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = Xhemm<T>(queue_cpp, event);
-		routine.DoHemm(layout, side, triangle, m, n, alpha, Buffer<T>(a_buffer), a_offset, a_ld, Buffer<T>(b_buffer),
-									 b_offset, b_ld, beta, Buffer<T>(c_buffer), c_offset, c_ld);
+		routine.DoHemm(layout, side, triangle, m, n, alpha, (a_buffer), a_offset, a_ld, (b_buffer),
+									 b_offset, b_ld, beta, (c_buffer), c_offset, c_ld);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1201,8 +1201,8 @@ StatusCode Syrk(const Layout layout, const Triangle triangle, const Transpose a_
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = Xsyrk<T>(queue_cpp, event);
-		routine.DoSyrk(layout, triangle, a_transpose, n, k, alpha, Buffer<T>(a_buffer), a_offset, a_ld, beta,
-									 Buffer<T>(c_buffer), c_offset, c_ld);
+		routine.DoSyrk(layout, triangle, a_transpose, n, k, alpha, (a_buffer), a_offset, a_ld, beta,
+									 (c_buffer), c_offset, c_ld);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1233,8 +1233,8 @@ StatusCode Herk(const Layout layout, const Triangle triangle, const Transpose a_
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = Xherk<std::complex<T>, T>(queue_cpp, event);
-		routine.DoHerk(layout, triangle, a_transpose, n, k, alpha, Buffer<std::complex<T>>(a_buffer), a_offset, a_ld, beta,
-									 Buffer<std::complex<T>>(c_buffer), c_offset, c_ld);
+		routine.DoHerk(layout, triangle, a_transpose, n, k, alpha, (a_buffer), a_offset, a_ld, beta,
+									 (c_buffer), c_offset, c_ld);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1256,8 +1256,8 @@ StatusCode Syr2k(const Layout layout, const Triangle triangle, const Transpose a
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = Xsyr2k<T>(queue_cpp, event);
-		routine.DoSyr2k(layout, triangle, ab_transpose, n, k, alpha, Buffer<T>(a_buffer), a_offset, a_ld,
-										Buffer<T>(b_buffer), b_offset, b_ld, beta, Buffer<T>(c_buffer), c_offset, c_ld);
+		routine.DoSyr2k(layout, triangle, ab_transpose, n, k, alpha, (a_buffer), a_offset, a_ld,
+										(b_buffer), b_offset, b_ld, beta, (c_buffer), c_offset, c_ld);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1293,8 +1293,8 @@ StatusCode Her2k(const Layout layout, const Triangle triangle, const Transpose a
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = Xher2k<T, U>(queue_cpp, event);
-		routine.DoHer2k(layout, triangle, ab_transpose, n, k, alpha, Buffer<T>(a_buffer), a_offset, a_ld,
-										Buffer<T>(b_buffer), b_offset, b_ld, beta, Buffer<T>(c_buffer), c_offset, c_ld);
+		routine.DoHer2k(layout, triangle, ab_transpose, n, k, alpha, (a_buffer), a_offset, a_ld,
+										(b_buffer), b_offset, b_ld, beta, (c_buffer), c_offset, c_ld);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1319,8 +1319,8 @@ StatusCode Trmm(const Layout layout, const Side side, const Triangle triangle, c
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = Xtrmm<T>(queue_cpp, event);
-		routine.DoTrmm(layout, side, triangle, a_transpose, diagonal, m, n, alpha, Buffer<T>(a_buffer), a_offset, a_ld,
-									 Buffer<T>(b_buffer), b_offset, b_ld);
+		routine.DoTrmm(layout, side, triangle, a_transpose, diagonal, m, n, alpha, (a_buffer), a_offset, a_ld,
+									 (b_buffer), b_offset, b_ld);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1356,8 +1356,8 @@ StatusCode Trsm(const Layout layout, const Side side, const Triangle triangle, c
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = Xtrsm<T>(queue_cpp, event);
-		routine.DoTrsm(layout, side, triangle, a_transpose, diagonal, m, n, alpha, Buffer<T>(a_buffer), a_offset, a_ld,
-									 Buffer<T>(b_buffer), b_offset, b_ld);
+		routine.DoTrsm(layout, side, triangle, a_transpose, diagonal, m, n, alpha, (a_buffer), a_offset, a_ld,
+									 (b_buffer), b_offset, b_ld);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1423,7 +1423,7 @@ StatusCode Omatcopy(const Layout layout, const Transpose a_transpose, const size
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = Xomatcopy<T>(queue_cpp, event);
-		routine.DoOmatcopy(layout, a_transpose, m, n, alpha, Buffer<T>(a_buffer), a_offset, a_ld, Buffer<T>(b_buffer),
+		routine.DoOmatcopy(layout, a_transpose, m, n, alpha, (a_buffer), a_offset, a_ld, (b_buffer),
 											 b_offset, b_ld);
 		return StatusCode::kSuccess;
 	} catch (...) {
@@ -1618,8 +1618,8 @@ StatusCode GemmBatched(const Layout layout, const Transpose a_transpose, const T
 			b_offsets_cpp.push_back(b_offsets[batch]);
 			c_offsets_cpp.push_back(c_offsets[batch]);
 		}
-		routine.DoGemmBatched(layout, a_transpose, b_transpose, m, n, k, alphas_cpp, Buffer<T>(a_buffer), a_offsets_cpp,
-													a_ld, Buffer<T>(b_buffer), b_offsets_cpp, b_ld, betas_cpp, Buffer<T>(c_buffer), c_offsets_cpp,
+		routine.DoGemmBatched(layout, a_transpose, b_transpose, m, n, k, alphas_cpp, (a_buffer), a_offsets_cpp,
+													a_ld, (b_buffer), b_offsets_cpp, b_ld, betas_cpp, (c_buffer), c_offsets_cpp,
 													c_ld, batch_count);
 		return StatusCode::kSuccess;
 	} catch (...) {
@@ -1664,8 +1664,8 @@ StatusCode GemmStridedBatched(const Layout layout, const Transpose a_transpose, 
 	try {
 		auto queue_cpp = Queue(queue);
 		auto routine = XgemmStridedBatched<T>(queue_cpp, event);
-		routine.DoGemmStridedBatched(layout, a_transpose, b_transpose, m, n, k, alpha, Buffer<T>(a_buffer), a_offset, a_ld,
-																 a_stride, Buffer<T>(b_buffer), b_offset, b_ld, b_stride, beta, Buffer<T>(c_buffer),
+		routine.DoGemmStridedBatched(layout, a_transpose, b_transpose, m, n, k, alpha, (a_buffer), a_offset, a_ld,
+																 a_stride, (b_buffer), b_offset, b_ld, b_stride, beta, (c_buffer),
 																 c_offset, c_ld, c_stride, batch_count);
 		return StatusCode::kSuccess;
 	} catch (...) {

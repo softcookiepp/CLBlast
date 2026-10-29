@@ -41,9 +41,9 @@ void FillVector(const tart::DType& dtype, const std::shared_ptr<Program> program
 template <typename T>
 void PadCopyTransposeMatrix(const Databases& db, 
 														const size_t src_one, const size_t src_two,
-														const size_t src_ld, const size_t src_offset, const Buffer<T>& src, const size_t dest_one,
+														const size_t src_ld, const size_t src_offset, const tart::buffer_ptr& src, const size_t dest_one,
 														const size_t dest_two, const size_t dest_ld, const size_t dest_offset,
-														const Buffer<T>& dest, const T alpha, const std::shared_ptr<Program>& program,
+														const tart::buffer_ptr& dest, const T alpha, const std::shared_ptr<Program>& program,
 														const bool do_pad, const bool do_transpose, const bool do_conjugate,
 														const bool upper = false, const bool lower = false, const bool diagonal_imag_zero = false)
 {
@@ -92,8 +92,8 @@ void PadCopyTransposeMatrix(const Databases& db,
 	if (use_fast_kernel)
 	{
 		kernel->setArg(0, static_cast<int>(src_ld));
-		kernel->setArg(1, src());
-		kernel->setArg(2, dest());
+		kernel->setArg(1, src);
+		kernel->setArg(2, dest);
 		kernel->setArgAs(tart::getDType<T>(), 3, alpha);
 	} 
 	else
@@ -102,12 +102,12 @@ void PadCopyTransposeMatrix(const Databases& db,
 		kernel->setArg(1, static_cast<int>(src_two));
 		kernel->setArg(2, static_cast<int>(src_ld));
 		kernel->setArg(3, static_cast<int>(src_offset));
-		kernel->setArg(4, src());
+		kernel->setArg(4, src);
 		kernel->setArg(5, static_cast<int>(dest_one));
 		kernel->setArg(6, static_cast<int>(dest_two));
 		kernel->setArg(7, static_cast<int>(dest_ld));
 		kernel->setArg(8, static_cast<int>(dest_offset));
-		kernel->setArg(9, dest());
+		kernel->setArg(9, dest);
 		kernel->setArgAs(tart::getDType<T>(), 10, (alpha));
 		if (pad_kernel)
 		{
@@ -177,11 +177,10 @@ void PadCopyTransposeMatrix(const Databases& db,
 }
 
 // Batched version of the above
-template <typename T>
-void PadCopyTransposeMatrixBatched(const Databases& db, const size_t src_one, const size_t src_two,
-																	 const size_t src_ld, const Buffer<int>& src_offsets, const Buffer<T>& src,
+inline void PadCopyTransposeMatrixBatched(const Databases& db, const size_t src_one, const size_t src_two,
+																	 const size_t src_ld, const tart::buffer_ptr& src_offsets, const tart::buffer_ptr& src,
 																	 const size_t dest_one, const size_t dest_two, const size_t dest_ld,
-																	 const Buffer<int>& dest_offsets, const Buffer<T>& dest,
+																	 const tart::buffer_ptr& dest_offsets, const tart::buffer_ptr& dest,
 																	 const std::shared_ptr<Program>& program, const bool do_pad, const bool do_transpose,
 																	 const bool do_conjugate, const size_t batch_count)
 {
@@ -201,13 +200,13 @@ void PadCopyTransposeMatrixBatched(const Databases& db, const size_t src_one, co
 	kernel->setArg(0, static_cast<int>(src_one));
 	kernel->setArg(1, static_cast<int>(src_two));
 	kernel->setArg(2, static_cast<int>(src_ld));
-	kernel->setArg(3, src_offsets());
-	kernel->setArg(4, src());
+	kernel->setArg(3, src_offsets);
+	kernel->setArg(4, src);
 	kernel->setArg(5, static_cast<int>(dest_one));
 	kernel->setArg(6, static_cast<int>(dest_two));
 	kernel->setArg(7, static_cast<int>(dest_ld));
-	kernel->setArg(8, dest_offsets());
-	kernel->setArg(9, dest());
+	kernel->setArg(8, dest_offsets);
+	kernel->setArg(9, dest);
 	if (do_pad) {
 		kernel->setArg(10, static_cast<int>(do_conjugate));
 	}
@@ -249,12 +248,11 @@ void PadCopyTransposeMatrixBatched(const Databases& db, const size_t src_one, co
 }
 
 // Batched version of the above
-template <typename T>
-void PadCopyTransposeMatrixStridedBatched(const Databases& db, const size_t src_one,
+inline void PadCopyTransposeMatrixStridedBatched(const Databases& db, const size_t src_one,
 										const size_t src_two, const size_t src_ld, const size_t src_offset,
-										const size_t src_stride, const Buffer<T>& src, const size_t dest_one,
+										const size_t src_stride, const tart::buffer_ptr& src, const size_t dest_one,
 										const size_t dest_two, const size_t dest_ld, const size_t dest_offset,
-										const size_t dest_stride, const Buffer<T>& dest,
+										const size_t dest_stride, const tart::buffer_ptr& dest,
 										const std::shared_ptr<Program>& program, const bool do_pad,
 										const bool do_transpose, const bool do_conjugate, const size_t batch_count)
 {
@@ -276,13 +274,13 @@ void PadCopyTransposeMatrixStridedBatched(const Databases& db, const size_t src_
 	kernel->setArg(2, static_cast<int>(src_ld));
 	kernel->setArg(3, static_cast<int>(src_offset));
 	kernel->setArg(4, static_cast<int>(src_stride));
-	kernel->setArg(5, src());
+	kernel->setArg(5, src);
 	kernel->setArg(6, static_cast<int>(dest_one));
 	kernel->setArg(7, static_cast<int>(dest_two));
 	kernel->setArg(8, static_cast<int>(dest_ld));
 	kernel->setArg(9, static_cast<int>(dest_offset));
 	kernel->setArg(10, static_cast<int>(dest_stride));
-	kernel->setArg(11, dest());
+	kernel->setArg(11, dest);
 	if (do_pad) {
 		kernel->setArg(12, static_cast<int>(do_conjugate));
 	}

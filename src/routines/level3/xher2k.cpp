@@ -28,9 +28,9 @@ Xher2k<T, U>::Xher2k(Queue& queue, EventPointer event, const std::string& name) 
 // The main routine
 template <typename T, typename U>
 void Xher2k<T, U>::DoHer2k(const Layout layout, const Triangle triangle, const Transpose ab_transpose, const size_t n,
-	const size_t k, const T alpha, const Buffer<T>& a_buffer, const size_t a_offset,
-	const size_t a_ld, const Buffer<T>& b_buffer, const size_t b_offset, const size_t b_ld,
-	const U beta, const Buffer<T>& c_buffer, const size_t c_offset, const size_t c_ld)
+	const size_t k, const T alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
+	const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld,
+	const U beta, const tart::buffer_ptr& c_buffer, const size_t c_offset, const size_t c_ld)
 {
 	
 	
@@ -39,9 +39,6 @@ void Xher2k<T, U>::DoHer2k(const Layout layout, const Triangle triangle, const T
 	const auto negated_ab_transpose = (ab_transpose != Transpose::kNo) ? Transpose::kNo : Transpose::kYes;
 	HerkAB(layout, triangle, ab_transpose, negated_ab_transpose, n, k, alpha, a_buffer, a_offset, a_ld, b_buffer,
 				 b_offset, b_ld, complex_beta, c_buffer, c_offset, c_ld, false);
-	
-	//first_herk_event.WaitForCompletion();
-	this->device_()->enqueueBarrier( {a_buffer(), b_buffer(), c_buffer()} );
 
 	// Swaps the arguments for matrices A and B, sets 'beta' to 1, and conjugate alpha
 	auto conjugate_alpha = T{alpha.real(), -alpha.imag()};

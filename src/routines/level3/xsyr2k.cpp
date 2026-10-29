@@ -28,9 +28,9 @@ Xsyr2k<T>::Xsyr2k(Queue& queue, EventPointer event, const std::string& name) : X
 // The main routine
 template <typename T>
 void Xsyr2k<T>::DoSyr2k(const Layout layout, const Triangle triangle, const Transpose ab_transpose, const size_t n,
-												const size_t k, const T alpha, const Buffer<T>& a_buffer, const size_t a_offset,
-												const size_t a_ld, const Buffer<T>& b_buffer, const size_t b_offset, const size_t b_ld,
-												const T beta, const Buffer<T>& c_buffer, const size_t c_offset, const size_t c_ld)
+												const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
+												const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld,
+												const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset, const size_t c_ld)
 {
 	
 	
@@ -41,7 +41,7 @@ void Xsyr2k<T>::DoSyr2k(const Layout layout, const Triangle triangle, const Tran
 	
 	//first_syrk_event.WaitForCompletion();
 	// I have no idea which buffers actually need a barrier as of now. Will look closer after tests pass
-	this->device_()->enqueueBarrier({a_buffer(), b_buffer(), c_buffer()});
+	this->device_()->enqueueBarrier({a_buffer, b_buffer, c_buffer});
 	
 	
 	// Swaps the arguments for matrices A and B, and sets 'beta' to 1

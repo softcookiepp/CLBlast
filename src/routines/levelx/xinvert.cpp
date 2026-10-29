@@ -93,8 +93,8 @@ Xinvert<T>::Xinvert(Queue& queue, EventPointer event, const std::string& name)
 // Inverts diagonal square blocks of a matrix
 template <typename T>
 void Xinvert<T>::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle triangle, const Diagonal diag,
-	const size_t n, const size_t block_size, const Buffer<T>& src,
-	const size_t offset, const size_t ld_src, Buffer<T>& dest)
+	const size_t n, const size_t block_size, const tart::buffer_ptr& src,
+	const size_t offset, const size_t ld_src, tart::buffer_ptr& dest)
 {
 	// Makes sure all dimensions are larger than zero
 	if ((block_size == 0) || (n == 0)) {
@@ -122,8 +122,8 @@ void Xinvert<T>::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle 
 	}
 
 	// Checks for validity of the source and destination matrices
-	TestMatrixA(mDtype, n, n, src(), offset, ld_src);
-	TestMatrixB(mDtype, block_size, num_blocks * block_size, dest(), 0, block_size);
+	TestMatrixA(mDtype, n, n, src, offset, ld_src);
+	TestMatrixB(mDtype, block_size, num_blocks * block_size, dest, 0, block_size);
 
 	// Determines which kernels to run based on the layout (the kernels assume column-major as
 	// default) and on whether we are dealing with an upper or lower triangle of the triangular matrix
@@ -136,7 +136,7 @@ void Xinvert<T>::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle 
 
 	// Fills the output buffer with zeros
 	FillMatrix(mDtype, program_, block_size,
-						 num_blocks * block_size, block_size, 0, dest(), ConstantZero<T>(), 16);
+						 num_blocks * block_size, block_size, 0, dest, ConstantZero<T>(), 16);
 	//event_wait_list.push_back(fill_matrix_event);
 	//device_()->enqueueBarrier({dest()});
 
@@ -144,10 +144,10 @@ void Xinvert<T>::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle 
 	Kernel kernelOld(program_, "InvertDiagonalBlock");
 	tart::kernel_ptr kernel = kernelOld.get();
 	kernel->setArg(0, static_cast<int>(n));
-	kernel->setArg(1, src());
+	kernel->setArg(1, src);
 	kernel->setArg(2, static_cast<int>(offset));
 	kernel->setArg(3, static_cast<int>(ld_src));
-	kernel->setArg(4, dest());
+	kernel->setArg(4, dest);
 	kernel->setArg(5, static_cast<int>(block_size));
 	kernel->setArg(6, static_cast<int>(unit_diagonal));
 	kernel->setArg(7, static_cast<int>(is_upper));
@@ -156,10 +156,6 @@ void Xinvert<T>::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle 
 	global_invert[0] = global_invert[0] / local_invert[0];
 	
 	kernel->enqueue(global_invert, {});
-	if (internal_block_size == block_size) {
-		//event_wait_list.push_back(base_kernel_event);
-		//device_()->enqueueBarrier({dest()});
-	}
 	
 	// Builds up block_size x block_size blocks. For example, internal_block_size=16:
 	// use	 16 x 16	blocks to build	32 x 32	blocks,	1 x (1 x npages) grid,	4 x 4 threads;
@@ -182,10 +178,10 @@ void Xinvert<T>::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle 
 		tart::kernel_ptr kernel1 = kernel1Old.get();
 		std::cout << "KERNEL 1: " << "TripleMatMul" + ToString(current_size) + "Part1" + name_postfix << std::endl;
 		kernel1->setArg(0, static_cast<int>(n));
-		kernel1->setArg(1, src());
+		kernel1->setArg(1, src);
 		kernel1->setArg(2, static_cast<int>(offset));
 		kernel1->setArg(3, static_cast<int>(ld_src));
-		kernel1->setArg(4, dest());
+		kernel1->setArg(4, dest);
 		kernel1->setArg(5, static_cast<int>(current_size));
 		kernel1->setArg(6, static_cast<int>(npages));
 		kernel1->setArg(7, static_cast<int>(block_size));
@@ -199,15 +195,11 @@ void Xinvert<T>::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle 
 		tart::kernel_ptr kernel2 = kernel2Old.get();
 		std::cout << "KERNEL 2: " << "TripleMatMul" + ToString(current_size) + "Part2" + name_postfix << std::endl;
 		kernel2->setArg(0, static_cast<int>(n));
-		kernel2->setArg(1, dest());
+		kernel2->setArg(1, dest);
 		kernel2->setArg(2, static_cast<int>(current_size));
 		kernel2->setArg(3, static_cast<int>(npages));
 		kernel2->setArg(4, static_cast<int>(block_size));
 		kernel2->enqueue(global, {});
-		if (!is_last_kernel) {
-			//event_wait_list.push_back(kernel2_event);
-			//device_()->enqueueBarrier({dest()});
-		}
 
 		// Exit in case we reach beyond the bounds of the input matrix
 		if (current_size * 2 >= n) {

@@ -32,9 +32,9 @@ Xhemm<T>::Xhemm(Queue& queue, EventPointer event, const std::string& name) : Xge
 // The main routine
 template <typename T>
 void Xhemm<T>::DoHemm(const Layout layout, const Side side, const Triangle triangle, const size_t m, const size_t n,
-											const T alpha, const Buffer<T>& a_buffer, const size_t a_offset, const size_t a_ld,
-											const Buffer<T>& b_buffer, const size_t b_offset, const size_t b_ld, const T beta,
-											const Buffer<T>& c_buffer, const size_t c_offset, const size_t c_ld) {
+											const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
+											const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld, const tart::Scalar& beta,
+											const tart::buffer_ptr& c_buffer, const size_t c_offset, const size_t c_ld) {
 	// Makes sure all dimensions are larger than zero
 	if ((m == 0) || (n == 0)) {
 		throw BLASError(StatusCode::kInvalidDimension);
@@ -45,7 +45,7 @@ void Xhemm<T>::DoHemm(const Layout layout, const Side side, const Triangle trian
 	auto k = (side == Side::kLeft) ? m : n;
 
 	// Checks for validity of the squared A matrix
-	TestMatrixA(this->mDtype, k, k, a_buffer(), a_offset, a_ld);
+	TestMatrixA(this->mDtype, k, k, a_buffer, a_offset, a_ld);
 
 	// Determines which kernel to run based on the layout (the Xgemm kernel assumes column-major as
 	// default) and on whether we are dealing with an upper or lower triangle of the hermitian matrix
@@ -54,7 +54,7 @@ void Xhemm<T>::DoHemm(const Layout layout, const Side side, const Triangle trian
 	auto kernel_name = (is_upper) ? "HermUpperToSquared" : "HermLowerToSquared";
 	
 	// Temporary buffer for a copy of the hermitian matrix
-	auto temp_herm = Buffer<T>(this->mDevice, k * k);
+	auto temp_herm = this->mDevice->allocateBuffer(k * k * sizeof(T));
 
 	// Creates a general matrix from the hermitian matrix to be able to run the regular Xgemm
 	// routine afterwards
@@ -65,11 +65,11 @@ void Xhemm<T>::DoHemm(const Layout layout, const Side side, const Triangle trian
 	kernel->setArg(0, static_cast<int>(k));
 	kernel->setArg(1, static_cast<int>(a_ld));
 	kernel->setArg(2, static_cast<int>(a_offset));
-	kernel->setArg(3, a_buffer());
+	kernel->setArg(3, a_buffer);
 	kernel->setArg(4, static_cast<int>(k));
 	kernel->setArg(5, static_cast<int>(k));
 	kernel->setArg(6, static_cast<int>(0));
-	kernel->setArg(7, temp_herm());
+	kernel->setArg(7, temp_herm);
 
 	// Uses the common padding kernel's thread configuration. This is allowed, since the
 	// hermitian-to-squared kernel uses the same parameters.
@@ -93,19 +93,18 @@ void Xhemm<T>::DoHemm(const Layout layout, const Side side, const Triangle trian
 		db_["PADTRA_PAD"]
 	};
 	kernel->enqueue(global, spec);
-	//device_()->enqueueBarrier({temp_herm()});
 
 	// Runs the regular Xgemm code with either "C := AB+C" or ...
 	if (side == Side::kLeft) {
 		DoGemm(layout, Transpose::kNo, Transpose::kNo, m, n, k, alpha, temp_herm, 0, k, b_buffer, b_offset, b_ld, beta,
-					 c_buffer, c_offset, c_ld, Buffer<T>(0), false);
+					 c_buffer, c_offset, c_ld, tart::buffer_ptr(0), false);
 	}
 
 	// ... with "C := BA+C". Note that A and B are now reversed.
 	else {
 		try {
 			DoGemm(layout, Transpose::kNo, Transpose::kNo, m, n, k, alpha, b_buffer, b_offset, b_ld, temp_herm, 0, k, beta,
-						 c_buffer, c_offset, c_ld, Buffer<T>(0), false);
+						 c_buffer, c_offset, c_ld, tart::buffer_ptr(0), false);
 		} catch (BLASError& e) {
 			// A and B are now reversed, so also reverse the error codes returned from the Xgemm routine
 			switch (e.status()) {

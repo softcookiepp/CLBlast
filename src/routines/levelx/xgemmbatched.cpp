@@ -64,9 +64,9 @@ XgemmBatched<T>::XgemmBatched(Queue& queue, EventPointer event, const std::strin
 template <typename T>
 void XgemmBatched<T>::DoGemmBatched(const Layout layout, const Transpose a_transpose, const Transpose b_transpose,
 	const size_t m, const size_t n, const size_t k, const std::vector<T>& alphas,
-	const Buffer<T>& a_buffer, const std::vector<size_t>& a_offsets, const size_t a_ld,
-	const Buffer<T>& b_buffer, const std::vector<size_t>& b_offsets, const size_t b_ld,
-	const std::vector<T>& betas, const Buffer<T>& c_buffer,
+	const tart::buffer_ptr& a_buffer, const std::vector<size_t>& a_offsets, const size_t a_ld,
+	const tart::buffer_ptr& b_buffer, const std::vector<size_t>& b_offsets, const size_t b_ld,
+	const std::vector<T>& betas, const tart::buffer_ptr& c_buffer,
 	const std::vector<size_t>& c_offsets, const size_t c_ld, const size_t batch_count)
 {
 	// Tests for a valid batch count
@@ -93,15 +93,15 @@ void XgemmBatched<T>::DoGemmBatched(const Layout layout, const Transpose a_trans
 														 a_do_transpose, b_do_transpose, c_do_transpose, a_conjugate, b_conjugate, gemm_kernel_id);
 
 	// Tests the matrices for validity
-	TestBatchedMatrixA(this->mDtype, a_one, a_two, a_buffer(), a_offsets, a_ld, false);	// don't test for invalid LD
-	TestBatchedMatrixB(this->mDtype, b_one, b_two, b_buffer(), b_offsets, b_ld, false);	// don't test for invalid LD
-	TestBatchedMatrixC(this->mDtype, c_one, c_two, c_buffer(), c_offsets, c_ld);
+	TestBatchedMatrixA(this->mDtype, a_one, a_two, a_buffer, a_offsets, a_ld, false);	// don't test for invalid LD
+	TestBatchedMatrixB(this->mDtype, b_one, b_two, b_buffer, b_offsets, b_ld, false);	// don't test for invalid LD
+	TestBatchedMatrixC(this->mDtype, c_one, c_two, c_buffer, c_offsets, c_ld);
 
 	// Upload the scalar arguments to the device
-	auto alphas_device = Buffer<T>(this->mDevice, batch_count);
-	auto betas_device = Buffer<T>(this->mDevice, batch_count);
-	alphas_device.Write(queue_, batch_count, alphas);
-	betas_device.Write(queue_, batch_count, betas);
+	auto alphas_device = this->mDevice->allocateBuffer(batch_count*sizeof(T));
+	auto betas_device = this->mDevice->allocateBuffer(batch_count*sizeof(T));
+	alphas_device->copyIn(alphas);
+	betas_device->copyIn(betas);
 
 	// Converts the offset to integers
 	auto a_offsets_int = std::vector<int>(batch_count);
@@ -133,9 +133,9 @@ void XgemmBatched<T>::DoGemmBatched(const Layout layout, const Transpose a_trans
 // overhead of these extra kernels might not be ideal for certain devices/arguments.
 template <typename T>
 void XgemmBatched<T>::BatchedGemmIndirect(
-		const size_t m, const size_t n, const size_t k, const Buffer<T>& alphas, const Buffer<T>& a_buffer,
-		const std::vector<int>& a_offsets, const size_t a_ld, const Buffer<T>& b_buffer, const std::vector<int>& b_offsets,
-		const size_t b_ld, const Buffer<T>& betas, const Buffer<T>& c_buffer, const std::vector<int>& c_offsets,
+		const size_t m, const size_t n, const size_t k, const tart::buffer_ptr& alphas, const tart::buffer_ptr& a_buffer,
+		const std::vector<int>& a_offsets, const size_t a_ld, const tart::buffer_ptr& b_buffer, const std::vector<int>& b_offsets,
+		const size_t b_ld, const tart::buffer_ptr& betas, const tart::buffer_ptr& c_buffer, const std::vector<int>& c_offsets,
 		const size_t c_ld, const bool a_do_transpose, const bool b_do_transpose, const bool c_do_transpose,
 		const bool a_conjugate, const bool b_conjugate, const size_t a_one, const size_t a_two, const size_t b_one,
 		const size_t b_two, const size_t c_one, const size_t c_two, const size_t batch_count) {
@@ -168,53 +168,45 @@ void XgemmBatched<T>::BatchedGemmIndirect(
 	auto c_no_temp = c_one == c_one_i && c_two == c_two_i && c_ld == c_one && c_offsets == c_offsets_i && !c_do_transpose;
 
 	// Creates the temporary matrices
-	const auto a_temp = (a_no_temp) ? a_buffer : Buffer<T>(this->mDevice, batch_count * a_one_i * a_two_i);
-	const auto b_temp = (b_no_temp) ? b_buffer : Buffer<T>(this->mDevice, batch_count * b_one_i * b_two_i);
-	const auto c_temp = (c_no_temp) ? c_buffer : Buffer<T>(this->mDevice, batch_count * c_one_i * c_two_i);
+	const auto a_temp = (a_no_temp) ? a_buffer : this->mDevice->allocateBuffer(sizeof(T)* batch_count * a_one_i * a_two_i);
+	const auto b_temp = (b_no_temp) ? b_buffer : this->mDevice->allocateBuffer(sizeof(T)* batch_count * b_one_i * b_two_i);
+	const auto c_temp = (c_no_temp) ? c_buffer : this->mDevice->allocateBuffer(sizeof(T)* batch_count * c_one_i * c_two_i);
 
 	// Runs the pre-processing kernel for matrix A. This transposes the matrix, but also pads zeros
 	// to fill it up until it reaches a certain multiple of size (kernel parameter dependent). In
 	// case nothing has to be done, these kernels can be skipped.
-	std::vector<tart::buffer_ptr> barrierBuffers;
 	if (!a_no_temp) {
-		auto a_offsets_device = Buffer<int>(this->mDevice, batch_count);
-		auto a_offsets_i_device = Buffer<int>(this->mDevice, batch_count);
-		a_offsets_device.Write(queue_, batch_count, a_offsets);
-		a_offsets_i_device.Write(queue_, batch_count, a_offsets_i);
+		auto a_offsets_device = this->mDevice->allocateBuffer(sizeof(int)*batch_count);
+		auto a_offsets_i_device = this->mDevice->allocateBuffer(batch_count*sizeof(int));
+		a_offsets_device->copyIn(a_offsets);
+		a_offsets_i_device->copyIn(a_offsets_i);
 		PadCopyTransposeMatrixBatched(db_, a_one, a_two, a_ld,
-																	a_offsets_device, a_buffer, a_one_i, a_two_i, a_one_i, a_offsets_i_device, a_temp,
-																	program_, true, a_do_transpose, a_conjugate, batch_count);
-		//eventWaitList.push_back(eventProcessA);
-		barrierBuffers.push_back(a_temp());
+			a_offsets_device, a_buffer, a_one_i, a_two_i, a_one_i, a_offsets_i_device, a_temp,
+			program_, true, a_do_transpose, a_conjugate, batch_count);
 	}
 
 	// As above, but now for matrix B
 	if (!b_no_temp) {
-		auto b_offsets_device = Buffer<int>(this->mDevice, batch_count);
-		auto b_offsets_i_device = Buffer<int>(this->mDevice, batch_count);
-		b_offsets_device.Write(queue_, batch_count, b_offsets);
-		b_offsets_i_device.Write(queue_, batch_count, b_offsets_i);
+		auto b_offsets_device = this->mDevice->allocateBuffer(sizeof(int)*batch_count);
+		auto b_offsets_i_device = this->mDevice->allocateBuffer(sizeof(int)*batch_count);
+		b_offsets_device->copyIn(b_offsets);
+		b_offsets_i_device->copyIn(b_offsets_i);
 		PadCopyTransposeMatrixBatched(db_, b_one, b_two, b_ld,
-																	b_offsets_device, b_buffer, b_one_i, b_two_i, b_one_i, b_offsets_i_device, b_temp,
-																	program_, true, b_do_transpose, b_conjugate, batch_count);
-		//eventWaitList.push_back(eventProcessB);
-		barrierBuffers.push_back(b_temp());
+			b_offsets_device, b_buffer, b_one_i, b_two_i, b_one_i, b_offsets_i_device, b_temp,
+			program_, true, b_do_transpose, b_conjugate, batch_count);
 	}
 
 	// As above, but now for matrix C
-	auto c_offsets_device = Buffer<int>(this->mDevice, batch_count);
-	auto c_offsets_i_device = Buffer<int>(this->mDevice, batch_count);
+	auto c_offsets_device = this->mDevice->allocateBuffer(sizeof(int)*batch_count);
+	auto c_offsets_i_device = this->mDevice->allocateBuffer(sizeof(int)*batch_count);
 	if (!c_no_temp) {
-		c_offsets_device.Write(queue_, batch_count, c_offsets);
-		c_offsets_i_device.Write(queue_, batch_count, c_offsets_i);
+		c_offsets_device->copyIn(c_offsets);
+		c_offsets_i_device->copyIn(c_offsets_i);
 		PadCopyTransposeMatrixBatched(db_, c_one, c_two, c_ld,
-																	c_offsets_device, c_buffer, c_one_i, c_two_i, c_one_i, c_offsets_i_device, c_temp,
-																	program_, true, c_do_transpose, false, batch_count);
-		//eventWaitList.push_back(eventProcessC);
-		barrierBuffers.push_back(c_temp());
+			c_offsets_device, c_buffer, c_one_i, c_two_i, c_one_i, c_offsets_i_device, c_temp,
+			program_, true, c_do_transpose, false, batch_count);
 	}
 
-	//this->//device_()->enqueueBarrier(barrierBuffers);
 
 	// Retrieves the Xgemm kernel from the compiled binary
 	Kernel kernelOld(program_, "XgemmBatched");
@@ -224,15 +216,15 @@ void XgemmBatched<T>::BatchedGemmIndirect(
 	kernel->setArg(0, static_cast<int>(m_ceiled));
 	kernel->setArg(1, static_cast<int>(n_ceiled));
 	kernel->setArg(2, static_cast<int>(k_ceiled));
-	kernel->setArg(14, alphas());
-	kernel->setArg(15, betas());
-	kernel->setArg(5, a_temp());
+	kernel->setArg(14, alphas);
+	kernel->setArg(15, betas);
+	kernel->setArg(5, a_temp);
 	kernel->setArg(6, static_cast<int>(a_one_i));
 	kernel->setArg(7, static_cast<int>(a_two_i));
-	kernel->setArg(8, b_temp());
+	kernel->setArg(8, b_temp);
 	kernel->setArg(9, static_cast<int>(b_one_i));
 	kernel->setArg(10, static_cast<int>(b_two_i));
-	kernel->setArg(11, c_temp());
+	kernel->setArg(11, c_temp);
 	kernel->setArg(12, static_cast<int>(c_one_i));
 	kernel->setArg(13, static_cast<int>(c_two_i));
 
@@ -267,7 +259,7 @@ void XgemmBatched<T>::BatchedGemmIndirect(
 	// Runs the post-processing kernel if needed
 	if (!c_no_temp) {
 		//eventWaitList.push_back(eventKernel);
-		//this->//device_()->enqueueBarrier({c_buffer()});
+		//this->//device_()->enqueueBarrier({c_buffer});
 		PadCopyTransposeMatrixBatched(db_, c_one_i, c_two_i, c_one_i,
 																	c_offsets_i_device, c_temp, c_one, c_two, c_ld, c_offsets_device, c_buffer, program_,
 																	false, c_do_transpose, false, batch_count);
@@ -278,20 +270,20 @@ void XgemmBatched<T>::BatchedGemmIndirect(
 
 // The direct version of batched GEMM, requiring just one kernel, no pre or post-processing kernels.
 template <typename T>
-void XgemmBatched<T>::BatchedGemmDirect(const size_t m, const size_t n, const size_t k, const Buffer<T>& alphas,
-																				const Buffer<T>& a_buffer, const std::vector<int>& a_offsets, const size_t a_ld,
-																				const Buffer<T>& b_buffer, const std::vector<int>& b_offsets, const size_t b_ld,
-																				const Buffer<T>& betas, const Buffer<T>& c_buffer,
+void XgemmBatched<T>::BatchedGemmDirect(const size_t m, const size_t n, const size_t k, const tart::buffer_ptr& alphas,
+																				const tart::buffer_ptr& a_buffer, const std::vector<int>& a_offsets, const size_t a_ld,
+																				const tart::buffer_ptr& b_buffer, const std::vector<int>& b_offsets, const size_t b_ld,
+																				const tart::buffer_ptr& betas, const tart::buffer_ptr& c_buffer,
 																				const std::vector<int>& c_offsets, const size_t c_ld, const bool a_do_transpose,
 																				const bool b_do_transpose, const bool c_do_transpose, const bool a_conjugate,
 																				const bool b_conjugate, const size_t batch_count) {
 	// Uploads the offsets to the device
-	auto a_offsets_device = Buffer<int>(this->mDevice, batch_count);
-	auto b_offsets_device = Buffer<int>(this->mDevice, batch_count);
-	auto c_offsets_device = Buffer<int>(this->mDevice, batch_count);
-	a_offsets_device.Write(queue_, batch_count, a_offsets);
-	b_offsets_device.Write(queue_, batch_count, b_offsets);
-	c_offsets_device.Write(queue_, batch_count, c_offsets);
+	auto a_offsets_device = this->mDevice->allocateBuffer(sizeof(int) * batch_count);
+	auto b_offsets_device = this->mDevice->allocateBuffer(sizeof(int) * batch_count);
+	auto c_offsets_device = this->mDevice->allocateBuffer(sizeof(int) * batch_count);
+	a_offsets_device->copyIn(a_offsets);
+	b_offsets_device->copyIn(b_offsets);
+	c_offsets_device->copyIn(c_offsets);
 
 	// Retrieves the proper XgemmDirect kernel from the compiled binary
 	Kernel kernelOld(program_, "XgemmDirectBatchedTT");
@@ -302,12 +294,12 @@ void XgemmBatched<T>::BatchedGemmDirect(const size_t m, const size_t n, const si
 	kernel->setArg(1, static_cast<int>(n));
 	kernel->setArg(2, static_cast<int>(k));
 	
-	kernel->setArg(3, a_buffer());
+	kernel->setArg(3, a_buffer);
 	kernel->setArg(4, static_cast<int>(a_ld));
 	
-	kernel->setArg(5, b_buffer());
+	kernel->setArg(5, b_buffer);
 	kernel->setArg(6, static_cast<int>(b_ld));
-	kernel->setArg(7, c_buffer());
+	kernel->setArg(7, c_buffer);
 	kernel->setArg(8, static_cast<int>(c_ld));
 	
 	kernel->setArg(9, static_cast<int>(c_do_transpose));
@@ -315,14 +307,14 @@ void XgemmBatched<T>::BatchedGemmDirect(const size_t m, const size_t n, const si
 	kernel->setArg(11, static_cast<int>(b_conjugate));
 	
 	// for workaround to no pointer casting allowed. for some reason this kernel doesn't like duplicate bindings
-	kernel->setArg(12, a_buffer());
-	kernel->setArg(13, b_buffer());
+	kernel->setArg(12, a_buffer);
+	kernel->setArg(13, b_buffer);
 	
-	kernel->setArg(14, alphas());
-	kernel->setArg(15, betas());
-	kernel->setArg(16, a_offsets_device());
-	kernel->setArg(17, b_offsets_device());
-	kernel->setArg(18, c_offsets_device());
+	kernel->setArg(14, alphas);
+	kernel->setArg(15, betas);
+	kernel->setArg(16, a_offsets_device);
+	kernel->setArg(17, b_offsets_device);
+	kernel->setArg(18, c_offsets_device);
 
 	// Computes the global and local thread sizes
 	const auto m_ceiled = Ceil(m, db_["WGD"]);

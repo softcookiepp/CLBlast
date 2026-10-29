@@ -32,14 +32,14 @@ class Xsyrk : public Routine {
 
 	// Templated-precision implementation of the routine
 	void DoSyrk(const Layout layout, const Triangle triangle, const Transpose a_transpose, const size_t n, const size_t k,
-							const T alpha, const Buffer<T>& a_buffer, const size_t a_offset, const size_t a_ld, const T beta,
-							const Buffer<T>& c_buffer, const size_t c_offset, const size_t c_ld);
+							const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld, const tart::Scalar& beta,
+							const tart::buffer_ptr& c_buffer, const size_t c_offset, const size_t c_ld);
 
 	// Helper function to be reused for SYR2K
 	void SyrkAB(const Layout layout, const Triangle triangle, const Transpose a_transpose, const Transpose b_transpose,
-							const size_t n, const size_t k, const T alpha, const Buffer<T>& a_buffer, const size_t a_offset,
-							const size_t a_ld, const Buffer<T>& b_buffer, const size_t b_offset, const size_t b_ld, const T beta,
-							const Buffer<T>& c_buffer, const size_t c_offset, const size_t c_ld);
+							const size_t n, const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
+							const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld, const tart::Scalar& beta,
+							const tart::buffer_ptr& c_buffer, const size_t c_offset, const size_t c_ld);
 };
 
 // =================================================================================================

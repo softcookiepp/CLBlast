@@ -68,8 +68,8 @@ Xomatcopy<T>::Xomatcopy(Queue& queue, EventPointer event, const std::string& nam
 // The main routine
 template <typename T>
 void Xomatcopy<T>::DoOmatcopy(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n,
-	const T alpha, const Buffer<T>& a_buffer, const size_t a_offset, const size_t a_ld,
-	const Buffer<T>& b_buffer, const size_t b_offset, const size_t b_ld)
+	const T alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
+	const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld)
 {
 	// Makes sure all dimensions are larger than zero
 	if ((m == 0) || (n == 0)) {
@@ -95,8 +95,8 @@ void Xomatcopy<T>::DoOmatcopy(const Layout layout, const Transpose a_transpose, 
 	// Also tests that the leading dimensions of:
 	//		matrix A cannot be less than N when rotated, or less than M when not-rotated
 	//		matrix B cannot be less than M when rotated, or less than N when not-rotated
-	TestMatrixA(mDtype, a_one, a_two, a_buffer(), a_offset, a_ld);
-	TestMatrixB(mDtype, b_one, b_two, b_buffer(), b_offset, b_ld);
+	TestMatrixA(mDtype, a_one, a_two, a_buffer, a_offset, a_ld);
+	TestMatrixB(mDtype, b_one, b_two, b_buffer, b_offset, b_ld);
 
 	PadCopyTransposeMatrix(db_, a_one, a_two, a_ld, a_offset, a_buffer, b_one,
 												 b_two, b_ld, b_offset, b_buffer, alpha, program_, false, transpose, conjugate);

@@ -99,10 +99,10 @@ Xgemm<T>::Xgemm(Queue& queue, EventPointer event, const std::string& name)
 // The main routine
 template <typename T>
 void Xgemm<T>::DoGemm(const Layout layout, const Transpose a_transpose, const Transpose b_transpose, const size_t m,
-											const size_t n, const size_t k, const T alpha, const Buffer<T>& a_buffer, const size_t a_offset,
-											const size_t a_ld, const Buffer<T>& b_buffer, const size_t b_offset, const size_t b_ld,
-											const T beta, const Buffer<T>& c_buffer, const size_t c_offset, const size_t c_ld,
-											const Buffer<T>& temp_buffer, const bool temp_buffer_provided) 	// optional arguments
+											const size_t n, const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
+											const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld,
+											const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset, const size_t c_ld,
+											const tart::buffer_ptr& temp_buffer, const bool temp_buffer_provided) 	// optional arguments
 {
 
 	// Two methods to choose from, select which one to run
@@ -122,9 +122,9 @@ void Xgemm<T>::DoGemm(const Layout layout, const Transpose a_transpose, const Tr
 	//		matrix A cannot be less than K when rotated, or less than M when not-rotated
 	//		matrix B cannot be less than N when rotated, or less than K when not-rotated
 	//		matrix C cannot be less than N when rotated, or less than M when not-rotated
-	TestMatrixA(mDtype, a_one, a_two, a_buffer(), a_offset, a_ld);
-	TestMatrixB(mDtype, b_one, b_two, b_buffer(), b_offset, b_ld);
-	TestMatrixC(mDtype, c_one, c_two, c_buffer(), c_offset, c_ld);
+	TestMatrixA(mDtype, a_one, a_two, a_buffer, a_offset, a_ld);
+	TestMatrixB(mDtype, b_one, b_two, b_buffer, b_offset, b_ld);
+	TestMatrixC(mDtype, c_one, c_two, c_buffer, c_offset, c_ld);
 
 	// get working sequence
 	
@@ -148,13 +148,13 @@ void Xgemm<T>::DoGemm(const Layout layout, const Transpose a_transpose, const Tr
 // requirements, but several pre and post-processing kernels take care of those. However, the
 // overhead of these extra kernels might not be ideal for certain devices/arguments.
 template <typename T>
-void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, const T alpha, const Buffer<T>& a_buffer,
-	const size_t a_offset, const size_t a_ld, const Buffer<T>& b_buffer, const size_t b_offset,
-	const size_t b_ld, const T beta, const Buffer<T>& c_buffer, const size_t c_offset,
+void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer,
+	const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset,
+	const size_t b_ld, const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset,
 	const size_t c_ld, const bool a_do_transpose, const bool b_do_transpose,
 	const bool c_do_transpose, const bool a_conjugate, const bool b_conjugate,
 	const size_t a_one, const size_t a_two, const size_t b_one, const size_t b_two,
-	const size_t c_one, const size_t c_two, const Buffer<T>& temp_buffer,
+	const size_t c_one, const size_t c_two, const tart::buffer_ptr& temp_buffer,
 	const bool temp_buffer_provided)
 {
 	// Calculates the ceiled versions of m, n, and k
@@ -194,15 +194,15 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	const
 #endif
 	auto temp_buffer_all =
-			(temp_buffer_provided) ? temp_buffer : ((temp_size > 0) ? Buffer<T>(this->mDevice, temp_size) : a_buffer);
+			(temp_buffer_provided) ? temp_buffer : ((temp_size > 0) ? this->mDevice->allocateBuffer(temp_size*sizeof(T)) : a_buffer);
 	// Verifies if the provided temporary buffer is large enough
 	if (temp_buffer_provided) {
 		const auto required_size = temp_size * sizeof(T);
-		if (temp_buffer_all.GetSize() < required_size) {
+		if (temp_buffer_all->getSize() < required_size) {
 #if VULKAN_API
 			// temporary hack due to indirect kernel being forced on under certain circumstances
 			if (temp_size == 0) throw std::runtime_error("this probably shouldn't happen");
-			temp_buffer_all = Buffer<T>(this->mDevice, temp_size);
+			temp_buffer_all = this->mDevice->allocateBuffer(temp_size);
 #else
 			throw BLASError(StatusCode::kInsufficientMemoryTemp);
 #endif
@@ -240,7 +240,7 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	}
 
 	// As above, but now for matrix C. This is only necessary if C is used both as input and output.
-	if (!c_no_temp && beta != static_cast<T>(0))
+	if (!c_no_temp && beta.get<T>() != static_cast<T>(0))
 	{
 		PadCopyTransposeMatrix(db_, c_one, c_two, c_ld, c_offset,
 													 c_buffer, c_one_i, c_two_i, c_one_i, c_temp_offset, c_temp, ConstantOne<T>(), program_, true,
@@ -265,11 +265,11 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	kernel->setArg(2, static_cast<int>(k_ceiled));
 	kernel->setArgAs(mDtype, 3, alpha);
 	kernel->setArgAs(mDtype, 4, beta);
-	kernel->setArg(5, a_temp());
-	kernel->setArg(6, b_temp());
-	kernel->setArg(7, c_temp());
-	kernel->setArg(8, a_temp());
-	kernel->setArg(9, b_temp());
+	kernel->setArg(5, a_temp);
+	kernel->setArg(6, b_temp);
+	kernel->setArg(7, c_temp);
+	kernel->setArg(8, a_temp);
+	kernel->setArg(9, b_temp);
 	kernel->setArg(10, static_cast<int>(b_temp_offset / db_["VWN"]));
 	kernel->setArg(11, static_cast<int>(c_temp_offset / db_["VWM"]));
 
@@ -313,9 +313,9 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 
 // The direct version of GEMM, requiring just one kernel, no pre or post-processing kernels.
 template <typename T>
-void Xgemm<T>::GemmDirect(const size_t m, const size_t n, const size_t k, const T alpha, const Buffer<T>& a_buffer,
-													const size_t a_offset, const size_t a_ld, const Buffer<T>& b_buffer, const size_t b_offset,
-													const size_t b_ld, const T beta, const Buffer<T>& c_buffer, const size_t c_offset,
+void Xgemm<T>::GemmDirect(const size_t m, const size_t n, const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer,
+													const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset,
+													const size_t b_ld, const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset,
 													const size_t c_ld, const bool a_do_transpose, const bool b_do_transpose,
 													const bool c_do_transpose, const bool a_conjugate, const bool b_conjugate)
 	{
@@ -329,13 +329,13 @@ void Xgemm<T>::GemmDirect(const size_t m, const size_t n, const size_t k, const 
 	kernel->setArg(2, static_cast<int>(k));
 	kernel->setArgAs(mDtype, 3, alpha);
 	kernel->setArgAs(mDtype, 4, beta);
-	kernel->setArg(5, a_buffer());
+	kernel->setArg(5, a_buffer);
 	kernel->setArg(6, static_cast<int>(a_offset));
 	kernel->setArg(7, static_cast<int>(a_ld));
-	kernel->setArg(8, b_buffer());
+	kernel->setArg(8, b_buffer);
 	kernel->setArg(9, static_cast<int>(b_offset));
 	kernel->setArg(10, static_cast<int>(b_ld));
-	kernel->setArg(11, c_buffer());
+	kernel->setArg(11, c_buffer);
 	kernel->setArg(12, static_cast<int>(c_offset));
 	kernel->setArg(13, static_cast<int>(c_ld));
 	kernel->setArg(14, static_cast<int>(c_do_transpose));
@@ -343,8 +343,8 @@ void Xgemm<T>::GemmDirect(const size_t m, const size_t n, const size_t k, const 
 	kernel->setArg(16, static_cast<int>(b_conjugate));
 	
 	// provide the same buffers twice to get around GLSL's lack of pointer casting
-	kernel->setArg(17, a_buffer());
-	kernel->setArg(18, b_buffer());
+	kernel->setArg(17, a_buffer);
+	kernel->setArg(18, b_buffer);
 
 	// Computes the global and local thread sizes
 	const auto m_ceiled = Ceil(m, db_["WGD"]);

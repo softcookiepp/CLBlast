@@ -92,10 +92,10 @@ static size_t PerBatchSizeC(const Layout layout,
 template <typename T>
 void XgemmStridedBatched<T>::DoGemmStridedBatched(const Layout layout, const Transpose a_transpose,
 	const Transpose b_transpose, const size_t m, const size_t n,
-	const size_t k, const T alpha, const Buffer<T>& a_buffer,
+	const size_t k, const T alpha, const tart::buffer_ptr& a_buffer,
 	const size_t a_offset, const size_t a_ld, const size_t a_stride,
-	const Buffer<T>& b_buffer, const size_t b_offset, const size_t b_ld,
-	const size_t b_stride, const T beta, const Buffer<T>& c_buffer,
+	const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld,
+	const size_t b_stride, const T beta, const tart::buffer_ptr& c_buffer,
 	const size_t c_offset, const size_t c_ld, const size_t c_stride,
 	const size_t batch_count)
 {
@@ -123,7 +123,7 @@ void XgemmStridedBatched<T>::DoGemmStridedBatched(const Layout layout, const Tra
 			const auto c_batch_offset = b_offset + PerBatchSizeC(layout, m, n, k, c_ld) * batch;
 			xgemm.DoGemm(layout, a_transpose, b_transpose,
 				m, n, k, alpha, a_buffer, a_batch_offset, a_ld, b_buffer,
-				b_batch_offset, b_ld, beta, c_buffer, c_batch_offset, c_ld, Buffer<T>(0), false);
+				b_batch_offset, b_ld, beta, c_buffer, c_batch_offset, c_ld, tart::buffer_ptr(0), false);
 		}
 		
 		return;
@@ -140,9 +140,9 @@ void XgemmStridedBatched<T>::DoGemmStridedBatched(const Layout layout, const Tra
 														 a_do_transpose, b_do_transpose, c_do_transpose, a_conjugate, b_conjugate, gemm_kernel_id);
 
 	// Tests the matrices for validity
-	TestStridedBatchedMatrixA(this->mDtype, a_one, a_two, a_buffer(), a_offset, a_stride, batch_count, a_ld);
-	TestStridedBatchedMatrixB(this->mDtype, b_one, b_two, b_buffer(), b_offset, b_stride, batch_count, b_ld);
-	TestStridedBatchedMatrixC(this->mDtype, c_one, c_two, c_buffer(), c_offset, c_stride, batch_count, c_ld);
+	TestStridedBatchedMatrixA(this->mDtype, a_one, a_two, a_buffer, a_offset, a_stride, batch_count, a_ld);
+	TestStridedBatchedMatrixB(this->mDtype, b_one, b_two, b_buffer, b_offset, b_stride, batch_count, b_ld);
+	TestStridedBatchedMatrixC(this->mDtype, c_one, c_two, c_buffer, c_offset, c_stride, batch_count, c_ld);
 
 	// Selects which version of the batched GEMM to run
 	if (do_gemm_direct) {	// single generic kernel
@@ -164,9 +164,9 @@ void XgemmStridedBatched<T>::DoGemmStridedBatched(const Layout layout, const Tra
 // overhead of these extra kernels might not be ideal for certain devices/arguments.
 template <typename T>
 void XgemmStridedBatched<T>::BatchedGemmIndirect(
-		const size_t m, const size_t n, const size_t k, const T alpha, const Buffer<T>& a_buffer, const size_t a_offset,
-		const size_t a_ld, const size_t a_stride, const Buffer<T>& b_buffer, const size_t b_offset, const size_t b_ld,
-		const size_t b_stride, const T beta, const Buffer<T>& c_buffer, const size_t c_offset, const size_t c_ld,
+		const size_t m, const size_t n, const size_t k, const T alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
+		const size_t a_ld, const size_t a_stride, const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld,
+		const size_t b_stride, const T beta, const tart::buffer_ptr& c_buffer, const size_t c_offset, const size_t c_ld,
 		const size_t c_stride, const bool a_do_transpose, const bool b_do_transpose, const bool c_do_transpose,
 		const bool a_conjugate, const bool b_conjugate, const size_t a_one, const size_t a_two, const size_t b_one,
 		const size_t b_two, const size_t c_one, const size_t c_two, const size_t batch_count) {
@@ -187,9 +187,9 @@ void XgemmStridedBatched<T>::BatchedGemmIndirect(
 	auto c_no_temp = c_one == c_one_i && c_two == c_two_i && c_ld == c_one && !c_do_transpose;
 
 	// Creates the temporary matrices
-	const auto a_temp = (a_no_temp) ? a_buffer : Buffer<T>(this->mDevice, batch_count * a_one_i * a_two_i);
-	const auto b_temp = (b_no_temp) ? b_buffer : Buffer<T>(this->mDevice, batch_count * b_one_i * b_two_i);
-	const auto c_temp = (c_no_temp) ? c_buffer : Buffer<T>(this->mDevice, batch_count * c_one_i * c_two_i);
+	const auto a_temp = (a_no_temp) ? a_buffer : this->mDevice->allocateBuffer(sizeof(T) * batch_count * a_one_i * a_two_i);
+	const auto b_temp = (b_no_temp) ? b_buffer : this->mDevice->allocateBuffer(sizeof(T) * batch_count * b_one_i * b_two_i);
+	const auto c_temp = (c_no_temp) ? c_buffer : this->mDevice->allocateBuffer(sizeof(T) * batch_count * c_one_i * c_two_i);
 
 	// Runs the pre-processing kernel for matrix A. This transposes the matrix, but also pads zeros
 	// to fill it up until it reaches a certain multiple of size (kernel parameter dependent). In
@@ -197,10 +197,10 @@ void XgemmStridedBatched<T>::BatchedGemmIndirect(
 	std::vector<tart::buffer_ptr> barrierBuffers;
 	if (!a_no_temp) {
 		PadCopyTransposeMatrixStridedBatched(db_, a_one, a_two,
-																				 a_ld, a_offset, a_stride, a_buffer, a_one_i, a_two_i, a_one_i, 0,
-																				 a_one_i * a_two_i, a_temp, program_, true, a_do_transpose, a_conjugate,
-																				 batch_count);
-		barrierBuffers.push_back(a_temp());
+			a_ld, a_offset, a_stride, a_buffer, a_one_i, a_two_i, a_one_i, 0,
+			a_one_i * a_two_i, a_temp, program_, true, a_do_transpose, a_conjugate,
+			batch_count);
+		barrierBuffers.push_back(a_temp);
 	}
 
 	// As above, but now for matrix B
@@ -209,7 +209,7 @@ void XgemmStridedBatched<T>::BatchedGemmIndirect(
 																				 b_ld, b_offset, b_stride, b_buffer, b_one_i, b_two_i, b_one_i, 0,
 																				 b_one_i * b_two_i, b_temp, program_, true, b_do_transpose, b_conjugate,
 																				 batch_count);
-		barrierBuffers.push_back(b_temp());
+		barrierBuffers.push_back(b_temp);
 	}
 
 	// As above, but now for matrix C
@@ -217,10 +217,8 @@ void XgemmStridedBatched<T>::BatchedGemmIndirect(
 		PadCopyTransposeMatrixStridedBatched(db_, c_one, c_two,
 																				 c_ld, c_offset, c_stride, c_buffer, c_one_i, c_two_i, c_one_i, 0,
 																				 c_one_i * c_two_i, c_temp, program_, true, c_do_transpose, false, batch_count);
-		barrierBuffers.push_back(c_temp());
+		barrierBuffers.push_back(c_temp);
 	}
-	
-	//this->//device_()->enqueueBarrier(barrierBuffers);
 
 	// Retrieves the Xgemm kernel from the compiled binary
 	Kernel kernelOld(program_, "XgemmStridedBatched");
@@ -232,13 +230,13 @@ void XgemmStridedBatched<T>::BatchedGemmIndirect(
 	kernel->setArg(2, static_cast<int>(k_ceiled));
 	kernel->setArgAs(mDtype, 3, alpha);
 	kernel->setArgAs(mDtype, 4, beta);
-	kernel->setArg(5, a_temp());
+	kernel->setArg(5, a_temp);
 	kernel->setArg(6, static_cast<int>(a_one_i));
 	kernel->setArg(7, static_cast<int>(a_two_i));
-	kernel->setArg(8, b_temp());
+	kernel->setArg(8, b_temp);
 	kernel->setArg(9, static_cast<int>(b_one_i));
 	kernel->setArg(10, static_cast<int>(b_two_i));
-	kernel->setArg(11, c_temp());
+	kernel->setArg(11, c_temp);
 	kernel->setArg(12, static_cast<int>(c_one_i));
 	kernel->setArg(13, static_cast<int>(c_two_i));
 
@@ -283,9 +281,9 @@ void XgemmStridedBatched<T>::BatchedGemmIndirect(
 // The direct version of batched GEMM, requiring just one kernel, no pre or post-processing kernels.
 template <typename T>
 void XgemmStridedBatched<T>::BatchedGemmDirect(
-		const size_t m, const size_t n, const size_t k, const T alpha, const Buffer<T>& a_buffer, const size_t a_offset,
-		const size_t a_ld, const size_t a_stride, const Buffer<T>& b_buffer, const size_t b_offset, const size_t b_ld,
-		const size_t b_stride, const T beta, const Buffer<T>& c_buffer, const size_t c_offset, const size_t c_ld,
+		const size_t m, const size_t n, const size_t k, const T alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
+		const size_t a_ld, const size_t a_stride, const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld,
+		const size_t b_stride, const T beta, const tart::buffer_ptr& c_buffer, const size_t c_offset, const size_t c_ld,
 		const size_t c_stride, const bool a_do_transpose, const bool b_do_transpose, const bool c_do_transpose,
 		const bool a_conjugate, const bool b_conjugate, const size_t batch_count)
 {
@@ -299,15 +297,15 @@ void XgemmStridedBatched<T>::BatchedGemmDirect(
 	kernel->setArg(2, static_cast<int>(k));
 	kernel->setArgAs(mDtype, 3, alpha);
 	kernel->setArgAs(mDtype, 4, beta);
-	kernel->setArg(5, a_buffer());
+	kernel->setArg(5, a_buffer);
 	kernel->setArg(6, static_cast<int>(a_offset));
 	kernel->setArg(7, static_cast<int>(a_ld));
 	kernel->setArg(8, static_cast<int>(a_stride));
-	kernel->setArg(9, b_buffer());
+	kernel->setArg(9, b_buffer);
 	kernel->setArg(10, static_cast<int>(b_offset));
 	kernel->setArg(11, static_cast<int>(b_ld));
 	kernel->setArg(12, static_cast<int>(b_stride));
-	kernel->setArg(13, c_buffer());
+	kernel->setArg(13, c_buffer);
 	kernel->setArg(14, static_cast<int>(c_offset));
 	kernel->setArg(15, static_cast<int>(c_ld));
 	kernel->setArg(16, static_cast<int>(c_stride));
@@ -317,8 +315,8 @@ void XgemmStridedBatched<T>::BatchedGemmDirect(
 	
 #if VULKAN_API
 	// for workaround to no pointer casting allowed
-	kernel->setArg(20, a_buffer());
-	kernel->setArg(21, b_buffer());
+	kernel->setArg(20, a_buffer);
+	kernel->setArg(21, b_buffer);
 #endif
 
 	// Computes the global and local thread sizes

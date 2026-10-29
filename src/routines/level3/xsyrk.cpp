@@ -94,8 +94,8 @@ Xsyrk<T>::Xsyrk(Queue& queue, EventPointer event, const std::string& name)
 // The main routine
 template <typename T>
 void Xsyrk<T>::DoSyrk(const Layout layout, const Triangle triangle, const Transpose a_transpose, const size_t n,
-											const size_t k, const T alpha, const Buffer<T>& a_buffer, const size_t a_offset,
-											const size_t a_ld, const T beta, const Buffer<T>& c_buffer, const size_t c_offset,
+											const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
+											const size_t a_ld, const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset,
 											const size_t c_ld) {
 	const auto b_transpose = (a_transpose != Transpose::kNo) ? Transpose::kNo : Transpose::kYes;
 	const auto& b_buffer = a_buffer;
@@ -107,9 +107,9 @@ void Xsyrk<T>::DoSyrk(const Layout layout, const Triangle triangle, const Transp
 
 template <typename T>
 void Xsyrk<T>::SyrkAB(const Layout layout, const Triangle triangle, const Transpose a_transpose,
-											const Transpose b_transpose, const size_t n, const size_t k, const T alpha,
-											const Buffer<T>& a_buffer, const size_t a_offset, const size_t a_ld, const Buffer<T>& b_buffer,
-											const size_t b_offset, const size_t b_ld, const T beta, const Buffer<T>& c_buffer,
+											const Transpose b_transpose, const size_t n, const size_t k, const tart::Scalar& alpha,
+											const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& b_buffer,
+											const size_t b_offset, const size_t b_ld, const tart::Scalar& beta, const tart::buffer_ptr& c_buffer,
 											const size_t c_offset, const size_t c_ld) {
 	// Computes the transpose/conjugate options and sets the a/b/c sizes based on that
 	bool a_do_transpose, b_do_transpose, c_do_transpose, a_conjugate, b_conjugate;
@@ -123,9 +123,9 @@ void Xsyrk<T>::SyrkAB(const Layout layout, const Triangle triangle, const Transp
 	// space. Also tests that the leading dimensions of:
 	//		matrix A cannot be less than N when rotated, or less than K when not-rotated
 	//		matrix C cannot be less than N
-	TestMatrixA(mDtype, a_one, a_two, a_buffer(), a_offset, a_ld);
-	TestMatrixB(mDtype, b_one, b_two, b_buffer(), b_offset, b_ld);
-	TestMatrixC(mDtype, c_one, c_two, c_buffer(), c_offset, c_ld);
+	TestMatrixA(mDtype, a_one, a_two, a_buffer, a_offset, a_ld);
+	TestMatrixB(mDtype, b_one, b_two, b_buffer, b_offset, b_ld);
+	TestMatrixC(mDtype, c_one, c_two, c_buffer, c_offset, c_ld);
 
 	// Calculates the ceiled versions of n and k
 	auto n_ceiled = Ceil(Ceil(n, db_["MWG"]), db_["NWG"]);
@@ -148,29 +148,29 @@ void Xsyrk<T>::SyrkAB(const Layout layout, const Triangle triangle, const Transp
 			Xgemm<T>::NoTempBuffer(b_one, b_one_i, b_two, b_two_i, b_ld, b_offset, b_do_transpose, b_conjugate);
 
 	// Creates the temporary matrices
-	auto a_temp = (a_no_temp) ? a_buffer : Buffer<T>(this->mDevice, a_one_i * a_two_i);
-	auto b_temp = (b_no_temp) ? b_buffer : Buffer<T>(this->mDevice, b_one_i * b_two_i);
-	auto c_temp = Buffer<T>(this->mDevice, n_ceiled * n_ceiled);
+	auto a_temp = (a_no_temp) ? a_buffer : this->mDevice->allocateBuffer(sizeof(T) * a_one_i * a_two_i);
+	auto b_temp = (b_no_temp) ? b_buffer : this->mDevice->allocateBuffer(sizeof(T) * b_one_i * b_two_i);
+	auto c_temp = this->mDevice->allocateBuffer(sizeof(T) * n_ceiled * n_ceiled);
 
 	// Runs the pre-processing kernel for matrix A. This transposes the matrix, but also pads zeros
 	// to fill it up until it reaches a certain multiple of size (kernel parameter dependent). In
 	// case nothing has to be done, these kernels can be skipped.
-	std::vector<tart::buffer_ptr> barrierBuffers({c_buffer(), c_temp()});
+	std::vector<tart::buffer_ptr> barrierBuffers({c_buffer, c_temp});
 	if (!a_no_temp) {
 		PadCopyTransposeMatrix(db_, a_one, a_two, a_ld, a_offset,
 													 a_buffer, a_one_i, a_two_i, a_one_i, 0, a_temp, ConstantOne<T>(), program_, true,
 													 a_do_transpose, false,
 													 false, false, false);
-		barrierBuffers.push_back(a_buffer());
-		barrierBuffers.push_back(a_temp());
+		barrierBuffers.push_back(a_buffer);
+		barrierBuffers.push_back(a_temp);
 	}
 	if (!b_no_temp) {
 		PadCopyTransposeMatrix(db_, b_one, b_two, b_ld, b_offset,
 													 b_buffer, b_one_i, b_two_i, b_one_i, 0, b_temp, ConstantOne<T>(), program_, true,
 													 b_do_transpose, false,
 													 false, false, false);
-		barrierBuffers.push_back(b_buffer());
-		barrierBuffers.push_back(b_temp());
+		barrierBuffers.push_back(b_buffer);
+		barrierBuffers.push_back(b_temp);
 	}
 
 	// Furthermore, also creates a (possibly padded) copy of matrix C, since it is not allowed to
@@ -192,11 +192,11 @@ void Xsyrk<T>::SyrkAB(const Layout layout, const Triangle triangle, const Transp
 	kernel->setArg(1, static_cast<int>(k_ceiled));
 	kernel->setArgAs(mDtype, 2, (alpha));
 	kernel->setArgAs(mDtype, 3, (beta));
-	kernel->setArg(4, a_temp());
-	kernel->setArg(5, b_temp());
-	kernel->setArg(6, c_temp());
-	kernel->setArg(7, a_temp());
-	kernel->setArg(8, b_temp());
+	kernel->setArg(4, a_temp);
+	kernel->setArg(5, b_temp);
+	kernel->setArg(6, c_temp);
+	kernel->setArg(7, a_temp);
+	kernel->setArg(8, b_temp);
 
 	// Computes the global and local thread sizes
 	auto global = std::vector<uint32_t>{(n_ceiled * db_["MDIMC"]) / db_["MWG"], (n_ceiled * db_["NDIMC"]) / db_["NWG"]};
@@ -225,7 +225,7 @@ void Xsyrk<T>::SyrkAB(const Layout layout, const Triangle triangle, const Transp
 
 	// Launches the kernel
 	kernel->enqueue(global, spec);
-	//device_()->enqueueBarrier({c_temp()});
+	//device_()->enqueueBarrier({c_temp});
 	
 	
 	// Runs the post-processing kernel

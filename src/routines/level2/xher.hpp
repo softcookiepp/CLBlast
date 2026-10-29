@@ -20,7 +20,6 @@ namespace clblast {
 // =================================================================================================
 
 // See comment at top of file for a description of the class
-template <typename T, typename U>
 class Xher : public Routine
 {
 	uint32_t mHPR;
@@ -32,15 +31,12 @@ class Xher : public Routine
 	uint32_t mSPR2;
  public:
 	// Constructor
-	Xher(Queue& queue, EventPointer event, const std::string& name = "HER");
-
-	// Translates alpha of type 'U' into type 'T'
-	T GetAlpha(const U alpha);
+	Xher(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "HER");
 
 	// Templated-precision implementation of the routine
-	void DoHer(const Layout layout, const Triangle triangle, const size_t n, const U alpha, const Buffer<T>& x_buffer,
-						 const size_t x_offset, const size_t x_inc, const Buffer<T>& a_buffer, const size_t a_offset,
-						 const size_t a_ld, const bool packed = false);
+	void DoHer(const Layout layout, const Triangle triangle, const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& x_buffer,
+		const size_t x_offset, const size_t x_inc, const tart::buffer_ptr& a_buffer, const size_t a_offset,
+		const size_t a_ld, const bool packed = false);
 };
 
 // =================================================================================================

@@ -901,9 +901,9 @@ StatusCode Her(const Layout layout, const Triangle triangle, const size_t n, con
 							 tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xher<std::complex<T>, T>(queue_cpp, event);
-		routine.DoHer(layout, triangle, n, alpha, Buffer<std::complex<T>>(x_buffer), x_offset, x_inc,
-									Buffer<std::complex<T>>(a_buffer), a_offset, a_ld);
+		auto routine = Xher(tart::getDType<std::complex<T>>(), queue_cpp, event);
+		routine.DoHer(layout, triangle, n, alpha, (x_buffer), x_offset, x_inc,
+									(a_buffer), a_offset, a_ld);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -923,9 +923,9 @@ StatusCode Hpr(const Layout layout, const Triangle triangle, const size_t n, con
 							 tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xhpr<std::complex<T>, T>(queue_cpp, event);
-		routine.DoHpr(layout, triangle, n, alpha, Buffer<std::complex<T>>(x_buffer), x_offset, x_inc,
-									Buffer<std::complex<T>>(ap_buffer), ap_offset);
+		auto routine = Xhpr(tart::getDType<std::complex<T>>(), queue_cpp, event);
+		routine.DoHpr(layout, triangle, n, alpha, (x_buffer), x_offset, x_inc,
+									(ap_buffer), ap_offset);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -991,8 +991,8 @@ StatusCode Syr(const Layout layout, const Triangle triangle, const size_t n, con
 							 tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xsyr<T>(queue_cpp, event);
-		routine.DoSyr(layout, triangle, n, alpha, Buffer<T>(x_buffer), x_offset, x_inc, Buffer<T>(a_buffer), a_offset,
+		auto routine = Xsyr(tart::getDType<T>(), queue_cpp, event);
+		routine.DoSyr(layout, triangle, n, alpha, (x_buffer), x_offset, x_inc, (a_buffer), a_offset,
 									a_ld);
 		return StatusCode::kSuccess;
 	} catch (...) {
@@ -1016,8 +1016,8 @@ StatusCode Spr(const Layout layout, const Triangle triangle, const size_t n, con
 							 tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xspr<T>(queue_cpp, event);
-		routine.DoSpr(layout, triangle, n, alpha, Buffer<T>(x_buffer), x_offset, x_inc, Buffer<T>(ap_buffer), ap_offset);
+		auto routine = Xspr(tart::getDType<T>(), queue_cpp, event);
+		routine.DoSpr(layout, triangle, n, alpha, (x_buffer), x_offset, x_inc, (ap_buffer), ap_offset);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();

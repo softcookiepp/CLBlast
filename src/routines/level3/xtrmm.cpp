@@ -24,14 +24,12 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-template <typename T>
-Xtrmm<T>::Xtrmm(Queue& queue, EventPointer event, const std::string& name) : Xgemm<T>(queue, event, name) {}
+Xtrmm::Xtrmm(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) : Xgemm(dtype, queue, event, name) {}
 
 // =================================================================================================
 
 // The main routine
-template <typename T>
-void Xtrmm<T>::DoTrmm(const Layout layout, const Side side, const Triangle triangle, const Transpose a_transpose,
+void Xtrmm::DoTrmm(const Layout layout, const Side side, const Triangle triangle, const Transpose a_transpose,
 											const Diagonal diagonal, const size_t m, const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer,
 											const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset,
 											const size_t b_ld) {
@@ -54,8 +52,8 @@ void Xtrmm<T>::DoTrmm(const Layout layout, const Side side, const Triangle trian
 
 	// Creates a copy of B to avoid overwriting input in GEMM while computing output
 	const auto b_size = (b_ld * (b_two - 1) + b_one + b_offset);
-	auto b_buffer_copy = this->mDevice->allocateBuffer(sizeof(T) * b_size);
-	b_buffer->copyTo(b_buffer_copy, 0, 0, b_size*sizeof(T));
+	auto b_buffer_copy = this->mDevice->allocateBuffer(this->mDtype.size() * b_size);
+	b_buffer->copyTo(b_buffer_copy, 0, 0, b_size*this->mDtype.size());
 
 	// Determines which kernel to run based on the layout (the Xgemm kernel assumes column-major as
 	// default) and on whether we are dealing with an upper or lower triangle of the triangular matrix
@@ -67,7 +65,7 @@ void Xtrmm<T>::DoTrmm(const Layout layout, const Side side, const Triangle trian
 	auto unit_diagonal = (diagonal == Diagonal::kUnit) ? true : false;
 
 	// Temporary buffer for a copy of the triangular matrix
-	auto temp_triangular = this->mDevice->allocateBuffer(sizeof(T) * k * k);
+	auto temp_triangular = this->mDevice->allocateBuffer(this->mDtype.size() * k * k);
 
 	// Creates a general matrix from the triangular matrix to be able to run the regular Xgemm
 	// routine afterwards
@@ -111,14 +109,14 @@ void Xtrmm<T>::DoTrmm(const Layout layout, const Side side, const Triangle trian
 	// Runs the regular Xgemm code with either "B := alpha*A*B" or ...
 	if (side == Side::kLeft) {
 		DoGemm(layout, a_transpose, Transpose::kNo, m, n, k, alpha, temp_triangular, 0, k, b_buffer_copy, b_offset, b_ld,
-					 ConstantZero<T>(), b_buffer, b_offset, b_ld);
+					 tart::Scalar::zero(), b_buffer, b_offset, b_ld);
 	}
 
 	// ... with "B := alpha*B*A". Note that A and B are now reversed.
 	else {
 		try {
 			DoGemm(layout, Transpose::kNo, a_transpose, m, n, k, alpha, b_buffer_copy, b_offset, b_ld, temp_triangular, 0, k,
-						 ConstantZero<T>(), b_buffer, b_offset, b_ld);
+						 tart::Scalar::zero(), b_buffer, b_offset, b_ld);
 		} catch (BLASError& e) {
 			// A and B are now reversed, so also reverse the error codes returned from the Xgemm routine
 			switch (e.status()) {
@@ -140,15 +138,6 @@ void Xtrmm<T>::DoTrmm(const Layout layout, const Side side, const Triangle trian
 		}
 	}
 }
-
-// =================================================================================================
-
-// Compiles the templated class
-template class Xtrmm<half>;
-template class Xtrmm<float>;
-template class Xtrmm<double>;
-template class Xtrmm<float2>;
-template class Xtrmm<double2>;
 
 // =================================================================================================
 }	// namespace clblast

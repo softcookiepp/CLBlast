@@ -22,19 +22,19 @@ namespace clblast {
 // =================================================================================================
 
 // See comment at top of file for a description of the class
-template <typename T>
-class Xtrmm : public Xgemm<T> {
+class Xtrmm : public Xgemm
+{
  public:
 	// Uses methods and variables the regular Xgemm routine
-	using Xgemm<T>::routine_name_;
-	using Xgemm<T>::queue_;
-	using Xgemm<T>::device_;
-	using Xgemm<T>::program_;
-	using Xgemm<T>::db_;
-	using Xgemm<T>::DoGemm;
+	using Xgemm::routine_name_;
+	using Xgemm::queue_;
+	using Xgemm::device_;
+	using Xgemm::program_;
+	using Xgemm::db_;
+	using Xgemm::DoGemm;
 
 	// Constructor
-	Xtrmm(Queue& queue, EventPointer event, const std::string& name = "TRMM");
+	Xtrmm(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "TRMM");
 
 	// Templated-precision implementation of the routine
 	void DoTrmm(const Layout layout, const Side side, const Triangle triangle, const Transpose a_transpose,

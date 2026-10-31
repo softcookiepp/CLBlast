@@ -56,11 +56,11 @@ void FillCacheForPrecision(Queue& queue) {
 		Xtpmv(tart::getDType<Type>(), queue, nullptr);
 
 		// Runs all the level 3 set-up functions that support all precisions
-		Xgemm<Type>(queue, nullptr);
-		Xsymm<Type>(queue, nullptr);
+		Xgemm(tart::getDType<Type>(), queue, nullptr);
+		Xsymm(tart::getDType<Type>(), queue, nullptr);
 		Xsyrk<Type>(queue, nullptr);
 		Xsyr2k<Type>(queue, nullptr);
-		Xtrmm<Type>(queue, nullptr);
+		Xtrmm(tart::getDType<Type>(), queue, nullptr);
 
 		// Runs all the non-BLAS set-up functions
 		Xomatcopy<Type>(queue, nullptr);
@@ -104,7 +104,7 @@ void FillCacheForPrecision(Queue& queue) {
 		Xspr2(tart::getDType<Real>(), queue, nullptr);
 
 		// Runs all the level 3 set-up functions that don't support all precisions
-		Xhemm<Complex>(queue, nullptr);
+		Xhemm(tart::getDType<Complex>(), queue, nullptr);
 		Xherk<Complex, Real>(queue, nullptr);
 		Xher2k<Complex, Real>(queue, nullptr);
 		Xspr2(tart::getDType<Real>(), queue, nullptr);

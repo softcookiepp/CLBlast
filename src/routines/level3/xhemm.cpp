@@ -24,14 +24,12 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-template <typename T>
-Xhemm<T>::Xhemm(Queue& queue, EventPointer event, const std::string& name) : Xgemm<T>(queue, event, name) {}
+Xhemm::Xhemm(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) : Xgemm(dtype, queue, event, name) {}
 
 // =================================================================================================
 
 // The main routine
-template <typename T>
-void Xhemm<T>::DoHemm(const Layout layout, const Side side, const Triangle triangle, const size_t m, const size_t n,
+void Xhemm::DoHemm(const Layout layout, const Side side, const Triangle triangle, const size_t m, const size_t n,
 											const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
 											const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld, const tart::Scalar& beta,
 											const tart::buffer_ptr& c_buffer, const size_t c_offset, const size_t c_ld) {
@@ -54,7 +52,7 @@ void Xhemm<T>::DoHemm(const Layout layout, const Side side, const Triangle trian
 	auto kernel_name = (is_upper) ? "HermUpperToSquared" : "HermLowerToSquared";
 	
 	// Temporary buffer for a copy of the hermitian matrix
-	auto temp_herm = this->mDevice->allocateBuffer(k * k * sizeof(T));
+	auto temp_herm = this->mDevice->allocateBuffer(k * k * this->mDtype.size());
 
 	// Creates a general matrix from the hermitian matrix to be able to run the regular Xgemm
 	// routine afterwards
@@ -126,12 +124,6 @@ void Xhemm<T>::DoHemm(const Layout layout, const Side side, const Triangle trian
 		}
 	}
 }
-
-// =================================================================================================
-
-// Compiles the templated class
-template class Xhemm<float2>;
-template class Xhemm<double2>;
 
 // =================================================================================================
 }	// namespace clblast

@@ -24,10 +24,9 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-template <typename T>
-Xgemm<T>::Xgemm(Queue& queue, EventPointer event, const std::string& name)
+Xgemm::Xgemm(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
 		: Routine(queue, event, name, {"Copy", "Pad", "Transpose", "Padtranspose", "Xgemm", "XgemmDirect", "GemmRoutine"},
-							precisionToDataType(PrecisionValue<T>()), {},
+							dtype, {},
 							{
 	#include "../../kernels-vk-inline/level3/copy_fast.glsl.inl"
 	,
@@ -97,8 +96,7 @@ Xgemm<T>::Xgemm(Queue& queue, EventPointer event, const std::string& name)
 // =================================================================================================
 
 // The main routine
-template <typename T>
-void Xgemm<T>::DoGemm(const Layout layout, const Transpose a_transpose, const Transpose b_transpose, const size_t m,
+void Xgemm::DoGemm(const Layout layout, const Transpose a_transpose, const Transpose b_transpose, const size_t m,
 											const size_t n, const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
 											const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld,
 											const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset, const size_t c_ld,
@@ -147,8 +145,7 @@ void Xgemm<T>::DoGemm(const Layout layout, const Transpose a_transpose, const Tr
 // The indirect version of GEMM. This uses the faster but non-general kernel. It has specific
 // requirements, but several pre and post-processing kernels take care of those. However, the
 // overhead of these extra kernels might not be ideal for certain devices/arguments.
-template <typename T>
-void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer,
+void Xgemm::GemmIndirect(const size_t m, const size_t n, const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer,
 	const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset,
 	const size_t b_ld, const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset,
 	const size_t c_ld, const bool a_do_transpose, const bool b_do_transpose,
@@ -194,10 +191,10 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	const
 #endif
 	auto temp_buffer_all =
-			(temp_buffer_provided) ? temp_buffer : ((temp_size > 0) ? this->mDevice->allocateBuffer(temp_size*sizeof(T)) : a_buffer);
+			(temp_buffer_provided) ? temp_buffer : ((temp_size > 0) ? this->mDevice->allocateBuffer(temp_size*this->mDtype.size()) : a_buffer);
 	// Verifies if the provided temporary buffer is large enough
 	if (temp_buffer_provided) {
-		const auto required_size = temp_size * sizeof(T);
+		const auto required_size = temp_size * this->mDtype.size();
 		if (temp_buffer_all->getSize() < required_size) {
 #if VULKAN_API
 			// temporary hack due to indirect kernel being forced on under certain circumstances
@@ -220,8 +217,8 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	bool recordTempBarrier = false;
 	if (!a_no_temp)
 	{
-		PadCopyTransposeMatrix(db_, a_one, a_two, a_ld, a_offset,
-													 a_buffer, a_one_i, a_two_i, a_one_i, 0, a_temp, ConstantOne<T>(), program_, true,
+		PadCopyTransposeMatrix(this->mDtype, db_, a_one, a_two, a_ld, a_offset,
+													 a_buffer, a_one_i, a_two_i, a_one_i, 0, a_temp, tart::Scalar::one(), program_, true,
 													 a_do_transpose, a_conjugate,
 													 false, false, false);
 		// eventWaitList.push_back(eventProcessA);
@@ -231,8 +228,8 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	// As above, but now for matrix B
 	if (!b_no_temp)
 	{
-		PadCopyTransposeMatrix(db_, b_one, b_two, b_ld, b_offset,
-													 b_buffer, b_one_i, b_two_i, b_one_i, b_temp_offset, b_temp, ConstantOne<T>(), program_, true,
+		PadCopyTransposeMatrix(this->mDtype, db_, b_one, b_two, b_ld, b_offset,
+													 b_buffer, b_one_i, b_two_i, b_one_i, b_temp_offset, b_temp, tart::Scalar::one(), program_, true,
 													 b_do_transpose, b_conjugate,
 													 false, false, false);
 		// eventWaitList.push_back(eventProcessB);
@@ -240,10 +237,10 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	}
 
 	// As above, but now for matrix C. This is only necessary if C is used both as input and output.
-	if (!c_no_temp && beta.get<T>() != static_cast<T>(0))
+	if (!c_no_temp && beta != tart::Scalar::zero())
 	{
-		PadCopyTransposeMatrix(db_, c_one, c_two, c_ld, c_offset,
-													 c_buffer, c_one_i, c_two_i, c_one_i, c_temp_offset, c_temp, ConstantOne<T>(), program_, true,
+		PadCopyTransposeMatrix(this->mDtype, db_, c_one, c_two, c_ld, c_offset,
+													 c_buffer, c_one_i, c_two_i, c_one_i, c_temp_offset, c_temp, tart::Scalar::one(), program_, true,
 													 c_do_transpose, false,
 													 false, false, false);
 		// eventWaitList.push_back(eventProcessC);
@@ -303,8 +300,8 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 	// Runs the post-processing kernel if needed
 	if (!c_no_temp) {
 		// eventWaitList.push_back(eventKernel);
-		PadCopyTransposeMatrix(db_, c_one_i, c_two_i, c_one_i, c_temp_offset,
-													 c_temp, c_one, c_two, c_ld, c_offset, c_buffer, ConstantOne<T>(), program_, false,
+		PadCopyTransposeMatrix(this->mDtype, db_, c_one_i, c_two_i, c_one_i, c_temp_offset,
+													 c_temp, c_one, c_two, c_ld, c_offset, c_buffer, tart::Scalar::one(), program_, false,
 													 c_do_transpose, false, false, false, false);
 	}
 }
@@ -312,13 +309,12 @@ void Xgemm<T>::GemmIndirect(const size_t m, const size_t n, const size_t k, cons
 // =================================================================================================
 
 // The direct version of GEMM, requiring just one kernel, no pre or post-processing kernels.
-template <typename T>
-void Xgemm<T>::GemmDirect(const size_t m, const size_t n, const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer,
+void Xgemm::GemmDirect(const size_t m, const size_t n, const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer,
 													const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset,
 													const size_t b_ld, const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset,
 													const size_t c_ld, const bool a_do_transpose, const bool b_do_transpose,
 													const bool c_do_transpose, const bool a_conjugate, const bool b_conjugate)
-	{
+{
 	// Retrieves the XgemmDirect kernel from the compiled binary
 	Kernel kernelOld(program_, "XgemmDirectTT");
 	tart::kernel_ptr kernel = kernelOld.get();
@@ -368,15 +364,6 @@ void Xgemm<T>::GemmDirect(const size_t m, const size_t n, const size_t k, const 
 	// Launches the kernel
 	kernel->enqueue(global, spec);
 }
-
-// =================================================================================================
-
-// Compiles the templated class
-template class Xgemm<half>;
-template class Xgemm<float>;
-template class Xgemm<double>;
-template class Xgemm<float2>;
-template class Xgemm<double2>;
 
 // =================================================================================================
 }	// namespace clblast

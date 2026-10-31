@@ -19,11 +19,11 @@
 namespace clblast {
 // =================================================================================================
 
-template <typename T>
-class Xinvert : public Routine {
+class Xinvert : public Routine
+{
  public:
   // Constructor
-  Xinvert(Queue& queue, EventPointer event, const std::string& name = "INVERT");
+  Xinvert(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "INVERT");
 
   // Inverts diagonal square blocks of a matrix
   void InvertMatrixDiagonalBlocks(const Layout layout, const Triangle triangle, const Diagonal diag, const size_t n,

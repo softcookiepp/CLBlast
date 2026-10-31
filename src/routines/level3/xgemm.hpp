@@ -22,7 +22,6 @@ namespace clblast {
 // =================================================================================================
 
 // See comment at top of file for a description of the class
-template <typename T>
 class Xgemm : public Routine {
  public:
 	// Defines the assumptions of the GEMM kernels
@@ -152,7 +151,7 @@ class Xgemm : public Routine {
 	}
 
 	// Constructor
-	Xgemm(Queue& queue, EventPointer event, const std::string& name = "GEMM");
+	Xgemm(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "GEMM");
 
 	// Templated-precision implementation of the routine
 	void DoGemm(const Layout layout, const Transpose a_transpose, const Transpose b_transpose, const size_t m,

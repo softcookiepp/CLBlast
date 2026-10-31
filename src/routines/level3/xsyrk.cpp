@@ -114,7 +114,7 @@ void Xsyrk<T>::SyrkAB(const Layout layout, const Triangle triangle, const Transp
 	// Computes the transpose/conjugate options and sets the a/b/c sizes based on that
 	bool a_do_transpose, b_do_transpose, c_do_transpose, a_conjugate, b_conjugate;
 	size_t a_one, a_two, b_one, b_two, c_one, c_two;
-	Xgemm<T>::ProcessArguments(layout, a_transpose, b_transpose, n, n, k, a_one, a_two, b_one, b_two, c_one, c_two,
+	Xgemm::ProcessArguments(layout, a_transpose, b_transpose, n, n, k, a_one, a_two, b_one, b_two, c_one, c_two,
 														 a_do_transpose, b_do_transpose, c_do_transpose, a_conjugate, b_conjugate, db_["GEMMK"]);
 
 	// Tests the two matrices (A, C) for validity, first from a perspective of the OpenCL buffers and
@@ -133,19 +133,19 @@ void Xsyrk<T>::SyrkAB(const Layout layout, const Triangle triangle, const Transp
 
 	// Computes the first and second "internal" (ceiled) dimensions of the 3 matrices taking into account
 	// whether the matrices need to be rotated or not for the kernel.
-	const auto a_one_i = (Xgemm<T>::a_want_rotated_(db_["GEMMK"])) ? k_ceiled : n_ceiled;
-	const auto a_two_i = (Xgemm<T>::a_want_rotated_(db_["GEMMK"])) ? n_ceiled : k_ceiled;
-	const auto b_one_i = (!Xgemm<T>::b_want_rotated_(db_["GEMMK"])) ? k_ceiled : n_ceiled;
-	const auto b_two_i = (!Xgemm<T>::b_want_rotated_(db_["GEMMK"])) ? n_ceiled : k_ceiled;
+	const auto a_one_i = (Xgemm::a_want_rotated_(db_["GEMMK"])) ? k_ceiled : n_ceiled;
+	const auto a_two_i = (Xgemm::a_want_rotated_(db_["GEMMK"])) ? n_ceiled : k_ceiled;
+	const auto b_one_i = (!Xgemm::b_want_rotated_(db_["GEMMK"])) ? k_ceiled : n_ceiled;
+	const auto b_two_i = (!Xgemm::b_want_rotated_(db_["GEMMK"])) ? n_ceiled : k_ceiled;
 
 	// Decides which kernel to run: the upper-triangular or lower-triangular version
 	auto kernel_name = (triangle == Triangle::kUpper) ? "XgemmUpper" : "XgemmLower";
 
 	// Determines whether or not temporary matrices are needed
 	const auto a_no_temp =
-			Xgemm<T>::NoTempBuffer(a_one, a_one_i, a_two, a_two_i, a_ld, a_offset, a_do_transpose, a_conjugate);
+			Xgemm::NoTempBuffer(a_one, a_one_i, a_two, a_two_i, a_ld, a_offset, a_do_transpose, a_conjugate);
 	const auto b_no_temp =
-			Xgemm<T>::NoTempBuffer(b_one, b_one_i, b_two, b_two_i, b_ld, b_offset, b_do_transpose, b_conjugate);
+			Xgemm::NoTempBuffer(b_one, b_one_i, b_two, b_two_i, b_ld, b_offset, b_do_transpose, b_conjugate);
 
 	// Creates the temporary matrices
 	auto a_temp = (a_no_temp) ? a_buffer : this->mDevice->allocateBuffer(sizeof(T) * a_one_i * a_two_i);
@@ -157,7 +157,7 @@ void Xsyrk<T>::SyrkAB(const Layout layout, const Triangle triangle, const Transp
 	// case nothing has to be done, these kernels can be skipped.
 	std::vector<tart::buffer_ptr> barrierBuffers({c_buffer, c_temp});
 	if (!a_no_temp) {
-		PadCopyTransposeMatrix(db_, a_one, a_two, a_ld, a_offset,
+		PadCopyTransposeMatrix(this->mDtype, db_, a_one, a_two, a_ld, a_offset,
 													 a_buffer, a_one_i, a_two_i, a_one_i, 0, a_temp, ConstantOne<T>(), program_, true,
 													 a_do_transpose, false,
 													 false, false, false);
@@ -165,7 +165,7 @@ void Xsyrk<T>::SyrkAB(const Layout layout, const Triangle triangle, const Transp
 		barrierBuffers.push_back(a_temp);
 	}
 	if (!b_no_temp) {
-		PadCopyTransposeMatrix(db_, b_one, b_two, b_ld, b_offset,
+		PadCopyTransposeMatrix(this->mDtype, db_, b_one, b_two, b_ld, b_offset,
 													 b_buffer, b_one_i, b_two_i, b_one_i, 0, b_temp, ConstantOne<T>(), program_, true,
 													 b_do_transpose, false,
 													 false, false, false);
@@ -175,7 +175,7 @@ void Xsyrk<T>::SyrkAB(const Layout layout, const Triangle triangle, const Transp
 
 	// Furthermore, also creates a (possibly padded) copy of matrix C, since it is not allowed to
 	// modify the other triangle.
-	PadCopyTransposeMatrix(db_, n, n, c_ld, c_offset, c_buffer,
+	PadCopyTransposeMatrix(this->mDtype, db_, n, n, c_ld, c_offset, c_buffer,
 												 n_ceiled, n_ceiled, n_ceiled, 0, c_temp, ConstantOne<T>(), program_, true, c_do_transpose,
 												 false,
 												 false, false, false);
@@ -230,9 +230,9 @@ void Xsyrk<T>::SyrkAB(const Layout layout, const Triangle triangle, const Transp
 	
 	// Runs the post-processing kernel
 	const auto upper =
-			Xgemm<T>::c_want_rotated_(db_["GEMMK"]) ? (triangle == Triangle::kLower) : (triangle == Triangle::kUpper);
+			Xgemm::c_want_rotated_(db_["GEMMK"]) ? (triangle == Triangle::kLower) : (triangle == Triangle::kUpper);
 	const auto lower = !upper;
-	PadCopyTransposeMatrix(db_, n_ceiled, n_ceiled, n_ceiled, 0, c_temp, n,
+	PadCopyTransposeMatrix(this->mDtype, db_, n_ceiled, n_ceiled, n_ceiled, 0, c_temp, n,
 												 n, c_ld, c_offset, c_buffer, ConstantOne<T>(), program_, false, c_do_transpose, false, upper,
 												 lower, false);
 												 

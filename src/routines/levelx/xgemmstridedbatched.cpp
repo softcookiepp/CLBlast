@@ -115,7 +115,7 @@ void XgemmStridedBatched<T>::DoGemmStridedBatched(const Layout layout, const Tra
 	// so this is a workaround
 	if (a_offset || b_offset || c_offset)
 	{
-		Xgemm<T> xgemm(queue_, event_);
+		Xgemm xgemm(tart::getDType<T>(), queue_, event_);
 		for (auto batch = size_t{0}; batch < batch_count; ++batch)
 		{
 			const auto a_batch_offset = a_offset + PerBatchSizeA(layout, a_transpose, m, n, k, a_ld) * batch;
@@ -130,13 +130,13 @@ void XgemmStridedBatched<T>::DoGemmStridedBatched(const Layout layout, const Tra
 	}
 
 	// Two methods to choose from, select which one to run
-	const auto do_gemm_direct = Xgemm<T>::UseDirectKernel(m, n, k, db_["XGEMM_MIN_INDIRECT_SIZE"]);
+	const auto do_gemm_direct = Xgemm::UseDirectKernel(m, n, k, db_["XGEMM_MIN_INDIRECT_SIZE"]);
 	const auto gemm_kernel_id = (do_gemm_direct) ? 0 : db_["GEMMK"];
 
 	// Computes the transpose/conjugate options and sets the a/b/c sizes based on that
 	bool a_do_transpose, b_do_transpose, c_do_transpose, a_conjugate, b_conjugate;
 	size_t a_one, a_two, b_one, b_two, c_one, c_two;
-	Xgemm<T>::ProcessArguments(layout, a_transpose, b_transpose, m, n, k, a_one, a_two, b_one, b_two, c_one, c_two,
+	Xgemm::ProcessArguments(layout, a_transpose, b_transpose, m, n, k, a_one, a_two, b_one, b_two, c_one, c_two,
 														 a_do_transpose, b_do_transpose, c_do_transpose, a_conjugate, b_conjugate, gemm_kernel_id);
 
 	// Tests the matrices for validity
@@ -178,7 +178,7 @@ void XgemmStridedBatched<T>::BatchedGemmIndirect(
 	// Computes the first and second "internal" (ceiled) dimensions of the 3 matrices taking into account
 	// whether the matrices need to be rotated or not for the kernel.
 	size_t a_one_i, a_two_i, b_one_i, b_two_i, c_one_i, c_two_i;
-	Xgemm<T>::CalculateInternalDimensions(m, n, k, db_["MWG"], db_["NWG"], db_["KWG"], a_one_i, a_two_i, b_one_i, b_two_i,
+	Xgemm::CalculateInternalDimensions(m, n, k, db_["MWG"], db_["NWG"], db_["KWG"], a_one_i, a_two_i, b_one_i, b_two_i,
 																				c_one_i, c_two_i, db_["GEMMK"]);
 
 	// Determines whether or not temporary matrices are needed

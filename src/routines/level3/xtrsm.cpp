@@ -30,14 +30,12 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-template <typename T>
-Xtrsm<T>::Xtrsm(Queue& queue, EventPointer event, const std::string& name) : Xgemm<T>(queue, event, name) {}
+Xtrsm::Xtrsm(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) : Xgemm(dtype, queue, event, name) {}
 
 // =================================================================================================
 
 // The entry point: transforming into col-major (if needed) and then running the col-major version
-template <typename T>
-void Xtrsm<T>::DoTrsm(const Layout layout, Side side, Triangle triangle, const Transpose a_transpose,
+void Xtrsm::DoTrsm(const Layout layout, Side side, Triangle triangle, const Transpose a_transpose,
 											const Diagonal diagonal, size_t m, size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer,
 											const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset,
 											const size_t b_ld) {
@@ -62,11 +60,11 @@ void Xtrsm<T>::DoTrsm(const Layout layout, Side side, Triangle triangle, const T
 // =================================================================================================
 
 // The main routine
-template <typename T>
-void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Transpose a_transpose,
-														const Diagonal diagonal, const size_t m, const size_t n, const tart::Scalar& alpha,
-														const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
-														const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld) {
+void Xtrsm::TrsmColMajor(const Side side, const Triangle triangle, const Transpose a_transpose,
+	const Diagonal diagonal, const size_t m, const size_t n, const tart::Scalar& alpha,
+	const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
+	const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld)
+{
 	// Settings
 	constexpr auto block_size = size_t{16};	// tuneable
 
@@ -98,21 +96,21 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 	const auto x_size = b_size;
 	const auto x_ld = b_ld;
 	const auto x_offset = b_offset;
-	auto x_buffer = this->mDevice->allocateBuffer(sizeof(T) * x_size);
+	auto x_buffer = this->mDevice->allocateBuffer(this->mDtype.size() * x_size);
 	
 	// this will be faster, and compatible with the sequence-based API
-	this->mDevice->enqueueCopyBuffer(x_buffer, b_buffer, 0, 0, x_size*sizeof(T));
+	this->mDevice->enqueueCopyBuffer(x_buffer, b_buffer, 0, 0, x_size*this->mDtype.size());
 
 	// Temporary buffer for the inverse of the A matrix
 	const auto a_inv_size = Ceil(k, block_size) * block_size;
-	auto a_inv_buffer = this->mDevice->allocateBuffer(sizeof(T) * a_inv_size);
+	auto a_inv_buffer = this->mDevice->allocateBuffer(this->mDtype.size() * a_inv_size);
 
 	// Fills the output buffer with zeros
 	FillMatrix(this->mDtype, program_, x_one, x_two, x_ld, x_offset,
-						 x_buffer, ConstantZero<T>(), 16);
+						 x_buffer, tart::Scalar::zero(), 16);
 
 	// Inverts the diagonal blocks
-	auto inverter = Xinvert<T>(queue_, nullptr);
+	auto inverter = Xinvert(this->mDtype, queue_, nullptr);
 	inverter.InvertMatrixDiagonalBlocks(Layout::kColMajor, triangle, diagonal, k, block_size, a_buffer, a_offset, a_ld,
 																			a_inv_buffer);
 
@@ -121,16 +119,16 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 													(triangle == Triangle::kLower && a_transpose == Transpose::kNo));
 
 	// Left side
-	auto gemm1 = Xgemm<T>(queue_, nullptr);
+	auto gemm1 = Xgemm(this->mDtype, queue_, nullptr);
 	if (side == Side::kLeft) {
 		// True when (lower triangular) or (upper triangular and transposed)
 		if (condition) {
 			for (auto i = size_t{0}; i < m; i += block_size) {
-				const auto gemm_alpha = (i == 0) ? alpha : ConstantOne<T>();
+				const auto gemm_alpha = (i == 0) ? alpha : tart::Scalar::one();
 				const auto current_block_size = std::min(m - i, block_size);
 				gemm1.DoGemm(Layout::kColMajor, a_transpose, Transpose::kNo, current_block_size, n, current_block_size,
 										 gemm_alpha, a_inv_buffer, i * block_size, block_size, b_buffer, b_offset + i, b_ld,
-										 ConstantZero<T>(), x_buffer, x_offset + i, x_ld, tart::buffer_ptr(0), false);
+										 tart::Scalar::zero(), x_buffer, x_offset + i, x_ld, tart::buffer_ptr(0), false);
 				if (i + block_size >= m) {
 					break;
 				}
@@ -138,7 +136,7 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 				const auto this_a_offset =
 						(a_transpose == Transpose::kNo) ? (i + block_size) + i * a_ld : i + (block_size + i) * a_ld;
 				gemm1.DoGemm(Layout::kColMajor, a_transpose, Transpose::kNo, m - i - block_size, n, block_size,
-										 ConstantNegOne<T>(), a_buffer, this_a_offset + a_offset, a_ld, x_buffer, x_offset + i, x_ld,
+										 tart::Scalar::negOne(), a_buffer, this_a_offset + a_offset, a_ld, x_buffer, x_offset + i, x_ld,
 										 gemm_alpha, b_buffer, b_offset + i + block_size, b_ld, tart::buffer_ptr(0), false);
 			}
 		}
@@ -149,18 +147,18 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 			const auto i_start = static_cast<int>(m) - static_cast<int>(special_block_size);
 			for (auto i = i_start; i >= 0; i -= static_cast<int>(block_size)) {
 				const auto current_block_size = (i == i_start) ? special_block_size : block_size;
-				const auto gemm_alpha = (i == i_start) ? alpha : ConstantOne<T>();
-				auto gemm1 = Xgemm<T>(queue_, nullptr);
+				const auto gemm_alpha = (i == i_start) ? alpha : tart::Scalar::one();
+				auto gemm1 = Xgemm(this->mDtype, queue_, nullptr);
 				gemm1.DoGemm(Layout::kColMajor, a_transpose, Transpose::kNo, current_block_size, n, current_block_size,
 										 gemm_alpha, a_inv_buffer, i * block_size, block_size, b_buffer, b_offset + i, b_ld,
-										 ConstantZero<T>(), x_buffer, x_offset + i, x_ld, tart::buffer_ptr(0), false);
+										 tart::Scalar::zero(), x_buffer, x_offset + i, x_ld, tart::buffer_ptr(0), false);
 				if (i - static_cast<int>(block_size) < 0) {
 					break;
 				}
 
 				const auto this_a_offset = (a_transpose == Transpose::kNo) ? i * a_ld : i;
-				auto gemm2 = Xgemm<T>(queue_, nullptr);
-				gemm2.DoGemm(Layout::kColMajor, a_transpose, Transpose::kNo, i, n, current_block_size, ConstantNegOne<T>(),
+				auto gemm2 = Xgemm(this->mDtype, queue_, nullptr);
+				gemm2.DoGemm(Layout::kColMajor, a_transpose, Transpose::kNo, i, n, current_block_size, tart::Scalar::negOne(),
 										 a_buffer, this_a_offset + a_offset, a_ld, x_buffer, x_offset + i, x_ld, gemm_alpha, b_buffer,
 										 b_offset, b_ld, tart::buffer_ptr(0), false);
 			}
@@ -175,18 +173,18 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 			const auto i_start = static_cast<int>(n) - static_cast<int>(special_block_size);
 			for (auto i = i_start; i >= 0; i -= static_cast<int>(block_size)) {
 				const auto current_block_size = (i == i_start) ? special_block_size : block_size;
-				const auto gemm_alpha = (i == i_start) ? alpha : ConstantOne<T>();
-				auto gemm1 = Xgemm<T>(queue_, nullptr);
+				const auto gemm_alpha = (i == i_start) ? alpha : tart::Scalar::one();
+				auto gemm1 = Xgemm(this->mDtype, queue_, nullptr);
 				gemm1.DoGemm(Layout::kColMajor, Transpose::kNo, a_transpose, m, current_block_size, current_block_size,
 										 gemm_alpha, b_buffer, b_offset + i * b_ld, b_ld, a_inv_buffer, i * block_size, block_size,
-										 ConstantZero<T>(), x_buffer, x_offset + i * x_ld, x_ld, tart::buffer_ptr(0), false);
+										 tart::Scalar::zero(), x_buffer, x_offset + i * x_ld, x_ld, nullptr, false);
 				if (i - static_cast<int>(block_size) < 0) {
 					break;
 				}
 
 				const auto this_a_offset = (a_transpose == Transpose::kNo) ? i : i * a_ld;
-				auto gemm2 = Xgemm<T>(queue_, nullptr);
-				gemm2.DoGemm(Layout::kColMajor, Transpose::kNo, a_transpose, m, i, current_block_size, ConstantNegOne<T>(),
+				auto gemm2 = Xgemm(this->mDtype, queue_, nullptr);
+				gemm2.DoGemm(Layout::kColMajor, Transpose::kNo, a_transpose, m, i, current_block_size, tart::Scalar::zero(),
 										 x_buffer, x_offset + i * x_ld, x_ld, a_buffer, this_a_offset + a_offset, a_ld, gemm_alpha,
 										 b_buffer, b_offset, b_ld, tart::buffer_ptr(0), false);
 			}
@@ -195,21 +193,21 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 		// True when (upper triangular) or (lower triangular and transposed)
 		else {
 			for (auto i = size_t{0}; i < n; i += block_size) {
-				const auto gemm_alpha = (i == 0) ? alpha : ConstantOne<T>();
+				const auto gemm_alpha = (i == 0) ? alpha : tart::Scalar::one();
 				const auto current_block_size = std::min(n - i, block_size);
-				auto gemm1 = Xgemm<T>(queue_, nullptr);
+				auto gemm1 = Xgemm(this->mDtype, queue_, nullptr);
 				gemm1.DoGemm(Layout::kColMajor, Transpose::kNo, a_transpose, m, current_block_size, current_block_size,
 										 gemm_alpha, b_buffer, b_offset + i * b_ld, b_ld, a_inv_buffer, i * block_size, block_size,
-										 ConstantZero<T>(), x_buffer, x_offset + i * x_ld, x_ld, tart::buffer_ptr(0), false);
+										 tart::Scalar::zero(), x_buffer, x_offset + i * x_ld, x_ld, tart::buffer_ptr(0), false);
 				if (i + block_size >= n) {
 					break;
 				}
 
 				const auto this_a_offset =
 						(a_transpose == Transpose::kNo) ? i + (block_size + i) * a_ld : (i + block_size) + i * a_ld;
-				auto gemm2 = Xgemm<T>(queue_, nullptr);
+				auto gemm2 = Xgemm(this->mDtype, queue_, nullptr);
 				gemm2.DoGemm(Layout::kColMajor, Transpose::kNo, a_transpose, m, n - i - block_size, block_size,
-										 ConstantNegOne<T>(), x_buffer, x_offset + i * x_ld, x_ld, a_buffer, this_a_offset + a_offset, a_ld,
+										 tart::Scalar::negOne(), x_buffer, x_offset + i * x_ld, x_ld, a_buffer, this_a_offset + a_offset, a_ld,
 										 gemm_alpha, b_buffer, b_offset + (i + block_size) * b_ld, b_ld, tart::buffer_ptr(0), false);
 			}
 		}
@@ -217,18 +215,9 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 
 	// Retrieves the results
 	//x_buffer.CopyToAsync(queue_, b_size, b_buffer, event_);
-	device_()->enqueueCopyBuffer(b_buffer, x_buffer, 0, 0, b_size*sizeof(T));
+	device_()->enqueueCopyBuffer(b_buffer, x_buffer, 0, 0, b_size*this->mDtype.size());
 	
 }
-
-// =================================================================================================
-
-// Compiles the templated class
-template class Xtrsm<half>;
-template class Xtrsm<float>;
-template class Xtrsm<double>;
-template class Xtrsm<float2>;
-template class Xtrsm<double2>;
 
 // =================================================================================================
 }	// namespace clblast

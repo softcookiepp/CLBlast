@@ -157,7 +157,7 @@ void Xsyrk<T>::SyrkAB(const Layout layout, const Triangle triangle, const Transp
 	// case nothing has to be done, these kernels can be skipped.
 	std::vector<tart::buffer_ptr> barrierBuffers({c_buffer, c_temp});
 	if (!a_no_temp) {
-		PadCopyTransposeMatrix(db_, a_one, a_two, a_ld, a_offset,
+		PadCopyTransposeMatrix(this->mDtype, db_, a_one, a_two, a_ld, a_offset,
 													 a_buffer, a_one_i, a_two_i, a_one_i, 0, a_temp, ConstantOne<T>(), program_, true,
 													 a_do_transpose, false,
 													 false, false, false);
@@ -165,7 +165,7 @@ void Xsyrk<T>::SyrkAB(const Layout layout, const Triangle triangle, const Transp
 		barrierBuffers.push_back(a_temp);
 	}
 	if (!b_no_temp) {
-		PadCopyTransposeMatrix(db_, b_one, b_two, b_ld, b_offset,
+		PadCopyTransposeMatrix(this->mDtype, db_, b_one, b_two, b_ld, b_offset,
 													 b_buffer, b_one_i, b_two_i, b_one_i, 0, b_temp, ConstantOne<T>(), program_, true,
 													 b_do_transpose, false,
 													 false, false, false);
@@ -175,7 +175,7 @@ void Xsyrk<T>::SyrkAB(const Layout layout, const Triangle triangle, const Transp
 
 	// Furthermore, also creates a (possibly padded) copy of matrix C, since it is not allowed to
 	// modify the other triangle.
-	PadCopyTransposeMatrix(db_, n, n, c_ld, c_offset, c_buffer,
+	PadCopyTransposeMatrix(this->mDtype, db_, n, n, c_ld, c_offset, c_buffer,
 												 n_ceiled, n_ceiled, n_ceiled, 0, c_temp, ConstantOne<T>(), program_, true, c_do_transpose,
 												 false,
 												 false, false, false);
@@ -232,7 +232,7 @@ void Xsyrk<T>::SyrkAB(const Layout layout, const Triangle triangle, const Transp
 	const auto upper =
 			Xgemm<T>::c_want_rotated_(db_["GEMMK"]) ? (triangle == Triangle::kLower) : (triangle == Triangle::kUpper);
 	const auto lower = !upper;
-	PadCopyTransposeMatrix(db_, n_ceiled, n_ceiled, n_ceiled, 0, c_temp, n,
+	PadCopyTransposeMatrix(this->mDtype, db_, n_ceiled, n_ceiled, n_ceiled, 0, c_temp, n,
 												 n, c_ld, c_offset, c_buffer, ConstantOne<T>(), program_, false, c_do_transpose, false, upper,
 												 lower, false);
 												 

@@ -92,15 +92,15 @@ Xherk<T, U>::Xherk(Queue& queue, EventPointer event, const std::string& name)
 // The main routine
 template <typename T, typename U>
 void Xherk<T, U>::DoHerk(const Layout layout, const Triangle triangle, const Transpose a_transpose, const size_t n,
-												 const size_t k, const U alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
-												 const size_t a_ld, const U beta, const tart::buffer_ptr& c_buffer, const size_t c_offset,
+												 const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
+												 const size_t a_ld, const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset,
 												 const size_t c_ld) {
 	const auto b_transpose = (a_transpose != Transpose::kNo) ? Transpose::kNo : Transpose::kYes;
 	const auto& b_buffer = a_buffer;
 	const auto b_offset = a_offset;
 	const auto b_ld = a_ld;
-	const auto complex_alpha = T{alpha, static_cast<U>(0.0)};
-	const auto complex_beta = T{beta, static_cast<U>(0.0)};
+	const auto complex_alpha = T{alpha.get<U>(), static_cast<U>(0.0)};
+	const auto complex_beta = T{beta.get<U>(), static_cast<U>(0.0)};
 	HerkAB(layout, triangle, a_transpose, b_transpose, n, k, complex_alpha, a_buffer, a_offset, a_ld, b_buffer, b_offset,
 				 b_ld, complex_beta, c_buffer, c_offset, c_ld, true);
 }

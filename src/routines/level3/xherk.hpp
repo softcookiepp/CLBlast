@@ -30,7 +30,7 @@ class Xherk : public Routine {
 
   // Templated-precision implementation of the routine
   void DoHerk(const Layout layout, const Triangle triangle, const Transpose a_transpose, const size_t n, const size_t k,
-              const U alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld, const U beta,
+              const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld, const tart::Scalar& beta,
               const tart::buffer_ptr& c_buffer, const size_t c_offset, const size_t c_ld);
 
   // Helper function to be reused for HER2K

@@ -30,14 +30,12 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-template <typename T>
-Xtrsm<T>::Xtrsm(Queue& queue, EventPointer event, const std::string& name) : Xgemm(tart::getDType<T>(), queue, event, name) {}
+Xtrsm::Xtrsm(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) : Xgemm(dtype, queue, event, name) {}
 
 // =================================================================================================
 
 // The entry point: transforming into col-major (if needed) and then running the col-major version
-template <typename T>
-void Xtrsm<T>::DoTrsm(const Layout layout, Side side, Triangle triangle, const Transpose a_transpose,
+void Xtrsm::DoTrsm(const Layout layout, Side side, Triangle triangle, const Transpose a_transpose,
 											const Diagonal diagonal, size_t m, size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer,
 											const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset,
 											const size_t b_ld) {
@@ -62,8 +60,7 @@ void Xtrsm<T>::DoTrsm(const Layout layout, Side side, Triangle triangle, const T
 // =================================================================================================
 
 // The main routine
-template <typename T>
-void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Transpose a_transpose,
+void Xtrsm::TrsmColMajor(const Side side, const Triangle triangle, const Transpose a_transpose,
 														const Diagonal diagonal, const size_t m, const size_t n, const tart::Scalar& alpha,
 														const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
 														const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld) {
@@ -98,21 +95,21 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 	const auto x_size = b_size;
 	const auto x_ld = b_ld;
 	const auto x_offset = b_offset;
-	auto x_buffer = this->mDevice->allocateBuffer(sizeof(T) * x_size);
+	auto x_buffer = this->mDevice->allocateBuffer(this->mDtype.size() * x_size);
 	
 	// this will be faster, and compatible with the sequence-based API
-	this->mDevice->enqueueCopyBuffer(x_buffer, b_buffer, 0, 0, x_size*sizeof(T));
+	this->mDevice->enqueueCopyBuffer(x_buffer, b_buffer, 0, 0, x_size*this->mDtype.size());
 
 	// Temporary buffer for the inverse of the A matrix
 	const auto a_inv_size = Ceil(k, block_size) * block_size;
-	auto a_inv_buffer = this->mDevice->allocateBuffer(sizeof(T) * a_inv_size);
+	auto a_inv_buffer = this->mDevice->allocateBuffer(this->mDtype.size() * a_inv_size);
 
 	// Fills the output buffer with zeros
 	FillMatrix(this->mDtype, program_, x_one, x_two, x_ld, x_offset,
 						 x_buffer, tart::Scalar::zero(), 16);
 
 	// Inverts the diagonal blocks
-	auto inverter = Xinvert<T>(queue_, nullptr);
+	auto inverter = Xinvert(this->mDtype, queue_, nullptr);
 	inverter.InvertMatrixDiagonalBlocks(Layout::kColMajor, triangle, diagonal, k, block_size, a_buffer, a_offset, a_ld,
 																			a_inv_buffer);
 
@@ -217,18 +214,9 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 
 	// Retrieves the results
 	//x_buffer.CopyToAsync(queue_, b_size, b_buffer, event_);
-	device_()->enqueueCopyBuffer(b_buffer, x_buffer, 0, 0, b_size*sizeof(T));
+	device_()->enqueueCopyBuffer(b_buffer, x_buffer, 0, 0, b_size*this->mDtype.size());
 	
 }
-
-// =================================================================================================
-
-// Compiles the templated class
-template class Xtrsm<half>;
-template class Xtrsm<float>;
-template class Xtrsm<double>;
-template class Xtrsm<float2>;
-template class Xtrsm<double2>;
 
 // =================================================================================================
 }	// namespace clblast

@@ -29,9 +29,8 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-template <typename T>
-Xinvert<T>::Xinvert(Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Invert"}, precisionToDataType(PrecisionValue<T>()), {},
+Xinvert::Xinvert(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
+		: Routine(queue, event, name, {"Invert"}, dtype, {},
 							{
 	#include "../../kernels-vk-inline/level3/level3_fill_matrix.glsl.inl"
 	,
@@ -91,8 +90,7 @@ Xinvert<T>::Xinvert(Queue& queue, EventPointer event, const std::string& name)
 // =================================================================================================
 
 // Inverts diagonal square blocks of a matrix
-template <typename T>
-void Xinvert<T>::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle triangle, const Diagonal diag,
+void Xinvert::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle triangle, const Diagonal diag,
 	const size_t n, const size_t block_size, const tart::buffer_ptr& src,
 	const size_t offset, const size_t ld_src, tart::buffer_ptr& dest)
 {
@@ -208,15 +206,6 @@ void Xinvert<T>::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle 
 	}
 	
 }
-
-// =================================================================================================
-
-// Compiles the templated class
-template class Xinvert<half>;
-template class Xinvert<float>;
-template class Xinvert<double>;
-template class Xinvert<float2>;
-template class Xinvert<double2>;
 
 // =================================================================================================
 }	// namespace clblast

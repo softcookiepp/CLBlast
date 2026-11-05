@@ -21,7 +21,6 @@ namespace clblast {
 // =================================================================================================
 
 // See comment at top of file for a description of the class
-template <typename T>
 class Xhemm : public Xgemm {
  public:
 	// Uses methods and variables the regular Xgemm routine
@@ -33,7 +32,7 @@ class Xhemm : public Xgemm {
 	using Xgemm::DoGemm;
 
 	// Constructor
-	Xhemm(Queue& queue, EventPointer event, const std::string& name = "HEMM");
+	Xhemm(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "HEMM");
 
 	// Templated-precision implementation of the routine
 	void DoHemm(const Layout layout, const Side side, const Triangle triangle, const size_t m, const size_t n,

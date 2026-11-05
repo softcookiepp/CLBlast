@@ -1138,7 +1138,7 @@ StatusCode Symm(const Layout layout, const Side side, const Triangle triangle, c
 								const size_t c_ld, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xsymm<T>(queue_cpp, event);
+		auto routine = Xsymm(tart::getDType<T>(), queue_cpp, event);
 		routine.DoSymm(layout, side, triangle, m, n, alpha, (a_buffer), a_offset, a_ld, (b_buffer),
 									 b_offset, b_ld, beta, (c_buffer), c_offset, c_ld);
 		return StatusCode::kSuccess;
@@ -1175,7 +1175,7 @@ StatusCode Hemm(const Layout layout, const Side side, const Triangle triangle, c
 								const size_t c_ld, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xhemm<T>(queue_cpp, event);
+		auto routine = Xhemm(tart::getDType<T>(), queue_cpp, event);
 		routine.DoHemm(layout, side, triangle, m, n, alpha, (a_buffer), a_offset, a_ld, (b_buffer),
 									 b_offset, b_ld, beta, (c_buffer), c_offset, c_ld);
 		return StatusCode::kSuccess;
@@ -1318,7 +1318,7 @@ StatusCode Trmm(const Layout layout, const Side side, const Triangle triangle, c
 								tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xtrmm<T>(queue_cpp, event);
+		auto routine = Xtrmm(tart::getDType<T>(), queue_cpp, event);
 		routine.DoTrmm(layout, side, triangle, a_transpose, diagonal, m, n, alpha, (a_buffer), a_offset, a_ld,
 									 (b_buffer), b_offset, b_ld);
 		return StatusCode::kSuccess;
@@ -1355,7 +1355,7 @@ StatusCode Trsm(const Layout layout, const Side side, const Triangle triangle, c
 								tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xtrsm<T>(queue_cpp, event);
+		auto routine = Xtrsm(tart::getDType<T>(), queue_cpp, event);
 		routine.DoTrsm(layout, side, triangle, a_transpose, diagonal, m, n, alpha, (a_buffer), a_offset, a_ld,
 									 (b_buffer), b_offset, b_ld);
 		return StatusCode::kSuccess;

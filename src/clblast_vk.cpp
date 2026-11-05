@@ -1391,9 +1391,9 @@ StatusCode Had(const size_t n, const T alpha, const tart::buffer_ptr x_buffer, c
 							 const size_t z_offset, const size_t z_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xhad<T>(queue_cpp, event);
-		routine.DoHad(n, alpha, Buffer<T>(x_buffer), x_offset, x_inc, Buffer<T>(y_buffer), y_offset, y_inc, beta,
-									Buffer<T>(z_buffer), z_offset, z_inc);
+		auto routine = Xhad(tart::getDType<T>(), queue_cpp, event);
+		routine.DoHad(n, alpha, (x_buffer), x_offset, x_inc, (y_buffer), y_offset, y_inc, beta,
+									(z_buffer), z_offset, z_inc);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();

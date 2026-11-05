@@ -24,9 +24,8 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-template <typename T>
-Xhad<T>::Xhad(Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Xaxpy"}, precisionToDataType(PrecisionValue<T>()), {},
+Xhad::Xhad(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
+		: Routine(queue, event, name, {"Xaxpy"}, dtype, {},
 							{
 	#include "../../kernels-vk-inline/level1/xhad.glsl.inl"
 	,
@@ -42,10 +41,9 @@ Xhad<T>::Xhad(Queue& queue, EventPointer event, const std::string& name)
 // =================================================================================================
 
 // The main routine
-template <typename T>
-void Xhad<T>::DoHad(const size_t n, const T alpha, const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc,
-										const Buffer<T>& y_buffer, const size_t y_offset, const size_t y_inc, const T beta,
-										const Buffer<T>& z_buffer, const size_t z_offset, const size_t z_inc)
+void Xhad::DoHad(const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
+	const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc, const tart::Scalar& beta,
+	const tart::buffer_ptr& z_buffer, const size_t z_offset, const size_t z_inc)
 {
 	// Makes sure all dimensions are larger than zero
 	if (n == 0) {
@@ -53,9 +51,9 @@ void Xhad<T>::DoHad(const size_t n, const T alpha, const Buffer<T>& x_buffer, co
 	}
 
 	// Tests the vectors for validity
-	TestVectorX(mDtype, n, x_buffer(), x_offset, x_inc);
-	TestVectorY(mDtype, n, y_buffer(), y_offset, y_inc);
-	TestVectorZ(mDtype, n, z_buffer(), z_offset, z_inc);
+	TestVectorX(mDtype, n, x_buffer, x_offset, x_inc);
+	TestVectorY(mDtype, n, y_buffer, y_offset, y_inc);
+	TestVectorZ(mDtype, n, z_buffer, z_offset, z_inc);
 
 	// Determines whether or not the fast-version can be used
 	const auto use_faster_kernel = (x_offset == 0) && (x_inc == 1) && (y_offset == 0) && (y_inc == 1) &&
@@ -74,20 +72,20 @@ void Xhad<T>::DoHad(const size_t n, const T alpha, const Buffer<T>& x_buffer, co
 		kernel->setArg(0, static_cast<int>(n));
 		kernel->setArgAs(mDtype, 1, alpha);
 		kernel->setArgAs(mDtype, 2, (beta));
-		kernel->setArg(3, x_buffer());
-		kernel->setArg(4, y_buffer());
-		kernel->setArg(5, z_buffer());
+		kernel->setArg(3, x_buffer);
+		kernel->setArg(4, y_buffer);
+		kernel->setArg(5, z_buffer);
 	} else {
 		kernel->setArg(0, static_cast<int>(n));
 		kernel->setArgAs(mDtype, 1, (alpha));
 		kernel->setArgAs(mDtype, 2, (beta));
-		kernel->setArg(3, x_buffer());
+		kernel->setArg(3, x_buffer);
 		kernel->setArg(4, static_cast<int>(x_offset));
 		kernel->setArg(5, static_cast<int>(x_inc));
-		kernel->setArg(6, y_buffer());
+		kernel->setArg(6, y_buffer);
 		kernel->setArg(7, static_cast<int>(y_offset));
 		kernel->setArg(8, static_cast<int>(y_inc));
-		kernel->setArg(9, z_buffer());
+		kernel->setArg(9, z_buffer);
 		kernel->setArg(10, static_cast<int>(z_offset));
 		kernel->setArg(11, static_cast<int>(z_inc));
 	}
@@ -108,15 +106,6 @@ void Xhad<T>::DoHad(const size_t n, const T alpha, const Buffer<T>& x_buffer, co
 	}
 	kernel->enqueue(global, {db_["WGS"], db_["WPT"]});
 }
-
-// =================================================================================================
-
-// Compiles the templated class
-template class Xhad<half>;
-template class Xhad<float>;
-template class Xhad<double>;
-template class Xhad<float2>;
-template class Xhad<double2>;
 
 // =================================================================================================
 }	// namespace clblast

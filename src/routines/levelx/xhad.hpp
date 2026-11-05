@@ -20,16 +20,15 @@ namespace clblast {
 // =================================================================================================
 
 // See comment at top of file for a description of the class
-template <typename T>
 class Xhad : public Routine {
  public:
   // Constructor
-  Xhad(Queue& queue, EventPointer event, const std::string& name = "HAD");
+  Xhad(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "HAD");
 
   // Templated-precision implementation of the routine
-  void DoHad(const size_t n, const T alpha, const Buffer<T>& x_buffer, const size_t x_offset, const size_t x_inc,
-             const Buffer<T>& y_buffer, const size_t y_offset, const size_t y_inc, const T beta,
-             const Buffer<T>& z_buffer, const size_t z_offset, const size_t z_inc);
+  void DoHad(const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
+             const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc, const tart::Scalar& beta,
+             const tart::buffer_ptr& z_buffer, const size_t z_offset, const size_t z_inc);
 };
 
 // =================================================================================================

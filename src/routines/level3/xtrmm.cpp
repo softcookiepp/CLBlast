@@ -25,7 +25,7 @@ namespace clblast {
 
 // Constructor: forwards to base class constructor
 template <typename T>
-Xtrmm<T>::Xtrmm(Queue& queue, EventPointer event, const std::string& name) : Xgemm<T>(queue, event, name) {}
+Xtrmm<T>::Xtrmm(Queue& queue, EventPointer event, const std::string& name) : Xgemm(tart::getDType<T>(), queue, event, name) {}
 
 // =================================================================================================
 
@@ -111,14 +111,14 @@ void Xtrmm<T>::DoTrmm(const Layout layout, const Side side, const Triangle trian
 	// Runs the regular Xgemm code with either "B := alpha*A*B" or ...
 	if (side == Side::kLeft) {
 		DoGemm(layout, a_transpose, Transpose::kNo, m, n, k, alpha, temp_triangular, 0, k, b_buffer_copy, b_offset, b_ld,
-					 ConstantZero<T>(), b_buffer, b_offset, b_ld);
+					 tart::Scalar::zero(), b_buffer, b_offset, b_ld);
 	}
 
 	// ... with "B := alpha*B*A". Note that A and B are now reversed.
 	else {
 		try {
 			DoGemm(layout, Transpose::kNo, a_transpose, m, n, k, alpha, b_buffer_copy, b_offset, b_ld, temp_triangular, 0, k,
-						 ConstantZero<T>(), b_buffer, b_offset, b_ld);
+						 tart::Scalar::zero(), b_buffer, b_offset, b_ld);
 		} catch (BLASError& e) {
 			// A and B are now reversed, so also reverse the error codes returned from the Xgemm routine
 			switch (e.status()) {

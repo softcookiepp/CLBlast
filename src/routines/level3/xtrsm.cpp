@@ -31,7 +31,7 @@ namespace clblast {
 
 // Constructor: forwards to base class constructor
 template <typename T>
-Xtrsm<T>::Xtrsm(Queue& queue, EventPointer event, const std::string& name) : Xgemm<T>(queue, event, name) {}
+Xtrsm<T>::Xtrsm(Queue& queue, EventPointer event, const std::string& name) : Xgemm(tart::getDType<T>(), queue, event, name) {}
 
 // =================================================================================================
 
@@ -121,7 +121,7 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 													(triangle == Triangle::kLower && a_transpose == Transpose::kNo));
 
 	// Left side
-	auto gemm1 = Xgemm<T>(queue_, nullptr);
+	auto gemm1 = Xgemm(this->mDtype, queue_, nullptr);
 	if (side == Side::kLeft) {
 		// True when (lower triangular) or (upper triangular and transposed)
 		if (condition) {
@@ -150,7 +150,7 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 			for (auto i = i_start; i >= 0; i -= static_cast<int>(block_size)) {
 				const auto current_block_size = (i == i_start) ? special_block_size : block_size;
 				const auto gemm_alpha = (i == i_start) ? alpha : tart::Scalar::one();
-				auto gemm1 = Xgemm<T>(queue_, nullptr);
+				auto gemm1 = Xgemm(this->mDtype, queue_, nullptr);
 				gemm1.DoGemm(Layout::kColMajor, a_transpose, Transpose::kNo, current_block_size, n, current_block_size,
 										 gemm_alpha, a_inv_buffer, i * block_size, block_size, b_buffer, b_offset + i, b_ld,
 										 tart::Scalar::zero(), x_buffer, x_offset + i, x_ld, tart::buffer_ptr(0), false);
@@ -159,7 +159,7 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 				}
 
 				const auto this_a_offset = (a_transpose == Transpose::kNo) ? i * a_ld : i;
-				auto gemm2 = Xgemm<T>(queue_, nullptr);
+				auto gemm2 = Xgemm(this->mDtype, queue_, nullptr);
 				gemm2.DoGemm(Layout::kColMajor, a_transpose, Transpose::kNo, i, n, current_block_size, tart::Scalar::negOne(),
 										 a_buffer, this_a_offset + a_offset, a_ld, x_buffer, x_offset + i, x_ld, gemm_alpha, b_buffer,
 										 b_offset, b_ld, tart::buffer_ptr(0), false);
@@ -176,7 +176,7 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 			for (auto i = i_start; i >= 0; i -= static_cast<int>(block_size)) {
 				const auto current_block_size = (i == i_start) ? special_block_size : block_size;
 				const auto gemm_alpha = (i == i_start) ? alpha : tart::Scalar::one();
-				auto gemm1 = Xgemm<T>(queue_, nullptr);
+				auto gemm1 = Xgemm(this->mDtype, queue_, nullptr);
 				gemm1.DoGemm(Layout::kColMajor, Transpose::kNo, a_transpose, m, current_block_size, current_block_size,
 										 gemm_alpha, b_buffer, b_offset + i * b_ld, b_ld, a_inv_buffer, i * block_size, block_size,
 										 tart::Scalar::zero(), x_buffer, x_offset + i * x_ld, x_ld, tart::buffer_ptr(0), false);
@@ -185,7 +185,7 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 				}
 
 				const auto this_a_offset = (a_transpose == Transpose::kNo) ? i : i * a_ld;
-				auto gemm2 = Xgemm<T>(queue_, nullptr);
+				auto gemm2 = Xgemm(this->mDtype, queue_, nullptr);
 				gemm2.DoGemm(Layout::kColMajor, Transpose::kNo, a_transpose, m, i, current_block_size, tart::Scalar::negOne(),
 										 x_buffer, x_offset + i * x_ld, x_ld, a_buffer, this_a_offset + a_offset, a_ld, gemm_alpha,
 										 b_buffer, b_offset, b_ld, tart::buffer_ptr(0), false);
@@ -197,7 +197,7 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 			for (auto i = size_t{0}; i < n; i += block_size) {
 				const auto gemm_alpha = (i == 0) ? alpha : tart::Scalar::one();
 				const auto current_block_size = std::min(n - i, block_size);
-				auto gemm1 = Xgemm<T>(queue_, nullptr);
+				auto gemm1 = Xgemm(this->mDtype, queue_, nullptr);
 				gemm1.DoGemm(Layout::kColMajor, Transpose::kNo, a_transpose, m, current_block_size, current_block_size,
 										 gemm_alpha, b_buffer, b_offset + i * b_ld, b_ld, a_inv_buffer, i * block_size, block_size,
 										 tart::Scalar::zero(), x_buffer, x_offset + i * x_ld, x_ld, tart::buffer_ptr(0), false);
@@ -207,7 +207,7 @@ void Xtrsm<T>::TrsmColMajor(const Side side, const Triangle triangle, const Tran
 
 				const auto this_a_offset =
 						(a_transpose == Transpose::kNo) ? i + (block_size + i) * a_ld : (i + block_size) + i * a_ld;
-				auto gemm2 = Xgemm<T>(queue_, nullptr);
+				auto gemm2 = Xgemm(this->mDtype, queue_, nullptr);
 				gemm2.DoGemm(Layout::kColMajor, Transpose::kNo, a_transpose, m, n - i - block_size, block_size,
 										 tart::Scalar::negOne(), x_buffer, x_offset + i * x_ld, x_ld, a_buffer, this_a_offset + a_offset, a_ld,
 										 gemm_alpha, b_buffer, b_offset + (i + block_size) * b_ld, b_ld, tart::buffer_ptr(0), false);

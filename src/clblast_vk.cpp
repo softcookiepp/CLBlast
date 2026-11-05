@@ -1098,7 +1098,7 @@ StatusCode Gemm(const Layout layout, const Transpose a_transpose, const Transpos
 								tart::buffer_ptr temp_buffer) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xgemm<T>(queue_cpp, event);
+		auto routine = Xgemm(tart::getDType<T>(), queue_cpp, event);
 		const auto temp_buffer_provided = temp_buffer != nullptr;
 		auto temp_buffer_cpp = temp_buffer_provided ? (temp_buffer) : (nullptr);
 		routine.DoGemm(layout, a_transpose, b_transpose, m, n, k, alpha, (a_buffer), a_offset, a_ld,
@@ -1720,11 +1720,11 @@ StatusCode GemmTempBufferSize(const Layout layout, const Transpose a_transpose, 
 		Routine::InitDatabase(device, kernel_names, tart::getDType<T>(), {}, db);
 
 		// Computes the buffer size
-		if (Xgemm<T>::UseDirectKernel(m, n, k, db["XGEMM_MIN_INDIRECT_SIZE"])) {
+		if (Xgemm::UseDirectKernel(m, n, k, db["XGEMM_MIN_INDIRECT_SIZE"])) {
 			temp_buffer_size = 0;
 		} else {
 			temp_buffer_size =
-					Xgemm<T>::GetTempSize(layout, a_transpose, b_transpose, m, n, k, a_offset, a_ld, b_offset, b_ld, c_offset,
+					Xgemm::GetTempSize(layout, a_transpose, b_transpose, m, n, k, a_offset, a_ld, b_offset, b_ld, c_offset,
 																c_ld, db["MWG"], db["NWG"], db["KWG"] * db["KREG"], db["GEMMK"]);
 		}
 		temp_buffer_size *= sizeof(T);	// translate from num-elements to bytes

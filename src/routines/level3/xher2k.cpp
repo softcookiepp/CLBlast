@@ -20,14 +20,12 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-template <typename T, typename U>
-Xher2k<T, U>::Xher2k(Queue& queue, EventPointer event, const std::string& name) : Xherk<T, U>(queue, event, name) {}
+Xher2k::Xher2k(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) : Xherk(dtype, queue, event, name) {}
 
 // =================================================================================================
 
 // The main routine
-template <typename T, typename U>
-void Xher2k<T, U>::DoHer2k(const Layout layout, const Triangle triangle, const Transpose ab_transpose, const size_t n,
+void Xher2k::DoHer2k(const Layout layout, const Triangle triangle, const Transpose ab_transpose, const size_t n,
 	const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
 	const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld,
 	const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset, const size_t c_ld)
@@ -49,12 +47,6 @@ void Xher2k<T, U>::DoHer2k(const Layout layout, const Triangle triangle, const T
 				 
 	
 }
-
-// =================================================================================================
-
-// Compiles the templated class
-template class Xher2k<float2, float>;
-template class Xher2k<double2, double>;
 
 // =================================================================================================
 }	// namespace clblast

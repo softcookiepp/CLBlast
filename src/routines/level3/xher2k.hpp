@@ -22,15 +22,14 @@ namespace clblast {
 // =================================================================================================
 
 // See comment at top of file for a description of the class
-template <typename T, typename U>
-class Xher2k : public Xherk<T, U> {
+class Xher2k : public Xherk {
  public:
   // Uses methods and variables the regular Xherk routine
-  using Xherk<T, U>::event_;
-  using Xherk<T, U>::HerkAB;
+  using Xherk::event_;
+  using Xherk::HerkAB;
 
   // Constructor
-  Xher2k(Queue& queue, EventPointer event, const std::string& name = "HER2K");
+  Xher2k(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "HER2K");
 
   // Templated-precision implementation of the routine
   void DoHer2k(const Layout layout, const Triangle triangle, const Transpose ab_transpose, const size_t n,

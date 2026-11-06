@@ -105,8 +105,8 @@ void FillCacheForPrecision(Queue& queue) {
 
 		// Runs all the level 3 set-up functions that don't support all precisions
 		Xhemm(tart::getDType<Complex>(), queue, nullptr);
-		Xherk<Complex, Real>(queue, nullptr);
-		Xher2k<Complex, Real>(queue, nullptr);
+		Xherk(tart::getDType<Complex>(), queue, nullptr);
+		Xher2k(tart::getDType<Complex>(), queue, nullptr);
 		Xspr2(tart::getDType<Real>(), queue, nullptr);
 
 	} catch (const RuntimeErrorCode& e) {

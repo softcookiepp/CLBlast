@@ -24,9 +24,8 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-template <typename T, typename U>
-Xherk<T, U>::Xherk(Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Copy", "Pad", "Transpose", "Padtranspose", "Xgemm"}, precisionToDataType(PrecisionValue<T>()), {},
+Xherk::Xherk(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
+		: Routine(queue, event, name, {"Copy", "Pad", "Transpose", "Padtranspose", "Xgemm"}, dtype, {},
 							{
 	#include "../../kernels-vk-inline/level3/copy_fast.glsl.inl"
 	,
@@ -90,8 +89,7 @@ Xherk<T, U>::Xherk(Queue& queue, EventPointer event, const std::string& name)
 // =================================================================================================
 
 // The main routine
-template <typename T, typename U>
-void Xherk<T, U>::DoHerk(const Layout layout, const Triangle triangle, const Transpose a_transpose, const size_t n,
+void Xherk::DoHerk(const Layout layout, const Triangle triangle, const Transpose a_transpose, const size_t n,
 												 const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
 												 const size_t a_ld, const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset,
 												 const size_t c_ld) {
@@ -99,14 +97,11 @@ void Xherk<T, U>::DoHerk(const Layout layout, const Triangle triangle, const Tra
 	const auto& b_buffer = a_buffer;
 	const auto b_offset = a_offset;
 	const auto b_ld = a_ld;
-	const auto complex_alpha = T{alpha.get<U>(), static_cast<U>(0.0)};
-	const auto complex_beta = T{beta.get<U>(), static_cast<U>(0.0)};
-	HerkAB(layout, triangle, a_transpose, b_transpose, n, k, complex_alpha, a_buffer, a_offset, a_ld, b_buffer, b_offset,
-				 b_ld, complex_beta, c_buffer, c_offset, c_ld, true);
+	HerkAB(layout, triangle, a_transpose, b_transpose, n, k, alpha, a_buffer, a_offset, a_ld, b_buffer, b_offset,
+				 b_ld, beta, c_buffer, c_offset, c_ld, true);
 }
 
-template <typename T, typename U>
-void Xherk<T, U>::HerkAB(const Layout layout, const Triangle triangle, const Transpose a_transpose,
+void Xherk::HerkAB(const Layout layout, const Triangle triangle, const Transpose a_transpose,
 	const Transpose b_transpose, const size_t n, const size_t k, const tart::Scalar& complex_alpha,
 	const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& b_buffer,
 	const size_t b_offset, const size_t b_ld, const tart::Scalar& complex_beta, const tart::buffer_ptr& c_buffer,
@@ -155,31 +150,24 @@ void Xherk<T, U>::HerkAB(const Layout layout, const Triangle triangle, const Tra
 			Xgemm::NoTempBuffer(b_one, b_one_i, b_two, b_two_i, b_ld, b_offset, b_do_transpose, b_conjugate);
 
 	// Creates the temporary matrices
-	auto a_temp = (a_no_temp) ? a_buffer : this->mDevice->allocateBuffer(sizeof(T) * a_one_i * a_two_i);
-	auto b_temp = (b_no_temp) ? b_buffer : this->mDevice->allocateBuffer(sizeof(T) * b_one_i * b_two_i);
-	auto c_temp = this->mDevice->allocateBuffer(sizeof(T) * n_ceiled * n_ceiled);
+	auto a_temp = (a_no_temp) ? a_buffer : this->mDevice->allocateBuffer(this->mDtype.size() * a_one_i * a_two_i);
+	auto b_temp = (b_no_temp) ? b_buffer : this->mDevice->allocateBuffer(this->mDtype.size() * b_one_i * b_two_i);
+	auto c_temp = this->mDevice->allocateBuffer(this->mDtype.size() * n_ceiled * n_ceiled);
 
 	// Runs the pre-processing kernel for matrix A. This transposes the matrix, but also pads zeros
 	// to fill it up until it reaches a certain multiple of size (kernel parameter dependent). In
 	// case nothing has to be done, these kernels can be skipped. Two copies are created.
-	std::vector<tart::buffer_ptr> barrierBuffers({c_buffer, c_temp});
 	if (!a_no_temp) {
 		PadCopyTransposeMatrix(this->mDtype, db_, a_one, a_two, a_ld, a_offset,
 													 a_buffer, a_one_i, a_two_i, a_one_i, 0, a_temp, tart::Scalar::one(), program_, true,
 													 a_do_transpose, a_conjugate,
 													 false, false, false);
-		//eventWaitList.push_back(eventProcessA);
-		barrierBuffers.push_back(a_buffer);
-		barrierBuffers.push_back(a_temp);
 	}
 	if (!b_no_temp) {
 		PadCopyTransposeMatrix(this->mDtype, db_, b_one, b_two, b_ld, b_offset,
 													 b_buffer, b_one_i, b_two_i, b_one_i, 0, b_temp, tart::Scalar::one(), program_, true,
 													 b_do_transpose, b_conjugate,
 													 false, false, false);
-		//eventWaitList.push_back(eventProcessB);
-		barrierBuffers.push_back(b_buffer);
-		barrierBuffers.push_back(b_temp);
 	}
 
 	// Furthermore, also creates a (possibly padded) copy of matrix C, since it is not allowed to
@@ -188,8 +176,6 @@ void Xherk<T, U>::HerkAB(const Layout layout, const Triangle triangle, const Tra
 												 n_ceiled, n_ceiled, n_ceiled, 0, c_temp, tart::Scalar::one(), program_, true, c_do_transpose,
 												 false,
 												 false, false, false);
-	// now we can just use a single barrier for them all!
-	//device_()->enqueueBarrier(barrierBuffers);
 
 	// Retrieves the XgemmUpper or XgemmLower kernel from the compiled binary
 	Kernel kernelOld(program_, kernel_name);
@@ -240,12 +226,6 @@ void Xherk<T, U>::HerkAB(const Layout layout, const Triangle triangle, const Tra
 												 lower, diagonal_to_zero);
 	
 }
-
-// =================================================================================================
-
-// Compiles the templated class
-template class Xherk<float2, float>;
-template class Xherk<double2, double>;
 
 // =================================================================================================
 }	// namespace clblast

@@ -27,9 +27,8 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-template <typename T>
-Xconvgemm<T>::Xconvgemm(Queue& queue, EventPointer event, const std::string& name, const ConvGemmMethod method)
-		: Routine(queue, event, name, {"Xconvgemm"}, precisionToDataType(PrecisionValue<T>()), {},
+Xconvgemm::Xconvgemm(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name, const ConvGemmMethod method)
+		: Routine(queue, event, name, {"Xconvgemm"}, dtype, {},
 							{
 	// regular kernel
 	#include "../../kernels-vk-inline/levelx/xconvgemm_part2_xconvgemm_kernel.glsl.inl"
@@ -48,8 +47,7 @@ Xconvgemm<T>::Xconvgemm(Queue& queue, EventPointer event, const std::string& nam
 
 // =================================================================================================
 
-template <typename T>
-void Xconvgemm<T>::DoConvgemm(const KernelMode kernel_mode, const size_t channels, const size_t height,
+void Xconvgemm::DoConvgemm(const KernelMode kernel_mode, const size_t channels, const size_t height,
 	const size_t width, const size_t kernel_h, const size_t kernel_w, const size_t pad_h,
 	const size_t pad_w, const size_t stride_h, const size_t stride_w, const size_t dilation_h,
 	const size_t dilation_w, const size_t num_kernels, const size_t batch_count,
@@ -170,34 +168,45 @@ void Xconvgemm<T>::DoConvgemm(const KernelMode kernel_mode, const size_t channel
 	const auto global = std::vector<uint32_t>{m_ceiled / db_["WGD"], (n_ceiled) / db_["WGD"], batch_count};
 	//const auto local = std::vector<size_t>{db_["MDIMCD"], db_["NDIMCD"], 1};
 	
-	std::vector<uint32_t> spec({
-		db_["WGD"],
-		// workgroup size ones go here
-		db_["MDIMCD"],
-		db_["NDIMCD"],
-		
-		db_["MDIMAD"],
-		db_["NDIMBD"],
-		db_["KWID"],
-		db_["PADA"],
-		db_["PADB"]
-	});
-	if (method_ != ConvGemmMethod::kWithIm2Col) // extra spec constant required
-		spec.push_back(static_cast<uint32_t>(kernel_mode == KernelMode::kConvolution));
+	std::vector<uint32_t> spec;
+	if (method_ == ConvGemmMethod::kWithIm2Col)
+	{
+		spec = {
+			db_["WGD"],
+			// workgroup size ones go here
+			db_["MDIMCD"],
+			db_["NDIMCD"],
+			
+			db_["MDIMAD"],
+			db_["NDIMBD"],
+			db_["KWID"],
+			db_["PADA"],
+			db_["PADB"]
+		};
+	}
+	else
+	{
+		spec = {
+			db_["WGD"],
+			// workgroup size ones go here
+			db_["MDIMCD"],
+			db_["NDIMCD"],
+			
+			db_["MDIMAD"],
+			db_["NDIMBD"],
+			db_["KWID"],
+			db_["PADA"],
+			db_["PADB"],
+			0, 0,
+			static_cast<uint32_t>(kernel_mode == KernelMode::kConvolution)
+		};
+	}
+
 	
 	// Launches the kernel
 	kernel->enqueue(global, spec);
 	
 }
-
-// =================================================================================================
-
-// Compiles the templated class
-template class Xconvgemm<half>;
-template class Xconvgemm<float>;
-template class Xconvgemm<double>;
-template class Xconvgemm<float2>;
-template class Xconvgemm<double2>;
 
 // =================================================================================================
 }	// namespace clblast

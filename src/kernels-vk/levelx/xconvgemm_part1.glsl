@@ -18,7 +18,7 @@
 #define XCONVGEMM_PART1_GLSL
 
 #include "../level3/xgemm_direct_part2.glsl"
-layout(constant_id = 8) const bool KERNEL_FLIP = false;
+layout(constant_id = 10) const bool KERNEL_FLIP = false;
 layout(
 	local_size_x_id = 1, // MDIMCD,
 	local_size_y_id = 2, // NDIMCD,

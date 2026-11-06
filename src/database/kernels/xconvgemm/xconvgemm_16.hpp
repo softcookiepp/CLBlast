@@ -12,7 +12,7 @@ namespace database {
 
 const NewDatabaseEntry NewDbXconvgemmHalf = 
 {
-	"Xconvgemm", tart::dtypes::float16, {"VWMD", "VWND"}, {"KWID", "MDIMAD", "MDIMCD", "NDIMBD", "NDIMCD", "PADA", "PADB", "VWMD", "VWND", "WGD"},
+	"Xconvgemm", tart::dtypes::float16, {"VWMD", "VWND"}, {"KWID", "MDIMAD", "MDIMCD", "NDIMBD", "NDIMCD", "PADA", "PADB", "WGD"},
 	{ // vendors
 		{ // default vendor
 			kDefaultVendorID,

@@ -1532,7 +1532,7 @@ StatusCode Convgemm(const KernelMode kernel_mode, const size_t channels, const s
 										const size_t result_offset, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xconvgemm<T>(queue_cpp, event);
+		auto routine = Xconvgemm(tart::getDType<T>(), queue_cpp, event);
 		routine.DoConvgemm(kernel_mode, channels, height, width, kernel_h, kernel_w, pad_h, pad_w, stride_h, stride_w,
 											 dilation_h, dilation_w, num_kernels, batch_count, (im_buffer), im_offset,
 											 (kernel_buffer), kernel_offset, (result_buffer), result_offset);

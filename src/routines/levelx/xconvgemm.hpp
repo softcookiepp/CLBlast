@@ -22,12 +22,11 @@ namespace clblast {
 // =================================================================================================
 
 // See comment at top of file for a description of the class
-template <typename T>
 class Xconvgemm : public Routine {
  public:
   // Constructor
   enum class ConvGemmMethod { kWithIm2Col, kSingleKernel };
-  Xconvgemm(Queue& queue, EventPointer event, const std::string& name = "CONVGEMM",
+  Xconvgemm(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "CONVGEMM",
             const ConvGemmMethod method = ConvGemmMethod::kSingleKernel);
 
   // Templated-precision implementation of the routine

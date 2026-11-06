@@ -12,7 +12,7 @@ namespace database {
 
 const NewDatabaseEntry NewDbXconvgemmComplexSingle = 
 {
-	"Xconvgemm", tart::dtypes::complex64, {"VWMD", "VWND"}, {"KWID", "MDIMAD", "MDIMCD", "NDIMBD", "NDIMCD", "PADA", "PADB", "VWMD", "VWND", "WGD"},
+	"Xconvgemm", tart::dtypes::complex64, {"VWMD", "VWND"}, {"KWID", "MDIMAD", "MDIMCD", "NDIMBD", "NDIMCD", "PADA", "PADB", "WGD"},
 	{ // vendors
 		{ // default vendor
 			kDefaultVendorID,

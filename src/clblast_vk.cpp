@@ -1605,7 +1605,7 @@ StatusCode GemmBatched(const Layout layout, const Transpose a_transpose, const T
 											 const size_t batch_count, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = XgemmBatched<T>(queue_cpp, event);
+		auto routine = XgemmBatched(tart::getDType<T>(), queue_cpp, event);
 		auto alphas_cpp = std::vector<T>();
 		auto betas_cpp = std::vector<T>();
 		auto a_offsets_cpp = std::vector<size_t>();

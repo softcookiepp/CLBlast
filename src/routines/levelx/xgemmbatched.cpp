@@ -25,10 +25,9 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-template <typename T>
-XgemmBatched<T>::XgemmBatched(Queue& queue, EventPointer event, const std::string& name)
+XgemmBatched::XgemmBatched(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
 		: Routine(queue, event, name, {"Copy", "Pad", "Transpose", "Padtranspose", "Xgemm", "XgemmDirect", "GemmRoutine"},
-							precisionToDataType(PrecisionValue<T>()), {},
+							dtype, {},
 							{
 	#include "../../kernels-vk-inline/level3/copy_matrix_batched.glsl.inl"
 	,
@@ -61,16 +60,15 @@ XgemmBatched<T>::XgemmBatched(Queue& queue, EventPointer event, const std::strin
 // =================================================================================================
 
 // The main routine
-template <typename T>
-void XgemmBatched<T>::DoGemmBatched(const Layout layout, const Transpose a_transpose, const Transpose b_transpose,
-	const size_t m, const size_t n, const size_t k, const std::vector<T>& alphas,
+void XgemmBatched::DoGemmBatched(const Layout layout, const Transpose a_transpose, const Transpose b_transpose,
+	const size_t m, const size_t n, const size_t k, const tart::buffer_ptr& alphas_device,
 	const tart::buffer_ptr& a_buffer, const std::vector<size_t>& a_offsets, const size_t a_ld,
 	const tart::buffer_ptr& b_buffer, const std::vector<size_t>& b_offsets, const size_t b_ld,
-	const std::vector<T>& betas, const tart::buffer_ptr& c_buffer,
+	const tart::buffer_ptr& betas_device, const tart::buffer_ptr& c_buffer,
 	const std::vector<size_t>& c_offsets, const size_t c_ld, const size_t batch_count)
 {
 	// Tests for a valid batch count
-	if ((batch_count < 1) || (alphas.size() != batch_count) || (betas.size() != batch_count) ||
+	if ((batch_count < 1) || (alphas_device->getSize()/this->mDtype.size() != batch_count) || (betas_device->getSize()/this->mDtype.size() != batch_count) ||
 			(a_offsets.size() != batch_count) || (b_offsets.size() != batch_count) || (c_offsets.size() != batch_count)) {
 		throw BLASError(StatusCode::kInvalidBatchCount);
 	}
@@ -96,12 +94,6 @@ void XgemmBatched<T>::DoGemmBatched(const Layout layout, const Transpose a_trans
 	TestBatchedMatrixA(this->mDtype, a_one, a_two, a_buffer, a_offsets, a_ld, false);	// don't test for invalid LD
 	TestBatchedMatrixB(this->mDtype, b_one, b_two, b_buffer, b_offsets, b_ld, false);	// don't test for invalid LD
 	TestBatchedMatrixC(this->mDtype, c_one, c_two, c_buffer, c_offsets, c_ld);
-
-	// Upload the scalar arguments to the device
-	auto alphas_device = this->mDevice->allocateBuffer(batch_count*sizeof(T));
-	auto betas_device = this->mDevice->allocateBuffer(batch_count*sizeof(T));
-	alphas_device->copyIn(alphas);
-	betas_device->copyIn(betas);
 
 	// Converts the offset to integers
 	auto a_offsets_int = std::vector<int>(batch_count);
@@ -131,14 +123,14 @@ void XgemmBatched<T>::DoGemmBatched(const Layout layout, const Transpose a_trans
 // The indirect version of batched GEMM. This uses the faster but non-general kernel. It has specific
 // requirements, but several pre and post-processing kernels take care of those. However, the
 // overhead of these extra kernels might not be ideal for certain devices/arguments.
-template <typename T>
-void XgemmBatched<T>::BatchedGemmIndirect(
+void XgemmBatched::BatchedGemmIndirect(
 		const size_t m, const size_t n, const size_t k, const tart::buffer_ptr& alphas, const tart::buffer_ptr& a_buffer,
 		const std::vector<int>& a_offsets, const size_t a_ld, const tart::buffer_ptr& b_buffer, const std::vector<int>& b_offsets,
 		const size_t b_ld, const tart::buffer_ptr& betas, const tart::buffer_ptr& c_buffer, const std::vector<int>& c_offsets,
 		const size_t c_ld, const bool a_do_transpose, const bool b_do_transpose, const bool c_do_transpose,
 		const bool a_conjugate, const bool b_conjugate, const size_t a_one, const size_t a_two, const size_t b_one,
-		const size_t b_two, const size_t c_one, const size_t c_two, const size_t batch_count) {
+		const size_t b_two, const size_t c_one, const size_t c_two, const size_t batch_count)
+{
 	// Calculates the ceiled versions of m, n, and k
 	const auto m_ceiled = Ceil(Ceil(m, db_["MWG"]), db_["VWM"]);
 	const auto n_ceiled = Ceil(Ceil(n, db_["NWG"]), db_["VWN"]);
@@ -168,9 +160,9 @@ void XgemmBatched<T>::BatchedGemmIndirect(
 	auto c_no_temp = c_one == c_one_i && c_two == c_two_i && c_ld == c_one && c_offsets == c_offsets_i && !c_do_transpose;
 
 	// Creates the temporary matrices
-	const auto a_temp = (a_no_temp) ? a_buffer : this->mDevice->allocateBuffer(sizeof(T)* batch_count * a_one_i * a_two_i);
-	const auto b_temp = (b_no_temp) ? b_buffer : this->mDevice->allocateBuffer(sizeof(T)* batch_count * b_one_i * b_two_i);
-	const auto c_temp = (c_no_temp) ? c_buffer : this->mDevice->allocateBuffer(sizeof(T)* batch_count * c_one_i * c_two_i);
+	const auto a_temp = (a_no_temp) ? a_buffer : this->mDevice->allocateBuffer(this->mDtype.size()* batch_count * a_one_i * a_two_i);
+	const auto b_temp = (b_no_temp) ? b_buffer : this->mDevice->allocateBuffer(this->mDtype.size()* batch_count * b_one_i * b_two_i);
+	const auto c_temp = (c_no_temp) ? c_buffer : this->mDevice->allocateBuffer(this->mDtype.size()* batch_count * c_one_i * c_two_i);
 
 	// Runs the pre-processing kernel for matrix A. This transposes the matrix, but also pads zeros
 	// to fill it up until it reaches a certain multiple of size (kernel parameter dependent). In
@@ -269,14 +261,14 @@ void XgemmBatched<T>::BatchedGemmIndirect(
 // =================================================================================================
 
 // The direct version of batched GEMM, requiring just one kernel, no pre or post-processing kernels.
-template <typename T>
-void XgemmBatched<T>::BatchedGemmDirect(const size_t m, const size_t n, const size_t k, const tart::buffer_ptr& alphas,
-																				const tart::buffer_ptr& a_buffer, const std::vector<int>& a_offsets, const size_t a_ld,
-																				const tart::buffer_ptr& b_buffer, const std::vector<int>& b_offsets, const size_t b_ld,
-																				const tart::buffer_ptr& betas, const tart::buffer_ptr& c_buffer,
-																				const std::vector<int>& c_offsets, const size_t c_ld, const bool a_do_transpose,
-																				const bool b_do_transpose, const bool c_do_transpose, const bool a_conjugate,
-																				const bool b_conjugate, const size_t batch_count) {
+void XgemmBatched::BatchedGemmDirect(const size_t m, const size_t n, const size_t k, const tart::buffer_ptr& alphas,
+	const tart::buffer_ptr& a_buffer, const std::vector<int>& a_offsets, const size_t a_ld,
+	const tart::buffer_ptr& b_buffer, const std::vector<int>& b_offsets, const size_t b_ld,
+	const tart::buffer_ptr& betas, const tart::buffer_ptr& c_buffer,
+	const std::vector<int>& c_offsets, const size_t c_ld, const bool a_do_transpose,
+	const bool b_do_transpose, const bool c_do_transpose, const bool a_conjugate,
+	const bool b_conjugate, const size_t batch_count)
+{
 	// Uploads the offsets to the device
 	auto a_offsets_device = this->mDevice->allocateBuffer(sizeof(int) * batch_count);
 	auto b_offsets_device = this->mDevice->allocateBuffer(sizeof(int) * batch_count);
@@ -338,15 +330,6 @@ void XgemmBatched<T>::BatchedGemmDirect(const size_t m, const size_t n, const si
 	// Launches the kernel
 	kernel->enqueue(global, spec);
 }
-
-// =================================================================================================
-
-// Compiles the templated class
-template class XgemmBatched<half>;
-template class XgemmBatched<float>;
-template class XgemmBatched<double>;
-template class XgemmBatched<float2>;
-template class XgemmBatched<double2>;
 
 // =================================================================================================
 }	// namespace clblast

@@ -1564,7 +1564,7 @@ StatusCode AxpyBatched(const size_t n, const T* alphas, const tart::buffer_ptr x
 											 const size_t batch_count, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = XaxpyBatched<T>(queue_cpp, event);
+		auto routine = XaxpyBatched(tart::getDType<T>(), queue_cpp, event);
 		auto alphas_cpp = std::vector<T>();
 		auto x_offsets_cpp = std::vector<size_t>();
 		auto y_offsets_cpp = std::vector<size_t>();
@@ -1573,7 +1573,7 @@ StatusCode AxpyBatched(const size_t n, const T* alphas, const tart::buffer_ptr x
 			x_offsets_cpp.push_back(x_offsets[batch]);
 			y_offsets_cpp.push_back(y_offsets[batch]);
 		}
-		routine.DoAxpyBatched(n, alphas_cpp, Buffer<T>(x_buffer), x_offsets_cpp, x_inc, Buffer<T>(y_buffer), y_offsets_cpp,
+		routine.DoAxpyBatched(n, alphas_cpp, (x_buffer), x_offsets_cpp, x_inc, (y_buffer), y_offsets_cpp,
 													y_inc, batch_count);
 		return StatusCode::kSuccess;
 	} catch (...) {

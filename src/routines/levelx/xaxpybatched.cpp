@@ -24,9 +24,8 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-template <typename T>
-XaxpyBatched<T>::XaxpyBatched(Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Xaxpy"}, precisionToDataType(PrecisionValue<T>()), {},
+XaxpyBatched::XaxpyBatched(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
+		: Routine(queue, event, name, {"Xaxpy"}, dtype, {},
 							{
 	#include "../../kernels-vk-inline/level1/xaxpy_batched.glsl.inl"
 							}
@@ -38,18 +37,11 @@ XaxpyBatched<T>::XaxpyBatched(Queue& queue, EventPointer event, const std::strin
 // =================================================================================================
 
 // The main routine
-template <typename T>
-void XaxpyBatched<T>::DoAxpyBatched(const size_t n, const std::vector<T>& alphas, const Buffer<T>& x_buffer,
-	const std::vector<size_t>& x_offsets, const size_t x_inc, const Buffer<T>& y_buffer,
+void XaxpyBatched::DoAxpyBatched(const size_t n, const tart::buffer_ptr& alphas_device, const tart::buffer_ptr& x_buffer,
+	const std::vector<size_t>& x_offsets, const size_t x_inc, const tart::buffer_ptr& y_buffer,
 	const std::vector<size_t>& y_offsets, const size_t y_inc,
 	const size_t batch_count)
 {
-	// Tests for a valid batch count
-	if ((batch_count < 1) || (alphas.size() != batch_count) || (x_offsets.size() != batch_count) ||
-			(y_offsets.size() != batch_count)) {
-		throw BLASError(StatusCode::kInvalidBatchCount);
-	}
-
 	// Makes sure all dimensions are larger than zero
 	if (n == 0) {
 		throw BLASError(StatusCode::kInvalidDimension);
@@ -57,23 +49,22 @@ void XaxpyBatched<T>::DoAxpyBatched(const size_t n, const std::vector<T>& alphas
 
 	// Tests the vectors for validity
 	for (auto batch = size_t{0}; batch < batch_count; ++batch) {
-		TestVectorX(mDtype, n, x_buffer(), x_offsets[batch], x_inc);
-		TestVectorY(mDtype, n, y_buffer(), y_offsets[batch], y_inc);
+		TestVectorX(mDtype, n, x_buffer, x_offsets[batch], x_inc);
+		TestVectorY(mDtype, n, y_buffer, y_offsets[batch], y_inc);
 	}
 
 	// Upload the arguments to the device
 	auto x_offsets_int = std::vector<int>(batch_count);
 	auto y_offsets_int = std::vector<int>(batch_count);
-	for (auto batch = size_t{0}; batch < batch_count; ++batch) {
+	for (auto batch = size_t{0}; batch < batch_count; ++batch)
+	{
 		x_offsets_int[batch] = static_cast<int>(x_offsets[batch]);
 		y_offsets_int[batch] = static_cast<int>(y_offsets[batch]);
 	}
-	auto x_offsets_device = Buffer<int>(this->mDevice, batch_count);
-	auto y_offsets_device = Buffer<int>(this->mDevice, batch_count);
-	auto alphas_device = Buffer<T>(this->mDevice, batch_count);
-	x_offsets_device.Write(queue_, batch_count, x_offsets_int);
-	y_offsets_device.Write(queue_, batch_count, y_offsets_int);
-	alphas_device.Write(queue_, batch_count, alphas);
+	auto x_offsets_device = this->mDevice->allocateBuffer(x_offsets_int.size()*sizeof(int));
+	x_offsets_device->copyIn(x_offsets_int);
+	auto y_offsets_device = this->mDevice->allocateBuffer(y_offsets_int.size()*sizeof(int));
+	y_offsets_device->copyIn(y_offsets_int);
 
 	// Retrieves the Xaxpy kernel from the compiled binary
 	Kernel kernelOld(program_, "XaxpyBatched");
@@ -81,12 +72,12 @@ void XaxpyBatched<T>::DoAxpyBatched(const size_t n, const std::vector<T>& alphas
 
 	// Sets the kernel arguments
 	kernel->setArg(0, static_cast<int>(n));
-	kernel->setArg(1, alphas_device());
-	kernel->setArg(2, x_buffer());
-	kernel->setArg(3, x_offsets_device());
+	kernel->setArg(1, alphas_device);
+	kernel->setArg(2, x_buffer);
+	kernel->setArg(3, x_offsets_device);
 	kernel->setArg(4, static_cast<int>(x_inc));
-	kernel->setArg(5, y_buffer());
-	kernel->setArg(6, y_offsets_device());
+	kernel->setArg(5, y_buffer);
+	kernel->setArg(6, y_offsets_device);
 	kernel->setArg(7, static_cast<int>(y_inc));
 
 	// Launches the kernel
@@ -95,15 +86,6 @@ void XaxpyBatched<T>::DoAxpyBatched(const size_t n, const std::vector<T>& alphas
 	auto local = std::vector<size_t>{db_["WGS"], 1};
 	kernel->enqueue({global[0] / local[0], 1, 1}, {db_["WGS"], db_["WPT"]});
 }
-
-// =================================================================================================
-
-// Compiles the templated class
-template class XaxpyBatched<half>;
-template class XaxpyBatched<float>;
-template class XaxpyBatched<double>;
-template class XaxpyBatched<float2>;
-template class XaxpyBatched<double2>;
 
 // =================================================================================================
 }	// namespace clblast

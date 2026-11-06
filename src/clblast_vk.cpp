@@ -1457,7 +1457,7 @@ StatusCode Im2col(const KernelMode kernel_mode, const size_t channels, const siz
 		auto queue_cpp = Queue(queue);
 		auto routine = Xim2col<T>(queue_cpp, event);
 		routine.DoIm2col(kernel_mode, channels, height, width, kernel_h, kernel_w, pad_h, pad_w, stride_h, stride_w,
-										 dilation_h, dilation_w, Buffer<T>(im_buffer), im_offset, Buffer<T>(col_buffer), col_offset);
+										 dilation_h, dilation_w, (im_buffer), im_offset, (col_buffer), col_offset);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1495,7 +1495,7 @@ StatusCode Col2im(const KernelMode kernel_mode, const size_t channels, const siz
 		auto queue_cpp = Queue(queue);
 		auto routine = Xcol2im<T>(queue_cpp, event);
 		routine.DoCol2im(kernel_mode, channels, height, width, kernel_h, kernel_w, pad_h, pad_w, stride_h, stride_w,
-										 dilation_h, dilation_w, Buffer<T>(col_buffer), col_offset, Buffer<T>(im_buffer), im_offset);
+										 dilation_h, dilation_w, (col_buffer), col_offset, (im_buffer), im_offset);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1534,8 +1534,8 @@ StatusCode Convgemm(const KernelMode kernel_mode, const size_t channels, const s
 		auto queue_cpp = Queue(queue);
 		auto routine = Xconvgemm<T>(queue_cpp, event);
 		routine.DoConvgemm(kernel_mode, channels, height, width, kernel_h, kernel_w, pad_h, pad_w, stride_h, stride_w,
-											 dilation_h, dilation_w, num_kernels, batch_count, Buffer<T>(im_buffer), im_offset,
-											 Buffer<T>(kernel_buffer), kernel_offset, Buffer<T>(result_buffer), result_offset);
+											 dilation_h, dilation_w, num_kernels, batch_count, (im_buffer), im_offset,
+											 (kernel_buffer), kernel_offset, (result_buffer), result_offset);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();

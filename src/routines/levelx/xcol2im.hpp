@@ -31,7 +31,7 @@ class Xcol2im : public Routine {
   void DoCol2im(const KernelMode kernel_mode, const size_t channels, const size_t height, const size_t width,
                 const size_t kernel_h, const size_t kernel_w, const size_t pad_h, const size_t pad_w,
                 const size_t stride_h, const size_t stride_w, const size_t dilation_h, const size_t dilation_w,
-                const Buffer<T>& col_buffer, const size_t col_offset, const Buffer<T>& im_buffer,
+                const tart::buffer_ptr& col_buffer, const size_t col_offset, const tart::buffer_ptr& im_buffer,
                 const size_t im_offset);
 };
 

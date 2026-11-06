@@ -53,8 +53,8 @@ void Xconvgemm<T>::DoConvgemm(const KernelMode kernel_mode, const size_t channel
 	const size_t width, const size_t kernel_h, const size_t kernel_w, const size_t pad_h,
 	const size_t pad_w, const size_t stride_h, const size_t stride_w, const size_t dilation_h,
 	const size_t dilation_w, const size_t num_kernels, const size_t batch_count,
-	const Buffer<T>& im_buffer, const size_t im_offset, const Buffer<T>& kernel_buffer,
-	const size_t kernel_offset, const Buffer<T>& result_buffer, const size_t result_offset)
+	const tart::buffer_ptr& im_buffer, const size_t im_offset, const tart::buffer_ptr& kernel_buffer,
+	const size_t kernel_offset, const tart::buffer_ptr& result_buffer, const size_t result_offset)
 {
 	// Tests for a valid batch count
 	if (batch_count == 0) {
@@ -83,12 +83,12 @@ void Xconvgemm<T>::DoConvgemm(const KernelMode kernel_mode, const size_t channel
 
 	// Possible approach: im2col + GEMM
 	//			result = GEMM(im2col(image), kernel)
-	auto col_buffer = Buffer<T>(this->mDevice, 0);	// nullptr, will be optionally created later
+	tart::buffer_ptr col_buffer = nullptr;	// nullptr, will be optionally created later
 	if (method_ == ConvGemmMethod::kWithIm2Col)
 	{
 		// Temporary col matrix
 		const auto col_size = (method_ == ConvGemmMethod::kWithIm2Col) ? patch_size * num_patches * batch_count : 1;
-		col_buffer = Buffer<T>(this->mDevice, col_size);
+		col_buffer = this->mDevice->allocateBuffer(this->mDtype.size() * col_size);
 
 		// Loops over each batch
 		for (auto batch_id = size_t{0}; batch_id < batch_count; ++batch_id) {
@@ -98,8 +98,6 @@ void Xconvgemm<T>::DoConvgemm(const KernelMode kernel_mode, const size_t channel
 			auto im2col = Xim2col<T>(queue_, nullptr);
 			im2col.DoIm2col(kernel_mode, channels, height, width, kernel_h, kernel_w, pad_h, pad_w, stride_h, stride_w,
 											dilation_h, dilation_w, im_buffer, im_batch_offset, col_buffer, col_batch_offset);
-			//im2col_event.WaitForCompletion();
-			//device_()->enqueueBarrier( {col_buffer()} );
 		}
 	}
 
@@ -108,14 +106,14 @@ void Xconvgemm<T>::DoConvgemm(const KernelMode kernel_mode, const size_t channel
 	const auto result_stride = num_kernels * output_h * output_w;
 
 	// Tests the matrices for validity
-	TestMatrixB(mDtype, patch_size, num_kernels, kernel_buffer(), kernel_offset, patch_size);
+	TestMatrixB(mDtype, patch_size, num_kernels, kernel_buffer, kernel_offset, patch_size);
 	for (auto batch = size_t{0}; batch < batch_count; ++batch) {
 		if (method_ == ConvGemmMethod::kWithIm2Col) {
-			TestMatrixA(mDtype, num_patches, patch_size, col_buffer(), col_stride * batch, num_patches);
+			TestMatrixA(mDtype, num_patches, patch_size, col_buffer, col_stride * batch, num_patches);
 		} else {
 			// TODO: check for valid image tensor
 		}
-		TestMatrixC(mDtype, num_patches, num_kernels, result_buffer(), result_offset + result_stride * batch, num_patches);
+		TestMatrixC(mDtype, num_patches, num_kernels, result_buffer, result_offset + result_stride * batch, num_patches);
 	}
 	
 	// Retrieves the proper XgemmDirect kernel from the compiled binary
@@ -127,18 +125,18 @@ void Xconvgemm<T>::DoConvgemm(const KernelMode kernel_mode, const size_t channel
 	kernel->setArg(0, static_cast<int>(num_patches));
 	kernel->setArg(1, static_cast<int>(num_kernels));
 	kernel->setArg(2, static_cast<int>(patch_size));
-	kernel->setArg(3, kernel_buffer());
+	kernel->setArg(3, kernel_buffer);
 	kernel->setArg(4, static_cast<int>(kernel_offset));
-	kernel->setArg(5, result_buffer());
+	kernel->setArg(5, result_buffer);
 	kernel->setArg(6, static_cast<int>(result_offset));
 	kernel->setArg(7, static_cast<int>(result_stride));
 	if (method_ == ConvGemmMethod::kWithIm2Col) {
 #if VULKAN_API
 		// both buffers need scalar casting
-		kernel->setArg(23, kernel_buffer());
-		kernel->setArg(24, col_buffer());
+		kernel->setArg(23, kernel_buffer);
+		kernel->setArg(24, col_buffer);
 #else
-		kernel->setArg(8, col_buffer());
+		kernel->setArg(8, col_buffer);
 #endif
 		kernel->setArg(9, static_cast<int>(0));
 		kernel->setArg(10, static_cast<int>(col_stride));
@@ -146,9 +144,9 @@ void Xconvgemm<T>::DoConvgemm(const KernelMode kernel_mode, const size_t channel
 	}
 	if (method_ == ConvGemmMethod::kSingleKernel) {
 #if VULKAN_API
-		kernel->setArg(23, kernel_buffer());
+		kernel->setArg(23, kernel_buffer);
 #endif
-		kernel->setArg(8, im_buffer());
+		kernel->setArg(8, im_buffer);
 		kernel->setArg(9, static_cast<int>(im_offset));
 		kernel->setArg(10, static_cast<int>(height));
 		kernel->setArg(11, static_cast<int>(width));

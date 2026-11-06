@@ -41,8 +41,8 @@ template <typename T>
 void Xim2col<T>::DoIm2col(const KernelMode kernel_mode, const size_t channels, const size_t height, const size_t width,
 													const size_t kernel_h, const size_t kernel_w, const size_t pad_h, const size_t pad_w,
 													const size_t stride_h, const size_t stride_w, const size_t dilation_h,
-													const size_t dilation_w, const Buffer<T>& im_buffer, const size_t im_offset,
-													const Buffer<T>& col_buffer, const size_t col_offset)
+													const size_t dilation_w, const tart::buffer_ptr& im_buffer, const size_t im_offset,
+													const tart::buffer_ptr& col_buffer, const size_t col_offset)
 {
 	// Flip the output along kernel_h and kernel_w, or not.
 	const auto kernel_name = "Xim2colKernelNormal";
@@ -78,9 +78,9 @@ void Xim2col<T>::DoIm2col(const KernelMode kernel_mode, const size_t channels, c
 	kernel->setArg(10, static_cast<int>(stride_w));
 	kernel->setArg(11, static_cast<int>(dilation_h));
 	kernel->setArg(12, static_cast<int>(dilation_w));
-	kernel->setArg(13, im_buffer());
+	kernel->setArg(13, im_buffer);
 	kernel->setArg(14, static_cast<int>(im_offset));
-	kernel->setArg(15, col_buffer());
+	kernel->setArg(15, col_buffer);
 	kernel->setArg(16, static_cast<int>(col_offset));
 
 	// Launches the kernel

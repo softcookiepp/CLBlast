@@ -41,8 +41,8 @@ template <typename T>
 void Xcol2im<T>::DoCol2im(const KernelMode kernel_mode, const size_t channels, const size_t height, const size_t width,
 													const size_t kernel_h, const size_t kernel_w, const size_t pad_h, const size_t pad_w,
 													const size_t stride_h, const size_t stride_w, const size_t dilation_h,
-													const size_t dilation_w, const Buffer<T>& col_buffer, const size_t col_offset,
-													const Buffer<T>& im_buffer, const size_t im_offset)
+													const size_t dilation_w, const tart::buffer_ptr& col_buffer, const size_t col_offset,
+													const tart::buffer_ptr& im_buffer, const size_t im_offset)
 {
 	// Flip the output along kernel_h and kernel_w, or not.
 	const auto kernel_name = "Xcol2imKernelNormal";
@@ -93,9 +93,9 @@ void Xcol2im<T>::DoCol2im(const KernelMode kernel_mode, const size_t channels, c
 	kernel->setArg(16, dilation_bez_w);
 	kernel->setArg(17, gcd_h);
 	kernel->setArg(18, gcd_w);
-	kernel->setArg(19, col_buffer());
+	kernel->setArg(19, col_buffer);
 	kernel->setArg(20, static_cast<int>(col_offset));
-	kernel->setArg(21, im_buffer());
+	kernel->setArg(21, im_buffer);
 	kernel->setArg(22, static_cast<int>(im_offset));
 
 	// Launches the kernel

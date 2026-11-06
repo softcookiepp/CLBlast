@@ -1455,7 +1455,7 @@ StatusCode Im2col(const KernelMode kernel_mode, const size_t channels, const siz
 									tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xim2col<T>(queue_cpp, event);
+		auto routine = Xim2col(tart::getDType<T>(), queue_cpp, event);
 		routine.DoIm2col(kernel_mode, channels, height, width, kernel_h, kernel_w, pad_h, pad_w, stride_h, stride_w,
 										 dilation_h, dilation_w, (im_buffer), im_offset, (col_buffer), col_offset);
 		return StatusCode::kSuccess;
@@ -1493,7 +1493,7 @@ StatusCode Col2im(const KernelMode kernel_mode, const size_t channels, const siz
 									tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xcol2im<T>(queue_cpp, event);
+		auto routine = Xcol2im(tart::getDType<T>(), queue_cpp, event);
 		routine.DoCol2im(kernel_mode, channels, height, width, kernel_h, kernel_w, pad_h, pad_w, stride_h, stride_w,
 										 dilation_h, dilation_w, (col_buffer), col_offset, (im_buffer), im_offset);
 		return StatusCode::kSuccess;

@@ -21,11 +21,10 @@ namespace clblast {
 // =================================================================================================
 
 // See comment at top of file for a description of the class
-template <typename T>
 class Xcol2im : public Routine {
  public:
   // Constructor
-  Xcol2im(Queue& queue, EventPointer event, const std::string& name = "COL2IM");
+  Xcol2im(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "COL2IM");
 
   // Templated-precision implementation of the routine
   void DoCol2im(const KernelMode kernel_mode, const size_t channels, const size_t height, const size_t width,

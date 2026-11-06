@@ -23,9 +23,8 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-template <typename T>
-Xim2col<T>::Xim2col(Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Copy"}, precisionToDataType(PrecisionValue<T>()), {},
+Xim2col::Xim2col(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
+		: Routine(queue, event, name, {"Copy"}, dtype, {},
 							{
 	#include "../../kernels-vk-inline/levelx/im2col_kernel_normal.glsl.inl"
 							}
@@ -37,8 +36,7 @@ Xim2col<T>::Xim2col(Queue& queue, EventPointer event, const std::string& name)
 // =================================================================================================
 
 // The main routine
-template <typename T>
-void Xim2col<T>::DoIm2col(const KernelMode kernel_mode, const size_t channels, const size_t height, const size_t width,
+void Xim2col::DoIm2col(const KernelMode kernel_mode, const size_t channels, const size_t height, const size_t width,
 													const size_t kernel_h, const size_t kernel_w, const size_t pad_h, const size_t pad_w,
 													const size_t stride_h, const size_t stride_w, const size_t dilation_h,
 													const size_t dilation_w, const tart::buffer_ptr& im_buffer, const size_t im_offset,
@@ -89,15 +87,6 @@ void Xim2col<T>::DoIm2col(const KernelMode kernel_mode, const size_t channels, c
 	const auto global = std::vector<uint32_t>{w_ceiled/db_["COPY_DIMX"], (h_ceiled * channels)/db_["COPY_DIMY"] };
 	kernel->enqueue(global, {db_["COPY_DIMX"], db_["COPY_DIMY"], static_cast<uint32_t>(kernel_mode == KernelMode::kConvolution)});
 }
-
-// =================================================================================================
-
-// Compiles the templated class
-template class Xim2col<half>;
-template class Xim2col<float>;
-template class Xim2col<double>;
-template class Xim2col<float2>;
-template class Xim2col<double2>;
 
 // =================================================================================================
 }	// namespace clblast

@@ -1663,7 +1663,7 @@ StatusCode GemmStridedBatched(const Layout layout, const Transpose a_transpose, 
 															const size_t batch_count, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = XgemmStridedBatched<T>(queue_cpp, event);
+		auto routine = XgemmStridedBatched(tart::getDType<T>(), queue_cpp, event);
 		routine.DoGemmStridedBatched(layout, a_transpose, b_transpose, m, n, k, alpha, (a_buffer), a_offset, a_ld,
 																 a_stride, (b_buffer), b_offset, b_ld, b_stride, beta, (c_buffer),
 																 c_offset, c_ld, c_stride, batch_count);

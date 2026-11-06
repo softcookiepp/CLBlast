@@ -24,9 +24,8 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-template <typename T>
-Xomatcopy<T>::Xomatcopy(Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Copy", "Pad", "Transpose", "Padtranspose"}, precisionToDataType(PrecisionValue<T>()), {},
+Xomatcopy::Xomatcopy(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
+		: Routine(queue, event, name, {"Copy", "Pad", "Transpose", "Padtranspose"}, dtype, {},
 							{
 	#include "../../kernels-vk-inline/level3/copy_fast.glsl.inl"
 	,
@@ -66,9 +65,8 @@ Xomatcopy<T>::Xomatcopy(Queue& queue, EventPointer event, const std::string& nam
 // =================================================================================================
 
 // The main routine
-template <typename T>
-void Xomatcopy<T>::DoOmatcopy(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n,
-	const T alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
+void Xomatcopy::DoOmatcopy(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n,
+	const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
 	const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld)
 {
 	// Makes sure all dimensions are larger than zero
@@ -101,15 +99,6 @@ void Xomatcopy<T>::DoOmatcopy(const Layout layout, const Transpose a_transpose, 
 	PadCopyTransposeMatrix(this->mDtype, db_, a_one, a_two, a_ld, a_offset, a_buffer, b_one,
 												 b_two, b_ld, b_offset, b_buffer, alpha, program_, false, transpose, conjugate);
 }
-
-// =================================================================================================
-
-// Compiles the templated class
-template class Xomatcopy<half>;
-template class Xomatcopy<float>;
-template class Xomatcopy<double>;
-template class Xomatcopy<float2>;
-template class Xomatcopy<double2>;
 
 // =================================================================================================
 }	// namespace clblast

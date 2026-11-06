@@ -63,7 +63,7 @@ void FillCacheForPrecision(Queue& queue) {
 		Xtrmm(tart::getDType<Type>(), queue, nullptr);
 
 		// Runs all the non-BLAS set-up functions
-		Xomatcopy<Type>(queue, nullptr);
+		Xomatcopy(tart::getDType<Type>(), queue, nullptr);
 
 	} catch (const RuntimeErrorCode& e) {
 		if (e.status() != StatusCode::kNoDoublePrecision && e.status() != StatusCode::kNoHalfPrecision) {

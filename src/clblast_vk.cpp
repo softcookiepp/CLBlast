@@ -1422,7 +1422,7 @@ StatusCode Omatcopy(const Layout layout, const Transpose a_transpose, const size
 										const size_t b_offset, const size_t b_ld, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xomatcopy<T>(queue_cpp, event);
+		auto routine = Xomatcopy(tart::getDType<T>(), queue_cpp, event);
 		routine.DoOmatcopy(layout, a_transpose, m, n, alpha, (a_buffer), a_offset, a_ld, (b_buffer),
 											 b_offset, b_ld);
 		return StatusCode::kSuccess;

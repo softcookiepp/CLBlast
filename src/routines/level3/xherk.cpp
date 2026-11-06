@@ -189,6 +189,8 @@ void Xherk::HerkAB(const Layout layout, const Triangle triangle, const Transpose
 	kernel->setArg(4, a_temp);
 	kernel->setArg(5, b_temp);
 	kernel->setArg(6, c_temp);
+	kernel->setArg(7, a_temp);
+	kernel->setArg(8, b_temp);
 
 	// Computes the global and local thread sizes
 	auto global = std::vector<uint32_t>{(n_ceiled) / db_["MWG"], (n_ceiled) / db_["NWG"]};

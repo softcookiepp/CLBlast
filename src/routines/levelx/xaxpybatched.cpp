@@ -84,7 +84,7 @@ void XaxpyBatched::DoAxpyBatched(const size_t n, const tart::buffer_ptr& alphas_
 	auto n_ceiled = Ceil(n, db_["WGS"] * db_["WPT"]);
 	auto global = std::vector<size_t>{n_ceiled / db_["WPT"], batch_count};
 	auto local = std::vector<size_t>{db_["WGS"], 1};
-	kernel->enqueue({global[0] / local[0], 1, 1}, {db_["WGS"], db_["WPT"]});
+	kernel->enqueue({global[0], global[1], 1}, {db_["WGS"], db_["WPT"]});
 }
 
 // =================================================================================================

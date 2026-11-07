@@ -201,7 +201,7 @@ void Xsyrk::SyrkAB(const Layout layout, const Triangle triangle, const Transpose
 	auto global = std::vector<uint32_t>{(n_ceiled * db_["MDIMC"]) / db_["MWG"], (n_ceiled * db_["NDIMC"]) / db_["NWG"]};
 	auto local = std::vector<size_t>{db_["MDIMC"], db_["NDIMC"]};
 	global[0] = global[0] / local[0];
-	global[0] = global[1] / local[1];
+	global[1] = global[1] / local[1];
 	const bool subgroupSupported = this->device_()->getMetadata().subgroupAdd;
 	std::vector<uint32_t> spec(subgroupSupported ? 16 : 15);
 	spec[0] = db_["GEMMK"];

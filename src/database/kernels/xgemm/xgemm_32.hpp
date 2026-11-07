@@ -19,7 +19,8 @@ const NewDatabaseEntry NewDbXgemmSingle =
 			{ // devices
 				{ // default device
 					kDeviceNameDefault, kDefaultDeviceID, { 1, 1 },
-					Params{ 0, 1, 32, 2, 8, 8, 16, 8, 8, 64, 0, 0, 0, 0 }
+					Params{ 1, 1, 32, 2, 8, 8, 16, 8, 8, 64, 0, 0, 0, 0 }
+					//Params{ 1, 1, 32, 2, 8, 32, 16, 8, 32, 64, 0, 0, 0, 0 }
 				}
 			}
 		}

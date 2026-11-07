@@ -24,11 +24,10 @@ namespace clblast {
 // =================================================================================================
 
 // See comment at top of file for a description of the class
-template <typename T>
 class Xsyrk : public Routine {
  public:
 	// Constructor
-	Xsyrk(Queue& queue, EventPointer event, const std::string& name = "SYRK");
+	Xsyrk(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "SYRK");
 
 	// Templated-precision implementation of the routine
 	void DoSyrk(const Layout layout, const Triangle triangle, const Transpose a_transpose, const size_t n, const size_t k,

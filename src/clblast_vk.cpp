@@ -1200,7 +1200,7 @@ StatusCode Syrk(const Layout layout, const Triangle triangle, const Transpose a_
 								const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xsyrk<T>(queue_cpp, event);
+		auto routine = Xsyrk(tart::getDType<T>(), queue_cpp, event);
 		routine.DoSyrk(layout, triangle, a_transpose, n, k, alpha, (a_buffer), a_offset, a_ld, beta,
 									 (c_buffer), c_offset, c_ld);
 		return StatusCode::kSuccess;
@@ -1255,7 +1255,7 @@ StatusCode Syr2k(const Layout layout, const Triangle triangle, const Transpose a
 								 const size_t c_offset, const size_t c_ld, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xsyr2k<T>(queue_cpp, event);
+		auto routine = Xsyr2k(tart::getDType<T>(), queue_cpp, event);
 		routine.DoSyr2k(layout, triangle, ab_transpose, n, k, alpha, (a_buffer), a_offset, a_ld,
 										(b_buffer), b_offset, b_ld, beta, (c_buffer), c_offset, c_ld);
 		return StatusCode::kSuccess;

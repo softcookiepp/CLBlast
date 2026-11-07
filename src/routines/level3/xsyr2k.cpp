@@ -20,14 +20,12 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-template <typename T>
-Xsyr2k<T>::Xsyr2k(Queue& queue, EventPointer event, const std::string& name) : Xsyrk<T>(queue, event, name) {}
+Xsyr2k::Xsyr2k(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) : Xsyrk(dtype, queue, event, name) {}
 
 // =================================================================================================
 
 // The main routine
-template <typename T>
-void Xsyr2k<T>::DoSyr2k(const Layout layout, const Triangle triangle, const Transpose ab_transpose, const size_t n,
+void Xsyr2k::DoSyr2k(const Layout layout, const Triangle triangle, const Transpose ab_transpose, const size_t n,
 												const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
 												const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld,
 												const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset, const size_t c_ld)
@@ -51,15 +49,6 @@ void Xsyr2k<T>::DoSyr2k(const Layout layout, const Triangle triangle, const Tran
 	
 	
 }
-
-// =================================================================================================
-
-// Compiles the templated class
-template class Xsyr2k<half>;
-template class Xsyr2k<float>;
-template class Xsyr2k<double>;
-template class Xsyr2k<float2>;
-template class Xsyr2k<double2>;
 
 // =================================================================================================
 }	// namespace clblast

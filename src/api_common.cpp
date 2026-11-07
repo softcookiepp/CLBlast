@@ -58,8 +58,8 @@ void FillCacheForPrecision(Queue& queue) {
 		// Runs all the level 3 set-up functions that support all precisions
 		Xgemm(tart::getDType<Type>(), queue, nullptr);
 		Xsymm(tart::getDType<Type>(), queue, nullptr);
-		Xsyrk<Type>(queue, nullptr);
-		Xsyr2k<Type>(queue, nullptr);
+		Xsyrk(tart::getDType<Type>(), queue, nullptr);
+		Xsyr2k(tart::getDType<Type>(), queue, nullptr);
 		Xtrmm(tart::getDType<Type>(), queue, nullptr);
 
 		// Runs all the non-BLAS set-up functions

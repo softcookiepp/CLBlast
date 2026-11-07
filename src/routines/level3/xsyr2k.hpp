@@ -22,15 +22,14 @@ namespace clblast {
 // =================================================================================================
 
 // See comment at top of file for a description of the class
-template <typename T>
-class Xsyr2k : public Xsyrk<T> {
+class Xsyr2k : public Xsyrk {
  public:
   // Uses methods and variables the regular Xsyrk routine
-  using Xsyrk<T>::event_;
-  using Xsyrk<T>::SyrkAB;
+  using Xsyrk::event_;
+  using Xsyrk::SyrkAB;
 
   // Constructor
-  Xsyr2k(Queue& queue, EventPointer event, const std::string& name = "SYR2K");
+  Xsyr2k(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "SYR2K");
 
   // Templated-precision implementation of the routine
   void DoSyr2k(const Layout layout, const Triangle triangle, const Transpose ab_transpose, const size_t n,

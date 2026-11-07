@@ -24,9 +24,8 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-template <typename T>
-Xsyrk<T>::Xsyrk(Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Copy", "Pad", "Transpose", "Padtranspose", "Xgemm"}, precisionToDataType(PrecisionValue<T>()), {},
+Xsyrk::Xsyrk(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
+		: Routine(queue, event, name, {"Copy", "Pad", "Transpose", "Padtranspose", "Xgemm"}, dtype, {},
 							{
 	#include "../../kernels-vk-inline/level3/copy_fast.glsl.inl"
 	,
@@ -92,8 +91,7 @@ Xsyrk<T>::Xsyrk(Queue& queue, EventPointer event, const std::string& name)
 // =================================================================================================
 
 // The main routine
-template <typename T>
-void Xsyrk<T>::DoSyrk(const Layout layout, const Triangle triangle, const Transpose a_transpose, const size_t n,
+void Xsyrk::DoSyrk(const Layout layout, const Triangle triangle, const Transpose a_transpose, const size_t n,
 											const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
 											const size_t a_ld, const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset,
 											const size_t c_ld) {
@@ -107,8 +105,7 @@ void Xsyrk<T>::DoSyrk(const Layout layout, const Triangle triangle, const Transp
 				 beta, c_buffer, c_offset, c_ld);
 }
 
-template <typename T>
-void Xsyrk<T>::SyrkAB(const Layout layout, const Triangle triangle, const Transpose a_transpose,
+void Xsyrk::SyrkAB(const Layout layout, const Triangle triangle, const Transpose a_transpose,
 											const Transpose b_transpose, const size_t n, const size_t k, const tart::Scalar& alpha,
 											const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& b_buffer,
 											const size_t b_offset, const size_t b_ld, const tart::Scalar& beta, const tart::buffer_ptr& c_buffer,
@@ -150,9 +147,9 @@ void Xsyrk<T>::SyrkAB(const Layout layout, const Triangle triangle, const Transp
 			Xgemm::NoTempBuffer(b_one, b_one_i, b_two, b_two_i, b_ld, b_offset, b_do_transpose, b_conjugate);
 
 	// Creates the temporary matrices
-	auto a_temp = (a_no_temp) ? a_buffer : this->mDevice->allocateBuffer(sizeof(T) * a_one_i * a_two_i);
-	auto b_temp = (b_no_temp) ? b_buffer : this->mDevice->allocateBuffer(sizeof(T) * b_one_i * b_two_i);
-	auto c_temp = this->mDevice->allocateBuffer(sizeof(T) * n_ceiled * n_ceiled);
+	auto a_temp = (a_no_temp) ? a_buffer : this->mDevice->allocateBuffer(this->mDtype.size() * a_one_i * a_two_i);
+	auto b_temp = (b_no_temp) ? b_buffer : this->mDevice->allocateBuffer(this->mDtype.size() * b_one_i * b_two_i);
+	auto c_temp = this->mDevice->allocateBuffer(this->mDtype.size() * n_ceiled * n_ceiled);
 
 	// Runs the pre-processing kernel for matrix A. This transposes the matrix, but also pads zeros
 	// to fill it up until it reaches a certain multiple of size (kernel parameter dependent). In
@@ -239,15 +236,6 @@ void Xsyrk<T>::SyrkAB(const Layout layout, const Triangle triangle, const Transp
 												 lower, false);
 												 
 }
-
-// =================================================================================================
-
-// Compiles the templated class
-template class Xsyrk<half>;
-template class Xsyrk<float>;
-template class Xsyrk<double>;
-template class Xsyrk<float2>;
-template class Xsyrk<double2>;
 
 // =================================================================================================
 }	// namespace clblast

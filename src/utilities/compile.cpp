@@ -24,47 +24,10 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 		const std::string& routine_name, const Device& device,
 		std::vector<std::string>& options,
 		const size_t run_preprocessor,	// 0: platform dependent, 1: always, 2: never
-		const bool silent
-#if VULKAN_API
-,
-		std::map<std::string, std::string>& kernelSources
-#endif
-		)
+		const bool silent, std::map<std::string, std::string>& kernelSources)
 {
 	auto header_string = std::string{""};
-	
-	// small hack until the kernel-side precision enums get changed
-	uint32_t precision;
-	switch(dtype())
-	{
-		case tart::DataType::eFloat16:
-		{
-			precision = 16;
-			break;
-		}
-		case tart::DataType::eFloat32:
-		{
-			precision = 32;
-			break;
-		}
-		case tart::DataType::eFloat64:
-		{
-			precision = 64;
-			break;
-		}
-		case tart::DataType::eComplex64:
-		{
-			precision = 3232;
-			break;
-		}
-		case tart::DataType::eComplex128:
-		{
-			precision = 6464;
-			break;
-		}
-	}
-
-	header_string += "#define PRECISION " + std::to_string(precision) + "\n";
+	header_string += "#define DTYPE " + std::to_string(static_cast<uint32_t>(dtype())) + "\n";
 
 	// Adds the name of the routine as a define
 	header_string += "#define ROUTINE_" + routine_name + " 1\n";
@@ -95,38 +58,17 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 			header_string += "#define USE_BDA 1\n";
 		}
 	#endif
-
-	header_string +=
-#include "kernels-vk-inline/common.glsl.inl"
-	;
-
-// Prints details of the routine to compile in case of debugging in verbose mode
-#ifdef VERBOSE
-	printf("[DEBUG] Compiling routine '%s-%s'\n", routine_name.c_str(), ToString(precision).c_str());
-	const auto start_time = std::chrono::steady_clock::now();
-#endif
 	
 	auto kernel_string = header_string + source_string;
 
 	// Compiles the kernel
 	std::shared_ptr<Program> program = nullptr;
-	if (true)
+	// append the header to everything
+	for (auto& pair : kernelSources)
 	{
-		// append the header to everything
-		for (auto& pair : kernelSources)
-		{
-			pair.second = "#version 450\n\n" + header_string + pair.second;
-		}
-		program = std::make_shared<Program>(device(), kernelSources);
+		pair.second = "#version 450\n\n" + header_string + pair.second;
 	}
-
-// Prints the elapsed compilation time in case of debugging in verbose mode
-#ifdef VERBOSE
-	const auto elapsed_time = std::chrono::steady_clock::now() - start_time;
-	const auto timing = std::chrono::duration<double, std::milli>(elapsed_time).count();
-	printf("[DEBUG] Completed compilation in %.2lf ms\n", timing);
-#endif
-
+	program = std::make_shared<Program>(device(), kernelSources);
 	return program;
 }
 #if VULKAN_API

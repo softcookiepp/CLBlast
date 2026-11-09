@@ -59,7 +59,7 @@ void main()
 
 	// Computes the absolute value and stores the final result
 	if (lid == 0) {
-		#if (PRECISION == 3232 || PRECISION == 6464) && defined(ROUTINE_ASUM)
+		#if ROUTINE_IS_COMPLEX && defined(ROUTINE_ASUM)
 			indexGM(asum, asum_offset).x = lm[0].x + lm[0].y; // the result is a non-complex number
 		#else
 			indexGM(asum, asum_offset) = lm[0];

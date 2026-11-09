@@ -80,7 +80,7 @@ void main()
 	while (id < n) {
 		const int x_index = id*x_inc + x_offset;
 		real v = indexGM(xgm, x_index);
-		#if PRECISION == 3232 || PRECISION == 6464
+		#if ROUTINE_IS_COMPLEX
 			precise singlereal x = abs(v.x) + abs(v.y);
 		#else
 			precise singlereal x = v;

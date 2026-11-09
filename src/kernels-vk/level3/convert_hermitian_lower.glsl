@@ -11,8 +11,9 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
-#ifndef PRECISION
-	#define PRECISION 3232
+#include "../dtype-enum.glsl"
+#ifndef DTYPE
+	#define DTYPE DTYPE_64
 #endif
 #ifndef ROUTINE_IS_COMPLEX
 	#define ROUTINE_IS_COMPLEX 1

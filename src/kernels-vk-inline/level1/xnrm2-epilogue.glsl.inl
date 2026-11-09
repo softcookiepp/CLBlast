@@ -60,22 +60,8 @@ R"(
 
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this file is used outside of the CLBlast library.
-#ifndef PRECISION
-	#define PRECISION 32			// Data-types: half, single or double precision, complex or regular
-	#define DTYPE DTYPE_F32
-#endif
 #ifndef DTYPE
-	#if PRECISION == 16
-		#define DTYPE DTYPE_F16
-	#elif PRECISION == 32
-		#define DTYPE DTYPE_F32
-	#elif PRECISION == 64
-		#define DTYPE DTYPE_F64
-	#elif PRECISION == 3232
-		#define DTYPE DTYPE_C64
-	#elif PRECISION == 6464
-		#define DTYPE DTYPE_C128
-	#endif
+	#define DTYPE DTYPE_F32
 #endif
 
 // =================================================================================================
@@ -95,7 +81,7 @@ R"(
 #endif
 
 // Enable support for half-precision
-#if PRECISION == 16 || DTYPE == DTYPE_F16
+#if DTYPE == DTYPE_F16
 	#extension GL_EXT_shader_16bit_storage : require
 	#extension GL_EXT_shader_explicit_arithmetic_types_float16 : require
 	#if SUBGROUP_OPERATIONS_SUPPORTED
@@ -104,7 +90,7 @@ R"(
 #endif
 
 // Enable support for double-precision
-#if PRECISION == 64 || PRECISION == 6464 || DTYPE == DTYPE_C128 || DTYPE == DTYPE_F64
+#if DTYPE == DTYPE_C128 || DTYPE == DTYPE_F64
 	#extension GL_EXT_shader_explicit_arithmetic_types_float64 : require
 #endif
 
@@ -143,7 +129,7 @@ R"(
 
 
 // Half-precision
-#if PRECISION == 16 || DTYPE == DTYPE_F16
+#if DTYPE == DTYPE_F16
 	struct vec2_t { f16vec2 s; };
 	struct vec4_t { f16vec4 s; };
 	struct vec8_t { float16_t s[8]; };
@@ -158,7 +144,7 @@ R"(
 	#define PI float16_t(3.14159265358979323846)
 
 // Single-precision
-#elif PRECISION == 32 || DTYPE == DTYPE_F32
+#elif DTYPE == DTYPE_F32
 	struct vec2_t { vec2 s; };
 	struct vec4_t { vec4 s; };
 	struct vec8_t { float s[8]; };
@@ -173,7 +159,7 @@ R"(
 	#define PI float(3.14159265358979323846)
 
 // Double-precision 
-#elif PRECISION == 64 || DTYPE == DTYPE_F64
+#elif DTYPE == DTYPE_F64
 	struct vec2_t { dvec2 s; };
 	struct vec4_t { dvec4 s; };
 	struct vec8_t { double s[8]; };
@@ -188,7 +174,7 @@ R"(
 	#define PI double(3.14159265358979323846)
 
 // Complex single-precision
-#elif PRECISION == 3232 || DTYPE == DTYPE_C64
+#elif DTYPE == DTYPE_C64
 	struct vec2_t { mat2x2 s; };
 	struct vec4_t { mat4x2 s; };
 	struct vec8_t { vec2 s[8]; };
@@ -203,7 +189,7 @@ R"(
 	#define PI float(3.14159265358979323846)
 
 // Complex double-precision
-#elif PRECISION == 6464 || DTYPE == DTYPE_C128
+#elif DTYPE == DTYPE_C128
 	struct vec2_t { dmat2x2 s; };
 	struct vec4_t { dmat4x2 s; };					 
 	struct vec8_t { dvec2 s[8]; };
@@ -218,7 +204,7 @@ R"(
 	#define PI double(3.14159265358979323846)
 #endif
 
-#define ROUTINE_IS_COMPLEX (PRECISION == 3232 || PRECISION == 6464 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128)
+#define ROUTINE_IS_COMPLEX (DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128)
 
 // this simplifies stuff c:
 #define real2 vec2_t
@@ -244,9 +230,9 @@ R"(
 #endif
 
 // Single-element version of a complex number
-#if PRECISION == 3232 || DTYPE == DTYPE_C64
+#if DTYPE == DTYPE_C64
 	#define singlereal float
-#elif PRECISION == 6464 || DTYPE == DTYPE_C128
+#elif DTYPE == DTYPE_C128
 	#define singlereal double 
 #else
 	#if USE_BDA
@@ -255,7 +241,7 @@ R"(
 	#define singlereal real 
 #endif
 
-#if USE_BDA && (PRECISION >= 3232 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128)
+#if USE_BDA && (DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128)
 	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE/2) buffer singlereal_ptr_t { singlereal s[]; };
 	//
 #endif
@@ -285,28 +271,28 @@ R"(
 #endif
 
 // Sets a variable to zero
-#if PRECISION == 3232 || PRECISION == 6464 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
 	#define SetToZero(a) a = real(ZERO, ZERO)
 #else
 	#define SetToZero(a) a = ZERO
 #endif
 
 // Sets a variable to zero (only the imaginary part)
-#if PRECISION == 3232 || PRECISION == 6464 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
 	#define ImagToZero(a) a.y = ZERO
 #else
 	#define ImagToZero(a) 
 #endif
 
 // Sets a variable to one
-#if PRECISION == 3232 || PRECISION == 6464 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
 	#define SetToOne(a) a = real(ONE, ZERO)
 #else
 	#define SetToOne(a) a = ONE
 #endif
 
 // Determines whether a variable is zero
-#if PRECISION == 3232 || PRECISION == 6464 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
 	#define IsZero(a) ((a[0] == ZERO) && (a[1] == ZERO))
 #else
 	#define IsZero(a) (a == ZERO)
@@ -316,34 +302,34 @@ R"(
 #define AbsoluteValue(value) value = abs(value)
 
 // Negation (component-wise)
-#if PRECISION == 3232 || PRECISION == 6464 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
 	#define Negate(value) value.x = (-1.0(value.x)); value.y = (-1.0*(value.y))
 #else
 	#define Negate(value) value = (-1.0*(value))
 #endif
 
 // Adds two complex variables
-#if PRECISION == 3232 || PRECISION == 6464 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
 	#define Add(c,a,b) c = real(a.x + b.x, a.y + b.y)
 #else
 	#define Add(c,a,b) c = a + b
 #endif
 
 // Subtracts two complex variables
-#if PRECISION == 3232 || PRECISION == 6464 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
 	#define Subtract(c,a,b) c = real(a.x - b.x, a.y - b.y)
 #else
 	#define Subtract(c,a,b) c = a - b
 #endif
 
 // Multiply two complex variables (used in the defines below)
-#if PRECISION == 3232 || PRECISION == 6464 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
 	#define MulReal(a,b) a[0]*b[0] - a[1]*b[1]
 	#define MulImag(a,b) a[0]*b[1] + a[1]*b[0]
 #endif
 
 // The scalar multiply function
-#if PRECISION == 3232 || PRECISION == 6464 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
 	#define Multiply(c,a,b) c = real(MulReal(a,b), MulImag(a,b))
 #else
 	#define Multiply(c,a,b) c = a * b
@@ -388,7 +374,7 @@ R"(
 }
 
 // The scalar multiply-add function
-#if PRECISION == 3232 || PRECISION == 6464 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
 	#define MultiplyAdd(c,a,b) c += real(MulReal(a,b), MulImag(a,b))
 #else
 	#if USE_CL_MAD == 1
@@ -399,16 +385,16 @@ R"(
 #endif
 
 // The scalar multiply-subtract function
-#if PRECISION == 3232 || PRECISION == 6464 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
 	#define MultiplySubtract(c,a,b) c -= real(MulReal(a,b), MulImag(a,b))
 #else
 	#define MultiplySubtract(c,a,b) c -= (a * b)
 #endif
 
 // The scalar division function: full division
-#if PRECISION == 3232 || PRECISION == 6464 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
 	#define DivideFull(c,a,b) singlereal num_x = (a.x * b.x) + (a.y * b.y); singlereal num_y = (a.y * b.x) - (a.x * b.y); singlereal denom = (b.x * b.x) + (b.y * b.y); c = real(num_x / denom, num_y / denom)
-#elif PRECISION == 16 || DTYPE == DTYPE_F16
+#elif DTYPE == DTYPE_F16
 	// Some hardware doesn't compute NaN properly
 	// #define DivideFull(c,a,b) c = (b == ZERO ? NAN : a / b)
 	// still need to test the specifics.
@@ -419,7 +405,7 @@ R"(
 #endif
 
 // The scalar AXPBY function
-#if PRECISION == 3232 || PRECISION == 6464 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
 	//#define AXPBY(e,a,b,c,d) e.x = MulReal(a,b) + MulReal(c,d); e.y = MulImag(a,b) + MulImag(c,d)
 	#define AXPBY(e,a,b,c,d) e = real(MulReal(a,b) + MulReal(c,d), MulImag(a,b) + MulImag(c,d))
 #else
@@ -427,7 +413,7 @@ R"(
 #endif
 
 // The complex conjugate operation for complex transforms
-#if PRECISION == 3232 || PRECISION == 6464 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
 	#define COMPLEX_CONJUGATE(value) value.y = -1.0*value.y
 #else
 	#define COMPLEX_CONJUGATE(value) 
@@ -592,22 +578,8 @@ R"(
 
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this file is used outside of the CLBlast library.
-#ifndef PRECISION
-	#define PRECISION 32			// Data-types: half, single or double precision, complex or regular
-	#define DTYPE DTYPE_F32
-#endif
 #ifndef DTYPE
-	#if PRECISION == 16
-		#define DTYPE DTYPE_F16
-	#elif PRECISION == 32
-		#define DTYPE DTYPE_F32
-	#elif PRECISION == 64
-		#define DTYPE DTYPE_F64
-	#elif PRECISION == 3232
-		#define DTYPE DTYPE_C64
-	#elif PRECISION == 6464
-		#define DTYPE DTYPE_C128
-	#endif
+	#define DTYPE DTYPE_F32
 #endif
 
 // =================================================================================================
@@ -627,7 +599,7 @@ R"(
 #endif
 
 // Enable support for half-precision
-#if PRECISION == 16 || DTYPE == DTYPE_F16
+#if DTYPE == DTYPE_F16
 	#extension GL_EXT_shader_16bit_storage : require
 	#extension GL_EXT_shader_explicit_arithmetic_types_float16 : require
 	#if SUBGROUP_OPERATIONS_SUPPORTED
@@ -636,7 +608,7 @@ R"(
 #endif
 
 // Enable support for double-precision
-#if PRECISION == 64 || PRECISION == 6464 || DTYPE == DTYPE_C128 || DTYPE == DTYPE_F64
+#if DTYPE == DTYPE_C128 || DTYPE == DTYPE_F64
 	#extension GL_EXT_shader_explicit_arithmetic_types_float64 : require
 #endif
 
@@ -675,7 +647,7 @@ R"(
 
 
 // Half-precision
-#if PRECISION == 16 || DTYPE == DTYPE_F16
+#if DTYPE == DTYPE_F16
 	struct vec2_t { f16vec2 s; };
 	struct vec4_t { f16vec4 s; };
 	struct vec8_t { float16_t s[8]; };
@@ -690,7 +662,7 @@ R"(
 	#define PI float16_t(3.14159265358979323846)
 
 // Single-precision
-#elif PRECISION == 32 || DTYPE == DTYPE_F32
+#elif DTYPE == DTYPE_F32
 	struct vec2_t { vec2 s; };
 	struct vec4_t { vec4 s; };
 	struct vec8_t { float s[8]; };
@@ -705,7 +677,7 @@ R"(
 	#define PI float(3.14159265358979323846)
 
 // Double-precision 
-#elif PRECISION == 64 || DTYPE == DTYPE_F64
+#elif DTYPE == DTYPE_F64
 	struct vec2_t { dvec2 s; };
 	struct vec4_t { dvec4 s; };
 	struct vec8_t { double s[8]; };
@@ -720,7 +692,7 @@ R"(
 	#define PI double(3.14159265358979323846)
 
 // Complex single-precision
-#elif PRECISION == 3232 || DTYPE == DTYPE_C64
+#elif DTYPE == DTYPE_C64
 	struct vec2_t { mat2x2 s; };
 	struct vec4_t { mat4x2 s; };
 	struct vec8_t { vec2 s[8]; };
@@ -735,7 +707,7 @@ R"(
 	#define PI float(3.14159265358979323846)
 
 // Complex double-precision
-#elif PRECISION == 6464 || DTYPE == DTYPE_C128
+#elif DTYPE == DTYPE_C128
 	struct vec2_t { dmat2x2 s; };
 	struct vec4_t { dmat4x2 s; };					 
 	struct vec8_t { dvec2 s[8]; };
@@ -750,7 +722,7 @@ R"(
 	#define PI double(3.14159265358979323846)
 #endif
 
-#define ROUTINE_IS_COMPLEX (PRECISION == 3232 || PRECISION == 6464 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128)
+#define ROUTINE_IS_COMPLEX (DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128)
 
 // this simplifies stuff c:
 #define real2 vec2_t
@@ -776,9 +748,9 @@ R"(
 #endif
 
 // Single-element version of a complex number
-#if PRECISION == 3232 || DTYPE == DTYPE_C64
+#if DTYPE == DTYPE_C64
 	#define singlereal float
-#elif PRECISION == 6464 || DTYPE == DTYPE_C128
+#elif DTYPE == DTYPE_C128
 	#define singlereal double 
 #else
 	#if USE_BDA
@@ -787,7 +759,7 @@ R"(
 	#define singlereal real 
 #endif
 
-#if USE_BDA && (PRECISION >= 3232 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128)
+#if USE_BDA && (DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128)
 	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE/2) buffer singlereal_ptr_t { singlereal s[]; };
 	//
 #endif
@@ -817,28 +789,28 @@ R"(
 #endif
 
 // Sets a variable to zero
-#if PRECISION == 3232 || PRECISION == 6464 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
 	#define SetToZero(a) a = real(ZERO, ZERO)
 #else
 	#define SetToZero(a) a = ZERO
 #endif
 
 // Sets a variable to zero (only the imaginary part)
-#if PRECISION == 3232 || PRECISION == 6464 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
 	#define ImagToZero(a) a.y = ZERO
 #else
 	#define ImagToZero(a) 
 #endif
 
 // Sets a variable to one
-#if PRECISION == 3232 || PRECISION == 6464 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
 	#define SetToOne(a) a = real(ONE, ZERO)
 #else
 	#define SetToOne(a) a = ONE
 #endif
 
 // Determines whether a variable is zero
-#if PRECISION == 3232 || PRECISION == 6464 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
 	#define IsZero(a) ((a[0] == ZERO) && (a[1] == ZERO))
 #else
 	#define IsZero(a) (a == ZERO)
@@ -848,34 +820,34 @@ R"(
 #define AbsoluteValue(value) value = abs(value)
 
 // Negation (component-wise)
-#if PRECISION == 3232 || PRECISION == 6464 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
 	#define Negate(value) value.x = (-1.0(value.x)); value.y = (-1.0*(value.y))
 #else
 	#define Negate(value) value = (-1.0*(value))
 #endif
 
 // Adds two complex variables
-#if PRECISION == 3232 || PRECISION == 6464 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
 	#define Add(c,a,b) c = real(a.x + b.x, a.y + b.y)
 #else
 	#define Add(c,a,b) c = a + b
 #endif
 
 // Subtracts two complex variables
-#if PRECISION == 3232 || PRECISION == 6464 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
 	#define Subtract(c,a,b) c = real(a.x - b.x, a.y - b.y)
 #else
 	#define Subtract(c,a,b) c = a - b
 #endif
 
 // Multiply two complex variables (used in the defines below)
-#if PRECISION == 3232 || PRECISION == 6464 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
 	#define MulReal(a,b) a[0]*b[0] - a[1]*b[1]
 	#define MulImag(a,b) a[0]*b[1] + a[1]*b[0]
 #endif
 
 // The scalar multiply function
-#if PRECISION == 3232 || PRECISION == 6464 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
 	#define Multiply(c,a,b) c = real(MulReal(a,b), MulImag(a,b))
 #else
 	#define Multiply(c,a,b) c = a * b
@@ -920,7 +892,7 @@ R"(
 }
 
 // The scalar multiply-add function
-#if PRECISION == 3232 || PRECISION == 6464 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
 	#define MultiplyAdd(c,a,b) c += real(MulReal(a,b), MulImag(a,b))
 #else
 	#if USE_CL_MAD == 1
@@ -931,16 +903,16 @@ R"(
 #endif
 
 // The scalar multiply-subtract function
-#if PRECISION == 3232 || PRECISION == 6464 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
 	#define MultiplySubtract(c,a,b) c -= real(MulReal(a,b), MulImag(a,b))
 #else
 	#define MultiplySubtract(c,a,b) c -= (a * b)
 #endif
 
 // The scalar division function: full division
-#if PRECISION == 3232 || PRECISION == 6464 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
 	#define DivideFull(c,a,b) singlereal num_x = (a.x * b.x) + (a.y * b.y); singlereal num_y = (a.y * b.x) - (a.x * b.y); singlereal denom = (b.x * b.x) + (b.y * b.y); c = real(num_x / denom, num_y / denom)
-#elif PRECISION == 16 || DTYPE == DTYPE_F16
+#elif DTYPE == DTYPE_F16
 	// Some hardware doesn't compute NaN properly
 	// #define DivideFull(c,a,b) c = (b == ZERO ? NAN : a / b)
 	// still need to test the specifics.
@@ -951,7 +923,7 @@ R"(
 #endif
 
 // The scalar AXPBY function
-#if PRECISION == 3232 || PRECISION == 6464 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
 	//#define AXPBY(e,a,b,c,d) e.x = MulReal(a,b) + MulReal(c,d); e.y = MulImag(a,b) + MulImag(c,d)
 	#define AXPBY(e,a,b,c,d) e = real(MulReal(a,b) + MulReal(c,d), MulImag(a,b) + MulImag(c,d))
 #else
@@ -959,7 +931,7 @@ R"(
 #endif
 
 // The complex conjugate operation for complex transforms
-#if PRECISION == 3232 || PRECISION == 6464 || DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
 	#define COMPLEX_CONJUGATE(value) value.y = -1.0*value.y
 #else
 	#define COMPLEX_CONJUGATE(value) 
@@ -1189,7 +1161,7 @@ void main()
 	// Computes the square root and stores the final result
 	if (lid == 0)
 	{
-		#if PRECISION == 3232 || PRECISION == 6464
+		#if ROUTINE_IS_COMPLEX
 			nrm2[nrm2_offset].x = sqrt(lm[0].x); // the result is a non-complex number
 		#else
 			nrm2[nrm2_offset] = sqrt(lm[0]);

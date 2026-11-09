@@ -110,7 +110,7 @@ void Xasum::DoAsum(const size_t n, const tart::buffer_ptr& asum_buffer, const si
 #endif
 
 	// Launches the epilogue kernel
-	kernel2->enqueue({1, 1, 1}, {db_["WGS2"]});
+	kernel2->enqueue({1, 1, 1}, {db_["WGS2"], mSum});
 }
 
 // =================================================================================================

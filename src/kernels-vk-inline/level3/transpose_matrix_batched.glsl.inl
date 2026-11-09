@@ -435,7 +435,7 @@ layout(constant_id = 16) const uint ROUTINE_HER2K = 0;
 	#define singlereal real 
 #endif
 
-#if USE_BDA && (DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128)
+#if USE_BDA && ROUTINE_IS_COMPLEX
 	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE/2) buffer singlereal_ptr_t { singlereal s[]; };
 	//
 #endif
@@ -465,28 +465,28 @@ layout(constant_id = 16) const uint ROUTINE_HER2K = 0;
 #endif
 
 // Sets a variable to zero
-#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if ROUTINE_IS_COMPLEX
 	#define SetToZero(a) a = real(ZERO, ZERO)
 #else
 	#define SetToZero(a) a = ZERO
 #endif
 
 // Sets a variable to zero (only the imaginary part)
-#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if ROUTINE_IS_COMPLEX
 	#define ImagToZero(a) a.y = ZERO
 #else
 	#define ImagToZero(a) 
 #endif
 
 // Sets a variable to one
-#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if ROUTINE_IS_COMPLEX
 	#define SetToOne(a) a = real(ONE, ZERO)
 #else
 	#define SetToOne(a) a = ONE
 #endif
 
 // Determines whether a variable is zero
-#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if ROUTINE_IS_COMPLEX
 	#define IsZero(a) ((a[0] == ZERO) && (a[1] == ZERO))
 #else
 	#define IsZero(a) (a == ZERO)
@@ -496,34 +496,34 @@ layout(constant_id = 16) const uint ROUTINE_HER2K = 0;
 #define AbsoluteValue(value) value = abs(value)
 
 // Negation (component-wise)
-#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if ROUTINE_IS_COMPLEX
 	#define Negate(value) value.x = (-1.0(value.x)); value.y = (-1.0*(value.y))
 #else
 	#define Negate(value) value = (-1.0*(value))
 #endif
 
 // Adds two complex variables
-#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if ROUTINE_IS_COMPLEX
 	#define Add(c,a,b) c = real(a.x + b.x, a.y + b.y)
 #else
 	#define Add(c,a,b) c = a + b
 #endif
 
 // Subtracts two complex variables
-#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if ROUTINE_IS_COMPLEX
 	#define Subtract(c,a,b) c = real(a.x - b.x, a.y - b.y)
 #else
 	#define Subtract(c,a,b) c = a - b
 #endif
 
 // Multiply two complex variables (used in the defines below)
-#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if ROUTINE_IS_COMPLEX
 	#define MulReal(a,b) a[0]*b[0] - a[1]*b[1]
 	#define MulImag(a,b) a[0]*b[1] + a[1]*b[0]
 #endif
 
 // The scalar multiply function
-#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if ROUTINE_IS_COMPLEX
 	#define Multiply(c,a,b) c = real(MulReal(a,b), MulImag(a,b))
 #else
 	#define Multiply(c,a,b) c = a * b
@@ -568,7 +568,7 @@ layout(constant_id = 16) const uint ROUTINE_HER2K = 0;
 }
 
 // The scalar multiply-add function
-#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if ROUTINE_IS_COMPLEX
 	#define MultiplyAdd(c,a,b) c += real(MulReal(a,b), MulImag(a,b))
 #else
 	#if USE_CL_MAD == 1
@@ -579,14 +579,14 @@ layout(constant_id = 16) const uint ROUTINE_HER2K = 0;
 #endif
 
 // The scalar multiply-subtract function
-#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if ROUTINE_IS_COMPLEX
 	#define MultiplySubtract(c,a,b) c -= real(MulReal(a,b), MulImag(a,b))
 #else
 	#define MultiplySubtract(c,a,b) c -= (a * b)
 #endif
 
 // The scalar division function: full division
-#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if ROUTINE_IS_COMPLEX
 	#define DivideFull(c,a,b) singlereal num_x = (a.x * b.x) + (a.y * b.y); singlereal num_y = (a.y * b.x) - (a.x * b.y); singlereal denom = (b.x * b.x) + (b.y * b.y); c = real(num_x / denom, num_y / denom)
 #elif DTYPE == DTYPE_F16
 	// Some hardware doesn't compute NaN properly
@@ -599,7 +599,7 @@ layout(constant_id = 16) const uint ROUTINE_HER2K = 0;
 #endif
 
 // The scalar AXPBY function
-#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+#if ROUTINE_IS_COMPLEX
 	//#define AXPBY(e,a,b,c,d) e.x = MulReal(a,b) + MulReal(c,d); e.y = MulImag(a,b) + MulImag(c,d)
 	#define AXPBY(e,a,b,c,d) e = real(MulReal(a,b) + MulReal(c,d), MulImag(a,b) + MulImag(c,d))
 #else

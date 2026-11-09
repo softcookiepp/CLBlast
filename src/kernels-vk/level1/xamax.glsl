@@ -18,20 +18,8 @@
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library.
 layout(constant_id = 0) const int WGS1 = 64; // The local work-group size of the main kernel
-
-#ifdef ROUTINE_MAX
-	#undef ROUTINE_MAX
-#endif
 layout(constant_id = 1) const int ROUTINE_MAX = 0;
-
-#ifdef ROUTINE_MIN
-	#undef ROUTINE_MIN
-#endif
 layout(constant_id = 2) const int ROUTINE_MIN = 0;
-
-#ifdef ROUTINE_AMIN
-	#undef ROUTINE_AMIN
-#endif
 layout(constant_id = 3) const int ROUTINE_AMIN = 0;
 
 // =================================================================================================

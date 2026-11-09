@@ -15,7 +15,6 @@
 #define LEVEL3_USE_SPEC 1
 #include "level3.glsl"
 // =================================================================================================
-#if 1 //defined(ROUTINE_TRMM)
 
 // Same as above, but now the matrix' data is stored in the upper-triangle
 layout(local_size_x_id = 3, local_size_y_id = 4) in;
@@ -68,7 +67,6 @@ void main()
 	}
 }
 
-#endif
 // =================================================================================================
 
 // End of the C++11 raw string literal

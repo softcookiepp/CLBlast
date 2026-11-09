@@ -18,6 +18,7 @@
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
 // this kernel file is used outside of the CLBlast library.
 layout(constant_id = 0) const int WGS2 = 62; // The local work-group size of the epilogue kernel
+layout(constant_id = 1) const uint ROUTINE_SUM = 0;
 
 // =================================================================================================
 
@@ -58,12 +59,20 @@ void main()
 	}
 
 	// Computes the absolute value and stores the final result
-	if (lid == 0) {
-		#if ROUTINE_IS_COMPLEX && defined(ROUTINE_ASUM)
-			indexGM(asum, asum_offset).x = lm[0].x + lm[0].y; // the result is a non-complex number
-		#else
+	if (lid == 0)
+	{
+		if (ROUTINE_SUM == 0)
+		{
+			#if ROUTINE_IS_COMPLEX
+				indexGM(asum, asum_offset).x = lm[0].x + lm[0].y; // the result is a non-complex number
+			#else
+				indexGM(asum, asum_offset) = lm[0];
+			#endif
+		}
+		else
+		{
 			indexGM(asum, asum_offset) = lm[0];
-		#endif
+		}
 	}
 }
 

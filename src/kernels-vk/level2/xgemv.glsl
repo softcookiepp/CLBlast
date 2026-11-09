@@ -22,54 +22,16 @@ layout(constant_id = 0) const int WGS1 = 64;
 layout(constant_id = 1) const int WPT1 = 1;
 layout(constant_id = 2) const int UNROLL1 = 32;
 
-#ifdef ROUTINE_GBMV
-	#undef ROUTINE_GBMV
-#endif
+
 layout(constant_id = 3) const int ROUTINE_GBMV = 0;
-
-#ifdef ROUTINE_HEMV
-	#undef ROUTINE_HEMV
-#endif
 layout(constant_id = 4) const int ROUTINE_HEMV = 0;
-
-#ifdef ROUTINE_SYMV
-	#undef ROUTINE_SYMV
-#endif
 layout(constant_id = 5) const int ROUTINE_SYMV = 0;
-
-#ifdef ROUTINE_TRMV
-	#undef ROUTINE_TRMV
-#endif
 layout(constant_id = 6) const int ROUTINE_TRMV = 0;
-
-#ifdef ROUTINE_HBMV
-	#undef ROUTINE_HBMV
-#endif
 layout(constant_id = 7) const int ROUTINE_HBMV = 0;
-
-#ifdef ROUTINE_SBMV
-	#undef ROUTINE_SBMV
-#endif
 layout(constant_id = 8) const int ROUTINE_SBMV = 0;
-
-#ifdef ROUTINE_TBMV
-	#undef ROUTINE_TBMV
-#endif
 layout(constant_id = 9) const int ROUTINE_TBMV = 0;
-
-#ifdef ROUTINE_HPMV
-	#undef ROUTINE_HPMV
-#endif
 layout(constant_id = 10) const int ROUTINE_HPMV = 0;
-
-#ifdef ROUTINE_SPMV
-	#undef ROUTINE_SPMV
-#endif
 layout(constant_id = 11) const int ROUTINE_SPMV = 0;
-
-#ifdef ROUTINE_TPMV
-	#undef ROUTINE_TPMV
-#endif
 layout(constant_id = 12) const int ROUTINE_TPMV = 0;
 
 // buffer declarations

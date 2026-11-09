@@ -89,7 +89,8 @@ void Xsymm::DoSymm(const Layout layout, const Side side, const Triangle triangle
 		db_["TRA_SHUFFLE"],
 		db_["PADTRA_TILE"],
 		db_["PADTRA_WPT"],
-		db_["PADTRA_PAD"]
+		db_["PADTRA_PAD"],
+		0, 0, 0, 0
 	};
 	kernel->enqueue(global, spec);
 

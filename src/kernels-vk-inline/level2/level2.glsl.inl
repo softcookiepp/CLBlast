@@ -18,41 +18,12 @@ R"(
 layout(constant_id = 0) const int WGS1 = 8;
 layout(constant_id = 1) const int WGS2 = 8;
 layout(constant_id = 2) const int WPT = 1;
-
-// these will eventually be converted to specialization constants, but now I am too lazy
-#ifdef ROUTINE_HPR
-	#undef ROUTINE_HPR
-#endif
 layout(constant_id = 3) const int ROUTINE_HPR = 0;
-
-#ifdef ROUTINE_SPR
-	#undef ROUTINE_SPR
-#endif
 layout(constant_id = 4) const int ROUTINE_SPR = 0;
-
-#ifdef ROUTINE_GERC
-	#undef ROUTINE_GERC
-#endif
 layout(constant_id = 5) const int ROUTINE_GERC = 0;
-
-#ifdef ROUTINE_HER
-	#undef ROUTINE_HER
-#endif
 layout(constant_id = 6) const int ROUTINE_HER = 0;
-
-#ifdef ROUTINE_HER2
-	#undef ROUTINE_HER2
-#endif
 layout(constant_id = 7) const int ROUTINE_HER2 = 0;
-
-#ifdef ROUTINE_HPR2
-	#undef ROUTINE_HPR2
-#endif
 layout(constant_id = 8) const int ROUTINE_HPR2 = 0;
-
-#ifdef ROUTINE_SPR2
-	#undef ROUTINE_SPR2
-#endif
 layout(constant_id = 9) const int ROUTINE_SPR2 = 0;
 
 // =================================================================================================

@@ -53,7 +53,6 @@
 //R"(
 #include "../common.glsl"
 // =================================================================================================
-#if 1//defined(ROUTINE_INVERT)
 
 // Parameters set by the tuner
 // TODO: Make these actually tunable
@@ -203,7 +202,6 @@ void main()
 	}
 }
 
-#endif
 // =================================================================================================
 
 // End of the C++11 raw string literal

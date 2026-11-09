@@ -30,7 +30,7 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 	header_string += "#define DTYPE " + std::to_string(static_cast<uint32_t>(dtype())) + "\n";
 
 	// Adds the name of the routine as a define
-	header_string += "#define ROUTINE_" + routine_name + " 1\n";
+	//header_string += "#define ROUTINE_" + routine_name + " 1\n";
 
 	// For specific devices, use staggered/shuffled workgroup indices.
 	if (device()->getMetadata().physicalDeviceProperties.vendorID == tart::VendorID::eAMD)

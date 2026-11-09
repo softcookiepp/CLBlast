@@ -22,9 +22,7 @@
 #define LEVEL3_USE_SPEC 1
 #include "copy_matrix_batched_impl.glsl"
 // =================================================================================================
-#if 1//def ROUTINE_GEMMBATCHED
 
-// Batched version of the above
 layout(local_size_x_id = 3, local_size_y_id = 4, local_size_z = 1) in;
 
 layout(push_constant) uniform CopyMatrixBatched
@@ -60,7 +58,6 @@ void main()
 		alpha, 0, 0, 0);
 }
 
-#endif
 // =================================================================================================
 
 // End of the C++11 raw string literal

@@ -13,10 +13,7 @@
 //R"(
 #include "../dtype-enum.glsl"
 #ifndef DTYPE
-	#define DTYPE DTYPE_64
-#endif
-#ifndef ROUTINE_IS_COMPLEX
-	#define ROUTINE_IS_COMPLEX 1
+	#define DTYPE DTYPE_C64
 #endif
 #include "../common.glsl"
 #define LEVEL3_USE_SPEC 1

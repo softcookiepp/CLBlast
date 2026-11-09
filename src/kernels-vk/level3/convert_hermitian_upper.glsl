@@ -13,7 +13,7 @@
 //R"(
 #include "../dtype-enum.glsl"
 #ifndef DTYPE
-	#define DTYPE DTYPE_64
+	#define DTYPE DTYPE_C64
 #endif
 #include "../common.glsl"
 #define LEVEL3_USE_SPEC 1

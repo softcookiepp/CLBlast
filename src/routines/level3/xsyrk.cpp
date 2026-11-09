@@ -159,7 +159,8 @@ void Xsyrk::SyrkAB(const Layout layout, const Triangle triangle, const Transpose
 		PadCopyTransposeMatrix(this->mDtype, db_, a_one, a_two, a_ld, a_offset,
 													 a_buffer, a_one_i, a_two_i, a_one_i, 0, a_temp, tart::Scalar::one(), program_, true,
 													 a_do_transpose, false,
-													 false, false, false);
+													 false, false, false,
+													 true, false, false, false);
 		barrierBuffers.push_back(a_buffer);
 		barrierBuffers.push_back(a_temp);
 	}
@@ -167,7 +168,8 @@ void Xsyrk::SyrkAB(const Layout layout, const Triangle triangle, const Transpose
 		PadCopyTransposeMatrix(this->mDtype, db_, b_one, b_two, b_ld, b_offset,
 													 b_buffer, b_one_i, b_two_i, b_one_i, 0, b_temp, tart::Scalar::one(), program_, true,
 													 b_do_transpose, false,
-													 false, false, false);
+													 false, false, false,
+													 true, false, false, false);
 		barrierBuffers.push_back(b_buffer);
 		barrierBuffers.push_back(b_temp);
 	}
@@ -177,7 +179,8 @@ void Xsyrk::SyrkAB(const Layout layout, const Triangle triangle, const Transpose
 	PadCopyTransposeMatrix(this->mDtype, db_, n, n, c_ld, c_offset, c_buffer,
 												 n_ceiled, n_ceiled, n_ceiled, 0, c_temp, tart::Scalar::one(), program_, true, c_do_transpose,
 												 false,
-												 false, false, false);
+												 false, false, false,
+												 true, false, false, false);
 												 
 	// now we can just use a single barrier for them all!
 	//device_()->enqueueBarrier(barrierBuffers);
@@ -233,7 +236,8 @@ void Xsyrk::SyrkAB(const Layout layout, const Triangle triangle, const Transpose
 	const auto lower = !upper;
 	PadCopyTransposeMatrix(this->mDtype, db_, n_ceiled, n_ceiled, n_ceiled, 0, c_temp, n,
 												 n, c_ld, c_offset, c_buffer, tart::Scalar::one(), program_, false, c_do_transpose, false, upper,
-												 lower, false);
+												 lower, false,
+												 true, false, false, false);
 												 
 }
 

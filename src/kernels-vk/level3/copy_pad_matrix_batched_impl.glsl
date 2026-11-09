@@ -20,6 +20,9 @@
 #ifndef LEVEL3_USE_SPEC
 	#define LEVEL3_USE_SPEC 1
 #endif
+#ifndef LEVEL3_USE_SPEC_FOR_K_RANK_UPDATES
+	#define LEVEL3_USE_SPEC_FOR_K_RANK_UPDATES 1
+#endif
 #include "level3.glsl"
 // =================================================================================================
 

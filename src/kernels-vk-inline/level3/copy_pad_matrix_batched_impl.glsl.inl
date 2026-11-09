@@ -523,6 +523,9 @@ R"(
 #ifndef LEVEL3_USE_SPEC
 	#define LEVEL3_USE_SPEC 1
 #endif
+#ifndef LEVEL3_USE_SPEC_FOR_K_RANK_UPDATES
+	#define LEVEL3_USE_SPEC_FOR_K_RANK_UPDATES 1
+#endif
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
@@ -536,21 +539,6 @@ R"(
 #ifndef LEVEL3_GLSL
 #define LEVEL3_GLSL
 // =================================================================================================
-
-// Eventually, a lot of stuff will be replaced with specialization constants.
-// But for now, the boilerplate for that has yet to be written.
-#ifndef ROUTINE_SYRK
-	#define ROUTINE_SYRK 0
-#endif
-#ifndef ROUTINE_HERK
-	#define ROUTINE_HERK 0
-#endif
-#ifndef ROUTINE_SYR2K
-	#define ROUTINE_SYR2K 0
-#endif
-#ifndef ROUTINE_HER2K
-	#define ROUTINE_HER2K 0
-#endif
 
 
 // Parameters set by the tuner or by the database. Here they are given a basic default value in case
@@ -693,6 +681,45 @@ R"(
 	#endif
 	#ifndef PADTRA_PAD
 		#define PADTRA_PAD 0		// Padding of the local memory to avoid bank-conflicts
+	#endif
+#endif
+
+#ifndef LEVEL3_USE_SPEC_FOR_K_RANK_UPDATES
+	#define LEVEL3_USE_SPEC_FOR_K_RANK_UPDATES 0
+#endif
+
+#if LEVEL3_USE_SPEC_FOR_K_RANK_UPDATES == 1
+	#ifdef ROUTINE_SYRK
+		#undef ROUTINE_SYRK
+	#endif
+	layout(constant_id = 13) const uint ROUTINE_SYRK = 0;
+	
+	#ifdef ROUTINE_HERK
+		#undef ROUTINE_HERK
+	#endif
+	layout(constant_id = 14) const uint ROUTINE_HERK = 0;
+	
+	#ifdef ROUTINE_SYR2K
+		#undef ROUTINE_SYR2K
+	#endif
+	layout(constant_id = 15) const uint ROUTINE_SYR2K = 0;
+	
+	#ifdef ROUTINE_HER2K
+		#undef ROUTINE_HER2K
+	#endif
+	layout(constant_id = 16) const uint ROUTINE_HER2K = 0;
+#else
+	#ifndef ROUTINE_SYRK
+		#define ROUTINE_SYRK 0
+	#endif
+	#ifndef ROUTINE_HERK
+		#define ROUTINE_HERK 0
+	#endif
+	#ifndef ROUTINE_SYR2K
+		#define ROUTINE_SYR2K 0
+	#endif
+	#ifndef ROUTINE_HER2K
+		#define ROUTINE_HER2K 0
 	#endif
 #endif
 

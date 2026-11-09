@@ -39,12 +39,13 @@ void FillVector(const tart::DType& dtype, const std::shared_ptr<Program> program
 // Copies or transposes a matrix and optionally pads/unpads it with zeros. This method is also able
 // to write to symmetric and triangular matrices through optional arguments.
 inline void PadCopyTransposeMatrix(const tart::DType& dtype, const Databases& db, 
-														const size_t src_one, const size_t src_two,
-														const size_t src_ld, const size_t src_offset, const tart::buffer_ptr& src, const size_t dest_one,
-														const size_t dest_two, const size_t dest_ld, const size_t dest_offset,
-														const tart::buffer_ptr& dest, const tart::Scalar& alpha, const std::shared_ptr<Program>& program,
-														const bool do_pad, const bool do_transpose, const bool do_conjugate,
-														const bool upper = false, const bool lower = false, const bool diagonal_imag_zero = false)
+	const size_t src_one, const size_t src_two,
+	const size_t src_ld, const size_t src_offset, const tart::buffer_ptr& src, const size_t dest_one,
+	const size_t dest_two, const size_t dest_ld, const size_t dest_offset,
+	const tart::buffer_ptr& dest, const tart::Scalar& alpha, const std::shared_ptr<Program>& program,
+	const bool do_pad, const bool do_transpose, const bool do_conjugate,
+	const bool upper = false, const bool lower = false, const bool diagonal_imag_zero = false,
+	bool syrk = false, bool herk = false, bool syr2k = false, bool her2k = false)
 {
 	// Determines whether or not the fast-version could potentially be used
 	auto use_fast_kernel = (src_offset == 0) && (dest_offset == 0) && (do_conjugate == false) && (src_one == dest_one) &&
@@ -139,6 +140,13 @@ inline void PadCopyTransposeMatrix(const tart::DType& dtype, const Databases& db
 		db["PADTRA_WPT"],
 		db["PADTRA_PAD"]
 	};
+	if (!use_fast_kernel)
+	{
+		spec.push_back(static_cast<uint32_t>(syrk));
+		spec.push_back(static_cast<uint32_t>(herk));
+		spec.push_back(static_cast<uint32_t>(syr2k));
+		spec.push_back(static_cast<uint32_t>(her2k));
+	}
 	
 	if (do_transpose)
 	{
@@ -177,11 +185,12 @@ inline void PadCopyTransposeMatrix(const tart::DType& dtype, const Databases& db
 
 // Batched version of the above
 inline void PadCopyTransposeMatrixBatched(const Databases& db, const size_t src_one, const size_t src_two,
-																	 const size_t src_ld, const tart::buffer_ptr& src_offsets, const tart::buffer_ptr& src,
-																	 const size_t dest_one, const size_t dest_two, const size_t dest_ld,
-																	 const tart::buffer_ptr& dest_offsets, const tart::buffer_ptr& dest,
-																	 const std::shared_ptr<Program>& program, const bool do_pad, const bool do_transpose,
-																	 const bool do_conjugate, const size_t batch_count)
+	const size_t src_ld, const tart::buffer_ptr& src_offsets, const tart::buffer_ptr& src,
+	const size_t dest_one, const size_t dest_two, const size_t dest_ld,
+	const tart::buffer_ptr& dest_offsets, const tart::buffer_ptr& dest,
+	const std::shared_ptr<Program>& program, const bool do_pad, const bool do_transpose,
+	const bool do_conjugate, const size_t batch_count,
+	bool syrk = false, bool herk = false, bool syr2k = false, bool her2k = false)
 {
 	// Determines the right kernel
 	auto kernel_name = std::string{};
@@ -227,7 +236,11 @@ inline void PadCopyTransposeMatrixBatched(const Databases& db, const size_t src_
 		db["TRA_SHUFFLE"],
 		db["PADTRA_TILE"],
 		db["PADTRA_WPT"],
-		db["PADTRA_PAD"]
+		db["PADTRA_PAD"],
+		static_cast<uint32_t>(syrk),
+		static_cast<uint32_t>(herk),
+		static_cast<uint32_t>(syr2k),
+		static_cast<uint32_t>(her2k)
 	};
 	if (do_transpose) {
 		global = {Ceil(CeilDiv(dest_one, db["PADTRA_WPT"]), db["PADTRA_TILE"]),
@@ -248,12 +261,13 @@ inline void PadCopyTransposeMatrixBatched(const Databases& db, const size_t src_
 
 // Batched version of the above
 inline void PadCopyTransposeMatrixStridedBatched(const Databases& db, const size_t src_one,
-										const size_t src_two, const size_t src_ld, const size_t src_offset,
-										const size_t src_stride, const tart::buffer_ptr& src, const size_t dest_one,
-										const size_t dest_two, const size_t dest_ld, const size_t dest_offset,
-										const size_t dest_stride, const tart::buffer_ptr& dest,
-										const std::shared_ptr<Program>& program, const bool do_pad,
-										const bool do_transpose, const bool do_conjugate, const size_t batch_count)
+	const size_t src_two, const size_t src_ld, const size_t src_offset,
+	const size_t src_stride, const tart::buffer_ptr& src, const size_t dest_one,
+	const size_t dest_two, const size_t dest_ld, const size_t dest_offset,
+	const size_t dest_stride, const tart::buffer_ptr& dest,
+	const std::shared_ptr<Program>& program, const bool do_pad,
+	const bool do_transpose, const bool do_conjugate, const size_t batch_count,
+	bool syrk = false, bool herk = false, bool syr2k = false, bool her2k = false)
 {
 	// Determines the right kernel
 	auto kernel_name = std::string{};
@@ -301,7 +315,11 @@ inline void PadCopyTransposeMatrixStridedBatched(const Databases& db, const size
 		db["TRA_SHUFFLE"],
 		db["PADTRA_TILE"],
 		db["PADTRA_WPT"],
-		db["PADTRA_PAD"]
+		db["PADTRA_PAD"],
+		static_cast<uint32_t>(syrk),
+		static_cast<uint32_t>(herk),
+		static_cast<uint32_t>(syr2k),
+		static_cast<uint32_t>(her2k)
 	};
 	if (do_transpose) {
 		global = {Ceil(CeilDiv(dest_one, db["PADTRA_WPT"]), db["PADTRA_TILE"]),

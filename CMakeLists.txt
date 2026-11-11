@@ -233,16 +233,19 @@ endif()
 # Installs the library
 include(GNUInstallDirs)
 
+if(0)
 install(TARGETS clblast ${API_LIBRARIES} EXPORT CLBlast
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
 
 install(FILES include/clblast_half.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(FILES include/clblast_vk.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # Installs the config for find_package in dependent projects
 install(EXPORT CLBlast DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/CLBlast FILE CLBlastConfig.cmake)
+endif()
 
 # Install pkg-config file on Linux
 if(UNIX OR MINGW)

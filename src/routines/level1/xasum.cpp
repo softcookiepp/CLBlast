@@ -8,7 +8,7 @@
 // =================================================================================================
 
 #include "routines/level1/xasum.hpp"
-
+#include "routine_aot_cache.hpp"
 #include <cstddef>
 #include <string>
 #include <vector>
@@ -56,10 +56,8 @@ void Xasum::DoAsum(const size_t n, const tart::buffer_ptr& asum_buffer, const si
 	TestVectorScalar(mDtype, 1, asum_buffer, asum_offset);
 
 	// Retrieves the Xasum kernels from the compiled binary
-	Kernel kernel1Old(program_, "Xasum");
-	tart::kernel_ptr kernel1 = kernel1Old.get();
-	Kernel kernel2Old(program_, "XasumEpilogue");
-	tart::kernel_ptr kernel2 = kernel2Old.get();
+	tart::kernel_ptr kernel1 = getAsum(this->mDevice, this->mDtype);
+	tart::kernel_ptr kernel2 = getAsumEpilogue(this->mDevice, this->mDtype);
 	
 	// Creates the buffer for intermediate values
 	auto temp_size = 2 * db_["WGS2"];

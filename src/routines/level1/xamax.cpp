@@ -8,7 +8,7 @@
 // =================================================================================================
 
 #include "routines/level1/xamax.hpp"
-
+#include "routine_aot_cache.hpp"
 #include <cstddef>
 #include <string>
 #include <vector>
@@ -53,10 +53,8 @@ void Xamax::DoAmax(const size_t n, const tart::buffer_ptr& imax_buffer, const si
 	TestVectorIndex(mDtype, 1, imax_buffer, imax_offset);
 
 	// Retrieves the Xamax kernels from the compiled binary
-	auto kernel1Old = Kernel(program_, "Xamax");
-	tart::kernel_ptr kernel1 = kernel1Old.get();
-	auto kernel2Old = Kernel(program_, "XamaxEpilogue");
-	tart::kernel_ptr kernel2 = kernel2Old.get();
+	tart::kernel_ptr kernel1 = getAmax(this->mDevice, this->mDtype);
+	tart::kernel_ptr kernel2 = getAmaxEpilogue(this->mDevice, this->mDtype);
 
 	// Creates the buffer for intermediate values
 	auto temp_size = 2 * db_["WGS2"];

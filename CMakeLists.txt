@@ -249,13 +249,14 @@ install(FILES include/clblast_vk.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # Installs the config for find_package in dependent projects
 install(EXPORT CLBlast DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/CLBlast FILE CLBlastConfig.cmake)
-endif()
 
 # Install pkg-config file on Linux
 if(UNIX OR MINGW)
 		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/clblast.pc.in"
 									 "${CMAKE_CURRENT_BINARY_DIR}/clblast.pc" @ONLY IMMEDIATE)
 		install(FILES ${CMAKE_CURRENT_BINARY_DIR}/clblast.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+endif()
+
 endif()
 
 # ==================================================================================================

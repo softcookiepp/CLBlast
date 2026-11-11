@@ -49,6 +49,42 @@ using namespace tart::kernels;
 	
 #endif
 
+#ifndef DTYPE_SWITCH
+#define DTYPE_SWITCH(KERNEL, DTYPE, DEVICE) \
+	if (DTYPE == tart::dtypes::float16) \
+	{ \
+		return f16::KERNEL(DEVICE); \
+	} \
+	else if(DTYPE == tart::dtypes::float32) \
+	{ \
+		return f32::KERNEL(DEVICE); \
+	} \
+	else if(DTYPE == tart::dtypes::float64) \
+	{ \
+		return f64::KERNEL(DEVICE); \
+	} \
+	else if(DTYPE == tart::dtypes::complex64) \
+	{ \
+		return c64::KERNEL(DEVICE); \
+	} \
+	else if(DTYPE == tart::dtypes::complex128) \
+	{ \
+		return c128::KERNEL(DEVICE); \
+	} \
+	else \
+	{ \
+		throw std::runtime_error("dtype not implemented"); \
+		return nullptr; \
+	}
+
+#endif
+
+tart::kernel_ptr getAmax(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(amax, dtype, device); }
+tart::kernel_ptr getAmaxEpilogue(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(amax_epilogue, dtype, device); }
+
+tart::kernel_ptr getAsum(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(asum, dtype, device); }
+tart::kernel_ptr getAsumEpilogue(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(asum_epilogue, dtype, device); }
+
 tart::kernel_ptr getAxpy(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth)
 {
 	DTYPE_VW_SWITCH(axpy, dtype, vectorWidth, device);

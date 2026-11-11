@@ -99,6 +99,30 @@ build_kernel(c128 axpy_fastest_vw4 "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/
 build_kernel(c128 axpy_fastest_vw8 "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xaxpy_fastest.glsl" "-DDTYPE=DTYPE_C128 -DVW=8")
 build_kernel(c128 axpy_fastest_vw16 "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xaxpy_fastest.glsl" "-DDTYPE=DTYPE_C128 -DVW=16")
 
+# amax + epilogue
+build_kernel(f16 amax "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xamax.glsl" "-DDTYPE=DTYPE_F16")
+build_kernel(f32 amax "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xamax.glsl" "-DDTYPE=DTYPE_F32")
+build_kernel(f64 amax "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xamax.glsl" "-DDTYPE=DTYPE_F64")
+build_kernel(c64 amax "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xamax.glsl" "-DDTYPE=DTYPE_C64")
+build_kernel(c128 amax "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xamax.glsl" "-DDTYPE=DTYPE_C128")
+build_kernel(f16 amax_epilogue "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xamax_epilogue.glsl" "-DDTYPE=DTYPE_F16")
+build_kernel(f32 amax_epilogue "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xamax_epilogue.glsl" "-DDTYPE=DTYPE_F32")
+build_kernel(f64 amax_epilogue "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xamax_epilogue.glsl" "-DDTYPE=DTYPE_F64")
+build_kernel(c64 amax_epilogue "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xamax_epilogue.glsl" "-DDTYPE=DTYPE_C64")
+build_kernel(c128 amax_epilogue "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xamax_epilogue.glsl" "-DDTYPE=DTYPE_C128")
+
+# asum + epilogue
+build_kernel(f16 asum "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xasum.glsl" "-DDTYPE=DTYPE_F16")
+build_kernel(f32 asum "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xasum.glsl" "-DDTYPE=DTYPE_F32")
+build_kernel(f64 asum "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xasum.glsl" "-DDTYPE=DTYPE_F64")
+build_kernel(c64 asum "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xasum.glsl" "-DDTYPE=DTYPE_C64")
+build_kernel(c128 asum "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xasum.glsl" "-DDTYPE=DTYPE_C128")
+build_kernel(f16 asum_epilogue "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xasum_epilogue.glsl" "-DDTYPE=DTYPE_F16")
+build_kernel(f32 asum_epilogue "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xasum_epilogue.glsl" "-DDTYPE=DTYPE_F32")
+build_kernel(f64 asum_epilogue "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xasum_epilogue.glsl" "-DDTYPE=DTYPE_F64")
+build_kernel(c64 asum_epilogue "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xasum_epilogue.glsl" "-DDTYPE=DTYPE_C64")
+build_kernel(c128 asum_epilogue "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xasum_epilogue.glsl" "-DDTYPE=DTYPE_C128")
+
 
 set(ALL_KERNEL_NAMESPACES f16 f32 f64 c64 c128)
 

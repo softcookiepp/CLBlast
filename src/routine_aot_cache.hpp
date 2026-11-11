@@ -21,7 +21,9 @@ public:
 	
 };
 
-tart::kernel_ptr getAxpy(const tart::DType& dtype, const uint32_t vectorWidth);
+tart::kernel_ptr getAxpy(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth);
+tart::kernel_ptr getAxpyFaster(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth);
+tart::kernel_ptr getAxpyFastest(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth);
 
 
 } // namespace clblast

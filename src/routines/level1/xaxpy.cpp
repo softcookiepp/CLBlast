@@ -8,7 +8,7 @@
 // =================================================================================================
 
 #include "routines/level1/xaxpy.hpp"
-
+#include "routine_aot_cache.hpp"
 #include <cstddef>
 #include <string>
 #include <vector>
@@ -60,9 +60,14 @@ void Xaxpy::DoAxpy(const size_t n, const tart::Scalar& alpha, const tart::buffer
 	// If possible, run the fast-version of the kernel
 	const auto kernel_name = (use_fastest_kernel) ? "XaxpyFastest" : (use_faster_kernel) ? "XaxpyFaster" : "Xaxpy";
 
-	// Retrieves the Xaxpy kernel from the compiled binary
-	auto kernelOld = Kernel(program_, kernel_name);
-	tart::kernel_ptr kernel = kernelOld.get();
+	// And here we completely sidestep the kernel database entirely!
+	tart::kernel_ptr kernel = nullptr;
+	if (use_fastest_kernel)
+		kernel = getAxpyFastest(this->mDevice, this->mDtype, db_["VW"]);
+	else if (use_faster_kernel)
+		kernel = getAxpyFaster(this->mDevice, this->mDtype, db_["VW"]);
+	else
+		kernel = getAxpy(this->mDevice, this->mDtype, db_["VW"]);
 
 	// Sets the kernel arguments
 	#if VULKAN_USE_BDA

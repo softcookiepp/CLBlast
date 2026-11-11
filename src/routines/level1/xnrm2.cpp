@@ -52,10 +52,8 @@ void Xnrm2::DoNrm2(const size_t n, const tart::buffer_ptr& nrm2_buffer, const si
 	TestVectorScalar(mDtype, 1, nrm2_buffer, nrm2_offset);
 
 	// Retrieves the Xnrm2 kernels from the compiled binary
-	Kernel kernel1Old(program_, "Xnrm2");
-	tart::kernel_ptr kernel1 = kernel1Old.get();
-	Kernel kernel2Old(program_, "Xnrm2Epilogue");
-	tart::kernel_ptr kernel2 = kernel2Old.get();
+	tart::kernel_ptr kernel1 = getNrm2(this->mDevice, this->mDtype);
+	tart::kernel_ptr kernel2 = getNrm2Epilogue(this->mDevice, this->mDtype);
 
 	// Creates the buffer for intermediate values
 	auto temp_size = 2 * db_["WGS2"];

@@ -88,6 +88,9 @@ tart::kernel_ptr getAsumEpilogue(const tart::device_ptr& device, const tart::DTy
 tart::kernel_ptr getDot(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(dot, dtype, device); }
 tart::kernel_ptr getDotEpilogue(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(dot_epilogue, dtype, device); }
 
+tart::kernel_ptr getNrm2(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(nrm2, dtype, device); }
+tart::kernel_ptr getNrm2Epilogue(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(nrm2_epilogue, dtype, device); }
+
 tart::kernel_ptr getCopy(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(copy, dtype, vectorWidth, device); }
 tart::kernel_ptr getCopyFast(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(copy_fast, dtype, vectorWidth, device); }
 

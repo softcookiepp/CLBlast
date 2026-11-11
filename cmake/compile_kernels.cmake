@@ -46,7 +46,7 @@ foreach(VW ${VECTOR_WIDTHS})
 endforeach()
 
 
-set(REDUCE_KERNELS amax asum dot)
+set(REDUCE_KERNELS amax asum dot nrm2)
 foreach(KERNEL ${REDUCE_KERNELS})
 	build_kernel(f16 ${KERNEL} "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/x${KERNEL}.glsl" "-DDTYPE=DTYPE_F16")
 	build_kernel(f32 ${KERNEL} "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/x${KERNEL}.glsl" "-DDTYPE=DTYPE_F32")

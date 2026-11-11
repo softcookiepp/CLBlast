@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "routine.hpp"
+#include "routine_aot_cache.hpp"
 #include "routines/common.hpp"
 #include "utilities/backend.hpp"
 #include "utilities/buffer_test.hpp"
@@ -58,13 +59,17 @@ void Xcopy::DoCopy(const size_t n, const tart::buffer_ptr& x_buffer, const size_
 	// Will look into it.
 	bool use_fast_kernel = (x_offset == 0) && (x_inc == 1) && (y_offset == 0) && (y_inc == 1) &&
 												 IsMultiple(n, db_["WGS"] * db_["WPT"] * db_["VW"]);
+	
+	#if 1
+		tart::kernel_ptr kernel = (use_fast_kernel) ? getCopyFast(this->mDevice, this->mDtype, db_["VW"]) : getCopy(this->mDevice, this->mDtype, db_["VW"]);
+	#else
+		// If possible, run the fast-version of the kernel
+		auto kernel_name = (use_fast_kernel) ? "XcopyFast" : "Xcopy";
 
-	// If possible, run the fast-version of the kernel
-	auto kernel_name = (use_fast_kernel) ? "XcopyFast" : "Xcopy";
-
-	// Retrieves the Xcopy kernel from the compiled binary
-	auto kernelOld = Kernel(program_, kernel_name);
-	tart::kernel_ptr kernel = kernelOld.get();
+		// Retrieves the Xcopy kernel from the compiled binary
+		auto kernelOld = Kernel(program_, kernel_name);
+		tart::kernel_ptr kernel = kernelOld.get();
+	#endif
 	
 	// Sets the kernel arguments
 	if (use_fast_kernel)

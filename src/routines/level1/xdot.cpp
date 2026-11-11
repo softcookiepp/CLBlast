@@ -8,7 +8,7 @@
 // =================================================================================================
 
 #include "routines/level1/xdot.hpp"
-
+#include "routine_aot_cache.hpp"
 #include <cstddef>
 #include <string>
 #include <vector>
@@ -53,10 +53,8 @@ void Xdot::DoDot(const size_t n, const tart::buffer_ptr& dot_buffer, const size_
 	TestVectorScalar(mDtype, 1, dot_buffer, dot_offset);
 
 	// Retrieves the Xdot kernels from the compiled binary
-	Kernel kernel1Old(program_, "Xdot");
-	tart::kernel_ptr kernel1 = kernel1Old.get();
-	Kernel kernel2Old(program_, "XdotEpilogue");
-	tart::kernel_ptr kernel2 = kernel2Old.get();
+	tart::kernel_ptr kernel1 = getDot(this->mDevice, this->mDtype);
+	tart::kernel_ptr kernel2 = getDotEpilogue(this->mDevice, this->mDtype);
 
 	// Creates the buffer for intermediate values
 	auto temp_size = 2 * db_["WGS2"] * mDtype.size();

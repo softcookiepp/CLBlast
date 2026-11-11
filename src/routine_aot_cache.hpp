@@ -14,6 +14,9 @@ tart::kernel_ptr getAmaxEpilogue(const tart::device_ptr& device, const tart::DTy
 tart::kernel_ptr getAsum(const tart::device_ptr& device, const tart::DType& dtype);
 tart::kernel_ptr getAsumEpilogue(const tart::device_ptr& device, const tart::DType& dtype);
 
+tart::kernel_ptr getDot(const tart::device_ptr& device, const tart::DType& dtype);
+tart::kernel_ptr getDotEpilogue(const tart::device_ptr& device, const tart::DType& dtype);
+
 tart::kernel_ptr getCopy(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth);
 tart::kernel_ptr getCopyFast(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth);
 

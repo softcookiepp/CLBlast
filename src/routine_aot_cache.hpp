@@ -3,8 +3,7 @@
 
 #include "clblast_vk.h"
 #include <cstdint>
-
-#include "routines.hpp"
+#include "tart.hpp"
 
 namespace clblast
 {
@@ -21,6 +20,9 @@ public:
 	
 	
 };
+
+tart::kernel_ptr getAxpy(const tart::DType& dtype, const uint32_t vectorWidth);
+
 
 } // namespace clblast
 

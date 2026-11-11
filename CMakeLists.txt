@@ -189,6 +189,7 @@ set(SOURCES
 	src/routines/level2/level2.cpp
 	src/routines/level3/level3.cpp
 	src/routines/levelx/levelx.cpp
+	src/routine_aot_cache.cpp
 )
 
 if(OPENCL)
@@ -215,8 +216,9 @@ set_target_properties(clblast PROPERTIES VERSION ${clblast_VERSION} SOVERSION ${
 target_link_libraries(clblast ${API_LIBRARIES})
 
 # Now this is where we add the precompiled kernel SPIR-V
+include(${PROJECT_SOURCE_DIR}/tart/cmake/CMakeVariables.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/compile_kernels.cmake)
-tart_add_kernel_sources(clblast all-blas-kernels ${ALL_KERNEL_NAMESPACES})
+tart_add_kernel_sources(clblast all-blas-kernels "${ALL_KERNEL_NAMESPACES}")
 
 check_cxx_symbol_exists(clblast::Swap<float> "clblast_vk.h" HAVE_SYMBOL_THINGY)
 

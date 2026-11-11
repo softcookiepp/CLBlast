@@ -1,7 +1,9 @@
 
+
 # most args will be consistent, so wrap it
 macro(build_kernel KERNEL_NAMESPACE KERNEL_NAME INPUT_FILENAME BUILD_ARGS)
-	tart_build_kernel_spv(${KERNEL_NAMESPACE} ${KERNEL_NAME} main glsl ${INPUT_FILENAME} ${BUILD_ARGS})
+	message(${BUILD_ARGS})
+	tart_build_kernel_spv(${KERNEL_NAMESPACE} ${KERNEL_NAME} main glsl ${INPUT_FILENAME} "${BUILD_ARGS}")
 endmacro()
 
 build_kernel(f16 axpy_vw1 "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xaxpy.glsl" "-DDTYPE=DTYPE_F16 -DVW=1")
@@ -35,9 +37,5 @@ build_kernel(c128 axpy_vw8 "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xaxpy.gl
 build_kernel(c128 axpy_vw16 "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xaxpy.glsl" "-DDTYPE=DTYPE_C128 -DVW=16")
 
 
-list(APPEND ALL_KERNEL_NAMESPACES
-	f16
-	f32
-	f64
-	c64
-	c128)
+set(ALL_KERNEL_NAMESPACES f16 f32 f64 c64 c128)
+

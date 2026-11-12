@@ -1,4 +1,5 @@
 // it really works!
+#include "routine_aot_cache.hpp"
 #include "xgemm.cpp"
 #include "xhemm.cpp"
 #include "xher2k.cpp"

@@ -29,7 +29,13 @@
 		#if VWN == 1
 			return subgroupShuffle(reg, uint(src));
 		#else
-			return realN(subgroupShuffle(reg.s, uint(src)));
+			realN ret;
+			[[unroll]]
+			for (uint i = 0; i < VWN; i += 1)
+			{
+				ret.s[i] = subgroupShuffle(reg.s[i], uint(src));
+			}
+			return ret;
 		#endif
 	}
 #endif
@@ -260,12 +266,11 @@ void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
 							for (int _ki = 0; _ki < KREG/VWN; _ki += 1)
 							{
 								realN aval;
-								#if SUBGROUP_OPERATIONS_SUPPORTED == 1
-									if (ACTUALLY_USE_SUBGROUP_SHUFFLING)
-										aval = clblast_sub_group_shuffle(apm_gk1[_ki], _ni);
-									else
-								#endif
+								#if SUBGROUP_OPERATIONS_SUPPORTED == 1 && ACTUALLY_USE_SUBGROUP_SHUFFLING == 1
+									aval = clblast_sub_group_shuffle(apm_gk1[_ki], _ni);
+								#else
 										aval = apm_gk1[_ni * (KREG/VWN) + _ki];
+								#endif
 								#if VWN == 1
 									cpm[_ni * (MWI/VWM) + _mi] = MultiplyAddVector(cpm[_ni * (MWI/VWM) + _mi], bpm_gk1[(VWN * _ki + 0) * (MWI/VWM) + _mi], aval);
 								#else

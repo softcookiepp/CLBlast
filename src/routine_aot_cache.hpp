@@ -44,6 +44,8 @@ tart::kernel_ptr getTrsvForward(const tart::device_ptr& device, const tart::DTyp
 tart::kernel_ptr getTrsvBackward(const tart::device_ptr& device, const tart::DType& dtype);
 tart::kernel_ptr getTrsvFillVector(const tart::device_ptr& device, const tart::DType& dtype);
 
+tart::kernel_ptr getGemm(const tart::device_ptr& device, const tart::DType& dtype, const bool subgroupSupport, const uint32_t vwm, const uint32_t vwn);
+
 } // namespace clblast
 
 #endif

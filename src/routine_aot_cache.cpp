@@ -49,6 +49,55 @@ using namespace tart::kernels;
 	
 #endif
 
+#ifndef DUAL_VW_SWITCH
+#define DUAL_VW_SWITCH(NAMESPACE, KERNEL, VW1, VW2, DEVICE) \
+		switch(VW1) \
+		{ \
+			case 1: { VW_SWITCH(NAMESPACE, KERNEL##_vw1, VW2, DEVICE) } \
+			case 2: { VW_SWITCH(NAMESPACE, KERNEL##_vw2, VW2, DEVICE) } \
+			case 4: { VW_SWITCH(NAMESPACE, KERNEL##_vw4, VW2, DEVICE) } \
+			case 8: { VW_SWITCH(NAMESPACE, KERNEL##_vw8, VW2, DEVICE) } \
+			case 16: { VW_SWITCH(NAMESPACE, KERNEL##_vw16, VW2, DEVICE) } \
+			default: throw std::runtime_error("Invalid vector width"); \
+		}
+#endif
+
+#ifndef DUAL_VW_SUBGROUP_SWITCH
+#define DUAL_VW_SUBGROUP_SWITCH(NAMESPACE, KERNEL, SUBGROUP_SUPPORT, VW1, VW2, DEVICE) \
+	if (SUBGROUP_SUPPORT) { DUAL_VW_SWITCH(NAMESPACE, KERNEL##_##sub1, VW1, VW2, DEVICE) } \
+	else { DUAL_VW_SWITCH(NAMESPACE, KERNEL##_##sub0, VW1, VW2, DEVICE) } \
+	
+#endif
+
+#ifndef DTYPE_DUAL_VW_SUBGROUP_SWITCH
+#define DTYPE_DUAL_VW_SUBGROUP_SWITCH(DTYPE, KERNEL, SUBGROUP_SUPPORT, VW1, VW2, DEVICE) \
+	if (DTYPE == tart::dtypes::float16) \
+	{ \
+		DUAL_VW_SUBGROUP_SWITCH(f16, KERNEL, SUBGROUP_SUPPORT, VW1, VW2, DEVICE); \
+	} \
+	else if(DTYPE == tart::dtypes::float32) \
+	{ \
+		DUAL_VW_SUBGROUP_SWITCH(f16, KERNEL, SUBGROUP_SUPPORT, VW1, VW2, DEVICE); \
+	} \
+	else if(DTYPE == tart::dtypes::float64) \
+	{ \
+		DUAL_VW_SUBGROUP_SWITCH(f16, KERNEL, SUBGROUP_SUPPORT, VW1, VW2, DEVICE); \
+	} \
+	else if(DTYPE == tart::dtypes::complex64) \
+	{ \
+		DUAL_VW_SUBGROUP_SWITCH(f16, KERNEL, SUBGROUP_SUPPORT, VW1, VW2, DEVICE); \
+	} \
+	else if(DTYPE == tart::dtypes::complex128) \
+	{ \
+		DUAL_VW_SUBGROUP_SWITCH(f16, KERNEL, SUBGROUP_SUPPORT, VW1, VW2, DEVICE); \
+	} \
+	else \
+	{ \
+		throw std::runtime_error("dtype not implemented"); \
+		return nullptr; \
+	}
+#endif
+
 #ifndef DTYPE_SWITCH
 #define DTYPE_SWITCH(KERNEL, DTYPE, DEVICE) \
 	if (DTYPE == tart::dtypes::float16) \
@@ -125,5 +174,10 @@ tart::kernel_ptr getHer2(const tart::device_ptr& device, const tart::DType& dtyp
 tart::kernel_ptr getTrsvForward(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(trsv_forward, dtype, device); }
 tart::kernel_ptr getTrsvBackward(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(trsv_backward, dtype, device); }
 tart::kernel_ptr getTrsvFillVector(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(trsv_fill_vector, dtype, device); }
+
+tart::kernel_ptr getGemm(const tart::device_ptr& device, const tart::DType& dtype, const bool subgroupSupport, const uint32_t vwm, const uint32_t vwn)
+{
+	DTYPE_DUAL_VW_SUBGROUP_SWITCH(dtype, gemm, subgroupSupport, vwm, vwn, device)
+}
 
 } // namespace clblast

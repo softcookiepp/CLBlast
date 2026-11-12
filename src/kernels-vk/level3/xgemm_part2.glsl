@@ -18,7 +18,8 @@
 // The vectorised multiply-add function
 realM MultiplyAddVector(realM cvec, const realM avec, const real bval)
 {
-	#if ROUTINE_IS_COMPLEX == 0
+	// no native vector widths over 4 in GLSL
+	#if ROUTINE_IS_COMPLEX == 0 && VWM < 8
 		if (USE_VECTOR_MAD == 0)
 		{
 			cvec.s += avec.s * bval;

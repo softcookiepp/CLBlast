@@ -76,6 +76,14 @@ R"(
 #if SUBGROUP_OPERATIONS_SUPPORTED
 	//#extension GL_EXT_shader_subgroup : require
 	#extension GL_KHR_shader_subgroup_shuffle : require
+	#ifndef SUBGROUP_SIZE
+		#define SUBGROUP_SIZE gl_SubgroupSize
+	#endif
+#else
+	#ifndef SUBGROUP_SIZE
+		// unused, but still needs value so code compiles
+		#define SUBGROUP_SIZE 32
+	#endif
 #endif
 
 // Enable support for half-precision
@@ -527,8 +535,11 @@ R"(
 layout(constant_id = 0) const int WGS3 = 64;
 layout(constant_id = 1) const int WPT3 = 64;
 
+#ifndef VW
+	#define VW 1
+#endif
 #ifndef VW3
-	#define VW3 1			 // Vector width of matrix A loads
+	#define VW3 VW			 // Vector width of matrix A loads
 #endif
 
 // =================================================================================================

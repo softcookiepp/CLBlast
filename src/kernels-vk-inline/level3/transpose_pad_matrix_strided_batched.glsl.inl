@@ -100,6 +100,14 @@ R"(
 #if SUBGROUP_OPERATIONS_SUPPORTED
 	//#extension GL_EXT_shader_subgroup : require
 	#extension GL_KHR_shader_subgroup_shuffle : require
+	#ifndef SUBGROUP_SIZE
+		#define SUBGROUP_SIZE gl_SubgroupSize
+	#endif
+#else
+	#ifndef SUBGROUP_SIZE
+		// unused, but still needs value so code compiles
+		#define SUBGROUP_SIZE 32
+	#endif
 #endif
 
 // Enable support for half-precision

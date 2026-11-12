@@ -241,8 +241,7 @@ void Xgemm::GemmIndirect(const size_t m, const size_t n, const size_t k, const t
 	}
 
 	// Retrieves the Xgemm kernel from the compiled binary
-	Kernel kernelOld(program_, "Xgemm");
-	tart::kernel_ptr kernel = kernelOld.get();
+	tart::kernel_ptr kernel = getGemm(this->mDevice, this->mDtype, this->mDevice->getMetadata().subgroupAdd, db_["VWM"], db_["VWN"]);
 
 	// Sets the kernel arguments
 	kernel->setArg(0, static_cast<int>(m_ceiled));

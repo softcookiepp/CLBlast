@@ -42,13 +42,10 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 	if (meta.subgroupAdd)
 	{
 		header_string += "#define SUBGROUP_OPERATIONS_SUPPORTED 1\n";
-		header_string += "#define USE_SUBGROUP_SHUFFLING 1\n";
-		header_string += ("#define SUBGROUP_SIZE " + std::to_string(meta.subgroupSize) + "\n");
 	}
 	else
 	{
 		header_string += "#define SUBGROUP_OPERATIONS_SUPPORTED 0\n";
-		header_string += "#define USE_SUBGROUP_SHUFFLING 0\n";
 		header_string += ("#define SUBGROUP_SIZE " + std::to_string(meta.subgroupSize) + "\n");
 	}
 	#if VULKAN_USE_BDA

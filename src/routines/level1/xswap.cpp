@@ -57,11 +57,7 @@ void Xswap::DoSwap(const size_t n, const tart::buffer_ptr& x_buffer, const size_
 
 
 	// If possible, run the fast-version of the kernel
-	auto kernel_name = (use_fast_kernel) ? "XswapFast" : "Xswap";
-
-	// Retrieves the Xswap kernel from the compiled binary
-	auto kernelOld = Kernel(program_, kernel_name);
-	tart::kernel_ptr kernel = kernelOld.get();
+	tart::kernel_ptr kernel = (use_fast_kernel) ? getSwapFast(this->mDevice, this->mDtype, db_["VW"]) : getSwap(this->mDevice, this->mDtype, db_["VW"]);
 	
 	// Sets the kernel arguments
 #if VULKAN_API

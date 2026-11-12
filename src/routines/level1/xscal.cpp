@@ -56,11 +56,7 @@ void Xscal::DoScal(const size_t n, const tart::Scalar& alpha, const tart::buffer
 	bool use_fast_kernel = (x_offset == 0) && (x_inc == 1) && IsMultiple(n, db_["WGS"] * db_["WPT"] * db_["VW"]);
 
 	// If possible, run the fast-version of the kernel
-	auto kernel_name = (use_fast_kernel) ? "XscalFast" : "Xscal";
-	
-	// Retrieves the Xscal kernel from the compiled binary
-	auto kernelOld = Kernel(program_, kernel_name);
-	tart::kernel_ptr kernel = kernelOld.get();
+	tart::kernel_ptr kernel = (use_fast_kernel) ? getScalFast(this->mDevice, this->mDtype, db_["VW"]) : getScal(this->mDevice, this->mDtype, db_["VW"]);
 	
 #if VULKAN_API
 	#if VULKAN_USE_BDA

@@ -94,6 +94,12 @@ tart::kernel_ptr getNrm2Epilogue(const tart::device_ptr& device, const tart::DTy
 tart::kernel_ptr getCopy(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(copy, dtype, vectorWidth, device); }
 tart::kernel_ptr getCopyFast(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(copy_fast, dtype, vectorWidth, device); }
 
+tart::kernel_ptr getScal(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(scal, dtype, vectorWidth, device); }
+tart::kernel_ptr getScalFast(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(scal_fast, dtype, vectorWidth, device); }
+
+tart::kernel_ptr getSwap(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(swap, dtype, vectorWidth, device); }
+tart::kernel_ptr getSwapFast(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(swap_fast, dtype, vectorWidth, device); }
+
 tart::kernel_ptr getAxpy(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth)
 {
 	DTYPE_VW_SWITCH(axpy, dtype, vectorWidth, device);

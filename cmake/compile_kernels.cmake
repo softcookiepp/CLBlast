@@ -29,20 +29,23 @@ foreach(VW ${VECTOR_WIDTHS})
 	build_kernel(f64 "axpy_fastest_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xaxpy_fastest.glsl" "-DDTYPE=DTYPE_F64 -DVW=${VW}")
 	build_kernel(c64 "axpy_fastest_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xaxpy_fastest.glsl" "-DDTYPE=DTYPE_C64 -DVW=${VW}")
 	build_kernel(c128 "axpy_fastest_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xaxpy_fastest.glsl" "-DDTYPE=DTYPE_C128 -DVW=${VW}")
-	
-	# copy
-	build_kernel(f16 "copy_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xcopy.glsl" "-DDTYPE=DTYPE_F16 -DVW=${VW}")
-	build_kernel(f32 "copy_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xcopy.glsl" "-DDTYPE=DTYPE_F32 -DVW=${VW}")
-	build_kernel(f64 "copy_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xcopy.glsl" "-DDTYPE=DTYPE_F64 -DVW=${VW}")
-	build_kernel(c64 "copy_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xcopy.glsl" "-DDTYPE=DTYPE_C64 -DVW=${VW}")
-	build_kernel(c128 "copy_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xcopy.glsl" "-DDTYPE=DTYPE_C128 -DVW=${VW}")
-	
-	#copy fast
-	build_kernel(f16 "copy_fast_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xcopy_fast.glsl" "-DDTYPE=DTYPE_F16 -DVW=${VW}")
-	build_kernel(f32 "copy_fast_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xcopy_fast.glsl" "-DDTYPE=DTYPE_F32 -DVW=${VW}")
-	build_kernel(f64 "copy_fast_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xcopy_fast.glsl" "-DDTYPE=DTYPE_F64 -DVW=${VW}")
-	build_kernel(c64 "copy_fast_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xcopy_fast.glsl" "-DDTYPE=DTYPE_C64 -DVW=${VW}")
-	build_kernel(c128 "copy_fast_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/xcopy_fast.glsl" "-DDTYPE=DTYPE_C128 -DVW=${VW}")
+endforeach()
+
+set(ELEMENTWISE_2SPEED_KERNELS copy scal swap)
+foreach(KERNEL ${ELEMENTWISE_2SPEED_KERNELS})
+	foreach(VW ${VECTOR_WIDTHS})
+		build_kernel(f16 "${KERNEL}_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/x${KERNEL}.glsl" "-DDTYPE=DTYPE_F16 -DVW=${VW}")
+		build_kernel(f32 "${KERNEL}_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/x${KERNEL}.glsl" "-DDTYPE=DTYPE_F32 -DVW=${VW}")
+		build_kernel(f64 "${KERNEL}_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/x${KERNEL}.glsl" "-DDTYPE=DTYPE_F64 -DVW=${VW}")
+		build_kernel(c64 "${KERNEL}_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/x${KERNEL}.glsl" "-DDTYPE=DTYPE_C64 -DVW=${VW}")
+		build_kernel(c128 "${KERNEL}_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/x${KERNEL}.glsl" "-DDTYPE=DTYPE_C128 -DVW=${VW}")
+		
+		build_kernel(f16 "${KERNEL}_fast_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/x${KERNEL}_fast.glsl" "-DDTYPE=DTYPE_F16 -DVW=${VW}")
+		build_kernel(f32 "${KERNEL}_fast_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/x${KERNEL}_fast.glsl" "-DDTYPE=DTYPE_F32 -DVW=${VW}")
+		build_kernel(f64 "${KERNEL}_fast_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/x${KERNEL}_fast.glsl" "-DDTYPE=DTYPE_F64 -DVW=${VW}")
+		build_kernel(c64 "${KERNEL}_fast_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/x${KERNEL}_fast.glsl" "-DDTYPE=DTYPE_C64 -DVW=${VW}")
+		build_kernel(c128 "${KERNEL}_fast_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/x${KERNEL}_fast.glsl" "-DDTYPE=DTYPE_C128 -DVW=${VW}")
+	endforeach()
 endforeach()
 
 

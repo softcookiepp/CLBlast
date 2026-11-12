@@ -1,4 +1,5 @@
 // no way...
+#include "routine_aot_cache.hpp"
 #include "xgbmv.cpp"
 #include "xgemv.cpp"
 #include "xger.cpp"

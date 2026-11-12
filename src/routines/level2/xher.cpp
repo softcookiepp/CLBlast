@@ -73,8 +73,7 @@ void Xher::DoHer(const Layout layout, const Triangle triangle, const size_t n, c
 	}
 
 	// Retrieves the kernel from the compiled binary
-	auto kernelOld = Kernel(program_, "Xher");
-	tart::kernel_ptr kernel = kernelOld.get();
+	tart::kernel_ptr kernel = getHer(this->mDevice, this->mDtype);
 	
 	// Sets the kernel arguments
 	kernel->setArg(0, static_cast<int>(n));

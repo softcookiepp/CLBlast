@@ -8,7 +8,7 @@
 // =================================================================================================
 
 #include "routines/common.hpp"
-
+#include "routine_aot_cache.hpp"
 #include <cstddef>
 #include <memory>
 #include <vector>
@@ -41,8 +41,7 @@ void FillMatrix(const tart::DType& dtype, const std::shared_ptr<Program> program
 void FillVector(const tart::DType& dtype, const std::shared_ptr<Program> program, const size_t n, const size_t inc, const size_t offset,
 	const tart::buffer_ptr& dest, const tart::Scalar& constant_value, const size_t local_size)
 {
-	Kernel kernelOld(program, "FillVector");
-	tart::kernel_ptr kernel = kernelOld.get();
+	tart::kernel_ptr kernel = getTrsvFillVector(dest->getDevice(), dtype);
 	kernel->setArg(0, static_cast<int>(n));
 	kernel->setArg(1, static_cast<int>(inc));
 	kernel->setArg(2, static_cast<int>(offset));

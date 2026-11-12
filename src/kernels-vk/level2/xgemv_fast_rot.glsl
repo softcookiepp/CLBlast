@@ -25,8 +25,11 @@
 layout(constant_id = 0) const int WGS3 = 64;
 layout(constant_id = 1) const int WPT3 = 64;
 
+#ifndef VW
+	#define VW 1
+#endif
 #ifndef VW3
-	#define VW3 1			 // Vector width of matrix A loads
+	#define VW3 VW			 // Vector width of matrix A loads
 #endif
 
 // =================================================================================================

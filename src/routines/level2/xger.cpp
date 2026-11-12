@@ -64,8 +64,7 @@ void Xger::DoGer(const Layout layout, const size_t m, const size_t n, const tart
 	TestVectorY(mDtype, n, y_buffer, y_offset, y_inc);
 
 	// Retrieves the kernel from the compiled binary
-	auto kernelOld = Kernel(program_, "Xger");
-	tart::kernel_ptr kernel = kernelOld.get();
+	tart::kernel_ptr kernel = getGer(this->mDevice, this->mDtype);
 	
 	// Sets the kernel arguments
 	kernel->setArg(0, static_cast<int>(a_one));

@@ -23,8 +23,11 @@
 layout(constant_id = 0) const int WGS2 = 64;
 layout(constant_id = 1) const int WPT2 = 1;
 
+#ifndef VW
+	#define VW 1
+#endif
 #ifndef VW2
-	#define VW2 1			 // Vector width of matrix A loads
+	#define VW2 VW			 // Vector width of matrix A loads
 #endif
 
 // =================================================================================================

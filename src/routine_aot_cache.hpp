@@ -33,8 +33,16 @@ tart::kernel_ptr getAxpy(const tart::device_ptr& device, const tart::DType& dtyp
 tart::kernel_ptr getAxpyFaster(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth);
 tart::kernel_ptr getAxpyFastest(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth);
 
+tart::kernel_ptr getGemv(const tart::device_ptr& device, const tart::DType& dtype);
+tart::kernel_ptr getGemvFast(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth);
+tart::kernel_ptr getGemvFastRot(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth);
 
-
+tart::kernel_ptr getGer(const tart::device_ptr& device, const tart::DType& dtype);
+tart::kernel_ptr getHer(const tart::device_ptr& device, const tart::DType& dtype);
+tart::kernel_ptr getHer2(const tart::device_ptr& device, const tart::DType& dtype);
+tart::kernel_ptr getTrsvForward(const tart::device_ptr& device, const tart::DType& dtype);
+tart::kernel_ptr getTrsvBackward(const tart::device_ptr& device, const tart::DType& dtype);
+tart::kernel_ptr getTrsvFillVector(const tart::device_ptr& device, const tart::DType& dtype);
 
 } // namespace clblast
 

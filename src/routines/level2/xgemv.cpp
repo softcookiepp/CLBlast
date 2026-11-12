@@ -131,20 +131,23 @@ void Xgemv::MatVec(const Layout layout, const Transpose a_transpose, const size_
 	const auto m_ceiled = Ceil(m_real, db_["WGS1"] * db_["WPT1"]);
 	auto global_size = m_ceiled / db_["WPT1"];
 	auto local_size = db_["WGS1"];
-	if (fast_kernel) {
-		kernel_name = "XgemvFast";
+	tart::kernel_ptr kernel = nullptr;
+	if (fast_kernel)
+	{
+		kernel = getGemvFast(this->mDevice, this->mDtype, db_["VW2"]);
 		global_size = m_real / db_["WPT2"];
 		local_size = db_["WGS2"];
 	}
-	if (fast_kernel_rot) {
-		kernel_name = "XgemvFastRot";
+	else if (fast_kernel_rot)
+	{
+		kernel = getGemvFastRot(this->mDevice, this->mDtype, db_["VW3"]);
 		global_size = m_real;
 		local_size = db_["WGS3"];
 	}
-
-	// Retrieves the Xgemv kernel from the compiled binary
-	auto kernelOld = Kernel(program_, kernel_name);
-	tart::kernel_ptr kernel = kernelOld.get();
+	else
+	{
+		kernel = getGemv(this->mDevice, this->mDtype);
+	}
 	
 #if VULKAN_API
 	if (fast_kernel || fast_kernel_rot)

@@ -70,8 +70,7 @@ void Xher2::DoHer2(const Layout layout, const Triangle triangle, const size_t n,
 	TestVectorY(mDtype, n, y_buffer, y_offset, y_inc);
 
 	// Retrieves the kernel from the compiled binary
-	auto kernelOld = Kernel(program_, "Xher2");
-	tart::kernel_ptr kernel = kernelOld.get();
+	tart::kernel_ptr kernel = getHer2(this->mDevice, this->mDtype);
 	
 	// Sets the kernel arguments
 	kernel->setArg(0, static_cast<int>(n));

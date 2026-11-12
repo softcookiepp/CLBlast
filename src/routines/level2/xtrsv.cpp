@@ -51,9 +51,7 @@ void Xtrsv::Substitution(const Layout layout, const Triangle triangle, const Tra
 												 (triangle == Triangle::kLower && a_transpose != Transpose::kNo));
 
 	// Retrieves the kernel from the compiled binary
-	const auto kernel_name = (is_upper) ? "trsv_backward" : "trsv_forward";
-	Kernel kernelOld(program_, kernel_name);
-	tart::kernel_ptr kernel = kernelOld.get();
+	tart::kernel_ptr kernel = (is_upper) ? getTrsvBackward(mDevice, mDtype) : getTrsvForward(mDevice, mDtype);
 	
 	// Sets the kernel arguments
 	kernel->setArg(0, static_cast<int>(n));

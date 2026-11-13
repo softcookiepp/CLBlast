@@ -216,6 +216,14 @@ tart::kernel_ptr getGemm(const tart::device_ptr& device, const tart::DType& dtyp
 {
 	DTYPE_DUAL_VW_SUBGROUP_SWITCH(dtype, gemm, subgroupSupport, device)
 }
+tart::kernel_ptr getGemmUpper(const tart::device_ptr& device, const tart::DType& dtype, const bool subgroupSupport, const uint32_t vwm, const uint32_t vwn)
+{
+	DTYPE_DUAL_VW_SUBGROUP_SWITCH(dtype, gemm_upper, subgroupSupport, device)
+}
+tart::kernel_ptr getGemmLower(const tart::device_ptr& device, const tart::DType& dtype, const bool subgroupSupport, const uint32_t vwm, const uint32_t vwn)
+{
+	DTYPE_DUAL_VW_SUBGROUP_SWITCH(dtype, gemm_lower, subgroupSupport, device)
+}
 tart::kernel_ptr getGemmBatched(const tart::device_ptr& device, const tart::DType& dtype, const bool subgroupSupport, const uint32_t vwm, const uint32_t vwn)
 {
 	DTYPE_DUAL_VW_SUBGROUP_SWITCH(dtype, gemm_batched, subgroupSupport, device)

@@ -10,7 +10,11 @@ endmacro()
 set(BINARY_FLAG_OPTIONS 0 1)
 set(VECTOR_WIDTHS 1 2 4 8 16)
 
-set(LEVEL3_NOARG_NOX_KERNELS convert_hermitian_upper convert_hermitian_lower)
+set(LEVEL3_NOARG_NOX_KERNELS
+	convert_hermitian_upper convert_hermitian_lower
+	convert_symmetric_upper convert_symmetric_lower
+	convert_triangular_upper convert_triangular_lower
+	level3_fill_matrix)
 foreach(KERNEL ${LEVEL3_NOARG_NOX_KERNELS})
 	build_kernel(f16 "${KERNEL}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level3/${KERNEL}.glsl" "-DDTYPE=DTYPE_F16")
 	build_kernel(f32 "${KERNEL}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level3/${KERNEL}.glsl" "-DDTYPE=DTYPE_F32")

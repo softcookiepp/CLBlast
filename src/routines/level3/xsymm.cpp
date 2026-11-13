@@ -49,15 +49,13 @@ void Xsymm::DoSymm(const Layout layout, const Side side, const Triangle triangle
 	// default) and on whether we are dealing with an upper or lower triangle of the symmetric matrix
 	bool is_upper = ((triangle == Triangle::kUpper && layout != Layout::kRowMajor) ||
 									 (triangle == Triangle::kLower && layout == Layout::kRowMajor));
-	auto kernel_name = (is_upper) ? "SymmUpperToSquared" : "SymmLowerToSquared";
 
 	// Temporary buffer for a copy of the symmetric matrix
 	auto temp_symm = this->mDevice->allocateBuffer(this->mDtype.size() * k * k);
 
 	// Creates a general matrix from the symmetric matrix to be able to run the regular Xgemm
 	// routine afterwards
-	Kernel kernelOld(program_, kernel_name);
-	tart::kernel_ptr kernel = kernelOld.get();
+	tart::kernel_ptr kernel = (is_upper) ? getConvertSymmetricUpper(this->mDevice, this->mDtype) : getConvertSymmetricLower(this->mDevice, this->mDtype);
 
 	// Sets the arguments for the symmetric-to-squared kernel
 	kernel->setArg(0, static_cast<int>(k));

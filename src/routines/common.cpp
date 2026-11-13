@@ -24,8 +24,7 @@ namespace clblast {
 void FillMatrix(const tart::DType& dtype, const std::shared_ptr<Program> program, const size_t m, const size_t n, const size_t ld,
 	const size_t offset, const tart::buffer_ptr& dest, const tart::Scalar constant_value, const size_t local_size)
 {
-	Kernel kernelOld(program, "FillMatrix");
-	tart::kernel_ptr kernel = kernelOld.get();
+	tart::kernel_ptr kernel = getFillMatrix(dest->getDevice(), dtype);
 	kernel->setArg(0, static_cast<int>(m));
 	kernel->setArg(1, static_cast<int>(n));
 	kernel->setArg(2, static_cast<int>(ld));

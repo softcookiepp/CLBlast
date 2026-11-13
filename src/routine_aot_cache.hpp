@@ -55,6 +55,11 @@ tart::kernel_ptr getGemmDirectStridedBatched(const tart::device_ptr& device, con
 
 tart::kernel_ptr getConvertHermitianLower(const tart::device_ptr& device, const tart::DType& dtype);
 tart::kernel_ptr getConvertHermitianUpper(const tart::device_ptr& device, const tart::DType& dtype);
+tart::kernel_ptr getConvertSymmetricLower(const tart::device_ptr& device, const tart::DType& dtype);
+tart::kernel_ptr getConvertSymmetricUpper(const tart::device_ptr& device, const tart::DType& dtype);
+tart::kernel_ptr getConvertTriangularLower(const tart::device_ptr& device, const tart::DType& dtype);
+tart::kernel_ptr getConvertTriangularUpper(const tart::device_ptr& device, const tart::DType& dtype);
+tart::kernel_ptr getFillMatrix(const tart::device_ptr& device, const tart::DType& dtype);
 
 } // namespace clblast
 

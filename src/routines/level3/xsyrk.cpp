@@ -137,9 +137,6 @@ void Xsyrk::SyrkAB(const Layout layout, const Triangle triangle, const Transpose
 	const auto b_one_i = (!Xgemm::b_want_rotated_(db_["GEMMK"])) ? k_ceiled : n_ceiled;
 	const auto b_two_i = (!Xgemm::b_want_rotated_(db_["GEMMK"])) ? n_ceiled : k_ceiled;
 
-	// Decides which kernel to run: the upper-triangular or lower-triangular version
-	auto kernel_name = (triangle == Triangle::kUpper) ? "XgemmUpper" : "XgemmLower";
-
 	// Determines whether or not temporary matrices are needed
 	const auto a_no_temp =
 			Xgemm::NoTempBuffer(a_one, a_one_i, a_two, a_two_i, a_ld, a_offset, a_do_transpose, a_conjugate);
@@ -186,8 +183,9 @@ void Xsyrk::SyrkAB(const Layout layout, const Triangle triangle, const Transpose
 	//device_()->enqueueBarrier(barrierBuffers);
 
 	// Retrieves the XgemmUpper or XgemmLower kernel from the compiled binary
-	Kernel kernelOld(program_, kernel_name);
-	tart::kernel_ptr kernel = kernelOld.get();
+	tart::kernel_ptr kernel = (triangle == Triangle::kUpper) ?
+		getGemmUpper(this->mDevice, this->mDtype, this->mDevice->getMetadata().subgroupAdd, db_["VWM"], db_["VWN"]) :
+		getGemmLower(this->mDevice, this->mDtype, this->mDevice->getMetadata().subgroupAdd, db_["VWM"], db_["VWN"]);
 	
 	// Sets the kernel arguments
 	kernel->setArg(0, static_cast<int>(n_ceiled));

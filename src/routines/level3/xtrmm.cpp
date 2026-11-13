@@ -59,7 +59,6 @@ void Xtrmm::DoTrmm(const Layout layout, const Side side, const Triangle triangle
 	// default) and on whether we are dealing with an upper or lower triangle of the triangular matrix
 	bool is_upper = ((triangle == Triangle::kUpper && layout != Layout::kRowMajor) ||
 									 (triangle == Triangle::kLower && layout == Layout::kRowMajor));
-	auto kernel_name = (is_upper) ? "TriaUpperToSquared" : "TriaLowerToSquared";
 
 	// Determines whether or not the triangular matrix is unit-diagonal
 	auto unit_diagonal = (diagonal == Diagonal::kUnit) ? true : false;
@@ -69,8 +68,7 @@ void Xtrmm::DoTrmm(const Layout layout, const Side side, const Triangle triangle
 
 	// Creates a general matrix from the triangular matrix to be able to run the regular Xgemm
 	// routine afterwards
-	Kernel kernelOld(program_, kernel_name);
-	tart::kernel_ptr kernel = kernelOld.get();
+	tart::kernel_ptr kernel = (is_upper) ? getConvertTriangularUpper(this->mDevice, this->mDtype) : getConvertTriangularLower(this->mDevice, this->mDtype);
 	
 	// Sets the arguments for the triangular-to-squared kernel
 	kernel->setArg(0, static_cast<int>(k));

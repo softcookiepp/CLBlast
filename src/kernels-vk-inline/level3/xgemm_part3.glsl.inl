@@ -129,14 +129,18 @@ R"(
 // support for subgroup operations
 #ifndef SUBGROUP_OPERATIONS_SUPPORTED
 	#define SUBGROUP_OPERATIONS_SUPPORTED 0
+	#define USE_SUBGROUP_SHUFFLING 0
 #endif
+
 #if SUBGROUP_OPERATIONS_SUPPORTED
 	//#extension GL_EXT_shader_subgroup : require
+	#define USE_SUBGROUP_SHUFFLING 1
 	#extension GL_KHR_shader_subgroup_shuffle : require
 	#ifndef SUBGROUP_SIZE
 		#define SUBGROUP_SIZE gl_SubgroupSize
 	#endif
 #else
+	#define USE_SUBGROUP_SHUFFLING 0
 	#ifndef SUBGROUP_SIZE
 		// unused, but still needs value so code compiles
 		#define SUBGROUP_SIZE 32
@@ -967,7 +971,8 @@ realN LocalToPrivateB(
 // The vectorised multiply-add function
 realM MultiplyAddVector(realM cvec, const realM avec, const real bval)
 {
-	#if ROUTINE_IS_COMPLEX == 0
+	// no native vector widths over 4 in GLSL
+	#if ROUTINE_IS_COMPLEX == 0 && VWM < 8
 		if (USE_VECTOR_MAD == 0)
 		{
 			cvec.s += avec.s * bval;
@@ -1067,7 +1072,13 @@ void StoreResults(
 		#if VWN == 1
 			return subgroupShuffle(reg, uint(src));
 		#else
-			return realN(subgroupShuffle(reg.s, uint(src)));
+			realN ret;
+			[[unroll]]
+			for (uint i = 0; i < VWN; i += 1)
+			{
+				ret.s[i] = subgroupShuffle(reg.s[i], uint(src));
+			}
+			return ret;
 		#endif
 	}
 #endif
@@ -1298,12 +1309,11 @@ void XgemmBody(const int kSizeM, const int kSizeN, const int kSizeK,
 							for (int _ki = 0; _ki < KREG/VWN; _ki += 1)
 							{
 								realN aval;
-								#if SUBGROUP_OPERATIONS_SUPPORTED == 1
-									if (ACTUALLY_USE_SUBGROUP_SHUFFLING)
-										aval = clblast_sub_group_shuffle(apm_gk1[_ki], _ni);
-									else
-								#endif
+								#if SUBGROUP_OPERATIONS_SUPPORTED == 1 && ACTUALLY_USE_SUBGROUP_SHUFFLING == 1
+									aval = clblast_sub_group_shuffle(apm_gk1[_ki], _ni);
+								#else
 										aval = apm_gk1[_ni * (KREG/VWN) + _ki];
+								#endif
 								#if VWN == 1
 									cpm[_ni * (MWI/VWM) + _mi] = MultiplyAddVector(cpm[_ni * (MWI/VWM) + _mi], bpm_gk1[(VWN * _ki + 0) * (MWI/VWM) + _mi], aval);
 								#else

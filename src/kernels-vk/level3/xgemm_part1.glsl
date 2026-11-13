@@ -299,7 +299,14 @@ realN GlobalToPrivateA2D(
 			const __global realN* restrict agm = (const __global realN* restrict) a_ptr;
 		#endif
 		// ok yeah, this is probably not going to work quite the way I thought it would...
-		return agm[a_index];
+		#if VWN == 1
+			return a_ptr[a_index];
+		#else
+			realN outp;
+			vloadN2(outp, a_index, a_ptr, VWN);
+			return outp;
+		#endif
+		//return agm[a_index];
 	#else
 		const int a_index = (tid_y * NWI + _ni) * kSizeK + idk + _ki * VWN + a_ptr_offset;
 		#if VWN == 1

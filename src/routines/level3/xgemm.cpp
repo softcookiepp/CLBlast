@@ -44,7 +44,7 @@ Xgemm::Xgemm(const tart::DType& dtype, Queue& queue, EventPointer event, const s
 	,
 
 	// END OF THE COPY PAD TRANSPOSE ROUTINES
-	#include "../../kernels-vk-inline/level3/xgemm_direct_tt.glsl.inl"
+	#include "../../kernels-vk-inline/level3/xgemm_direct.glsl.inl"
 	,
 	// the final boss
 	#include "../../kernels-vk-inline/level3/xgemm_part4_xgemm.glsl.inl"
@@ -303,8 +303,7 @@ void Xgemm::GemmDirect(const size_t m, const size_t n, const size_t k, const tar
 													const bool c_do_transpose, const bool a_conjugate, const bool b_conjugate)
 	{
 	// Retrieves the XgemmDirect kernel from the compiled binary
-	Kernel kernelOld(program_, "XgemmDirectTT");
-	tart::kernel_ptr kernel = kernelOld.get();
+	tart::kernel_ptr kernel = getGemmDirect(this->mDevice, this->mDtype, db_["VWM"], db_["VWN"]);
 
 	// Sets the kernel arguments
 	kernel->setArg(0, static_cast<int>(m));

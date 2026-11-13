@@ -1,0 +1,61 @@
+#version 450
+
+// =================================================================================================
+// This file is part of the CLBlast project. Author(s):
+//	 Cedric Nugteren <www.cedricnugteren.nl>
+//
+// This is part 4 of 4 of the GEMM kernel. See part 1 for more information.
+//
+// =================================================================================================
+
+// Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
+// literal). Comment-out this line for syntax-highlighting when developing.
+//R"(
+#define USE_XGEMM_INDIRECT 1
+#include "xgemm_part3.glsl"
+// The upper-triangular and lower-triangular kernels are only used in special cases
+
+// Main entry point of the kernel. This is the upper-triangular version.
+layout(
+	local_size_x_id = 4, // MDIMC,
+	local_size_y_id = 5, // NDIMC,
+	local_size_z = 1
+	) in;
+
+layout(push_constant, std430) uniform XgemmUpper
+{
+	int kSizeN; int kSizeK;
+	real_arg arg_alpha;
+	real_arg arg_beta;
+#if USE_BDA
+	__global realM* restrict agm;
+	__global realN* restrict bgm;
+	__global realM* cgm;
+#endif
+};
+
+void main()
+{
+	const real alpha = (arg_alpha);
+	const real beta = (arg_beta);
+
+	// Skip these threads if they do not contain threads contributing to the upper-triangle
+	if ((GetGroupID1() + 1)*NWG < GetGroupID0()*MWG) {
+		return;
+	}
+
+	// Computes the matrix-multiplication and stores the result in global memory
+	XgemmBody(kSizeN, kSizeN, kSizeK,
+		#if USE_BDA
+			agm, bgm, cgm,
+		#else
+			0, 0, 0,
+		#endif
+		alpha, beta);
+}
+
+
+//)"
+// End of the C++11 raw string literal
+
+// =================================================================================================

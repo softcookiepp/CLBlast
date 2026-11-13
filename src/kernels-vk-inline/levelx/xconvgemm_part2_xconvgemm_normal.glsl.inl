@@ -136,14 +136,18 @@ R"(
 // support for subgroup operations
 #ifndef SUBGROUP_OPERATIONS_SUPPORTED
 	#define SUBGROUP_OPERATIONS_SUPPORTED 0
+	#define USE_SUBGROUP_SHUFFLING 0
 #endif
+
 #if SUBGROUP_OPERATIONS_SUPPORTED
 	//#extension GL_EXT_shader_subgroup : require
+	#define USE_SUBGROUP_SHUFFLING 1
 	#extension GL_KHR_shader_subgroup_shuffle : require
 	#ifndef SUBGROUP_SIZE
 		#define SUBGROUP_SIZE gl_SubgroupSize
 	#endif
 #else
+	#define USE_SUBGROUP_SHUFFLING 0
 	#ifndef SUBGROUP_SIZE
 		// unused, but still needs value so code compiles
 		#define SUBGROUP_SIZE 32

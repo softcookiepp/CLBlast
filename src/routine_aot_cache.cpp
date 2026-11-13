@@ -62,6 +62,36 @@ using namespace tart::kernels;
 		}
 #endif
 
+#ifndef DTYPE_DUAL_VW_SWITCH
+#define DTYPE_DUAL_VW_SWITCH(DTYPE, KERNEL, VW1, VW2, DEVICE) \
+	if (DTYPE == tart::dtypes::float16) \
+	{ \
+		DUAL_VW_SWITCH(f16, KERNEL, VW1, VW2, DEVICE); \
+	} \
+	else if(DTYPE == tart::dtypes::float32) \
+	{ \
+		DUAL_VW_SWITCH(f32, KERNEL, VW1, VW2, DEVICE); \
+	} \
+	else if(DTYPE == tart::dtypes::float64) \
+	{ \
+		DUAL_VW_SWITCH(f64, KERNEL, VW1, VW2, DEVICE); \
+	} \
+	else if(DTYPE == tart::dtypes::complex64) \
+	{ \
+		DUAL_VW_SWITCH(c64, KERNEL, VW1, VW2, DEVICE); \
+	} \
+	else if(DTYPE == tart::dtypes::complex128) \
+	{ \
+		DUAL_VW_SWITCH(c128, KERNEL, VW1, VW2, DEVICE); \
+	} \
+	else \
+	{ \
+		throw std::runtime_error("dtype not implemented"); \
+		return nullptr; \
+	}
+	
+#endif
+
 #ifndef DUAL_VW_SUBGROUP_SWITCH
 #define DUAL_VW_SUBGROUP_SWITCH(NAMESPACE, KERNEL, SUBGROUP_SUPPORT, VW1, VW2, DEVICE) \
 	if (SUBGROUP_SUPPORT) { DUAL_VW_SWITCH(NAMESPACE, KERNEL##_##sub1, VW1, VW2, DEVICE) } \
@@ -178,6 +208,11 @@ tart::kernel_ptr getTrsvFillVector(const tart::device_ptr& device, const tart::D
 tart::kernel_ptr getGemm(const tart::device_ptr& device, const tart::DType& dtype, const bool subgroupSupport, const uint32_t vwm, const uint32_t vwn)
 {
 	DTYPE_DUAL_VW_SUBGROUP_SWITCH(dtype, gemm, subgroupSupport, vwm, vwn, device)
+}
+
+tart::kernel_ptr getGemmDirect(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vwm, const uint32_t vwn)
+{
+	DTYPE_DUAL_VW_SWITCH(dtype, gemm_direct, vwm, vwn, device)
 }
 
 } // namespace clblast

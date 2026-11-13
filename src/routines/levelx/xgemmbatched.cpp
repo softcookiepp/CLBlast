@@ -278,8 +278,7 @@ void XgemmBatched::BatchedGemmDirect(const size_t m, const size_t n, const size_
 	c_offsets_device->copyIn(c_offsets);
 
 	// Retrieves the proper XgemmDirect kernel from the compiled binary
-	Kernel kernelOld(program_, "XgemmDirectBatchedTT");
-	tart::kernel_ptr kernel = kernelOld.get();
+	tart::kernel_ptr kernel = getGemmDirectBatched(this->mDevice, this->mDtype, db_["VWM"], db_["VWN"]);
 
 	// Sets the kernel arguments
 	kernel->setArg(0, static_cast<int>(m));

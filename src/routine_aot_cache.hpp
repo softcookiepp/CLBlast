@@ -45,7 +45,11 @@ tart::kernel_ptr getTrsvBackward(const tart::device_ptr& device, const tart::DTy
 tart::kernel_ptr getTrsvFillVector(const tart::device_ptr& device, const tart::DType& dtype);
 
 tart::kernel_ptr getGemm(const tart::device_ptr& device, const tart::DType& dtype, const bool subgroupSupport, const uint32_t vwm, const uint32_t vwn);
+tart::kernel_ptr getGemmBatched(const tart::device_ptr& device, const tart::DType& dtype, const bool subgroupSupport, const uint32_t vwm, const uint32_t vwn);
+tart::kernel_ptr getGemmStridedBatched(const tart::device_ptr& device, const tart::DType& dtype, const bool subgroupSupport, const uint32_t vwm, const uint32_t vwn);
 tart::kernel_ptr getGemmDirect(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vwm, const uint32_t vwn);
+tart::kernel_ptr getGemmDirectBatched(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vwm, const uint32_t vwn);
+tart::kernel_ptr getGemmDirectStridedBatched(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vwm, const uint32_t vwn);
 
 } // namespace clblast
 

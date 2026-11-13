@@ -216,10 +216,26 @@ tart::kernel_ptr getGemm(const tart::device_ptr& device, const tart::DType& dtyp
 {
 	DTYPE_DUAL_VW_SUBGROUP_SWITCH(dtype, gemm, subgroupSupport, device)
 }
+tart::kernel_ptr getGemmBatched(const tart::device_ptr& device, const tart::DType& dtype, const bool subgroupSupport, const uint32_t vwm, const uint32_t vwn)
+{
+	DTYPE_DUAL_VW_SUBGROUP_SWITCH(dtype, gemm_batched, subgroupSupport, device)
+}
+tart::kernel_ptr getGemmStridedBatched(const tart::device_ptr& device, const tart::DType& dtype, const bool subgroupSupport, const uint32_t vwm, const uint32_t vwn)
+{
+	DTYPE_DUAL_VW_SUBGROUP_SWITCH(dtype, gemm_strided_batched, subgroupSupport, device)
+}
 
 tart::kernel_ptr getGemmDirect(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vwm, const uint32_t vwn)
 {
 	DTYPE_DUAL_VW_SWITCH(dtype, gemm_direct, vwm, vwn, device)
+}
+tart::kernel_ptr getGemmDirectBatched(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vwm, const uint32_t vwn)
+{
+	DTYPE_DUAL_VW_SWITCH(dtype, gemm_direct_batched, vwm, vwn, device)
+}
+tart::kernel_ptr getGemmDirectStridedBatched(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vwm, const uint32_t vwn)
+{
+	DTYPE_DUAL_VW_SWITCH(dtype, gemm_direct_strided_batched, vwm, vwn, device)
 }
 
 } // namespace clblast

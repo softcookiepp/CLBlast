@@ -284,8 +284,7 @@ void XgemmStridedBatched::BatchedGemmDirect(
 		const bool a_conjugate, const bool b_conjugate, const size_t batch_count)
 {
 	// Retrieves the XgemmDirect kernel from the compiled binary
-	Kernel kernelOld(program_, "XgemmDirectStridedBatchedTT");
-	tart::kernel_ptr kernel = kernelOld.get();
+	tart::kernel_ptr kernel = getGemmDirectStridedBatched(this->mDevice, this->mDtype, db_["VWM"], db_["VWN"]);
 
 	// Sets the kernel arguments
 	kernel->setArg(0, static_cast<int>(m));

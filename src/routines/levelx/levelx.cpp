@@ -1,3 +1,4 @@
+#include "routine_aot_cache.hpp"
 #include "xaxpybatched.cpp"
 #include "xcol2im.cpp"
 #include "xconvgemm.cpp"

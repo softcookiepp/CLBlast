@@ -10,9 +10,21 @@ endmacro()
 set(BINARY_FLAG_OPTIONS 0 1)
 set(VECTOR_WIDTHS 1 2 4 8 16)
 
-set(GEMM_VW 1)
+set(LEVEL3_DUAL_VECTOR_WIDTH_KERNELS gemm_direct gemm_direct_batched gemm_direct_strided_batched)
+foreach(KERNEL ${LEVEL3_DUAL_VECTOR_WIDTH_KERNELS})
+	foreach(VWM ${VECTOR_WIDTHS})
+		foreach(VWN ${VECTOR_WIDTHS})
+			build_kernel(f16 "${KERNEL}_vw${VWM}_vw${VWN}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level3/x${KERNEL}.glsl" "-DDTYPE=DTYPE_F16 -DVWM=${VWM} -DVWN=${VWN}")
+			build_kernel(f32 "${KERNEL}_vw${VWM}_vw${VWN}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level3/x${KERNEL}.glsl" "-DDTYPE=DTYPE_F32 -DVWM=${VWM} -DVWN=${VWN}")
+			build_kernel(f64 "${KERNEL}_vw${VWM}_vw${VWN}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level3/x${KERNEL}.glsl" "-DDTYPE=DTYPE_F64 -DVWM=${VWM} -DVWN=${VWN}")
+			build_kernel(c64 "${KERNEL}_vw${VWM}_vw${VWN}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level3/x${KERNEL}.glsl" "-DDTYPE=DTYPE_C64 -DVWM=${VWM} -DVWN=${VWN}")
+			build_kernel(c128 "${KERNEL}_vw${VWM}_vw${VWN}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level3/x${KERNEL}.glsl" "-DDTYPE=DTYPE_C128 -DVWM=${VWM} -DVWN=${VWN}")
+		endforeach()
+	endforeach()
+endforeach()
 
-set(LEVEL3_SUBGROUP_DUAL_VECTOR_WIDTH_KERNELS gemm gemm_upper gemm_lower)
+set(GEMM_VW 1)
+set(LEVEL3_SUBGROUP_DUAL_VECTOR_WIDTH_KERNELS gemm gemm_upper gemm_lower gemm_batched gemm_strided_batched)
 foreach(KERNEL ${LEVEL3_SUBGROUP_DUAL_VECTOR_WIDTH_KERNELS})
 	foreach(SUBGROUP_SUPPORT ${BINARY_FLAG_OPTIONS})
 		foreach(VWM ${GEMM_VW})
@@ -26,23 +38,6 @@ foreach(KERNEL ${LEVEL3_SUBGROUP_DUAL_VECTOR_WIDTH_KERNELS})
 		endforeach()
 	endforeach()
 endforeach()
-
-set(LEVEL3_DUAL_VECTOR_WIDTH_KERNELS gemm_direct)
-foreach(KERNEL ${LEVEL3_DUAL_VECTOR_WIDTH_KERNELS})
-	foreach(VWM ${VECTOR_WIDTHS})
-		foreach(VWN ${VECTOR_WIDTHS})
-			build_kernel(f16 "${KERNEL}_vw${VWM}_vw${VWN}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level3/x${KERNEL}.glsl" "-DDTYPE=DTYPE_F16 -DVWM=${VWM} -DVWN=${VWN}")
-			build_kernel(f32 "${KERNEL}_vw${VWM}_vw${VWN}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level3/x${KERNEL}.glsl" "-DDTYPE=DTYPE_F32 -DVWM=${VWM} -DVWN=${VWN}")
-			build_kernel(f64 "${KERNEL}_vw${VWM}_vw${VWN}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level3/x${KERNEL}.glsl" "-DDTYPE=DTYPE_F64 -DVWM=${VWM} -DVWN=${VWN}")
-			build_kernel(c64 "${KERNEL}_vw${VWM}_vw${VWN}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level3/x${KERNEL}.glsl" "-DDTYPE=DTYPE_C64 -DVWM=${VWM} -DVWN=${VWN}")
-			build_kernel(c128 "${KERNEL}_vw${VWM}_vw${VWN}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level3/x${KERNEL}.glsl" "-DDTYPE=DTYPE_C128 -DVWM=${VWM} -DVWN=${VWN}")
-		endforeach()
-	endforeach()
-endforeach()
-
-
-
-
 
 set(VW_KERNELS_LEVEL1
 	axpy axpy_faster axpy_fastest

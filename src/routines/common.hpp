@@ -21,6 +21,7 @@
 #include "utilities/backend.hpp"
 #include "utilities/utilities.hpp"
 #include "routine.hpp"
+#include "routine_aot_cache.hpp"
 
 namespace clblast {
 
@@ -55,18 +56,20 @@ inline void PadCopyTransposeMatrix(const tart::DType& dtype, const Databases& db
 	// Determines the right kernel
 	auto kernel_name = std::string{};
 	auto pad_kernel = false;
+	tart::kernel_ptr kernel = nullptr;
+	tart::device_ptr device = dest->getDevice();
 	if (do_transpose)
 	{
 		if (use_fast_kernel && IsMultiple(src_ld, db["TRA_WPT"]) && IsMultiple(src_one, db["TRA_WPT"] * db["TRA_DIM"]) &&
 				IsMultiple(src_two, db["TRA_WPT"] * db["TRA_DIM"]))
 		{
-			kernel_name = "TransposeMatrixFast";
+			kernel = getTransposeMatrixFast(dest->getDevice(), dtype, db["TRA_WPT"]);
 		}
 		else
 		{
 			use_fast_kernel = false;
 			pad_kernel = (do_pad || do_conjugate);
-			kernel_name = (pad_kernel) ? "TransposePadMatrix" : "TransposeMatrix";
+			kernel = (pad_kernel) ? getTransposePadMatrix(device, dtype) : getTransposeMatrix(device, dtype);
 		}
 	}
 	else
@@ -74,19 +77,15 @@ inline void PadCopyTransposeMatrix(const tart::DType& dtype, const Databases& db
 		if (use_fast_kernel && IsMultiple(src_ld, db["COPY_VW"]) && IsMultiple(src_one, db["COPY_VW"] * db["COPY_DIMX"]) &&
 				IsMultiple(src_two, db["COPY_WPT"] * db["COPY_DIMY"]))
 		{
-			kernel_name = "CopyMatrixFast";
+			kernel = getCopyMatrixFast(device, dtype);
 		}
 		else
 		{
 			use_fast_kernel = false;
 			pad_kernel = do_pad;
-			kernel_name = (pad_kernel) ? "CopyPadMatrix" : "CopyMatrix";
+			kernel = (pad_kernel) ? getCopyPadMatrix(device, dtype) : getCopyMatrix(device, dtype);
 		}
 	}
-
-	// Retrieves the kernel from the compiled binary
-	auto kernelOld = Kernel(program, kernel_name);
-	tart::kernel_ptr kernel = kernelOld.get();
 	
 	// Sets the kernel arguments
 	if (use_fast_kernel)
@@ -184,7 +183,7 @@ inline void PadCopyTransposeMatrix(const tart::DType& dtype, const Databases& db
 }
 
 // Batched version of the above
-inline void PadCopyTransposeMatrixBatched(const Databases& db, const size_t src_one, const size_t src_two,
+inline void PadCopyTransposeMatrixBatched(const tart::DType& dtype, const Databases& db, const size_t src_one, const size_t src_two,
 	const size_t src_ld, const tart::buffer_ptr& src_offsets, const tart::buffer_ptr& src,
 	const size_t dest_one, const size_t dest_two, const size_t dest_ld,
 	const tart::buffer_ptr& dest_offsets, const tart::buffer_ptr& dest,
@@ -194,15 +193,13 @@ inline void PadCopyTransposeMatrixBatched(const Databases& db, const size_t src_
 {
 	// Determines the right kernel
 	auto kernel_name = std::string{};
+	tart::kernel_ptr kernel = nullptr;
+	tart::device_ptr device = dest->getDevice();
 	if (do_transpose) {
-		kernel_name = (do_pad) ? "TransposePadMatrixBatched" : "TransposeMatrixBatched";
+		kernel = (do_pad) ? getTransposePadMatrixBatched(device, dtype) : getTransposeMatrixBatched(device, dtype);
 	} else {
-		kernel_name = (do_pad) ? "CopyPadMatrixBatched" : "CopyMatrixBatched";
+		kernel = (do_pad) ? getCopyPadMatrixBatched(device, dtype) : getCopyMatrixBatched(device, dtype);
 	}
-
-	// Retrieves the kernel from the compiled binary
-	auto kernelOld = Kernel(program, kernel_name);
-	tart::kernel_ptr kernel = kernelOld.get();
 
 	// Sets the kernel arguments
 	kernel->setArg(0, static_cast<int>(src_one));
@@ -260,7 +257,7 @@ inline void PadCopyTransposeMatrixBatched(const Databases& db, const size_t src_
 }
 
 // Batched version of the above
-inline void PadCopyTransposeMatrixStridedBatched(const Databases& db, const size_t src_one,
+inline void PadCopyTransposeMatrixStridedBatched(const tart::DType& dtype, const Databases& db, const size_t src_one,
 	const size_t src_two, const size_t src_ld, const size_t src_offset,
 	const size_t src_stride, const tart::buffer_ptr& src, const size_t dest_one,
 	const size_t dest_two, const size_t dest_ld, const size_t dest_offset,
@@ -271,15 +268,13 @@ inline void PadCopyTransposeMatrixStridedBatched(const Databases& db, const size
 {
 	// Determines the right kernel
 	auto kernel_name = std::string{};
+	tart::kernel_ptr kernel = nullptr;
+	tart::device_ptr device = dest->getDevice();
 	if (do_transpose) {
-		kernel_name = (do_pad) ? "TransposePadMatrixStridedBatched" : "TransposeMatrixStridedBatched";
+		kernel = (do_pad) ? getTransposePadMatrixStridedBatched(device, dtype) : getTransposeMatrixStridedBatched(device, dtype);
 	} else {
-		kernel_name = (do_pad) ? "CopyPadMatrixStridedBatched" : "CopyMatrixStridedBatched";
+		kernel = (do_pad) ? getCopyPadMatrixStridedBatched(device, dtype) : getCopyMatrixStridedBatched(device, dtype);
 	}
-
-	// Retrieves the kernel from the compiled binary
-	auto kernelOld = Kernel(program, kernel_name);
-	tart::kernel_ptr kernel = kernelOld.get();
 	
 	// Sets the kernel arguments
 	kernel->setArg(0, static_cast<int>(src_one));

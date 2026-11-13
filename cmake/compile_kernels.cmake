@@ -10,11 +10,34 @@ endmacro()
 set(BINARY_FLAG_OPTIONS 0 1)
 set(VECTOR_WIDTHS 1 2 4 8 16)
 
+# only transpose_fast uses TRA_WPT, no other kernels use it
+foreach(VW ${VECTOR_WIDTHS})
+	build_kernel(f16 "transpose_fast_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level3/transpose_fast.glsl" "-DDTYPE=DTYPE_F16 -DTRA_WPT=${VW}")
+	build_kernel(f32 "transpose_fast_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level3/transpose_fast.glsl" "-DDTYPE=DTYPE_F32 -DTRA_WPT=${VW}")
+	build_kernel(f64 "transpose_fast_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level3/transpose_fast.glsl" "-DDTYPE=DTYPE_F64 -DTRA_WPT=${VW}")
+	build_kernel(c64 "transpose_fast_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level3/transpose_fast.glsl" "-DDTYPE=DTYPE_C64 -DTRA_WPT=${VW}")
+	build_kernel(c128 "transpose_fast_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level3/transpose_fast.glsl" "-DDTYPE=DTYPE_C128 -DTRA_WPT=${VW}")
+endforeach()
+
 set(LEVEL3_NOARG_NOX_KERNELS
 	convert_hermitian_upper convert_hermitian_lower
 	convert_symmetric_upper convert_symmetric_lower
 	convert_triangular_upper convert_triangular_lower
-	level3_fill_matrix)
+	level3_fill_matrix
+	transpose_pad_matrix
+	transpose_pad_matrix_batched
+	transpose_pad_matrix_strided_batched
+	transpose_matrix
+	transpose_matrix_batched
+	transpose_matrix_strided_batched
+	copy_matrix_fast
+	copy_pad_matrix
+	copy_pad_matrix_batched
+	copy_pad_matrix_strided_batched
+	copy_matrix
+	copy_matrix_batched
+	copy_matrix_strided_batched
+	)
 foreach(KERNEL ${LEVEL3_NOARG_NOX_KERNELS})
 	build_kernel(f16 "${KERNEL}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level3/${KERNEL}.glsl" "-DDTYPE=DTYPE_F16")
 	build_kernel(f32 "${KERNEL}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level3/${KERNEL}.glsl" "-DDTYPE=DTYPE_F32")
@@ -65,6 +88,16 @@ foreach(KERNEL ${VW_KERNELS_LEVEL1})
 		build_kernel(c64 "${KERNEL}_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/x${KERNEL}.glsl" "-DDTYPE=DTYPE_C64 -DVW=${VW}")
 		build_kernel(c128 "${KERNEL}_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/x${KERNEL}.glsl" "-DDTYPE=DTYPE_C128 -DVW=${VW}")
 	endforeach()
+endforeach()
+
+set(KERNELS_LEVEL1
+	axpy_batched)
+foreach(KERNEL ${KERNELS_LEVEL1})
+	build_kernel(f16 "${KERNEL}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/x${KERNEL}.glsl" "-DDTYPE=DTYPE_F16")
+	build_kernel(f32 "${KERNEL}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/x${KERNEL}.glsl" "-DDTYPE=DTYPE_F32")
+	build_kernel(f64 "${KERNEL}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/x${KERNEL}.glsl" "-DDTYPE=DTYPE_F64")
+	build_kernel(c64 "${KERNEL}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/x${KERNEL}.glsl" "-DDTYPE=DTYPE_C64")
+	build_kernel(c128 "${KERNEL}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/x${KERNEL}.glsl" "-DDTYPE=DTYPE_C128")
 endforeach()
 
 set(KERNELS_LEVEL2

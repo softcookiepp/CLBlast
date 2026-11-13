@@ -67,8 +67,7 @@ void XaxpyBatched::DoAxpyBatched(const size_t n, const tart::buffer_ptr& alphas_
 	y_offsets_device->copyIn(y_offsets_int);
 
 	// Retrieves the Xaxpy kernel from the compiled binary
-	Kernel kernelOld(program_, "XaxpyBatched");
-	tart::kernel_ptr kernel = kernelOld.get();
+	tart::kernel_ptr kernel = getAxpyBatched(mDevice, mDtype);
 
 	// Sets the kernel arguments
 	kernel->setArg(0, static_cast<int>(n));

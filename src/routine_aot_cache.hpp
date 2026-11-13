@@ -32,6 +32,7 @@ tart::kernel_ptr getSwapFast(const tart::device_ptr& device, const tart::DType& 
 tart::kernel_ptr getAxpy(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth);
 tart::kernel_ptr getAxpyFaster(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth);
 tart::kernel_ptr getAxpyFastest(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth);
+tart::kernel_ptr getAxpyBatched(const tart::device_ptr& device, const tart::DType& dtype);
 
 tart::kernel_ptr getGemv(const tart::device_ptr& device, const tart::DType& dtype);
 tart::kernel_ptr getGemvFast(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth);
@@ -60,6 +61,23 @@ tart::kernel_ptr getConvertSymmetricUpper(const tart::device_ptr& device, const 
 tart::kernel_ptr getConvertTriangularLower(const tart::device_ptr& device, const tart::DType& dtype);
 tart::kernel_ptr getConvertTriangularUpper(const tart::device_ptr& device, const tart::DType& dtype);
 tart::kernel_ptr getFillMatrix(const tart::device_ptr& device, const tart::DType& dtype);
+tart::kernel_ptr getTransposeMatrixFast(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth);
+tart::kernel_ptr getTransposePadMatrix(const tart::device_ptr& device, const tart::DType& dtype);
+tart::kernel_ptr getTransposeMatrix(const tart::device_ptr& device, const tart::DType& dtype);
+tart::kernel_ptr getCopyMatrixFast(const tart::device_ptr& device, const tart::DType& dtype);
+tart::kernel_ptr getCopyPadMatrix(const tart::device_ptr& device, const tart::DType& dtype);
+tart::kernel_ptr getCopyMatrix(const tart::device_ptr& device, const tart::DType& dtype);
+
+tart::kernel_ptr getTransposePadMatrixBatched(const tart::device_ptr& device, const tart::DType& dtype);
+tart::kernel_ptr getTransposeMatrixBatched(const tart::device_ptr& device, const tart::DType& dtype);
+tart::kernel_ptr getCopyPadMatrixBatched(const tart::device_ptr& device, const tart::DType& dtype);
+tart::kernel_ptr getCopyMatrixBatched(const tart::device_ptr& device, const tart::DType& dtype);
+
+tart::kernel_ptr getTransposePadMatrixStridedBatched(const tart::device_ptr& device, const tart::DType& dtype);
+tart::kernel_ptr getTransposeMatrixStridedBatched(const tart::device_ptr& device, const tart::DType& dtype);
+tart::kernel_ptr getCopyPadMatrixStridedBatched(const tart::device_ptr& device, const tart::DType& dtype);
+tart::kernel_ptr getCopyMatrixStridedBatched(const tart::device_ptr& device, const tart::DType& dtype);
+
 
 } // namespace clblast
 

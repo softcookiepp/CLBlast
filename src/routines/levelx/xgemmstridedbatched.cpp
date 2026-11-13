@@ -218,8 +218,7 @@ void XgemmStridedBatched::BatchedGemmIndirect(
 	}
 
 	// Retrieves the Xgemm kernel from the compiled binary
-	Kernel kernelOld(program_, "XgemmStridedBatched");
-	tart::kernel_ptr kernel = kernelOld.get();
+	tart::kernel_ptr kernel = getGemmStridedBatched(mDevice, mDtype, mDevice->getMetadata().subgroupAdd, db_["VWM"], db_["VWN"]);
 
 	// Sets the kernel arguments
 	kernel->setArg(0, static_cast<int>(m_ceiled));

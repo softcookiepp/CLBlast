@@ -335,7 +335,15 @@ realM GlobalToPrivateB2D(
 			const __global realM* restrict bgm = (const __global realM* restrict) b_ptr;
 		#endif
 		// ok yeah, this is probably not going to work quite the way I thought it would...
-		return bgm[b_index + b_ptr_offset/VWM];
+		#if VWM == 1 && VWN == 1
+			return bgm[b_index + b_ptr_offset];
+		#elif VWM == 1
+			return b_ptr[b_index + b_ptr_offset];
+		#else
+			realM ret;
+			vloadN2(ret, b_index, b_ptr, VWM);
+			return ret;
+		#endif
 	#else
 		const int b_index = (idk + _ki) * kSizeN + tid_x * MWI + _mi * VWM + b_ptr_offset;
 		#if VWM == 1

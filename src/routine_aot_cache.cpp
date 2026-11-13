@@ -99,27 +99,34 @@ using namespace tart::kernels;
 	
 #endif
 
+#ifndef SUBGROUP_SWITCH_VW1_VW1
+#define SUBGROUP_SWITCH_VW1_VW1(NAMESPACE, KERNEL, SUBGROUP_SUPPORT, DEVICE) \
+	if (SUBGROUP_SUPPORT) { return NAMESPACE::KERNEL##_sub1##_vw1_vw1(DEVICE); } \
+	else { return NAMESPACE::KERNEL##_sub1##_vw1_vw1(DEVICE); } \
+	
+#endif
+
 #ifndef DTYPE_DUAL_VW_SUBGROUP_SWITCH
-#define DTYPE_DUAL_VW_SUBGROUP_SWITCH(DTYPE, KERNEL, SUBGROUP_SUPPORT, VW1, VW2, DEVICE) \
+#define DTYPE_DUAL_VW_SUBGROUP_SWITCH(DTYPE, KERNEL, SUBGROUP_SUPPORT, DEVICE) \
 	if (DTYPE == tart::dtypes::float16) \
 	{ \
-		DUAL_VW_SUBGROUP_SWITCH(f16, KERNEL, SUBGROUP_SUPPORT, VW1, VW2, DEVICE); \
+		SUBGROUP_SWITCH_VW1_VW1(f16, KERNEL, SUBGROUP_SUPPORT, DEVICE); \
 	} \
 	else if(DTYPE == tart::dtypes::float32) \
 	{ \
-		DUAL_VW_SUBGROUP_SWITCH(f16, KERNEL, SUBGROUP_SUPPORT, VW1, VW2, DEVICE); \
+		SUBGROUP_SWITCH_VW1_VW1(f32, KERNEL, SUBGROUP_SUPPORT, DEVICE); \
 	} \
 	else if(DTYPE == tart::dtypes::float64) \
 	{ \
-		DUAL_VW_SUBGROUP_SWITCH(f16, KERNEL, SUBGROUP_SUPPORT, VW1, VW2, DEVICE); \
+		SUBGROUP_SWITCH_VW1_VW1(f64, KERNEL, SUBGROUP_SUPPORT, DEVICE); \
 	} \
 	else if(DTYPE == tart::dtypes::complex64) \
 	{ \
-		DUAL_VW_SUBGROUP_SWITCH(f16, KERNEL, SUBGROUP_SUPPORT, VW1, VW2, DEVICE); \
+		SUBGROUP_SWITCH_VW1_VW1(c64, KERNEL, SUBGROUP_SUPPORT, DEVICE); \
 	} \
 	else if(DTYPE == tart::dtypes::complex128) \
 	{ \
-		DUAL_VW_SUBGROUP_SWITCH(f16, KERNEL, SUBGROUP_SUPPORT, VW1, VW2, DEVICE); \
+		SUBGROUP_SWITCH_VW1_VW1(c128, KERNEL, SUBGROUP_SUPPORT, DEVICE); \
 	} \
 	else \
 	{ \
@@ -207,7 +214,7 @@ tart::kernel_ptr getTrsvFillVector(const tart::device_ptr& device, const tart::D
 
 tart::kernel_ptr getGemm(const tart::device_ptr& device, const tart::DType& dtype, const bool subgroupSupport, const uint32_t vwm, const uint32_t vwn)
 {
-	DTYPE_DUAL_VW_SUBGROUP_SWITCH(dtype, gemm, subgroupSupport, vwm, vwn, device)
+	DTYPE_DUAL_VW_SUBGROUP_SWITCH(dtype, gemm, subgroupSupport, device)
 }
 
 tart::kernel_ptr getGemmDirect(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vwm, const uint32_t vwn)

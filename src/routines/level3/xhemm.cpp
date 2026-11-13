@@ -49,15 +49,13 @@ void Xhemm::DoHemm(const Layout layout, const Side side, const Triangle triangle
 	// default) and on whether we are dealing with an upper or lower triangle of the hermitian matrix
 	bool is_upper = ((triangle == Triangle::kUpper && layout != Layout::kRowMajor) ||
 									 (triangle == Triangle::kLower && layout == Layout::kRowMajor));
-	auto kernel_name = (is_upper) ? "HermUpperToSquared" : "HermLowerToSquared";
 	
 	// Temporary buffer for a copy of the hermitian matrix
 	auto temp_herm = this->mDevice->allocateBuffer(k * k * this->mDtype.size());
 
 	// Creates a general matrix from the hermitian matrix to be able to run the regular Xgemm
 	// routine afterwards
-	Kernel kernelOld(program_, kernel_name);
-	tart::kernel_ptr kernel = kernelOld.get();
+	tart::kernel_ptr kernel = (is_upper) ? getConvertHermitianUpper(this->mDevice, this->mDtype) : getConvertHermitianLower(this->mDevice, this->mDtype);
 
 	// Sets the arguments for the hermitian-to-squared kernel
 	kernel->setArg(0, static_cast<int>(k));

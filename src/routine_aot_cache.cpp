@@ -238,4 +238,7 @@ tart::kernel_ptr getGemmDirectStridedBatched(const tart::device_ptr& device, con
 	DTYPE_DUAL_VW_SWITCH(dtype, gemm_direct_strided_batched, vwm, vwn, device)
 }
 
+tart::kernel_ptr getConvertHermitianLower(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(convert_hermitian_lower, dtype, device); }
+tart::kernel_ptr getConvertHermitianUpper(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(convert_hermitian_upper, dtype, device); }
+
 } // namespace clblast

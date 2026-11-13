@@ -51,6 +51,9 @@ tart::kernel_ptr getGemmDirect(const tart::device_ptr& device, const tart::DType
 tart::kernel_ptr getGemmDirectBatched(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vwm, const uint32_t vwn);
 tart::kernel_ptr getGemmDirectStridedBatched(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vwm, const uint32_t vwn);
 
+tart::kernel_ptr getConvertHermitianLower(const tart::device_ptr& device, const tart::DType& dtype);
+tart::kernel_ptr getConvertHermitianUpper(const tart::device_ptr& device, const tart::DType& dtype);
+
 } // namespace clblast
 
 #endif

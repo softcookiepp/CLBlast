@@ -80,6 +80,8 @@ tart::kernel_ptr getCopyMatrixStridedBatched(const tart::device_ptr& device, con
 
 tart::kernel_ptr getConvgemm(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vwm, const uint32_t vwn);
 tart::kernel_ptr getConvgemmWithIm2col(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vwm, const uint32_t vwn);
+tart::kernel_ptr getCol2im(const tart::device_ptr& device, const tart::DType& dtype);
+tart::kernel_ptr getIm2col(const tart::device_ptr& device, const tart::DType& dtype);
 
 } // namespace clblast
 

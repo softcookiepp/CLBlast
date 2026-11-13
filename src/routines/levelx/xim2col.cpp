@@ -42,9 +42,6 @@ void Xim2col::DoIm2col(const KernelMode kernel_mode, const size_t channels, cons
 													const size_t dilation_w, const tart::buffer_ptr& im_buffer, const size_t im_offset,
 													const tart::buffer_ptr& col_buffer, const size_t col_offset)
 {
-	// Flip the output along kernel_h and kernel_w, or not.
-	const auto kernel_name = "Xim2colKernelNormal";
-
 	// Makes sure all dimensions are larger than zero
 	if ((channels == 0) || (height == 0) || (width == 0)) {
 		throw BLASError(StatusCode::kInvalidDimension);
@@ -59,8 +56,7 @@ void Xim2col::DoIm2col(const KernelMode kernel_mode, const size_t channels, cons
 	const auto col_w = (size_w >= padding_w) ? (size_w - padding_w) / stride_w + 1 : 1;
 
 	// Retrieves the kernel from the compiled binary
-	auto kernelOld = Kernel(program_, kernel_name);
-	tart::kernel_ptr kernel = kernelOld.get();
+	tart::kernel_ptr kernel = getIm2col(mDevice, mDtype);
 
 	// Sets the kernel arguments
 	kernel->setArg(0, static_cast<int>(height));

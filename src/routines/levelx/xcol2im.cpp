@@ -42,9 +42,6 @@ void Xcol2im::DoCol2im(const KernelMode kernel_mode, const size_t channels, cons
 													const size_t dilation_w, const tart::buffer_ptr& col_buffer, const size_t col_offset,
 													const tart::buffer_ptr& im_buffer, const size_t im_offset)
 {
-	// Flip the output along kernel_h and kernel_w, or not.
-	const auto kernel_name = "Xcol2imKernelNormal";
-
 	// Makes sure all dimensions are larger than zero
 	if ((channels == 0) || (height == 0) || (width == 0)) {
 		throw BLASError(StatusCode::kInvalidDimension);
@@ -68,8 +65,7 @@ void Xcol2im::DoCol2im(const KernelMode kernel_mode, const size_t channels, cons
 	EuclidGCD(static_cast<int>(stride_w), static_cast<int>(dilation_w), stride_bez_w, dilation_bez_w, gcd_w);
 
 	// Retrieves the kernel from the compiled binary
-	auto kernelOld = Kernel(program_, kernel_name);
-	tart::kernel_ptr kernel = kernelOld.get();
+	tart::kernel_ptr kernel = getCol2im(mDevice, mDtype);
 
 	// Sets the kernel arguments
 	kernel->setArg(0, static_cast<int>(height));

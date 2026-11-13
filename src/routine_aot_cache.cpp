@@ -279,5 +279,7 @@ tart::kernel_ptr getConvgemmWithIm2col(const tart::device_ptr& device, const tar
 {
 	DTYPE_DUAL_VW_SWITCH(dtype, convgemm_kernel, vwm, vwn, device)
 }
+tart::kernel_ptr getCol2im(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(col2im_kernel_normal, dtype, device); }
+tart::kernel_ptr getIm2col(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(im2col_kernel_normal, dtype, device); }
 
 } // namespace clblast

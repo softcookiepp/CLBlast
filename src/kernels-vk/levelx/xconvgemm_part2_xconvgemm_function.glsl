@@ -172,7 +172,7 @@ void Xconvgemm(const int num_patches, const int num_kernels, const int patch_siz
 			
 			for (int _mi = 0; _mi < MWID; _mi += 1) {
 				StoreResultsDirect(resultgm, cpd[_ni * MWID + _mi], _mi, _ni, idm, idn,
-													 ONE, ZERO, num_patches, result_offset_batch, false);
+													 ONE_C, ZERO_C, num_patches, result_offset_batch, false);
 			}
 		}
 	}
@@ -250,7 +250,7 @@ void Xconvgemm(const int num_patches, const int num_kernels, const int patch_siz
 			
 			for (int _mi = 0; _mi < MWID; _mi += 1) {
 				StoreResultsChecked(resultgm, cpd[_ni * MWID + _mi], _mi, _ni, idm, idn, num_patches, num_kernels,
-														ONE, ZERO, num_patches, result_offset_batch, false);
+														ONE_C, ZERO_C, num_patches, result_offset_batch, false);
 			}
 		}
 	}

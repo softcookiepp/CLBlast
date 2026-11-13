@@ -191,6 +191,8 @@ R"(
 	#define real float16_t
 	#define ZERO float16_t(0.0)
 	#define ONE float16_t(1.0)
+	#define ZERO_C ZERO
+	#define ONE_C ONE
 	#define SMALLEST -1.0e14
 	#define INFINITY float16_t(uintBitsToFloat(0x7F800000))
 	#define NAN float16_t(uintBitsToFloat(0x7FC00000))
@@ -206,6 +208,8 @@ R"(
 	#define real float
 	#define ZERO real(0.0f)
 	#define ONE 1.0f
+	#define ZERO_C ZERO
+	#define ONE_C ONE
 	#define SMALLEST -1.0e37f
 	#define INFINITY uintBitsToFloat(0x7F800000)
 	#define NAN uintBitsToFloat(0x7FC00000)
@@ -221,6 +225,8 @@ R"(
 	#define real double
 	#define ZERO 0.0
 	#define ONE 1.0
+	#define ZERO_C ZERO
+	#define ONE_C ONE
 	#define SMALLEST -1.0e37
 	#define INFINITY double(uintBitsToFloat(0x7F800000))
 	#define NAN double(uintBitsToFloat(0x7FC00000))
@@ -236,6 +242,8 @@ R"(
 	#define real vec2
 	#define ZERO 0.0f
 	#define ONE 1.0f
+	#define ZERO_C vec2(0.0, 0.0)
+	#define ONE_C vec2(1.0, 0.0)
 	#define SMALLEST -1.0e37f
 	#define INFINITY uintBitsToFloat(0x7F800000)
 	#define NAN uintBitsToFloat(0x7FC00000)
@@ -251,6 +259,8 @@ R"(
 	#define real dvec2
 	#define ZERO 0.0
 	#define ONE 1.0
+	#define ZERO_C dvec2(0.0, 0.0)
+	#define ONE_C dvec2(1.0, 0.0)
 	#define SMALLEST -1.0e37
 	#define INFINITY double(uintBitsToFloat(0x7F800000))
 	#define NAN double(uintBitsToFloat(0x7FC00000))
@@ -826,7 +836,14 @@ realN GlobalToPrivateA2D(
 			const __global realN* restrict agm = (const __global realN* restrict) a_ptr;
 		#endif
 		// ok yeah, this is probably not going to work quite the way I thought it would...
-		return agm[a_index];
+		#if VWN == 1
+			return a_ptr[a_index];
+		#else
+			realN outp;
+			vloadN2(outp, a_index, a_ptr, VWN);
+			return outp;
+		#endif
+		//return agm[a_index];
 	#else
 		const int a_index = (tid_y * NWI + _ni) * kSizeK + idk + _ki * VWN + a_ptr_offset;
 		#if VWN == 1
@@ -855,7 +872,15 @@ realM GlobalToPrivateB2D(
 			const __global realM* restrict bgm = (const __global realM* restrict) b_ptr;
 		#endif
 		// ok yeah, this is probably not going to work quite the way I thought it would...
-		return bgm[b_index + b_ptr_offset/VWM];
+		#if VWM == 1 && VWN == 1
+			return bgm[b_index + b_ptr_offset];
+		#elif VWM == 1
+			return b_ptr[b_index + b_ptr_offset];
+		#else
+			realM ret;
+			vloadN2(ret, b_index, b_ptr, VWM);
+			return ret;
+		#endif
 	#else
 		const int b_index = (idk + _ki) * kSizeN + tid_x * MWI + _mi * VWM + b_ptr_offset;
 		#if VWM == 1
@@ -1147,6 +1172,8 @@ realN LocalToPrivateB(
 	#define real float16_t
 	#define ZERO float16_t(0.0)
 	#define ONE float16_t(1.0)
+	#define ZERO_C ZERO
+	#define ONE_C ONE
 	#define SMALLEST -1.0e14
 	#define INFINITY float16_t(uintBitsToFloat(0x7F800000))
 	#define NAN float16_t(uintBitsToFloat(0x7FC00000))
@@ -1162,6 +1189,8 @@ realN LocalToPrivateB(
 	#define real float
 	#define ZERO real(0.0f)
 	#define ONE 1.0f
+	#define ZERO_C ZERO
+	#define ONE_C ONE
 	#define SMALLEST -1.0e37f
 	#define INFINITY uintBitsToFloat(0x7F800000)
 	#define NAN uintBitsToFloat(0x7FC00000)
@@ -1177,6 +1206,8 @@ realN LocalToPrivateB(
 	#define real double
 	#define ZERO 0.0
 	#define ONE 1.0
+	#define ZERO_C ZERO
+	#define ONE_C ONE
 	#define SMALLEST -1.0e37
 	#define INFINITY double(uintBitsToFloat(0x7F800000))
 	#define NAN double(uintBitsToFloat(0x7FC00000))
@@ -1192,6 +1223,8 @@ realN LocalToPrivateB(
 	#define real vec2
 	#define ZERO 0.0f
 	#define ONE 1.0f
+	#define ZERO_C vec2(0.0, 0.0)
+	#define ONE_C vec2(1.0, 0.0)
 	#define SMALLEST -1.0e37f
 	#define INFINITY uintBitsToFloat(0x7F800000)
 	#define NAN uintBitsToFloat(0x7FC00000)
@@ -1207,6 +1240,8 @@ realN LocalToPrivateB(
 	#define real dvec2
 	#define ZERO 0.0
 	#define ONE 1.0
+	#define ZERO_C dvec2(0.0, 0.0)
+	#define ONE_C dvec2(1.0, 0.0)
 	#define SMALLEST -1.0e37
 	#define INFINITY double(uintBitsToFloat(0x7F800000))
 	#define NAN double(uintBitsToFloat(0x7FC00000))
@@ -1782,7 +1817,14 @@ realN GlobalToPrivateA2D(
 			const __global realN* restrict agm = (const __global realN* restrict) a_ptr;
 		#endif
 		// ok yeah, this is probably not going to work quite the way I thought it would...
-		return agm[a_index];
+		#if VWN == 1
+			return a_ptr[a_index];
+		#else
+			realN outp;
+			vloadN2(outp, a_index, a_ptr, VWN);
+			return outp;
+		#endif
+		//return agm[a_index];
 	#else
 		const int a_index = (tid_y * NWI + _ni) * kSizeK + idk + _ki * VWN + a_ptr_offset;
 		#if VWN == 1
@@ -1811,7 +1853,15 @@ realM GlobalToPrivateB2D(
 			const __global realM* restrict bgm = (const __global realM* restrict) b_ptr;
 		#endif
 		// ok yeah, this is probably not going to work quite the way I thought it would...
-		return bgm[b_index + b_ptr_offset/VWM];
+		#if VWM == 1 && VWN == 1
+			return bgm[b_index + b_ptr_offset];
+		#elif VWM == 1
+			return b_ptr[b_index + b_ptr_offset];
+		#else
+			realM ret;
+			vloadN2(ret, b_index, b_ptr, VWM);
+			return ret;
+		#endif
 	#else
 		const int b_index = (idk + _ki) * kSizeN + tid_x * MWI + _mi * VWM + b_ptr_offset;
 		#if VWM == 1
@@ -2206,6 +2256,8 @@ void StoreResults(
 	#define real float16_t
 	#define ZERO float16_t(0.0)
 	#define ONE float16_t(1.0)
+	#define ZERO_C ZERO
+	#define ONE_C ONE
 	#define SMALLEST -1.0e14
 	#define INFINITY float16_t(uintBitsToFloat(0x7F800000))
 	#define NAN float16_t(uintBitsToFloat(0x7FC00000))
@@ -2221,6 +2273,8 @@ void StoreResults(
 	#define real float
 	#define ZERO real(0.0f)
 	#define ONE 1.0f
+	#define ZERO_C ZERO
+	#define ONE_C ONE
 	#define SMALLEST -1.0e37f
 	#define INFINITY uintBitsToFloat(0x7F800000)
 	#define NAN uintBitsToFloat(0x7FC00000)
@@ -2236,6 +2290,8 @@ void StoreResults(
 	#define real double
 	#define ZERO 0.0
 	#define ONE 1.0
+	#define ZERO_C ZERO
+	#define ONE_C ONE
 	#define SMALLEST -1.0e37
 	#define INFINITY double(uintBitsToFloat(0x7F800000))
 	#define NAN double(uintBitsToFloat(0x7FC00000))
@@ -2251,6 +2307,8 @@ void StoreResults(
 	#define real vec2
 	#define ZERO 0.0f
 	#define ONE 1.0f
+	#define ZERO_C vec2(0.0, 0.0)
+	#define ONE_C vec2(1.0, 0.0)
 	#define SMALLEST -1.0e37f
 	#define INFINITY uintBitsToFloat(0x7F800000)
 	#define NAN uintBitsToFloat(0x7FC00000)
@@ -2266,6 +2324,8 @@ void StoreResults(
 	#define real dvec2
 	#define ZERO 0.0
 	#define ONE 1.0
+	#define ZERO_C dvec2(0.0, 0.0)
+	#define ONE_C dvec2(1.0, 0.0)
 	#define SMALLEST -1.0e37
 	#define INFINITY double(uintBitsToFloat(0x7F800000))
 	#define NAN double(uintBitsToFloat(0x7FC00000))
@@ -2841,7 +2901,14 @@ realN GlobalToPrivateA2D(
 			const __global realN* restrict agm = (const __global realN* restrict) a_ptr;
 		#endif
 		// ok yeah, this is probably not going to work quite the way I thought it would...
-		return agm[a_index];
+		#if VWN == 1
+			return a_ptr[a_index];
+		#else
+			realN outp;
+			vloadN2(outp, a_index, a_ptr, VWN);
+			return outp;
+		#endif
+		//return agm[a_index];
 	#else
 		const int a_index = (tid_y * NWI + _ni) * kSizeK + idk + _ki * VWN + a_ptr_offset;
 		#if VWN == 1
@@ -2870,7 +2937,15 @@ realM GlobalToPrivateB2D(
 			const __global realM* restrict bgm = (const __global realM* restrict) b_ptr;
 		#endif
 		// ok yeah, this is probably not going to work quite the way I thought it would...
-		return bgm[b_index + b_ptr_offset/VWM];
+		#if VWM == 1 && VWN == 1
+			return bgm[b_index + b_ptr_offset];
+		#elif VWM == 1
+			return b_ptr[b_index + b_ptr_offset];
+		#else
+			realM ret;
+			vloadN2(ret, b_index, b_ptr, VWM);
+			return ret;
+		#endif
 	#else
 		const int b_index = (idk + _ki) * kSizeN + tid_x * MWI + _mi * VWM + b_ptr_offset;
 		#if VWM == 1

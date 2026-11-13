@@ -117,7 +117,10 @@ void Xconvgemm::DoConvgemm(const KernelMode kernel_mode, const size_t channels, 
 	// Retrieves the proper XgemmDirect kernel from the compiled binary
 	const std::string kernel_name = (method_ == ConvGemmMethod::kWithIm2Col) ? "Xconvgemm" : "XconvgemmNormal";
 	Kernel kernelOld(program_, kernel_name);
-	tart::kernel_ptr kernel = kernelOld.get();
+	//tart::kernel_ptr kernel = kernelOld.get();
+	tart::kernel_ptr kernel = (method_ == ConvGemmMethod::kWithIm2Col) ?
+		getConvgemmWithIm2col(mDevice, mDtype, db_["VWMD"], db_["VWND"]):
+		getConvgemm(mDevice, mDtype, db_["VWMD"], db_["VWND"]);
 	
 	// Sets the kernel arguments
 	kernel->setArg(0, static_cast<int>(num_patches));

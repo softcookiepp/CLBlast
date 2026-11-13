@@ -148,6 +148,8 @@ R"(
 	#define real float16_t
 	#define ZERO float16_t(0.0)
 	#define ONE float16_t(1.0)
+	#define ZERO_C ZERO
+	#define ONE_C ONE
 	#define SMALLEST -1.0e14
 	#define INFINITY float16_t(uintBitsToFloat(0x7F800000))
 	#define NAN float16_t(uintBitsToFloat(0x7FC00000))
@@ -163,6 +165,8 @@ R"(
 	#define real float
 	#define ZERO real(0.0f)
 	#define ONE 1.0f
+	#define ZERO_C ZERO
+	#define ONE_C ONE
 	#define SMALLEST -1.0e37f
 	#define INFINITY uintBitsToFloat(0x7F800000)
 	#define NAN uintBitsToFloat(0x7FC00000)
@@ -178,6 +182,8 @@ R"(
 	#define real double
 	#define ZERO 0.0
 	#define ONE 1.0
+	#define ZERO_C ZERO
+	#define ONE_C ONE
 	#define SMALLEST -1.0e37
 	#define INFINITY double(uintBitsToFloat(0x7F800000))
 	#define NAN double(uintBitsToFloat(0x7FC00000))
@@ -193,6 +199,8 @@ R"(
 	#define real vec2
 	#define ZERO 0.0f
 	#define ONE 1.0f
+	#define ZERO_C vec2(0.0, 0.0)
+	#define ONE_C vec2(1.0, 0.0)
 	#define SMALLEST -1.0e37f
 	#define INFINITY uintBitsToFloat(0x7F800000)
 	#define NAN uintBitsToFloat(0x7FC00000)
@@ -208,6 +216,8 @@ R"(
 	#define real dvec2
 	#define ZERO 0.0
 	#define ONE 1.0
+	#define ZERO_C dvec2(0.0, 0.0)
+	#define ONE_C dvec2(1.0, 0.0)
 	#define SMALLEST -1.0e37
 	#define INFINITY double(uintBitsToFloat(0x7F800000))
 	#define NAN double(uintBitsToFloat(0x7FC00000))
@@ -526,63 +536,6 @@ R"(
 
 // =================================================================================================
 
-// =================================================================================================
-
-// Parameters set by the tuner or by the database. Here they are given a basic default value in case
-// this kernel file is used outside of the CLBlast library.
-
-// For the 'fast' copy kernel
-#ifndef COPY_DIMX
-	#define COPY_DIMX 8			// Local workgroup size in the first dimension (x)
-#endif
-#ifndef COPY_DIMY
-	#define COPY_DIMY 8			// Local workgroup size in the second dimension (y)
-#endif
-#ifndef COPY_WPT
-	#define COPY_WPT 1			 // Work per thread in the first dimension (x)
-#endif
-#ifndef COPY_VW
-	#define COPY_VW 1				// Vector width in the second dimension (y)
-#endif
-
-// For the padding/copy kernels and the conversion kernels
-#ifndef PAD_DIMX
-	#define PAD_DIMX 8			// Local workgroup size in the first dimension (x)
-#endif
-#ifndef PAD_DIMY
-	#define PAD_DIMY 8			// Local workgroup size in the second dimension (y)
-#endif
-#ifndef PAD_WPTX
-	#define PAD_WPTX 1			// Work per thread in the first dimension (x)
-#endif
-#ifndef PAD_WPTY
-	#define PAD_WPTY 1			// Work per thread in the second dimension (y)
-#endif
-
-// For the 'fast' transpose kernel
-#ifndef TRA_DIM
-	#define TRA_DIM 8			 // Number of local threads in the two dimensions (x,y)
-#endif
-#ifndef TRA_WPT
-	#define TRA_WPT 1			 // Work per thread in one dimension and vector-width in the other
-#endif
-#ifndef TRA_PAD
-	#define TRA_PAD 0			 // Padding of the local memory to avoid bank-conflicts
-#endif
-#ifndef TRA_SHUFFLE
-	#define TRA_SHUFFLE 0	 // Shuffling of the global indices to avoid global memory bank-conflicts
-#endif
-
-// For the padding/transpose kernels
-#ifndef PADTRA_TILE
-	#define PADTRA_TILE 8	 // Number of local threads in the two dimensions (x,y)
-#endif
-#ifndef PADTRA_WPT
-	#define PADTRA_WPT 1		// Amount of work per thread
-#endif
-#ifndef PADTRA_PAD
-	#define PADTRA_PAD 0		// Padding of the local memory to avoid bank-conflicts
-#endif
 
 // =================================================================================================
 

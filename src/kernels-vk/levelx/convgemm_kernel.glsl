@@ -1,0 +1,257 @@
+#version 450
+
+// =================================================================================================
+// This file is part of the CLBlast project. Author(s):
+//	 Cedric Nugteren <www.cedricnugteren.nl>
+//
+// This file contains the an implementation of 3D convolution on a 4D image using GEMM kernels. It
+// uses parameters from the direct GEMM kernel. This part contains the main kernel (2/2).
+// This uses "CONVGEMM_WITH_IM2COL" as a switch to select between direct convgemm or first running
+// the im2col kernel to create a 'col' temporary matrix.
+//
+// =================================================================================================
+
+// Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
+// literal). Comment-out this line for syntax-highlighting when developing.
+//R"(
+#include "../level3/xgemm_direct_part2.glsl"
+	layout(
+		local_size_x_id = 1, // MDIMCD,
+		local_size_y_id = 2, // NDIMCD,
+		local_size_z = 1) in;
+// =================================================================================================
+
+// ConvGEMM kernel
+
+#if USE_BDA == 0
+	layout(binding = 0, std430) buffer kernelgm_buffer { realND kernelgm[]; };
+	layout(binding = 1, std430) buffer resultgm_buffer { real resultgm[]; };
+	layout(binding = 2, std430) buffer colgm_buffer { realMD colgm[]; };
+	// workaround for no pointer casting
+	layout(binding = 3, std430) buffer kernelgms_buffer { real kernelgms[]; };
+	layout(binding = 4, std430) buffer colgms_buffer { real colgms[]; };
+#endif
+
+layout(push_constant, std430) uniform Xconvgemm
+{
+	int num_patches; int num_kernels; int patch_size;
+#if USE_BDA
+	__global realND* restrict kernelgm;
+#endif
+	int kernel_offset;
+#if USE_BDA
+	__global real* resultgm;
+#endif
+	int result_offset; int result_stride;
+#if USE_BDA
+	__global realMD* restrict colgm;
+#endif
+	int col_offset; int col_stride;
+};
+
+// these may be defined elsewhere. I really don't know at this point
+shared real alm[WGD * (WGD + PADA)];
+shared real blm[WGD * (WGD + PADB)];
+
+void main()
+{
+	// Batch offsets
+	const int batch = get_group_id(2);
+	const int col_offset_batch = col_offset + col_stride * batch;
+	const int result_offset_batch = result_offset + result_stride * batch;
+
+	// Extra pointers to scalar versions of global memory
+#if USE_BDA
+	const __global real* restrict colgms = (const __global real* restrict) colgm;
+	const __global real* restrict kernelgms = (const __global real* restrict) kernelgm;
+#endif
+
+	// Allocates workitem-private memory (registers)
+	
+	real apd[MWID];
+	
+	real bpd[NWID];
+	
+	real cpd[NWID * MWID];
+
+	// Initializes the accumulation registers
+	
+	for (int _mi = 0; _mi < MWID; _mi += 1) {
+		
+		for (int _ni = 0; _ni < NWID; _ni += 1) {
+			SetToZero(cpd[_ni * MWID + _mi]);
+		}
+	}
+
+	// Global m/n indices
+	const int idm = get_local_id(0) * MWID + GetGroupID0() * WGD;
+	const int idn = get_local_id(1) * NWID + GetGroupID1() * WGD;
+
+	// The faster version of GEMM is not allowed on the (incomplete) borders. Therefore, this section
+	// processes only the main parts: output blocks of WGD by WGD.
+	if ((idm < (num_patches/WGD)*WGD) && (idn < (num_kernels/WGD)*WGD)) {
+
+		// Loops over all complete workgroup tiles (K-dimension)
+		int kwg = 0;
+		for (kwg = 0; kwg < (patch_size/WGD) * WGD; kwg += WGD) {
+
+			// Loads data: off-chip --> local (matrix A and B)
+			if (num_patches % VWMD == 0 && col_offset_batch % VWMD == 0) {
+				GlobalToLocalDirectA(colgm, alm, num_patches, col_offset_batch, kwg, false, false);
+			}
+			else {
+				GlobalToLocalScalarA(colgms, alm, num_patches, col_offset_batch, kwg, false, false);
+			}
+			
+			if (patch_size % VWND == 0 && kernel_offset % VWND == 0) {
+				GlobalToLocalDirectB(kernelgm, blm, patch_size, kernel_offset, kwg, true, false);
+			}
+			else {
+				GlobalToLocalScalarB(kernelgms, blm, patch_size, kernel_offset, kwg, true, false);
+			}
+			barrier();
+
+			// Loops over all workitem tiles, unrolled by a factor KWID
+			for (int pwi = 0; pwi < WGD; pwi += KWID) {
+				
+				for (int _pit = 0; _pit < KWID; _pit += 1) {
+					int kg = pwi + _pit;
+
+					// Loads data: local --> private (matrix A and B)
+					
+					for (int _mi = 0; _mi < MWID; _mi += 1) {
+						LocalToPrivateDirectA(apd[_mi], alm, _mi, kg, false);
+					}
+					
+					for (int _ni = 0; _ni < NWID; _ni += 1) {
+						LocalToPrivateDirectB(bpd[_ni], blm, _ni, kg, true);
+					}
+
+					// Performs the accumulation (Cpmd += Apmd * Bpmd)
+					
+					for (int _ni = 0; _ni < NWID; _ni += 1) {
+						
+						for (int _mi = 0; _mi < MWID; _mi += 1) {
+							MultiplyAdd(cpd[_ni * MWID + _mi], apd[_mi], bpd[_ni]);
+						}
+					}
+				}
+			}
+			barrier();
+		}
+
+		// Loop over the remaining part (incomplete tile in K-dimension)
+		for (; kwg < patch_size; ++kwg) {
+
+			// Loads data: off-chip --> private (matrix A and B)
+			
+			for (int _mi = 0; _mi < MWID; _mi += 1) {
+				GlobalToPrivateDirectA(apd[_mi], colgms, _mi, num_patches, col_offset_batch, idm, kwg, false, false);
+			}
+			
+			for (int _ni = 0; _ni < NWID; _ni += 1) {
+				GlobalToPrivateDirectB(bpd[_ni], kernelgms, _ni, patch_size, kernel_offset, idn, kwg, true, false);
+			}
+
+			// Performs the accumulation (Cpmd += Apmd * Bpmd)
+			
+			for (int _ni = 0; _ni < NWID; _ni += 1) {
+				
+				for (int _mi = 0; _mi < MWID; _mi += 1) {
+					MultiplyAdd(cpd[_ni * MWID + _mi], apd[_mi], bpd[_ni]);
+				}
+			}
+		}
+
+		// Stores a tile of results
+		
+		for (int _ni = 0; _ni < NWID; _ni += 1) {
+			
+			for (int _mi = 0; _mi < MWID; _mi += 1) {
+				StoreResultsDirect(resultgm, cpd[_ni * MWID + _mi], _mi, _ni, idm, idn,
+													 ONE_C, ZERO_C, num_patches, result_offset_batch, false);
+			}
+		}
+	}
+
+	// Simple but slower version for the parts on the edge (incomplete tiles in M and N-dimensions)
+	else {
+		// Loops over all complete workgroup tiles (K-dimension)
+		int kwg = 0;
+		for (; kwg < (patch_size/WGD) * WGD; kwg+=WGD) {
+
+			// Loads data: off-chip --> local
+			GlobalToLocalCheckedA(colgms, alm, num_patches, col_offset_batch, kwg, false, false, num_patches, patch_size);
+			GlobalToLocalCheckedB(kernelgms, blm, patch_size, kernel_offset, kwg, true, false, num_kernels, patch_size);
+			barrier();
+
+			// Loops over all workitem tiles, unrolled by a factor KWID
+			for (int pwi = 0; pwi < WGD; pwi += KWID) {
+				
+				for (int _pit = 0; _pit < KWID; _pit += 1) {
+					int kg = pwi + _pit;
+
+					// Loads data: local --> private
+					
+					for (int _mi = 0; _mi < MWID; _mi += 1) {
+						LocalToPrivateDirectA(apd[_mi], alm, _mi, kg, false);
+					}
+					
+					for (int _ni = 0; _ni < NWID; _ni += 1) {
+						LocalToPrivateDirectB(bpd[_ni], blm, _ni, kg, true);
+					}
+
+					// Performs the accumulation (C += A * B)
+					
+					for (int _ni = 0; _ni < NWID; _ni += 1) {
+						
+						for (int _mi = 0; _mi < MWID; _mi += 1) {
+							MultiplyAdd(cpd[_ni * MWID + _mi], apd[_mi], bpd[_ni]);
+						}
+					}
+				}
+			}
+			barrier();
+		}
+
+		// Loop over the remaining part (incomplete tile in K-dimension)
+		for (; kwg < patch_size; ++kwg) {
+
+			// Loads data: off-chip --> private
+			
+			for (int _mi = 0; _mi < MWID; _mi += 1) {
+				GlobalToPrivateCheckedA(apd[_mi], colgms, _mi, num_patches, col_offset_batch, idm, kwg, false, false, num_patches);
+			}
+			
+			for (int _ni = 0; _ni < NWID; _ni += 1) {
+				GlobalToPrivateCheckedB(bpd[_ni], kernelgms, _ni, patch_size, kernel_offset, idn, kwg, true, false, num_kernels);
+			}
+
+			// Performs the accumulation (C += A * B)
+			
+			for (int _ni = 0; _ni < NWID; _ni += 1) {
+				
+				for (int _mi = 0; _mi < MWID; _mi += 1) {
+					MultiplyAdd(cpd[_ni * MWID + _mi], apd[_mi], bpd[_ni]);
+				}
+			}
+		}
+
+		// Stores a tile of results
+		
+		for (int _ni = 0; _ni < NWID; _ni += 1) {
+			
+			for (int _mi = 0; _mi < MWID; _mi += 1) {
+				StoreResultsChecked(resultgm, cpd[_ni * MWID + _mi], _mi, _ni, idm, idn, num_patches, num_kernels,
+														ONE_C, ZERO_C, num_patches, result_offset_batch, false);
+			}
+		}
+	}
+}
+
+// =================================================================================================
+
+// End of the C++11 raw string literal
+//)"
+
+// =================================================================================================

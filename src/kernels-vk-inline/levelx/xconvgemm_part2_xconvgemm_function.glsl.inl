@@ -199,6 +199,8 @@ R"(
 	#define real float16_t
 	#define ZERO float16_t(0.0)
 	#define ONE float16_t(1.0)
+	#define ZERO_C ZERO
+	#define ONE_C ONE
 	#define SMALLEST -1.0e14
 	#define INFINITY float16_t(uintBitsToFloat(0x7F800000))
 	#define NAN float16_t(uintBitsToFloat(0x7FC00000))
@@ -214,6 +216,8 @@ R"(
 	#define real float
 	#define ZERO real(0.0f)
 	#define ONE 1.0f
+	#define ZERO_C ZERO
+	#define ONE_C ONE
 	#define SMALLEST -1.0e37f
 	#define INFINITY uintBitsToFloat(0x7F800000)
 	#define NAN uintBitsToFloat(0x7FC00000)
@@ -229,6 +233,8 @@ R"(
 	#define real double
 	#define ZERO 0.0
 	#define ONE 1.0
+	#define ZERO_C ZERO
+	#define ONE_C ONE
 	#define SMALLEST -1.0e37
 	#define INFINITY double(uintBitsToFloat(0x7F800000))
 	#define NAN double(uintBitsToFloat(0x7FC00000))
@@ -244,6 +250,8 @@ R"(
 	#define real vec2
 	#define ZERO 0.0f
 	#define ONE 1.0f
+	#define ZERO_C vec2(0.0, 0.0)
+	#define ONE_C vec2(1.0, 0.0)
 	#define SMALLEST -1.0e37f
 	#define INFINITY uintBitsToFloat(0x7F800000)
 	#define NAN uintBitsToFloat(0x7FC00000)
@@ -259,6 +267,8 @@ R"(
 	#define real dvec2
 	#define ZERO 0.0
 	#define ONE 1.0
+	#define ZERO_C dvec2(0.0, 0.0)
+	#define ONE_C dvec2(1.0, 0.0)
 	#define SMALLEST -1.0e37
 	#define INFINITY double(uintBitsToFloat(0x7F800000))
 	#define NAN double(uintBitsToFloat(0x7FC00000))
@@ -1198,7 +1208,7 @@ void Xconvgemm(const int num_patches, const int num_kernels, const int patch_siz
 			
 			for (int _mi = 0; _mi < MWID; _mi += 1) {
 				StoreResultsDirect(resultgm, cpd[_ni * MWID + _mi], _mi, _ni, idm, idn,
-													 ONE, ZERO, num_patches, result_offset_batch, false);
+													 ONE_C, ZERO_C, num_patches, result_offset_batch, false);
 			}
 		}
 	}
@@ -1276,7 +1286,7 @@ void Xconvgemm(const int num_patches, const int num_kernels, const int patch_siz
 			
 			for (int _mi = 0; _mi < MWID; _mi += 1) {
 				StoreResultsChecked(resultgm, cpd[_ni * MWID + _mi], _mi, _ni, idm, idn, num_patches, num_kernels,
-														ONE, ZERO, num_patches, result_offset_batch, false);
+														ONE_C, ZERO_C, num_patches, result_offset_batch, false);
 			}
 		}
 	}

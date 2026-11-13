@@ -1,0 +1,771 @@
+
+// =================================================================================================
+// This file is part of the CLBlast project. Author(s):
+//	 Cedric Nugteren <www.cedricnugteren.nl>
+//
+// This file contains the common kernels shared among different BLAS routines. This file contains
+// kernels to copy matrices.
+//
+// =================================================================================================
+
+// literal). Comment-out this line for syntax-highlighting when developing.
+R"(
+
+// literal). Comment-out this line for syntax-highlighting when developing.
+#ifndef COMMON_GLSL
+#define COMMON_GLSL
+#ifndef DTYPE_ENUM_GLSL
+#define DTYPE_ENUM_GLSL
+
+#define DTYPE_F16 0
+#define DTYPE_F32 1
+#define DTYPE_F64 2
+#define DTYPE_BF16 3
+#define DTYPE_TQ1 4
+#define DTYPE_TQ2 5
+#define DTYPE_MXFP4 6 // MXFP4 (1 block)
+#define DTYPE_U8 7
+#define DTYPE_U16 8
+#define DTYPE_U32 9
+#define DTYPE_U64 10
+#define DTYPE_I8 11
+#define DTYPE_I16 12
+#define DTYPE_I32 13
+#define DTYPE_I64 14
+#define DTYPE_FP8E5M2 15
+#define DTYPE_FP8E4M3 16
+#define DTYPE_C64 17
+#define DTYPE_C128 18
+#define DTYPE_UNKNOWN 19
+
+#endif
+
+
+// flow control
+#extension GL_EXT_control_flow_attributes : require
+
+// =================================================================================================
+
+// whether or not to use buffer device addresses instead of descriptors
+// default to false
+#ifndef USE_BDA
+	#define USE_BDA 0
+#endif
+
+// if 64-bit integers are supported
+#ifndef USE_INT64
+	#define USE_INT64 0
+#endif
+
+// Parameters set by the tuner or by the database. Here they are given a basic default value in case
+// this file is used outside of the CLBlast library.
+#ifndef DTYPE
+	#define DTYPE DTYPE_F32
+#endif
+
+// =================================================================================================
+	
+// reserved for when unrolling semantics are able to be used
+#ifndef UNROLL
+	#define UNROLL(N) [[unroll]]
+#endif
+
+// support for subgroup operations
+#ifndef SUBGROUP_OPERATIONS_SUPPORTED
+	#define SUBGROUP_OPERATIONS_SUPPORTED 0
+	#define USE_SUBGROUP_SHUFFLING 0
+#endif
+
+#if SUBGROUP_OPERATIONS_SUPPORTED
+	//#extension GL_EXT_shader_subgroup : require
+	#define USE_SUBGROUP_SHUFFLING 1
+	#extension GL_KHR_shader_subgroup_shuffle : require
+	#ifndef SUBGROUP_SIZE
+		#define SUBGROUP_SIZE gl_SubgroupSize
+	#endif
+#else
+	#define USE_SUBGROUP_SHUFFLING 0
+	#ifndef SUBGROUP_SIZE
+		// unused, but still needs value so code compiles
+		#define SUBGROUP_SIZE 32
+	#endif
+#endif
+
+// Enable support for half-precision
+#if DTYPE == DTYPE_F16
+	#extension GL_EXT_shader_16bit_storage : require
+	#extension GL_EXT_shader_explicit_arithmetic_types_float16 : require
+	#if SUBGROUP_OPERATIONS_SUPPORTED
+		#extension GL_EXT_shader_subgroup_extended_types_float16 : require
+	#endif
+#endif
+
+// Enable support for double-precision
+#if DTYPE == DTYPE_C128 || DTYPE == DTYPE_F64
+	#extension GL_EXT_shader_explicit_arithmetic_types_float64 : require
+#endif
+
+#ifdef USE_INT64
+	#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+#endif
+
+#if USE_BDA
+	// if BDA is supported but uint64_t isn't, then we need to use uvec2 for the address types
+	#if USE_UINT64
+		#extension GL_EXT_buffer_reference : require
+		#define addr_t uint64_t
+		uint64_t addPtrOffset(uint64_t ptr, uint64_t offset) { return ptr + offset; }
+		uint64_t addPtrOffset(uint64_t ptr, uint offset) { return ptr + uint64_t(offset); }
+		uint64_t mulPtrCoef(uint64_t ptr, uint64_t coef) { return ptr*coef; }
+		uint64_t mulPtrCoef(uint64_t ptr, uint coef) { return ptr*uint64_t(coef); }
+	#else
+		#extension GL_EXT_buffer_reference_uvec2 : require
+		#define addr_t uvec2
+		uvec2 addPtrOffset(uvec2 addr, uvec2 offset)
+		{
+			uint carry;
+			uint lo = uaddCarry(addr.x, offset.x, carry);
+			uint hi = addr.y + offset.y + carry;
+			return uvec2(lo, hi);
+		}
+		uvec2 addPtrOffset(uvec2 addr, uint offset)
+		{
+			uint carry;
+			uint lo = uaddCarry(addr.x, offset, carry);
+			uint hi = addr.y + carry;
+			return uvec2(lo, hi);
+		}
+	#endif
+#endif
+
+
+// Half-precision
+#if DTYPE == DTYPE_F16
+	struct vec2_t { f16vec2 s; };
+	struct vec4_t { f16vec4 s; };
+	struct vec8_t { float16_t s[8]; };
+	struct vec16_t { float16_t s[16]; };
+	#define DTYPE_SIZE 2
+	#define real float16_t
+	#define ZERO float16_t(0.0)
+	#define ONE float16_t(1.0)
+	#define ZERO_C ZERO
+	#define ONE_C ONE
+	#define SMALLEST -1.0e14
+	#define INFINITY float16_t(uintBitsToFloat(0x7F800000))
+	#define NAN float16_t(uintBitsToFloat(0x7FC00000))
+	#define PI float16_t(3.14159265358979323846)
+
+// Single-precision
+#elif DTYPE == DTYPE_F32
+	struct vec2_t { vec2 s; };
+	struct vec4_t { vec4 s; };
+	struct vec8_t { float s[8]; };
+	struct vec16_t { float s[16]; };
+	#define DTYPE_SIZE 4
+	#define real float
+	#define ZERO real(0.0f)
+	#define ONE 1.0f
+	#define ZERO_C ZERO
+	#define ONE_C ONE
+	#define SMALLEST -1.0e37f
+	#define INFINITY uintBitsToFloat(0x7F800000)
+	#define NAN uintBitsToFloat(0x7FC00000)
+	#define PI float(3.14159265358979323846)
+
+// Double-precision 
+#elif DTYPE == DTYPE_F64
+	struct vec2_t { dvec2 s; };
+	struct vec4_t { dvec4 s; };
+	struct vec8_t { double s[8]; };
+	struct vec16_t { double s[16]; };
+	#define DTYPE_SIZE 8
+	#define real double
+	#define ZERO 0.0
+	#define ONE 1.0
+	#define ZERO_C ZERO
+	#define ONE_C ONE
+	#define SMALLEST -1.0e37
+	#define INFINITY double(uintBitsToFloat(0x7F800000))
+	#define NAN double(uintBitsToFloat(0x7FC00000))
+	#define PI double(3.14159265358979323846)
+
+// Complex single-precision
+#elif DTYPE == DTYPE_C64
+	struct vec2_t { mat2x2 s; };
+	struct vec4_t { mat4x2 s; };
+	struct vec8_t { vec2 s[8]; };
+	struct vec16_t { vec2 s[16]; };
+	#define DTYPE_SIZE 8
+	#define real vec2
+	#define ZERO 0.0f
+	#define ONE 1.0f
+	#define ZERO_C vec2(0.0, 0.0)
+	#define ONE_C vec2(1.0, 0.0)
+	#define SMALLEST -1.0e37f
+	#define INFINITY uintBitsToFloat(0x7F800000)
+	#define NAN uintBitsToFloat(0x7FC00000)
+	#define PI float(3.14159265358979323846)
+
+// Complex double-precision
+#elif DTYPE == DTYPE_C128
+	struct vec2_t { dmat2x2 s; };
+	struct vec4_t { dmat4x2 s; };					 
+	struct vec8_t { dvec2 s[8]; };
+	struct vec16_t { dvec2 s[16]; };
+	#define DTYPE_SIZE 16
+	#define real dvec2
+	#define ZERO 0.0
+	#define ONE 1.0
+	#define ZERO_C dvec2(0.0, 0.0)
+	#define ONE_C dvec2(1.0, 0.0)
+	#define SMALLEST -1.0e37
+	#define INFINITY double(uintBitsToFloat(0x7F800000))
+	#define NAN double(uintBitsToFloat(0x7FC00000))
+	#define PI double(3.14159265358979323846)
+#endif
+
+#define ROUTINE_IS_COMPLEX (DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128)
+
+// this simplifies stuff c:
+#define real2 vec2_t
+#define real4 vec4_t
+#define real8 vec8_t
+#define real16 vec16_t
+
+#if USE_BDA
+	// floating point BDA
+	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE) buffer real_ptr_t { real s[]; };
+	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE*2) buffer real2_ptr_t { vec2_t s[]; };
+	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE*4) buffer real4_ptr_t { real4 s[]; };
+	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE*8) buffer real8_ptr_t { real8 s[]; };
+	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE*16) buffer real16_ptr_t { real16 s[]; };
+	
+	// uint BDA
+	layout(buffer_reference, buffer_reference_align = 4) buffer int_ptr_t { int s[]; };
+	layout(buffer_reference, buffer_reference_align = 4) buffer uint_ptr_t { uint s[]; };
+
+	#define indexGM(ptr, index) ptr.s[index]
+#else
+	#define indexGM(ptr, index) ptr[index]
+#endif
+
+// Single-element version of a complex number
+#if DTYPE == DTYPE_C64
+	#define singlereal float
+#elif DTYPE == DTYPE_C128
+	#define singlereal double 
+#else
+	#if USE_BDA
+		#define singlereal_ptr_t real_ptr_t
+	#endif
+	#define singlereal real 
+#endif
+
+#if USE_BDA && ROUTINE_IS_COMPLEX
+	layout(buffer_reference, buffer_reference_align = DTYPE_SIZE/2) buffer singlereal_ptr_t { singlereal s[]; };
+	//
+#endif
+
+// Vulkan will let you put anything in the push constants, so there is no point in real_arg existing anymore.
+// It will be removed shortly
+#define real_arg real
+
+// Pointers to local memory objects (using a define because CUDA doesn't need them)
+#ifndef LOCAL_PTR
+	#define LOCAL_PTR shared
+#endif
+
+// =================================================================================================
+
+// actually use this, we are in Vulkan now after all!
+#ifndef USE_CL_MAD
+	#define USE_CL_MAD 1
+#endif
+
+// By default the workgroup size requirement is enabled. For Qualcomm devices the workgroup size 
+// requirement results in worse performance and is disabled (src/utilities/compile.cpp)
+#define RELAX_WORKGROUP_SIZE 0
+
+#if RELAX_WORKGROUP_SIZE
+	#error "RELAX_WORKGROUP_SIZE should not be enabled, as it is being removed"
+#endif
+
+// Sets a variable to zero
+#if ROUTINE_IS_COMPLEX
+	#define SetToZero(a) a = real(ZERO, ZERO)
+#else
+	#define SetToZero(a) a = ZERO
+#endif
+
+// Sets a variable to zero (only the imaginary part)
+#if ROUTINE_IS_COMPLEX
+	#define ImagToZero(a) a.y = ZERO
+#else
+	#define ImagToZero(a) 
+#endif
+
+// Sets a variable to one
+#if ROUTINE_IS_COMPLEX
+	#define SetToOne(a) a = real(ONE, ZERO)
+#else
+	#define SetToOne(a) a = ONE
+#endif
+
+// Determines whether a variable is zero
+#if ROUTINE_IS_COMPLEX
+	#define IsZero(a) ((a[0] == ZERO) && (a[1] == ZERO))
+#else
+	#define IsZero(a) (a == ZERO)
+#endif
+
+// component-wise absolute value
+#define AbsoluteValue(value) value = abs(value)
+
+// Negation (component-wise)
+#if ROUTINE_IS_COMPLEX
+	#define Negate(value) value.x = (-1.0(value.x)); value.y = (-1.0*(value.y))
+#else
+	#define Negate(value) value = (-1.0*(value))
+#endif
+
+// Adds two complex variables
+#if ROUTINE_IS_COMPLEX
+	#define Add(c,a,b) c = real(a.x + b.x, a.y + b.y)
+#else
+	#define Add(c,a,b) c = a + b
+#endif
+
+// Subtracts two complex variables
+#if ROUTINE_IS_COMPLEX
+	#define Subtract(c,a,b) c = real(a.x - b.x, a.y - b.y)
+#else
+	#define Subtract(c,a,b) c = a - b
+#endif
+
+// Multiply two complex variables (used in the defines below)
+#if ROUTINE_IS_COMPLEX
+	#define MulReal(a,b) a[0]*b[0] - a[1]*b[1]
+	#define MulImag(a,b) a[0]*b[1] + a[1]*b[0]
+#endif
+
+// The scalar multiply function
+#if ROUTINE_IS_COMPLEX
+	#define Multiply(c,a,b) c = real(MulReal(a,b), MulImag(a,b))
+#else
+	#define Multiply(c,a,b) c = a * b
+#endif
+
+#define vMultiply(c, a, b, vWidth) \
+{ \
+	UNROLL(vWidth) \
+	for (uint i = 0; i < vWidth; i += 1) \
+	{ \
+		Multiply(c.s[i], a.s[i], b.s[i]); \
+	} \
+}
+
+// c is vector, a is scalar, b is vector
+#define vsMultiply(c, a, b, vWidth) \
+{ \
+	UNROLL(vWidth) \
+	for (uint i = 0; i < vWidth; i += 1) \
+	{ \
+		Multiply(c.s[i], a, b.s[i]); \
+	} \
+}
+
+// c is vector, a is scalar, b is vector
+#define vsMultiplyAdd(c, a, b, vWidth) \
+{ \
+	UNROLL(vWidth) \
+	for (uint i = 0; i < vWidth; i += 1) \
+	{ \
+		MultiplyAdd(c.s[i], a, b.s[i]); \
+	} \
+}
+
+#define vSetToZero(v, vWidth) \
+{ \
+	UNROLL(vWidth) \
+	for (uint i = 0; i < vWidth; i += 1) \
+	{ \
+		SetToZero(v.s[i]); \
+	} \
+}
+
+// The scalar multiply-add function
+#if ROUTINE_IS_COMPLEX
+	#define MultiplyAdd(c,a,b) c += real(MulReal(a,b), MulImag(a,b))
+#else
+	#if USE_CL_MAD == 1
+		#define MultiplyAdd(c,a,b) c = fma(a, b, c)
+	#else
+		#define MultiplyAdd(c,a,b) c += (a * b)
+	#endif
+#endif
+
+// The scalar multiply-subtract function
+#if ROUTINE_IS_COMPLEX
+	#define MultiplySubtract(c,a,b) c -= real(MulReal(a,b), MulImag(a,b))
+#else
+	#define MultiplySubtract(c,a,b) c -= (a * b)
+#endif
+
+// The scalar division function: full division
+#if ROUTINE_IS_COMPLEX
+	#define DivideFull(c,a,b) singlereal num_x = (a.x * b.x) + (a.y * b.y); singlereal num_y = (a.y * b.x) - (a.x * b.y); singlereal denom = (b.x * b.x) + (b.y * b.y); c = real(num_x / denom, num_y / denom)
+#elif DTYPE == DTYPE_F16
+	// Some hardware doesn't compute NaN properly
+	// #define DivideFull(c,a,b) c = (b == ZERO ? NAN : a / b)
+	// still need to test the specifics.
+	// until then, just use default behavior...
+	#define DivideFull(c,a,b) c = a / b
+#else
+	#define DivideFull(c,a,b) c = a / b
+#endif
+
+// The scalar AXPBY function
+#if ROUTINE_IS_COMPLEX
+	//#define AXPBY(e,a,b,c,d) e.x = MulReal(a,b) + MulReal(c,d); e.y = MulImag(a,b) + MulImag(c,d)
+	#define AXPBY(e,a,b,c,d) e = real(MulReal(a,b) + MulReal(c,d), MulImag(a,b) + MulImag(c,d))
+#else
+	#define AXPBY(e,a,b,c,d) e = a*b + c*d
+#endif
+
+// The complex conjugate operation for complex transforms
+#if DTYPE == DTYPE_C64 || DTYPE == DTYPE_C128
+	#define COMPLEX_CONJUGATE(value) value.y = -1.0*value.y
+#else
+	#define COMPLEX_CONJUGATE(value) 
+#endif
+
+// =================================================================================================
+
+// Macro for storing and loading, to accomodate BDA
+#if USE_BDA
+	// this needs to be changed, but I forget how it works
+	#if 1
+		#define INDEX(buf, idx) buf.s[idx]
+	#else
+		// normally you could just use buf.s[idx], but sometimes the alignment does not match the element size.
+		#error "not implemented"
+	#endif
+#else
+	#define INDEX(buf, idx) buf[idx]
+#endif
+
+// =================================================================================================
+
+// vector load methods
+#define vload2_single_alignment(index, buf) real2(INDEX(buf, index), INDEX(buf, index+1))
+#define vload4_signle_alignment(index, buf) real4(INDEX(buf, index), INDEX(buf, index+1), INDEX(buf, index+2), INDEX(buf, index+3))
+
+#define vload2(index, buf) real2(real[2](INDEX(buf, index), INDEX(buf, index+1)))
+#define vload4(index, buf) real4(real[4](INDEX(buf, index), INDEX(buf, index+1), INDEX(buf, index+2), INDEX(buf, index+3)))
+#define vload8(index, buf) real8(real[8](INDEX(buf, index), INDEX(buf, index+1), INDEX(buf, index+2),\
+	INDEX(buf, index+3), INDEX(buf, index+4), INDEX(buf, index+5), INDEX(buf, index+6), INDEX(buf, index+7)))
+#define vload16(index, buf) real16(real[16](INDEX(buf, index), INDEX(buf, index+1), INDEX(buf, index+2),\
+	INDEX(buf, index+3), INDEX(buf, index+4), INDEX(buf, index+5), INDEX(buf, index+6), INDEX(buf, index+7),\
+	INDEX(buf, index+8), INDEX(buf, index+9), INDEX(buf, index+10), INDEX(buf, index+11), INDEX(buf, index+12),\
+	INDEX(buf, index+13), INDEX(buf, index+14), INDEX(buf, index+15) ))
+	
+#define vloadN(index, buf, N) vload##N(index, buf)
+#define vloadN2(ret, index, buf, N) \
+{ \
+	[[unroll]] for (uint i = 0; i < N; i += 1) ret.s[i] = INDEX(buf, index + i); \
+}
+
+#define vTranspose(dst, src, vWidth) \
+{ \
+	UNROLL(vWidth) \
+	for (uint i = 0; i < vWidth; i += 1) \
+	{ \
+		UNROLL(vWidth) \
+		for (uint j = 0; j < vWidth; j += 1) dst[i].s[j] = src[j].s[i]; \
+	} \
+}
+
+// =================================================================================================
+
+// Shuffled workgroup indices to avoid partition camping, see below. For specific devices, this is
+// enabled (see src/routine.cc).
+#ifndef USE_STAGGERED_INDICES
+	#define USE_STAGGERED_INDICES 0
+#endif
+
+// because I am extremely lazy hehe
+#define get_global_id(dim) int(gl_GlobalInvocationID[dim])
+#define get_local_id(dim) int(gl_LocalInvocationID[dim])
+#define get_group_id(dim) int(gl_WorkGroupID[dim])
+#define get_global_size(idx) int(gl_NumWorkGroups[idx] * gl_WorkGroupSize[idx])
+#define get_local_size(idx) int(gl_WorkGroupSize[idx])
+#define get_num_groups(dim) int(gl_NumWorkGroups[dim])
+#define get_sub_group_local_id() int(gl_SubgroupInvocationID)
+
+// Staggered/shuffled group indices to avoid partition camping (AMD GPUs). Formula's are taken from:
+// http://docs.nvidia.com/cuda/samples/6_Advanced/transpose/doc/MatrixTranspose.pdf
+// More details: https://github.com/CNugteren/CLBlast/issues/53
+#if USE_STAGGERED_INDICES == 1 && GEMMK == 0
+	int GetGroupIDFlat() {
+		return get_group_id(0) + get_num_groups(0) * get_group_id(1);
+		//return gl_WorkGroupID.x + gl_NumWorkGroups.x * gl_WorkGroupID.y;
+	}
+	int GetGroupID1() {
+		return (GetGroupIDFlat()) % get_num_groups(1);
+		//return int((GetGroupIDFlat()) % gl_NumWorkGroups.y);
+	}
+	int GetGroupID0() {
+		return ((GetGroupIDFlat() / get_num_groups(1)) + GetGroupID1()) % get_num_groups(0);
+		//return int(((GetGroupIDFlat() / gl_NumWorkGroups.y) + GetGroupID1()) % gl_WorkGroupSize.x);
+	}
+#else
+	int GetGroupID1() { return get_group_id(1); }
+	//int GetGroupID1() { return int(gl_WorkGroupID.y); }
+	int GetGroupID0() { return get_group_id(0); }
+	//int GetGroupID0() { return int(gl_WorkGroupID.x); }
+#endif
+
+
+// Copies a vector src to dest, without regards to width or non-scalar type of either one
+#define copyArbitraryVector(dst, src, size) { [[unroll]] for (uint _i = 0; _i < size; _i += 1) dst.s[_i] = src.s[_i]; }
+
+// =================================================================================================
+
+// End of the C++11 raw string literal
+#endif
+
+// =================================================================================================
+
+#define LEVEL3_USE_SPEC 1
+
+// =================================================================================================
+// This file is part of the CLBlast project. Author(s):
+//	 Cedric Nugteren <www.cedricnugteren.nl>
+//
+// This file contains the common functions and parameters specific for level 3 BLAS kernels.
+//
+// =================================================================================================
+
+// literal). Comment-out this line for syntax-highlighting when developing.
+#ifndef LEVEL3_GLSL
+#define LEVEL3_GLSL
+// =================================================================================================
+
+
+// Parameters set by the tuner or by the database. Here they are given a basic default value in case
+// this kernel file is used outside of the CLBlast library.
+
+#ifndef LEVEL3_USE_SPEC
+	#define LEVEL3_USE_SPEC 0
+#endif
+
+#if LEVEL3_USE_SPEC == 1
+		// For the 'fast' copy kernel
+	#ifdef COPY_DIMX
+		#undef COPY_DIMX 			// Local workgroup size in the first dimension (x)
+	#endif
+	layout(constant_id = 0) const int COPY_DIMX = 8;
+	
+	#ifdef COPY_DIMY
+		#undef COPY_DIMY 			// Local workgroup size in the second dimension (y)
+	#endif
+	layout(constant_id = 1) const int COPY_DIMY = 8;
+	
+	#ifdef COPY_WPT
+		#undef COPY_WPT 			 // Work per thread in the first dimension (x)
+	#endif
+	layout(constant_id = 2) const int COPY_WPT = 1;
+	
+	#ifndef COPY_VW // un-specable
+		#define COPY_VW 1				// Vector width in the second dimension (y)
+	#endif
+	
+
+	// For the padding/copy kernels and the conversion kernels
+	#ifdef PAD_DIMX
+		#undef PAD_DIMX 			// Local workgroup size in the first dimension (x)
+	#endif
+	layout(constant_id = 3) const int PAD_DIMX = 8;
+	
+	#ifdef PAD_DIMY
+		#undef PAD_DIMY 			// Local workgroup size in the second dimension (y)
+	#endif
+	layout(constant_id = 4) const int PAD_DIMY = 8;
+	
+	#ifdef PAD_WPTX
+		#undef PAD_WPTX 			// Work per thread in the first dimension (x)
+	#endif
+	layout(constant_id = 5) const int PAD_WPTX = 1;
+	
+	#ifdef PAD_WPTY
+		#undef PAD_WPTY 			// Work per thread in the second dimension (y)
+	#endif
+	layout(constant_id = 6) const int PAD_WPTY = 1;
+
+	// For the 'fast' transpose kernel
+	#ifdef TRA_DIM
+		#undef TRA_DIM 			 // Number of local threads in the two dimensions (x,y)
+	#endif
+	layout(constant_id = 7) const int TRA_DIM = 8;
+	
+	#ifndef TRA_WPT // un-specable
+		#define TRA_WPT 1			 // Work per thread in one dimension and vector-width in the other
+	#endif
+	
+	#ifdef TRA_PAD
+		#undef TRA_PAD 			 // Padding of the local memory to avoid bank-conflicts
+	#endif
+	layout(constant_id = 8) const int TRA_PAD = 0;
+	
+	#ifdef TRA_SHUFFLE
+		#undef TRA_SHUFFLE 	 // Shuffling of the global indices to avoid global memory bank-conflicts
+	#endif
+	layout(constant_id = 9) const int TRA_SHUFFLE = 0;
+
+
+	// For the padding/transpose kernels
+	#ifdef PADTRA_TILE
+		#undef PADTRA_TILE 	 // Number of local threads in the two dimensions (x,y)
+	#endif
+	layout(constant_id = 10) const int PADTRA_TILE = 8;
+	
+	#ifdef PADTRA_WPT
+		#undef PADTRA_WPT 		// Amount of work per thread
+	#endif
+	layout(constant_id = 11) const int PADTRA_WPT = 1;
+	
+	#ifdef PADTRA_PAD
+		#undef PADTRA_PAD 		// Padding of the local memory to avoid bank-conflicts
+	#endif
+	layout(constant_id = 12) const int PADTRA_PAD = 0;
+	
+#else
+	#error "everything should be using specialization constants for level3"
+	// For the 'fast' copy kernel
+	#ifndef COPY_DIMX
+		#define COPY_DIMX 8			// Local workgroup size in the first dimension (x)
+	#endif
+	#ifndef COPY_DIMY
+		#define COPY_DIMY 8			// Local workgroup size in the second dimension (y)
+	#endif
+	#ifndef COPY_WPT
+		#define COPY_WPT 1			 // Work per thread in the first dimension (x)
+	#endif
+	#ifndef COPY_VW
+		#define COPY_VW 1				// Vector width in the second dimension (y)
+	#endif
+
+	// For the padding/copy kernels and the conversion kernels
+	#ifndef PAD_DIMX
+		#define PAD_DIMX 8			// Local workgroup size in the first dimension (x)
+	#endif
+	#ifndef PAD_DIMY
+		#define PAD_DIMY 8			// Local workgroup size in the second dimension (y)
+	#endif
+	#ifndef PAD_WPTX
+		#define PAD_WPTX 1			// Work per thread in the first dimension (x)
+	#endif
+	#ifndef PAD_WPTY
+		#define PAD_WPTY 1			// Work per thread in the second dimension (y)
+	#endif
+
+	// For the 'fast' transpose kernel
+	#ifndef TRA_DIM
+		#define TRA_DIM 8			 // Number of local threads in the two dimensions (x,y)
+	#endif
+	#ifndef TRA_WPT // un-specable
+		#define TRA_WPT 1			 // Work per thread in one dimension and vector-width in the other
+	#endif
+	#ifndef TRA_PAD
+		#define TRA_PAD 0			 // Padding of the local memory to avoid bank-conflicts
+	#endif
+	#ifndef TRA_SHUFFLE
+		#define TRA_SHUFFLE 0	 // Shuffling of the global indices to avoid global memory bank-conflicts
+	#endif
+
+	// For the padding/transpose kernels
+	#ifndef PADTRA_TILE
+		#define PADTRA_TILE 8	 // Number of local threads in the two dimensions (x,y)
+	#endif
+	#ifndef PADTRA_WPT
+		#define PADTRA_WPT 1		// Amount of work per thread
+	#endif
+	#ifndef PADTRA_PAD
+		#define PADTRA_PAD 0		// Padding of the local memory to avoid bank-conflicts
+	#endif
+#endif
+
+layout(constant_id = 13) const uint ROUTINE_SYRK = 0;
+layout(constant_id = 14) const uint ROUTINE_HERK = 0;
+layout(constant_id = 15) const uint ROUTINE_SYR2K = 0;
+layout(constant_id = 16) const uint ROUTINE_HER2K = 0;
+
+// =================================================================================================
+#endif
+// End of the C++11 raw string literal
+
+// =================================================================================================
+
+// =================================================================================================
+
+// Data-widths
+#if COPY_VW == 1
+	#define realC real
+#elif COPY_VW == 2
+	#define realC real2
+#elif COPY_VW == 4
+	#define realC real4
+#elif COPY_VW == 8
+	#define realC real8
+#elif COPY_VW == 16
+	#define realC real16
+#endif
+
+// =================================================================================================
+
+// Fast copy kernel. Requires 'ld' and the number of threads in dimension 0 to be a multiple of
+// COPY_VW. Also requires both matrices to be of the same dimensions and without offset.
+layout(local_size_x_id = 0, local_size_y_id = 1) in;
+
+#if USE_BDA == 0
+	layout(binding = 0, std430) buffer src_buf { realC src[]; };
+	layout(binding = 1, std430) buffer dest_buf { realC dest[]; };
+#endif
+
+layout(push_constant) uniform CopyMatrixFast
+{
+	int ld;
+#if USE_BDA
+	__global const realC* restrict src,
+	__global realC* dest,
+#endif
+	real_arg arg_alpha;
+};
+
+void main()
+{
+	if (ld % COPY_VW != 0) return;
+
+	const real alpha = (arg_alpha);
+	UNROLL(COPY_WPT)
+	for (int _w_one = 0; _w_one < COPY_WPT; _w_one += 1) {
+		const int id_one = get_global_id(0);
+		const int id_two = (get_group_id(1)*COPY_WPT + _w_one) * COPY_DIMY + get_local_id(1);
+		const int id = id_two*(ld/COPY_VW) + id_one;
+		realC result;
+		#if COPY_VW == 1
+			Multiply(result, alpha, src[id]);
+		#else
+			vsMultiply(result, alpha, src[id], COPY_VW);
+		#endif
+		dest[id] = result;
+	}
+}
+
+// =================================================================================================
+
+// End of the C++11 raw string literal
+)"
+
+// =================================================================================================

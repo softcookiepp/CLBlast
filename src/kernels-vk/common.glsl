@@ -114,6 +114,8 @@
 	#define real float16_t
 	#define ZERO float16_t(0.0)
 	#define ONE float16_t(1.0)
+	#define ZERO_C ZERO
+	#define ONE_C ONE
 	#define SMALLEST -1.0e14
 	#define INFINITY float16_t(uintBitsToFloat(0x7F800000))
 	#define NAN float16_t(uintBitsToFloat(0x7FC00000))
@@ -129,6 +131,8 @@
 	#define real float
 	#define ZERO real(0.0f)
 	#define ONE 1.0f
+	#define ZERO_C ZERO
+	#define ONE_C ONE
 	#define SMALLEST -1.0e37f
 	#define INFINITY uintBitsToFloat(0x7F800000)
 	#define NAN uintBitsToFloat(0x7FC00000)
@@ -144,6 +148,8 @@
 	#define real double
 	#define ZERO 0.0
 	#define ONE 1.0
+	#define ZERO_C ZERO
+	#define ONE_C ONE
 	#define SMALLEST -1.0e37
 	#define INFINITY double(uintBitsToFloat(0x7F800000))
 	#define NAN double(uintBitsToFloat(0x7FC00000))
@@ -159,6 +165,8 @@
 	#define real vec2
 	#define ZERO 0.0f
 	#define ONE 1.0f
+	#define ZERO_C vec2(0.0, 0.0)
+	#define ONE_C vec2(1.0, 0.0)
 	#define SMALLEST -1.0e37f
 	#define INFINITY uintBitsToFloat(0x7F800000)
 	#define NAN uintBitsToFloat(0x7FC00000)
@@ -174,6 +182,8 @@
 	#define real dvec2
 	#define ZERO 0.0
 	#define ONE 1.0
+	#define ZERO_C dvec2(0.0, 0.0)
+	#define ONE_C dvec2(1.0, 0.0)
 	#define SMALLEST -1.0e37
 	#define INFINITY double(uintBitsToFloat(0x7F800000))
 	#define NAN double(uintBitsToFloat(0x7FC00000))

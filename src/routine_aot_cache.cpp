@@ -271,4 +271,13 @@ tart::kernel_ptr getTransposeMatrixStridedBatched(const tart::device_ptr& device
 tart::kernel_ptr getCopyPadMatrixStridedBatched(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(copy_pad_matrix_strided_batched, dtype, device); }
 tart::kernel_ptr getCopyMatrixStridedBatched(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(copy_matrix_strided_batched, dtype, device); }
 
+tart::kernel_ptr getConvgemm(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vwm, const uint32_t vwn)
+{
+	DTYPE_DUAL_VW_SWITCH(dtype, convgemm_normal, vwm, vwn, device)
+}
+tart::kernel_ptr getConvgemmWithIm2col(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vwm, const uint32_t vwn)
+{
+	DTYPE_DUAL_VW_SWITCH(dtype, convgemm_kernel, vwm, vwn, device)
+}
+
 } // namespace clblast

@@ -12,7 +12,6 @@
 // Enables loading of this file using the C++ pre-processor's #include (C++11 standard raw string
 // literal). Comment-out this line for syntax-highlighting when developing.
 //R"(
-#define INVERT_USE_SPEC 1
 #include "invert_diagonal_blocks_part1_triple_matmul.glsl"
 // =================================================================================================
 
@@ -44,13 +43,8 @@ layout(push_constant, std430) uniform TripleMatMulPart1
 // TripleMatMul64Part1Upper
 void main()
 {
-	#if INVERT_USE_SPEC == 1
-		TripleMatMulPart1(SIZE, UPPER, lm, n, src, a_offset,
-			lda, dest, current_size, num_pages, block_size);
-	#else
-		TripleMatMulPart1(64, true, lm, n, src, a_offset,
-			lda, dest, current_size, num_pages, block_size);
-	#endif
+	TripleMatMulPart1(SIZE, UPPER, lm, n, src, a_offset,
+		lda, dest, current_size, num_pages, block_size);
 }
 
 // =================================================================================================

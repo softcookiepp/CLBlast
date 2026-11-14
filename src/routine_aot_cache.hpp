@@ -34,6 +34,10 @@ tart::kernel_ptr getAxpyFaster(const tart::device_ptr& device, const tart::DType
 tart::kernel_ptr getAxpyFastest(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth);
 tart::kernel_ptr getAxpyBatched(const tart::device_ptr& device, const tart::DType& dtype);
 
+tart::kernel_ptr getHad(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth);
+tart::kernel_ptr getHadFaster(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth);
+tart::kernel_ptr getHadFastest(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth);
+
 tart::kernel_ptr getGemv(const tart::device_ptr& device, const tart::DType& dtype);
 tart::kernel_ptr getGemvFast(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth);
 tart::kernel_ptr getGemvFastRot(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth);

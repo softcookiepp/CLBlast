@@ -115,9 +115,6 @@ void Xconvgemm::DoConvgemm(const KernelMode kernel_mode, const size_t channels, 
 	}
 	
 	// Retrieves the proper XgemmDirect kernel from the compiled binary
-	const std::string kernel_name = (method_ == ConvGemmMethod::kWithIm2Col) ? "Xconvgemm" : "XconvgemmNormal";
-	Kernel kernelOld(program_, kernel_name);
-	//tart::kernel_ptr kernel = kernelOld.get();
 	tart::kernel_ptr kernel = (method_ == ConvGemmMethod::kWithIm2Col) ?
 		getConvgemmWithIm2col(mDevice, mDtype, db_["VWMD"], db_["VWND"]):
 		getConvgemm(mDevice, mDtype, db_["VWMD"], db_["VWND"]);
@@ -132,21 +129,15 @@ void Xconvgemm::DoConvgemm(const KernelMode kernel_mode, const size_t channels, 
 	kernel->setArg(6, static_cast<int>(result_offset));
 	kernel->setArg(7, static_cast<int>(result_stride));
 	if (method_ == ConvGemmMethod::kWithIm2Col) {
-#if VULKAN_API
 		// both buffers need scalar casting
 		kernel->setArg(23, kernel_buffer);
 		kernel->setArg(24, col_buffer);
-#else
-		kernel->setArg(8, col_buffer);
-#endif
 		kernel->setArg(9, static_cast<int>(0));
 		kernel->setArg(10, static_cast<int>(col_stride));
 
 	}
 	if (method_ == ConvGemmMethod::kSingleKernel) {
-#if VULKAN_API
 		kernel->setArg(23, kernel_buffer);
-#endif
 		kernel->setArg(8, im_buffer);
 		kernel->setArg(9, static_cast<int>(im_offset));
 		kernel->setArg(10, static_cast<int>(height));

@@ -60,12 +60,8 @@ void Xhad::DoHad(const size_t n, const tart::Scalar& alpha, const tart::buffer_p
 																 (z_offset == 0) && (z_inc == 1) && IsMultiple(n, db_["WPT"] * db_["VW"]);
 	const auto use_fastest_kernel = use_faster_kernel && IsMultiple(n, db_["WGS"] * db_["WPT"] * db_["VW"]);
 
-	// If possible, run the fast-version of the kernel
-	const auto kernel_name = (use_fastest_kernel) ? "XhadFastest" : (use_faster_kernel) ? "XhadFaster" : "Xhad";
-
 	// Retrieves the Xhad kernel from the compiled binary
-	auto kernelOld = Kernel(program_, kernel_name);
-	tart::kernel_ptr kernel = kernelOld.get();
+	tart::kernel_ptr kernel = (use_fastest_kernel) ? getHadFastest(mDevice, mDtype, db_["VW"]) : (use_faster_kernel) ? getHadFaster(mDevice, mDtype, db_["VW"]) : getHad(mDevice, mDtype, db_["VW"]);
 	
 	// Sets the kernel arguments
 	if (use_faster_kernel || use_fastest_kernel) {

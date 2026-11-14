@@ -101,7 +101,8 @@ set(VW_KERNELS_LEVEL1
 	axpy axpy_faster axpy_fastest
 	copy copy_fast
 	scal scal_fast
-	swap swap_fast)
+	swap swap_fast
+	had had_faster had_fastest)
 foreach(KERNEL ${VW_KERNELS_LEVEL1})
 	foreach(VW ${VECTOR_WIDTHS})
 		build_kernel(f16 "${KERNEL}_vw${VW}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/x${KERNEL}.glsl" "-DDTYPE=DTYPE_F16 -DVW=${VW}")

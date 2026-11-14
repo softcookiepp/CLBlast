@@ -202,6 +202,10 @@ tart::kernel_ptr getAxpyFastest(const tart::device_ptr& device, const tart::DTyp
 }
 tart::kernel_ptr getAxpyBatched(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(axpy_batched, dtype, device); }
 
+tart::kernel_ptr getHad(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(had, dtype, vectorWidth, device); }
+tart::kernel_ptr getHadFaster(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(had_faster, dtype, vectorWidth, device); }
+tart::kernel_ptr getHadFastest(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(had_fastest, dtype, vectorWidth, device); }
+
 tart::kernel_ptr getGemv(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(gemv, dtype, device); }
 tart::kernel_ptr getGemvFast(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(gemv_fast, dtype, vectorWidth, device); }
 tart::kernel_ptr getGemvFastRot(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(gemv_fast_rot, dtype, vectorWidth, device); }

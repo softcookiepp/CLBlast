@@ -87,9 +87,13 @@
 	layout(constant_id = 2) const int TMMWGSX = 4; // Work-group size in x-dimension of TripleMatMul kernels
 	
 	#ifdef TMMWGSY
-		#undef TMMWGSY 4									// Work-group size in y-dimension of TripleMatMul kernels
+		#undef TMMWGSY
 	#endif
 	layout(constant_id = 3) const int TMMWGSY = 4; // Work-group size in y-dimension of TripleMatMul kernels
+	
+	layout(constant_id = 4) const int SIZE = 64; // The size; this will let us consolidate kernels considerably
+	
+	layout(constant_id = 5) const bool UPPER = true; // and this too!
 #else
 	#ifndef INTERNAL_BLOCK_SIZE
 		#define INTERNAL_BLOCK_SIZE 16		 // Internal block size of the invert kernel
@@ -110,6 +114,8 @@
 		#define TMMWGSY 4									// Work-group size in y-dimension of TripleMatMul kernels
 	#endif
 #endif
+
+shared real lm[LOCALY * LOCALX];
 
 // =================================================================================================
 

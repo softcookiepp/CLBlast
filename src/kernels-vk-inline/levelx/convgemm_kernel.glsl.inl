@@ -323,7 +323,7 @@ R"(
 
 // Sets a variable to zero
 #if ROUTINE_IS_COMPLEX
-	#define SetToZero(a) a = real(ZERO, ZERO)
+	#define SetToZero(a) { a = real(ZERO, ZERO); }
 #else
 	#define SetToZero(a) a = ZERO
 #endif
@@ -354,7 +354,7 @@ R"(
 
 // Negation (component-wise)
 #if ROUTINE_IS_COMPLEX
-	#define Negate(value) value.x = (-1.0(value.x)); value.y = (-1.0*(value.y))
+	#define Negate(value) value.x = (-1.0*(value.x)); value.y = (-1.0*(value.y))
 #else
 	#define Negate(value) value = (-1.0*(value))
 #endif
@@ -381,7 +381,7 @@ R"(
 
 // The scalar multiply function
 #if ROUTINE_IS_COMPLEX
-	#define Multiply(c,a,b) c = real(MulReal(a,b), MulImag(a,b))
+	#define Multiply(c,a,b) { c = real(MulReal(a,b), MulImag(a,b)); }
 #else
 	#define Multiply(c,a,b) c = a * b
 #endif
@@ -1099,21 +1099,9 @@ void main()
 		
 		for (int _ni = 0; _ni < NWID; _ni += 1) {
 			
-			for (int _mi = 0; _mi < MWID; _mi += 1)
-			{
-				#if 1
-					real c_value = cpd[_ni * MWID + _mi];
-					int c_ld = num_patches;
-					int c_offset = result_offset_batch;
-					int c_index = (idn + _ni)*c_ld + (idm + _mi);
-					real result;
-					Multiply(result, ONE, c_value);
-					resultgm[c_index + c_offset] = result;
-
-				#else
-					StoreResultsDirect(resultgm, cpd[_ni * MWID + _mi], _mi, _ni, idm, idn,
-														 ONE, ZERO, num_patches, result_offset_batch, false);
-				#endif
+			for (int _mi = 0; _mi < MWID; _mi += 1) {
+				StoreResultsDirect(resultgm, cpd[_ni * MWID + _mi], _mi, _ni, idm, idn,
+													 ONE_C, ZERO_C, num_patches, result_offset_batch, false);
 			}
 		}
 	}
@@ -1187,7 +1175,7 @@ void main()
 			
 			for (int _mi = 0; _mi < MWID; _mi += 1) {
 				StoreResultsChecked(resultgm, cpd[_ni * MWID + _mi], _mi, _ni, idm, idn, num_patches, num_kernels,
-														ONE, ZERO, num_patches, result_offset_batch, false);
+														ONE_C, ZERO_C, num_patches, result_offset_batch, false);
 			}
 		}
 	}

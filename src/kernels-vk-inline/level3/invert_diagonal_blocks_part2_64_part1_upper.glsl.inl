@@ -10,6 +10,7 @@
 
 // literal). Comment-out this line for syntax-highlighting when developing.
 R"(
+#define INVERT_USE_SPEC 1
 
 // =================================================================================================
 // This file is part of the CLBlast project. Author(s):
@@ -346,7 +347,7 @@ R"(
 
 // Sets a variable to zero
 #if ROUTINE_IS_COMPLEX
-	#define SetToZero(a) a = real(ZERO, ZERO)
+	#define SetToZero(a) { a = real(ZERO, ZERO); }
 #else
 	#define SetToZero(a) a = ZERO
 #endif
@@ -377,7 +378,7 @@ R"(
 
 // Negation (component-wise)
 #if ROUTINE_IS_COMPLEX
-	#define Negate(value) value.x = (-1.0(value.x)); value.y = (-1.0*(value.y))
+	#define Negate(value) value.x = (-1.0*(value.x)); value.y = (-1.0*(value.y))
 #else
 	#define Negate(value) value = (-1.0*(value))
 #endif
@@ -404,7 +405,7 @@ R"(
 
 // The scalar multiply function
 #if ROUTINE_IS_COMPLEX
-	#define Multiply(c,a,b) c = real(MulReal(a,b), MulImag(a,b))
+	#define Multiply(c,a,b) { c = real(MulReal(a,b), MulImag(a,b)); }
 #else
 	#define Multiply(c,a,b) c = a * b
 #endif
@@ -594,24 +595,64 @@ R"(
 
 // Parameters set by the tuner
 // TODO: Make these actually tunable
-#ifndef INTERNAL_BLOCK_SIZE
-	#define INTERNAL_BLOCK_SIZE 16		 // Internal block size of the invert kernel
+#ifndef INVERT_USE_SPEC
+	#define INVERT_USE_SPEC 0
 #endif
-#ifndef LOCALPAD
-	#define LOCALPAD 0								 // Padding in the x-dimension of the local memory to avoid bank conflicts
+#if INVERT_USE_SPEC
+	#ifdef INTERNAL_BLOCK_SIZE
+		#undef INTERNAL_BLOCK_SIZE //16		 
+	#endif
+	layout(constant_id = 0) const int INTERNAL_BLOCK_SIZE = 16; // Internal block size of the invert kernel
+	
+	#ifdef LOCALPAD
+		#undef LOCALPAD //0								 
+	#endif
+	layout(constant_id = 1) const int LOCALPAD = 0; // Padding in the x-dimension of the local memory to avoid bank conflicts
+	
+	// keep this as is, it is not a tunable parameter in the database
+	#ifndef LOCALX
+		#define LOCALX (16 + LOCALPAD)		 // Local memory size in x-dimension of TripleMatMul kernels
+	#endif
+	// and this one too. Really not sure what can even be done here
+	#ifndef LOCALY
+		#define LOCALY 16									// Local memory size in y-dimension of TripleMatMul kernels
+	#endif
+	
+	#ifdef TMMWGSX
+		#undef TMMWGSX //4									
+	#endif
+	layout(constant_id = 2) const int TMMWGSX = 4; // Work-group size in x-dimension of TripleMatMul kernels
+	
+	#ifdef TMMWGSY
+		#undef TMMWGSY
+	#endif
+	layout(constant_id = 3) const int TMMWGSY = 4; // Work-group size in y-dimension of TripleMatMul kernels
+	
+	layout(constant_id = 4) const int SIZE = 64; // The size; this will let us consolidate kernels considerably
+	
+	layout(constant_id = 5) const bool UPPER = true; // and this too!
+#else
+	#ifndef INTERNAL_BLOCK_SIZE
+		#define INTERNAL_BLOCK_SIZE 16		 // Internal block size of the invert kernel
+	#endif
+	#ifndef LOCALPAD
+		#define LOCALPAD 0								 // Padding in the x-dimension of the local memory to avoid bank conflicts
+	#endif
+	#ifndef LOCALX
+		#define LOCALX (16 + LOCALPAD)		 // Local memory size in x-dimension of TripleMatMul kernels
+	#endif
+	#ifndef LOCALY
+		#define LOCALY 16									// Local memory size in y-dimension of TripleMatMul kernels
+	#endif
+	#ifndef TMMWGSX
+		#define TMMWGSX 4									// Work-group size in x-dimension of TripleMatMul kernels
+	#endif
+	#ifndef TMMWGSY
+		#define TMMWGSY 4									// Work-group size in y-dimension of TripleMatMul kernels
+	#endif
 #endif
-#ifndef LOCALX
-	#define LOCALX (16 + LOCALPAD)		 // Local memory size in x-dimension of TripleMatMul kernels
-#endif
-#ifndef LOCALY
-	#define LOCALY 16									// Local memory size in y-dimension of TripleMatMul kernels
-#endif
-#ifndef TMMWGSX
-	#define TMMWGSX 4									// Work-group size in x-dimension of TripleMatMul kernels
-#endif
-#ifndef TMMWGSY
-	#define TMMWGSY 4									// Work-group size in y-dimension of TripleMatMul kernels
-#endif
+
+shared real lm[LOCALY * LOCALX];
 
 // =================================================================================================
 
@@ -734,8 +775,7 @@ R"(
 // =================================================================================================
 
 
-	// local size appears to be variable for these kernels, so that is what we will do
-	layout(local_size_x_id = 0, local_size_y_id = 1, local_size_z_id = 2) in;
+layout(local_size_x_id = 0, local_size_y = 1, local_size_z = 1) in;
 
 
 #if USE_BDA == 0
@@ -756,14 +796,19 @@ layout(push_constant, std430) uniform TripleMatMulPart1
 	int current_size; int num_pages; int block_size;
 };
 
-shared real lm[LOCALY * LOCALX];
+
 
 // B12 =	A12 * B22
 // TripleMatMul64Part1Upper
 void main()
 {
-	TripleMatMulPart1(64, true, lm, n, src, a_offset,
-		lda, dest, current_size, num_pages, block_size);
+	#if INVERT_USE_SPEC == 1
+		TripleMatMulPart1(SIZE, UPPER, lm, n, src, a_offset,
+			lda, dest, current_size, num_pages, block_size);
+	#else
+		TripleMatMulPart1(64, true, lm, n, src, a_offset,
+			lda, dest, current_size, num_pages, block_size);
+	#endif
 }
 
 // =================================================================================================

@@ -36,32 +36,6 @@ Xinvert::Xinvert(const tart::DType& dtype, Queue& queue, EventPointer event, con
 	,
 	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part1_invert_diagonal_block.glsl.inl"
 	,
-	// 16 lower
-	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_16_part1_lower.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_16_part2_lower.glsl.inl"
-	,
-	// 32 lower
-	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_32_part1_lower.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_32_part2_lower.glsl.inl"
-	,
-	// 64 lower
-	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_64_part1_lower.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_64_part2_lower.glsl.inl"
-	,
-	// 16 upper
-	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_16_part1_upper.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_16_part2_upper.glsl.inl"
-	,
-	// 32 upper
-	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_32_part1_upper.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_32_part2_upper.glsl.inl"
-	,
-	// 64 upper
 	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_64_part1_upper.glsl.inl"
 	,
 	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_64_part2_upper.glsl.inl"
@@ -70,17 +44,6 @@ Xinvert::Xinvert(const tart::DType& dtype, Queue& queue, EventPointer event, con
 		{
 			"FillMatrix",
 			"InvertDiagonalBlock",
-			"TripleMatMul16Part1Lower",
-			"TripleMatMul16Part2Lower",
-			"TripleMatMul32Part1Lower",
-			"TripleMatMul32Part2Lower",
-			"TripleMatMul64Part1Lower",
-			"TripleMatMul64Part2Lower",
-			
-			"TripleMatMul16Part1Upper",
-			"TripleMatMul16Part2Upper",
-			"TripleMatMul32Part1Upper",
-			"TripleMatMul32Part2Upper",
 			"TripleMatMul64Part1Upper",
 			"TripleMatMul64Part2Upper"
 		}
@@ -127,10 +90,6 @@ void Xinvert::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle tri
 	// default) and on whether we are dealing with an upper or lower triangle of the triangular matrix
 	const bool is_upper = ((triangle == Triangle::kUpper && layout != Layout::kRowMajor) ||
 												 (triangle == Triangle::kLower && layout == Layout::kRowMajor));
-	const auto name_postfix = (is_upper) ? "Upper" : "Lower";
-	
-	// every kernel will be bound to this
-	
 
 	// Fills the output buffer with zeros
 	FillMatrix(mDtype, program_, block_size,
@@ -172,9 +131,8 @@ void Xinvert::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle tri
 		global[1] = global[1] / 4;
 
 		// Part 1
-		Kernel kernel1Old(program_, "TripleMatMul" + ToString(current_size) + "Part1" + name_postfix);
+		Kernel kernel1Old(program_, "TripleMatMul64Part1Upper");
 		tart::kernel_ptr kernel1 = kernel1Old.get();
-		std::cout << "KERNEL 1: " << "TripleMatMul" + ToString(current_size) + "Part1" + name_postfix << std::endl;
 		kernel1->setArg(0, static_cast<int>(n));
 		kernel1->setArg(1, src);
 		kernel1->setArg(2, static_cast<int>(offset));
@@ -183,22 +141,26 @@ void Xinvert::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle tri
 		kernel1->setArg(5, static_cast<int>(current_size));
 		kernel1->setArg(6, static_cast<int>(npages));
 		kernel1->setArg(7, static_cast<int>(block_size));
-		kernel1->enqueue(global, {});
-		//device_()->enqueueBarrier({dest()});
-		//event_wait_list.push_back(kernel1_event);
+		std::vector<uint32_t> spec = {
+			db_["INTERNAL_BLOCK_SIZE"],
+			db_["LOCALPAD"],
+			db_["TMMWGSX"],
+			db_["TMMWGSY"],
+			db_["SIZE"],
+			static_cast<uint32_t>(is_upper)
+		};
+		kernel1->enqueue(global, spec);
 
 		// Part 2
-		const bool is_last_kernel = (current_size * 2 >= block_size);
-		Kernel kernel2Old(program_, "TripleMatMul" + ToString(current_size) + "Part2" + name_postfix);
+		Kernel kernel2Old(program_, "TripleMatMul64Part2Upper");
 		tart::kernel_ptr kernel2 = kernel2Old.get();
-		std::cout << "KERNEL 2: " << "TripleMatMul" + ToString(current_size) + "Part2" + name_postfix << std::endl;
 		kernel2->setArg(0, static_cast<int>(n));
 		kernel2->setArg(1, dest);
 		kernel2->setArg(2, static_cast<int>(current_size));
 		kernel2->setArg(3, static_cast<int>(npages));
 		kernel2->setArg(4, static_cast<int>(block_size));
-		kernel2->enqueue(global, {});
-
+		kernel2->enqueue(global, spec);
+		
 		// Exit in case we reach beyond the bounds of the input matrix
 		if (current_size * 2 >= n) {
 			break;

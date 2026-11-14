@@ -96,6 +96,9 @@ void Xinvert::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle tri
 						 num_blocks * block_size, block_size, 0, dest, tart::Scalar::zero(), 16);
 	//event_wait_list.push_back(fill_matrix_event);
 	//device_()->enqueueBarrier({dest()});
+	
+	// used across all kernels here
+	
 
 	// Inverts the diagonal IB by IB inner blocks of the matrix: one block per work-group
 	Kernel kernelOld(program_, "InvertDiagonalBlock");
@@ -111,8 +114,15 @@ void Xinvert::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle tri
 	const auto local_invert = std::vector<size_t>{internal_block_size};
 	auto global_invert = std::vector<uint32_t>{num_internal_blocks * internal_block_size};
 	global_invert[0] = global_invert[0] / local_invert[0];
-	
-	kernel->enqueue(global_invert, {});
+	std::vector<uint32_t> spec = {
+		db_["INTERNAL_BLOCK_SIZE"],
+		db_["LOCALPAD"],
+		db_["TMMWGSX"],
+		db_["TMMWGSY"],
+		0,
+		static_cast<uint32_t>(is_upper)
+	};
+	kernel->enqueue(global_invert, spec);
 	
 	// Builds up block_size x block_size blocks. For example, internal_block_size=16:
 	// use	 16 x 16	blocks to build	32 x 32	blocks,	1 x (1 x npages) grid,	4 x 4 threads;
@@ -121,6 +131,15 @@ void Xinvert::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle tri
 	for (auto current_size = internal_block_size; current_size < block_size; current_size *= 2)
 	{
 		assert(current_size == 16 || current_size == 32 || current_size == 64);
+		
+		std::vector<uint32_t> spec2 = {
+			db_["INTERNAL_BLOCK_SIZE"],
+			db_["LOCALPAD"],
+			db_["TMMWGSX"],
+			db_["TMMWGSY"],
+			current_size,
+			static_cast<uint32_t>(is_upper)
+		};
 
 		// Emulates a 3D grid: NX * (NY * npages)
 		const auto npages = CeilDiv(n, current_size * 2);
@@ -141,15 +160,7 @@ void Xinvert::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle tri
 		kernel1->setArg(5, static_cast<int>(current_size));
 		kernel1->setArg(6, static_cast<int>(npages));
 		kernel1->setArg(7, static_cast<int>(block_size));
-		std::vector<uint32_t> spec = {
-			db_["INTERNAL_BLOCK_SIZE"],
-			db_["LOCALPAD"],
-			db_["TMMWGSX"],
-			db_["TMMWGSY"],
-			db_["SIZE"],
-			static_cast<uint32_t>(is_upper)
-		};
-		kernel1->enqueue(global, spec);
+		kernel1->enqueue(global, spec2);
 
 		// Part 2
 		Kernel kernel2Old(program_, "TripleMatMul64Part2Upper");
@@ -159,7 +170,7 @@ void Xinvert::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle tri
 		kernel2->setArg(2, static_cast<int>(current_size));
 		kernel2->setArg(3, static_cast<int>(npages));
 		kernel2->setArg(4, static_cast<int>(block_size));
-		kernel2->enqueue(global, spec);
+		kernel2->enqueue(global, spec2);
 		
 		// Exit in case we reach beyond the bounds of the input matrix
 		if (current_size * 2 >= n) {

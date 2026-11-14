@@ -10,6 +10,10 @@ endmacro()
 set(BINARY_FLAG_OPTIONS 0 1)
 set(VECTOR_WIDTHS 1 2 4 8 16)
 
+set(INVERT_KERNELS
+	invert_diagonal_block)
+
+
 set(LEVELX_KERNELS im2col_kernel_normal col2im_kernel_normal)
 foreach(KERNEL ${LEVELX_KERNELS})
 	build_kernel(f16 "${KERNEL}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/levelx/${KERNEL}.glsl" "-DDTYPE=DTYPE_F16")

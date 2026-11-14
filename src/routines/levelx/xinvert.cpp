@@ -34,7 +34,7 @@ Xinvert::Xinvert(const tart::DType& dtype, Queue& queue, EventPointer event, con
 							{
 	#include "../../kernels-vk-inline/level3/level3_fill_matrix.glsl.inl"
 	,
-	#include "../../kernels-vk-inline/level3//invert_diagonal_blocks_part1_invert_diagonal_block.glsl.inl"
+	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part1_invert_diagonal_block.glsl.inl"
 	,
 	// 16 lower
 	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_16_part1_lower.glsl.inl"

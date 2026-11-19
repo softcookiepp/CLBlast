@@ -18,7 +18,7 @@
 namespace clblast {
 // =================================================================================================
 
-void OpenCLDiagnostics(int argc, char* argv[]) {
+void VulkanDiagnostics(int argc, char* argv[]) {
 	auto arguments = RetrieveCommandLineArguments(argc, argv);
 
 	// Retrieves the arguments
@@ -29,7 +29,7 @@ void OpenCLDiagnostics(int argc, char* argv[]) {
 			GetArgument(arguments, help, kArgDevice, ConvertArgument(std::getenv("CLBLAST_DEVICE"), size_t{0}));
 	fprintf(stdout, "\n* %s\n", help.c_str());
 
-	// Initializes OpenCL
+	// Initializes Vulkan device
 	const auto device = Device(device_id);
 	auto queue = Queue(device);
 
@@ -38,7 +38,7 @@ void OpenCLDiagnostics(int argc, char* argv[]) {
 	const auto device_vendor = GetDeviceVendor(device);
 	const auto device_architecture = GetDeviceArchitecture(device);
 	const auto device_name = GetDeviceName(device);
-	printf("\n --- OpenCL device naming:\n");
+	printf("\n --- Vulkan device naming:\n");
 	printf("* Device type									 %s\n", device.Type().c_str());
 	printf("* Device name									 %s\n", device.Name().c_str());
 	//printf("* Platform vendor							 %s\n", platform.Vendor().c_str());
@@ -51,8 +51,8 @@ void OpenCLDiagnostics(int argc, char* argv[]) {
 	printf("* Device vendor								 %s\n", device_vendor.c_str());
 	printf("* Device architecture					 %s\n", device_architecture.c_str());
 
-	// Selected OpenCL properties
-	printf("\n --- OpenCL device properties:\n");
+	// Selected Vulkan properties
+	printf("\n --- Vulkan device properties:\n");
 	printf("* Max work group size					 %zu\n", device.MaxWorkGroupSize());
 	const auto max_work_item_sizes = device.MaxWorkItemSizes();
 	for (auto i = size_t{0}; i < max_work_item_sizes.size(); ++i) {
@@ -61,9 +61,9 @@ void OpenCLDiagnostics(int argc, char* argv[]) {
 	printf("* Local memory size						 %lu KB\n", device()->getMetadata().physicalDeviceProperties.limits.maxComputeSharedMemorySize);
 	printf("* Extensions:\n%s\n", device.Capabilities().c_str());
 
-	// Simple OpenCL benchmarking
+	// Simple Vulkan benchmarking
 	constexpr auto kNumRuns = 20;
-	printf("\n --- Some OpenCL library benchmarks (functions from clpp11.h):\n");
+	printf("\n --- Some Vulkan library benchmarks (functions from vkpp11):\n");
 	printf("* queue.GetDevice()						 %.4lf ms\n", TimeFunction(kNumRuns, [&]() { queue.GetDevice(); }));
 	printf("* device.Name()								 %.4lf ms\n", TimeFunction(kNumRuns, [&]() { device.Name(); }));
 	printf("* device.Vendor()							 %.4lf ms\n", TimeFunction(kNumRuns, [&]() { device.Vendor(); }));
@@ -78,7 +78,7 @@ void OpenCLDiagnostics(int argc, char* argv[]) {
 
 // Main function (not within the clblast namespace)
 int main(int argc, char* argv[]) {
-	clblast::OpenCLDiagnostics(argc, argv);
+	clblast::VulkanDiagnostics(argc, argv);
 	return 0;
 }
 

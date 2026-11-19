@@ -16,14 +16,8 @@
 #include <string>
 #include <vector>
 
-// Just needed for 'Precision'
-#ifdef OPENCL_API
-#define CL_TARGET_OPENCL_VERSION 110
-#include "clblast.h"
-
-#elif VULKAN_API
+// Include Vulkan BLAS header for Precision enum (only backend supported)
 #include "clblast_vk.h"
-#endif
 
 namespace clblast {
 // A special namespace to hold all the global constant variables (including the database entries)

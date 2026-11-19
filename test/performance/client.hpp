@@ -23,16 +23,11 @@
 #include <utility>
 #include <vector>
 
-#if OPENCL_API
-	#include "clblast.h"
-#elif VULKAN_API
-	#include "clblast_vk.h"
-#endif
+#include "clblast_vk.h"
 #include "test/test_utilities.hpp"
 #include "utilities/backend.hpp"
 
 // The libraries to test
-#include "test/wrapper_cuda.hpp"
 #include "utilities/utilities.hpp"
 
 namespace clblast {

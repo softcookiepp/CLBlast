@@ -31,10 +31,6 @@ Tart lives as a **git submodule** at `tart/` pointing to `https://codeberg.org/s
 CLBlast-vk/                          # Root: CLBlast fork, Vulkan BLAS library
 ├── include/                         # Public headers (user-facing API)
 │   ├── clblast_vk.h                 # Main header: BLAS routine declarations (Vulkan)
-│   ├── clblast.h                    # BLAS declarations (OpenCL, legacy)
-│   ├── clblast_cuda.h               # BLAS declarations (CUDA, legacy)
-│   ├── clblast_c.h                  # C API (Vulkan)
-│   ├── clblast_netlib_c.h           # CBLAS Netlib API (legacy)
 │   └── clblast_half.h               # Half-precision helper
 ├── src/                             # CLBlast library source
 │   ├── clblast_vk.cpp               # Vulkan-specific BLAS API implementation
@@ -91,10 +87,10 @@ CLBlast-vk/                          # Root: CLBlast fork, Vulkan BLAS library
 │   └── database/                   # Database management scripts
 ├── cmake/                           # CMake modules
 │   ├── compile_kernels.cmake       # Kernel source generation logic
-│   └── Modules/                    # Find modules (CBLAS, MKL, cuBLAS, etc.)
+│   └── Modules/                    # Find modules (CBLAS, MKL)
 ├── doc/                             # Documentation
 ├── CMakeLists.txt                   # Root build system (CMake >= 3.10)
-├── vcpkg.json                       # vcpkg manifest (OpenCL dependency)
+├── vcpkg.json                       # vcpkg manifest (no external deps)
 ├── .gitmodules                      # Tart submodule definition
 └── .github/workflows/               # CI pipelines
 ```
@@ -135,12 +131,13 @@ The `VULKAN` CMake option (default ON) selects the Vulkan code path:
 - Compiles `clblast_vk.cpp` as the implementation
 - Links against the Tart library
 
-The `OPENCL` option (default OFF) falls back to OpenCL:
-- Defines `OPENCL_API`
-- Includes `clblast.h`
-- Compiles `clblast.cpp`
+The `VULKAN` option (always ON) selects the Vulkan code path:
+- Defines `VULKAN_API`
+- Includes `clblast_vk.h` as the main header
+- Compiles `clblast_vk.cpp` as the implementation
+- Links against the Tart library
 
-Only one backend can be active at a time.
+The `OPENCL` option is deprecated (no longer builds).
 
 #### 2. vkpp11 – Vulkan C++11 Wrapper
 
@@ -348,14 +345,14 @@ make
 | Option | Default | Description |
 |--------|---------|-------------|
 | `VULKAN` | ON | Build with Vulkan backend |
-| `OPENCL` | OFF | Build with OpenCL backend |
+| `OPENCL` | OFF | Deprecated (no longer builds) |
 | `VULKAN_BDA` | OFF | Enable Vulkan Buffer Device Address support |
 | `SAMPLES` | OFF | Build sample programs |
 | `TUNERS` | ON | Build tuning executables |
 | `CLIENTS` | OFF | Build performance benchmark clients |
 | `TESTS` | OFF | Build correctness tests |
-| `CUBLAS` | OFF | Compare against cuBLAS |
-| `NETLIB` | OFF | Enable CBLAS Netlib API |
+| `CUBLAS` | OFF | Deprecated (cuBLAS wrapper removed) |
+| `NETLIB` | OFF | Deprecated (netlib API removed) |
 | `VERBOSE` | OFF | Enable diagnostic messages |
 | `BUILD_SHARED_LIBS` | ON | Build shared library (OFF for static) |
 
@@ -527,7 +524,7 @@ GitHub Actions workflows in `.github/workflows/`:
 | `src/cache.hpp` | Kernel compile-time caching |
 | `src/database/database.hpp` | Database initialization and lookup |
 | `src/database/database_structure.hpp` | Database data structures |
-| `src/utilities/backend.hpp` | Backend selector (VULKAN_API vs OPENCL_API) |
+| `src/utilities/backend.hpp` | Backend selector (always Vulkan) |
 | `src/tuning/tuning_api.cpp` | Public tuning API |
 | `src/tuning/tuning.cpp` | Tuning engine core |
 | `src/tuning/configurations.hpp` | Kernel parameter configurations |
@@ -541,7 +538,7 @@ GitHub Actions workflows in `.github/workflows/`:
 | `CMakeLists.txt` | Root CLBlast-vk build configuration |
 | `cmake/compile_kernels.cmake` | Kernel source generation macro |
 | `scripts/inline_gen.py` | SPIR-V inline header generation |
-| `vcpkg.json` | vcpkg manifest (OpenCL dependency) |
+| `vcpkg.json` | vcpkg manifest (no longer has external deps) |
 
 ---
 

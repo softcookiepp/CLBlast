@@ -22,16 +22,12 @@ jobs:
     runs-on: ${{ matrix.config.os }}
 
     env:
-      RELEASE_NAME: CLBlast-${{ github.event.inputs.version }}-${{ matrix.config.name }}-${{ matrix.config.arch }}
+      RELEASE_NAME: CLBlast-vk-${{ github.event.inputs.version }}-${{ matrix.config.name }}-${{ matrix.config.arch }}
 
     steps:
     - uses: actions/checkout@v3
-
-    - name: Install requirements for Ubuntu
-      run: |
-        sudo apt-get update
-        sudo apt-get install -yq ocl-icd-opencl-dev opencl-c-headers --no-install-recommends
-      if: ${{ matrix.config.name == 'linux' }}
+      with:
+        submodules: recursive
 
     - name: Run CMake
       run: |
@@ -66,21 +62,20 @@ jobs:
     runs-on: ${{ matrix.config.os }}
 
     env:
-      RELEASE_NAME: CLBlast-${{ github.event.inputs.version }}-${{ matrix.config.name }}-${{ matrix.config.arch }}
+      RELEASE_NAME: CLBlast-vk-${{ github.event.inputs.version }}-${{ matrix.config.name }}-${{ matrix.config.arch }}
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        submodules: recursive
 
     - name: Set up MSVC
       uses: ilammy/msvc-dev-cmd@v1
 
-    - name: Install OpenCL
-      run: vcpkg.exe --triplet=${{ matrix.config.arch }}-windows install
-
     - name: Run CMake
       run: |
         mkdir "${{env.RELEASE_NAME}}"
-        cmake -S . -B build  -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DTESTS=OFF -DCLIENTS=OFF -DSAMPLES=ON -DCMAKE_INSTALL_PREFIX="${{env.RELEASE_NAME}}" -DOPENCL_ROOT=C:/vcpkg/packages/opencl_x64-windows
+        cmake -S . -B build  -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DTESTS=OFF -DCLIENTS=OFF -DSAMPLES=ON -DCMAKE_INSTALL_PREFIX="${{env.RELEASE_NAME}}"
 
     - name: Compile the code
       run: cmake --build build --config Release

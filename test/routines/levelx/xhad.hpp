@@ -17,7 +17,6 @@
 #include <vector>
 
 #include "test/test_utilities.hpp"
-#include "test/wrapper_cuda.hpp"
 #include "utilities/backend.hpp"
 #include "utilities/utilities.hpp"
 

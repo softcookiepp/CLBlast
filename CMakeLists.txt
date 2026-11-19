@@ -45,32 +45,13 @@ option(SAMPLES "Enable compilation of the examples" OFF)
 option(TUNERS "Enable compilation of the tuners" ON)
 option(CLIENTS "Enable compilation of the clients to test and compare performance" OFF)
 option(TESTS "Enable compilation of the correctness tests" OFF)
-option(CUBLAS "Enables performance comparison against cuBLAS on NVIDIA GPUs" OFF)
-option(VULKAN_BDA "Enable Vulkan support of Buffer Device Addresses" OFF) # this may be eventually removed once BDA support is complete
+# VULKAN_BDA option (can be removed once BDA support is complete)
+option(VULKAN_BDA "Enable Vulkan support of Buffer Device Addresses" OFF)
 
-# The optional Netlib API for CLBlast
-option(NETLIB "Enable compilation of the CBLAS Netlib API" OFF)
-option(NETLIB_PERSISTENT_OPENCL "Makes OpenCL device and context in the CBLAS Netlib API static" OFF)
-if(NETLIB)
-	message("-- Building the Netlib API of CLBlast")
-	if(NETLIB_PERSISTENT_OPENCL)
-		message("	 ^^ while using static variables for OpenCL device and context")
-		add_definitions(-DNETLIB_PERSISTENT_OPENCL)
-	endif()
-endif()
-
-# debugging
-include(CheckCXXSymbolExists)
-
-# Select between an OpenCL API (default) or a Vulkan API
-option(OPENCL "Build CLBlast with an OpenCL API (default)" OFF)
-option(VULKAN "Build CLBlast with a Vulkan API (you must not value your time and/or sanity)" ON)
-if(VULKAN)
-	message("-- Building CLBlast with VULKAN API")
-	add_definitions(-DVULKAN_API)
-	if (VULKAN_BDA)
-		add_definitions(-DVULKAN_USE_BDA)
-	endif()
+# Always Vulkan
+add_definitions(-DVULKAN_API)
+if (VULKAN_BDA)
+	add_definitions(-DVULKAN_USE_BDA)
 endif()
 
 # Compile in verbose mode with additional diagnostic messages
@@ -123,18 +104,18 @@ set(API_INCLUDE_DIRS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tart/include>
 )
 
 
-# Locates the reference BLAS libraries in case the tests need to be compiled. The "FindclBLAS.cmake",
-# "FindCBLAS.cmake", "FindMKL.cmake", and "FindcuBLAS.cmake" are included.
+# Locates the reference BLAS libraries in case the tests need to be compiled. The "FindCBLAS.cmake"
+# and "FindMKL.cmake" are included.
 if(CLIENTS OR TESTS)
 	find_package(CBLAS)
 	find_package(MKL)
 	if(NOT CBLAS_FOUND AND NOT MKL_FOUND)
 		if(TESTS)
-			message(STATUS "Could NOT find clBLAS nor a CPU BLAS, disabling the compilation of the tests")
+			message(STATUS "Could NOT find a CPU BLAS, disabling the compilation of the tests")
 			set(TESTS OFF)
 		endif()
 		if(CLIENTS)
-			message(STATUS "Could NOT find clBLAS nor a CPU BLAS, head-to-head performance comparison not supported in the clients")
+			message(STATUS "Could NOT find a CPU BLAS, head-to-head performance comparison not supported in the clients")
 		endif()
 	endif()
 endif()
@@ -156,18 +137,9 @@ set(LEVELX_ROUTINES xhad xomatcopy xim2col xcol2im xconvgemm xaxpybatched xgemmb
 set(ROUTINES ${LEVEL1_ROUTINES} ${LEVEL2_ROUTINES} ${LEVEL3_ROUTINES} ${LEVELX_ROUTINES})
 set(PRECISIONS 32 64 3232 6464 16)
 
-# Sample programs
-if(FALSE)
-	set(SAMPLE_PROGRAMS_CPP sgemm sgemm_batched dtrsm tuning_api)
-	set(SAMPLE_PROGRAMS_C sasum samax dgemv sgemm haxpy cache)
-	if(NETLIB)
-		set(SAMPLE_PROGRAMS_C ${SAMPLE_PROGRAMS_C} sgemm_netlib)
-	endif()
-elseif(VULKAN)
-	# nothing yet :c
-	set(SAMPLE_PROGRAMS_CPP)
-	set(SAMPLE_PROGRAMS_C)
-endif()
+# Sample programs (currently none for Vulkan - legacy samples reference OpenCL/CUDA APIs)
+set(SAMPLE_PROGRAMS_CPP)
+set(SAMPLE_PROGRAMS_C)
 
 # ==================================================================================================
 
@@ -190,16 +162,9 @@ set(SOURCES
 	src/routines/level3/level3.cpp
 	src/routines/levelx/levelx.cpp
 	src/routine_aot_cache.cpp
+	src/clblast_vk.cpp
+	src/tuning/tuning_api.cpp
 )
-
-if(OPENCL)
-	set(SOURCES ${SOURCES} src/clblast.cpp src/clblast_c.cpp src/tuning/tuning_api.cpp)
-	if(NETLIB)
-		set(SOURCES ${SOURCES} src/clblast_netlib_c.cpp)
-	endif()
-elseif(VULKAN)
-	set(SOURCES ${SOURCES} src/clblast_vk.cpp src/tuning/tuning_api.cpp)
-endif()
 
 foreach(DATABASE ${DATABASES})
 	set(SOURCES ${SOURCES} src/database/kernels/${DATABASE}/${DATABASE}.cpp)
@@ -222,7 +187,7 @@ tart_add_kernel_sources(clblast all-blas-kernels "${ALL_KERNEL_NAMESPACES}")
 
 check_cxx_symbol_exists(clblast::Swap<float> "clblast_vk.h" HAVE_SYMBOL_THINGY)
 
-# Includes directories: CLBlast and OpenCL
+# Includes directories: CLBlast and Tart
 target_include_directories(clblast PUBLIC
 	$<BUILD_INTERFACE:${clblast_SOURCE_DIR}/include>
 	$<BUILD_INTERFACE:${clblast_SOURCE_DIR}/src>
@@ -265,13 +230,6 @@ endif()
 
 # This section contains all the code related to the examples
 if(SAMPLES)
-
-	# Downloads the opencl.hpp file from Khronos
-	if(OPENCL)
-		set(CLHPP_VERSION v2024.05.08)
-		file(DOWNLOAD https://raw.githubusercontent.com/KhronosGroup/OpenCL-CLHPP/refs/tags/${CLHPP_VERSION}/include/CL/opencl.hpp ${clblast_SOURCE_DIR}/samples/opencl.hpp)
-	endif()
-
 	# Adds sample programs (C++)
 	foreach(SAMPLE ${SAMPLE_PROGRAMS_CPP})
 		add_executable(clblast_sample_${SAMPLE} samples/${SAMPLE}.cpp)
@@ -312,10 +270,8 @@ if(TUNERS)
 		# Adds CLBlast's interface include paths because we can't link to CLBlast here
 		target_include_directories(tuners_common_library PRIVATE
 															 $<TARGET_PROPERTY:clblast,INTERFACE_INCLUDE_DIRECTORIES>
+															 $<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES>
 															 ${clblast_SOURCE_DIR} ${API_INCLUDE_DIRS})
-	if(VULKAN)
-		target_include_directories(tuners_common_library PRIVATE $<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES>)
-	endif()
 		set(TUNERS_COMMON $<TARGET_OBJECTS:tuners_common_library>)
 	endif()
 
@@ -325,10 +281,7 @@ if(TUNERS)
 		add_executable(clblast_tuner_${KERNEL} ${TUNERS_COMMON} src/tuning/kernels/${KERNEL}.cpp)
 		#target_link_libraries(clblast_tuner_${KERNEL} ${API_LIBRARIES})
 		target_link_libraries(clblast_tuner_${KERNEL} clblast)
-		target_include_directories(clblast_tuner_${KERNEL} PUBLIC $<TARGET_PROPERTY:clblast,INTERFACE_INCLUDE_DIRECTORIES> ${API_INCLUDE_DIRS})
-		if(VULKAN)
-		target_include_directories(clblast_tuner_${KERNEL} PUBLIC $<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES>)
-		endif()
+		target_include_directories(clblast_tuner_${KERNEL} PUBLIC $<TARGET_PROPERTY:clblast,INTERFACE_INCLUDE_DIRECTORIES> $<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES> ${API_INCLUDE_DIRS})
 		install(TARGETS clblast_tuner_${KERNEL} DESTINATION bin)
 	endforeach()
 	foreach(ROUTINE_TUNER ${ROUTINE_TUNERS})
@@ -366,6 +319,7 @@ if(CLIENTS OR TESTS)
 	# Sets the specifics for the reference BLAS libraries
 	set(REF_INCLUDES )
 	set(REF_LIBRARIES )
+	set(WRAPPERS )
 	if(CBLAS_FOUND OR MKL_FOUND)
 		if(MKL_FOUND)	# prefers MKL over another CBLAS implementation
 			set(REF_INCLUDES ${REF_INCLUDES} ${MKL_INCLUDE_DIRS})
@@ -378,12 +332,14 @@ if(CLIENTS OR TESTS)
 		set(WRAPPERS ${WRAPPERS} test/wrapper_cblas.hpp)
 		add_compile_definitions(CLBLAST_REF_CBLAS)
 	endif()
+	# clBLAS and cuBLAS wrappers removed (Vulkan-only)
+
 endif()
 
 # ==================================================================================================
 
 # Section for the performance tests (i.e. the client). These compare against optionally a reference
-# library, either clBLAS, a CPU BLAS, or CUDA's cuBLAS.
+# library: a CPU BLAS (OpenBLAS/MKL).
 if(CLIENTS)
 	set(CLIENTS_COMMON ${WRAPPERS} test/test_utilities.hpp
 										 test/performance/client.hpp test/routines/common.hpp)
@@ -399,7 +355,7 @@ if(CLIENTS)
 		# Adds CLBlast's interface include paths because we can't link to CLBlast here
 		target_include_directories(test_performance_common PRIVATE
 															 $<TARGET_PROPERTY:clblast,INTERFACE_INCLUDE_DIRECTORIES>
-															 #$<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES>
+															 $<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES>
 															 ${clblast_SOURCE_DIR} ${REF_INCLUDES})
 		set(CLIENTS_COMMON ${CLIENTS_COMMON} $<TARGET_OBJECTS:test_performance_common>)
 	endif()
@@ -435,8 +391,8 @@ endif()
 
 # ==================================================================================================
 
-# Section for the correctness tests. Note that these tests require the presence of clBLAS and/or a
-# CPU BLAS library, and/or cuBLAS to act as a reference.
+# Section for the correctness tests. Note that these tests require the presence of a
+# CPU BLAS library (OpenBLAS/MKL) to act as a reference.
 if(TESTS)
 	enable_testing()
 	set(TESTS_COMMON ${WRAPPERS} test/test_utilities.hpp test/correctness/testblas.hpp
@@ -452,7 +408,7 @@ if(TESTS)
 								test/test_utilities.cpp test/correctness/tester.cpp test/correctness/testblas.cpp)
 		target_include_directories(test_correctness_common PUBLIC
 															 $<TARGET_PROPERTY:clblast,INTERFACE_INCLUDE_DIRECTORIES>
-															 #$<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES>
+															 $<TARGET_PROPERTY:tart,INTERFACE_INCLUDE_DIRECTORIES>
 															 ${clblast_SOURCE_DIR} ${REF_INCLUDES})
 		set(TESTS_COMMON ${TESTS_COMMON} $<TARGET_OBJECTS:test_correctness_common>)
 	endif()

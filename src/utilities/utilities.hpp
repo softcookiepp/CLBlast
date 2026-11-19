@@ -259,9 +259,6 @@ struct Arguments {
   size_t num_runs = 10;
   std::vector<std::string> tuner_files = {};
   bool full_statistics = false;
-#ifdef CLBLAST_REF_CUBLAS
-  void* cublas_handle;  // cublasHandle_t
-#endif
   // Common arguments
   size_t platform_id = 0;
   size_t device_id = 0;

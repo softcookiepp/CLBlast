@@ -19,10 +19,8 @@
 #ifdef CLBLAST_REF_CBLAS
 #include "test/wrapper_cblas.hpp"
 #endif
-#include "test/wrapper_cuda.hpp"
-#ifdef CLBLAST_REF_CUBLAS
-#include "test/wrapper_cublas.hpp"
-#endif
+
+// cuBLAS wrappers removed (Vulkan-only)
 
 // =================================================================================================
 

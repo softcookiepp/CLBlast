@@ -4,10 +4,10 @@
 //	 Cedric Nugteren <www.cedricnugteren.nl>
 //
 // This file demonstrates the use of the SGEMM routine. It is a stand-alone example, but it does
-// require the Khronos C++ OpenCL API header file (downloaded by CMake). The example uses C++
+// uses Tart and CLBlast-vk headers.
 // features, but CLBlast can also be used using the regular C-style OpenCL API.
 //
-// Note that this example is meant for illustration purposes only. CLBlast provides other programs
+// Note that this example is meant for illustration purposes only. CLBlast-vk provides other programs
 // for performance benchmarking ('client_xxxxx') and for correctness testing ('test_xxxxx').
 //
 // =================================================================================================
@@ -128,7 +128,7 @@ int main() {
 	auto elapsed_time = std::chrono::steady_clock::now() - start_time;
 	auto time_ms = std::chrono::duration<double, std::milli>(elapsed_time).count();
 
-	// Example completed. See "clblast.h" for status codes (0 -> success).
+	// Example completed. See "clblast_vk.h" for status codes (0 -> success).
 	printf("Completed SGEMM in %.3lf ms with status %d\n", time_ms, static_cast<int>(status));
 	return 0;
 }

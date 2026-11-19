@@ -105,7 +105,7 @@ def main(argv):
     cpp_database_path = os.path.join(cl_args.clblast_root, "src", "database", "kernels")
 
     # Checks whether the command-line arguments are valid
-    clblast_header = os.path.join(cl_args.clblast_root, "include", "clblast.h")  # Not used but just for validation
+    clblast_header = os.path.join(cl_args.clblast_root, "include", "clblast_vk.h")  # Not used but just for validation
     if not os.path.isfile(clblast_header):
         raise RuntimeError("The path '" + cl_args.clblast_root +
                            "' does not point to the root of the CLBlast library")

@@ -101,8 +101,8 @@ void FloatToHalfBuffer(std::vector<half>& result, const std::vector<float>& sour
 
 // =================================================================================================
 
-// Creates a buffer but don't test for validity. That's the reason this is not using the clpp11.h or
-// cupp11.h interface.
+// Creates a buffer but don't test for validity. That's the reason this is not using the vkpp11.hpp
+// interface.
 template <typename T>
 Buffer<T> CreateInvalidBuffer(const tart::device_ptr& device, const size_t size)
 {

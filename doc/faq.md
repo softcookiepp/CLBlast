@@ -35,11 +35,11 @@ The GEMM routine uses too much memory or results in error -4, what can I do?
 
 By design the indirect version of the GEMM kernel might allocate some temporarily memory on your device, and that might be an issue in some scenarios. However, there are a few things you could do to avoid this:
 
-* Use the [override parameters](../include/clblast.h#L717) functionality to set the switching point between direct and in-direct kernels much further. Example [here in one of the tests](../test/routines/level3/xgemm.hpp#L73). This might affect the performance of the GEMM routine.
+* Use the [override parameters](../include/clblast_vk.h#L717) functionality to set the switching point between direct and in-direct kernels much further. Example [here in one of the tests](../test/routines/level3/xgemm.hpp#L73). This might affect the performance of the GEMM routine.
 
-* [Query the required buffer size](../include/clblast.h#L691), allocate the buffer yourself, and pass that to [GEMM](../include/clblast.h#L525). That way you are in control and can make sure it is only allocated once for example.
+* [Query the required buffer size](../include/clblast_vk.h#L691), allocate the buffer yourself, and pass that to [GEMM](../include/clblast_vk.h#L525). That way you are in control and can make sure it is only allocated once for example.
 
-* Make sure no temporary buffer is required. Thus, make sure the buffer size is already a multiple of the amount of work done per work-group, e.g. 32, 64 or 128 at most depending on the tuned values for your device (you can query them if wanted). Then also make sure they are pre-transposed as needed. The [query-temp-buffer-size function](../include/clblast.h#L691) and its implementation can help you figure out if you are there yet.
+* Make sure no temporary buffer is required. Thus, make sure the buffer size is already a multiple of the amount of work done per work-group, e.g. 32, 64 or 128 at most depending on the tuned values for your device (you can query them if wanted). Then also make sure they are pre-transposed as needed. The [query-temp-buffer-size function](../include/clblast_vk.h#L691) and its implementation can help you figure out if you are there yet.
 
 
 The tuners occasionally report failures or errors, is this an issue?

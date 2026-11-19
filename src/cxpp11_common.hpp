@@ -3,8 +3,8 @@
 // This file is part of the CLBlast project. Author(s):
 //   Ivan Shapovalov <intelfx@intelfx.name>
 //
-// This file contains exception classes corresponding to 'clpp11.hpp'. It is also part of the
-// CLCudaAPI project. See 'clpp11.hpp' for more details.
+// This file contains exception classes corresponding to 'vkpp11.hpp'. It is also part of the
+// CLCudaAPI project (originally for clpp11.hpp / cupp11.hpp).
 //
 // =================================================================================================
 

@@ -16,8 +16,7 @@
 // =================================================================================================
 
 
-	// local size appears to be variable for these kernels, so that is what we will do
-	layout(local_size_x_id = 0, local_size_y_id = 1, local_size_z_id = 2) in;
+layout(local_size_x_id = 0, local_size_y = 1, local_size_z = 1) in;
 
 
 #if USE_BDA == 0
@@ -38,13 +37,13 @@ layout(push_constant, std430) uniform TripleMatMulPart1
 	int current_size; int num_pages; int block_size;
 };
 
-shared real lm[LOCALY * LOCALX];
+
 
 // B12 =	A12 * B22
 // TripleMatMul64Part1Upper
 void main()
 {
-	TripleMatMulPart1(64, true, lm, n, src, a_offset,
+	TripleMatMulPart1(SIZE, UPPER, lm, n, src, a_offset,
 		lda, dest, current_size, num_pages, block_size);
 }
 

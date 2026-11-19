@@ -36,32 +36,6 @@ Xinvert::Xinvert(const tart::DType& dtype, Queue& queue, EventPointer event, con
 	,
 	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part1_invert_diagonal_block.glsl.inl"
 	,
-	// 16 lower
-	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_16_part1_lower.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_16_part2_lower.glsl.inl"
-	,
-	// 32 lower
-	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_32_part1_lower.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_32_part2_lower.glsl.inl"
-	,
-	// 64 lower
-	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_64_part1_lower.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_64_part2_lower.glsl.inl"
-	,
-	// 16 upper
-	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_16_part1_upper.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_16_part2_upper.glsl.inl"
-	,
-	// 32 upper
-	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_32_part1_upper.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_32_part2_upper.glsl.inl"
-	,
-	// 64 upper
 	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_64_part1_upper.glsl.inl"
 	,
 	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_64_part2_upper.glsl.inl"
@@ -70,17 +44,6 @@ Xinvert::Xinvert(const tart::DType& dtype, Queue& queue, EventPointer event, con
 		{
 			"FillMatrix",
 			"InvertDiagonalBlock",
-			"TripleMatMul16Part1Lower",
-			"TripleMatMul16Part2Lower",
-			"TripleMatMul32Part1Lower",
-			"TripleMatMul32Part2Lower",
-			"TripleMatMul64Part1Lower",
-			"TripleMatMul64Part2Lower",
-			
-			"TripleMatMul16Part1Upper",
-			"TripleMatMul16Part2Upper",
-			"TripleMatMul32Part1Upper",
-			"TripleMatMul32Part2Upper",
 			"TripleMatMul64Part1Upper",
 			"TripleMatMul64Part2Upper"
 		}
@@ -127,16 +90,15 @@ void Xinvert::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle tri
 	// default) and on whether we are dealing with an upper or lower triangle of the triangular matrix
 	const bool is_upper = ((triangle == Triangle::kUpper && layout != Layout::kRowMajor) ||
 												 (triangle == Triangle::kLower && layout == Layout::kRowMajor));
-	const auto name_postfix = (is_upper) ? "Upper" : "Lower";
-	
-	// every kernel will be bound to this
-	
 
 	// Fills the output buffer with zeros
 	FillMatrix(mDtype, program_, block_size,
 						 num_blocks * block_size, block_size, 0, dest, tart::Scalar::zero(), 16);
 	//event_wait_list.push_back(fill_matrix_event);
 	//device_()->enqueueBarrier({dest()});
+	
+	// used across all kernels here
+	
 
 	// Inverts the diagonal IB by IB inner blocks of the matrix: one block per work-group
 	Kernel kernelOld(program_, "InvertDiagonalBlock");
@@ -152,8 +114,15 @@ void Xinvert::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle tri
 	const auto local_invert = std::vector<size_t>{internal_block_size};
 	auto global_invert = std::vector<uint32_t>{num_internal_blocks * internal_block_size};
 	global_invert[0] = global_invert[0] / local_invert[0];
-	
-	kernel->enqueue(global_invert, {});
+	std::vector<uint32_t> spec = {
+		db_["INTERNAL_BLOCK_SIZE"],
+		db_["LOCALPAD"],
+		db_["TMMWGSX"],
+		db_["TMMWGSY"],
+		0,
+		static_cast<uint32_t>(is_upper)
+	};
+	kernel->enqueue(global_invert, spec);
 	
 	// Builds up block_size x block_size blocks. For example, internal_block_size=16:
 	// use	 16 x 16	blocks to build	32 x 32	blocks,	1 x (1 x npages) grid,	4 x 4 threads;
@@ -162,6 +131,15 @@ void Xinvert::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle tri
 	for (auto current_size = internal_block_size; current_size < block_size; current_size *= 2)
 	{
 		assert(current_size == 16 || current_size == 32 || current_size == 64);
+		
+		std::vector<uint32_t> spec2 = {
+			db_["INTERNAL_BLOCK_SIZE"],
+			db_["LOCALPAD"],
+			db_["TMMWGSX"],
+			db_["TMMWGSY"],
+			current_size,
+			static_cast<uint32_t>(is_upper)
+		};
 
 		// Emulates a 3D grid: NX * (NY * npages)
 		const auto npages = CeilDiv(n, current_size * 2);
@@ -172,9 +150,8 @@ void Xinvert::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle tri
 		global[1] = global[1] / 4;
 
 		// Part 1
-		Kernel kernel1Old(program_, "TripleMatMul" + ToString(current_size) + "Part1" + name_postfix);
+		Kernel kernel1Old(program_, "TripleMatMul64Part1Upper");
 		tart::kernel_ptr kernel1 = kernel1Old.get();
-		std::cout << "KERNEL 1: " << "TripleMatMul" + ToString(current_size) + "Part1" + name_postfix << std::endl;
 		kernel1->setArg(0, static_cast<int>(n));
 		kernel1->setArg(1, src);
 		kernel1->setArg(2, static_cast<int>(offset));
@@ -183,22 +160,18 @@ void Xinvert::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle tri
 		kernel1->setArg(5, static_cast<int>(current_size));
 		kernel1->setArg(6, static_cast<int>(npages));
 		kernel1->setArg(7, static_cast<int>(block_size));
-		kernel1->enqueue(global, {});
-		//device_()->enqueueBarrier({dest()});
-		//event_wait_list.push_back(kernel1_event);
+		kernel1->enqueue(global, spec2);
 
 		// Part 2
-		const bool is_last_kernel = (current_size * 2 >= block_size);
-		Kernel kernel2Old(program_, "TripleMatMul" + ToString(current_size) + "Part2" + name_postfix);
+		Kernel kernel2Old(program_, "TripleMatMul64Part2Upper");
 		tart::kernel_ptr kernel2 = kernel2Old.get();
-		std::cout << "KERNEL 2: " << "TripleMatMul" + ToString(current_size) + "Part2" + name_postfix << std::endl;
 		kernel2->setArg(0, static_cast<int>(n));
 		kernel2->setArg(1, dest);
 		kernel2->setArg(2, static_cast<int>(current_size));
 		kernel2->setArg(3, static_cast<int>(npages));
 		kernel2->setArg(4, static_cast<int>(block_size));
-		kernel2->enqueue(global, {});
-
+		kernel2->enqueue(global, spec2);
+		
 		// Exit in case we reach beyond the bounds of the input matrix
 		if (current_size * 2 >= n) {
 			break;

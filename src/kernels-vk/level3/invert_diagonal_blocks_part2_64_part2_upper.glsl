@@ -15,8 +15,7 @@
 #include "invert_diagonal_blocks_part1_triple_matmul.glsl"
 // =================================================================================================
 
-	// local size appears to be variable for these kernels, so that is what we will do
-	layout(local_size_x_id = 0, local_size_y_id = 1, local_size_z_id = 2) in;
+layout(local_size_x_id = 0, local_size_y = 1, local_size_z = 1) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) buffer dest_buf { real dest[]; };
@@ -31,13 +30,11 @@ layout(push_constant, std430) uniform TripleMatMulPart2
 	int current_size; int num_pages; int block_size;
 };
 
-shared real lm[LOCALY * LOCALX];
-
 // B12 = -B11 * B12
 //TripleMatMul64Part2Upper
 void main()
 {
-	TripleMatMulPart2(64, true, lm, n, dest, current_size, num_pages, block_size);
+	TripleMatMulPart2(SIZE, UPPER, lm, n, dest, current_size, num_pages, block_size);
 }
 
 

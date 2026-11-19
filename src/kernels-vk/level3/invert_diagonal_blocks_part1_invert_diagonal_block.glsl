@@ -54,31 +54,12 @@
 #include "../common.glsl"
 // =================================================================================================
 
-// Parameters set by the tuner
-// TODO: Make these actually tunable
-#ifndef INTERNAL_BLOCK_SIZE
-	#define INTERNAL_BLOCK_SIZE 16		 // Internal block size of the invert kernel
-#endif
-#ifndef LOCALPAD
-	#define LOCALPAD 0								 // Padding in the x-dimension of the local memory to avoid bank conflicts
-#endif
-#ifndef LOCALX
-	#define LOCALX (16 + LOCALPAD)		 // Local memory size in x-dimension of TripleMatMul kernels
-#endif
-#ifndef LOCALY
-	#define LOCALY 16									// Local memory size in y-dimension of TripleMatMul kernels
-#endif
-#ifndef TMMWGSX
-	#define TMMWGSX 4									// Work-group size in x-dimension of TripleMatMul kernels
-#endif
-#ifndef TMMWGSY
-	#define TMMWGSY 4									// Work-group size in y-dimension of TripleMatMul kernels
-#endif
+#include "invert_diagonal_blocks_parameters.glsl"
 
 // =================================================================================================
 
 // Inverts a diagonal block of INTERNAL_BLOCK_SIZE by INTERNAL_BLOCK_SIZE elements in a larger matrix
-layout(local_size_x = INTERNAL_BLOCK_SIZE, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x_id = 0, local_size_y = 1, local_size_z = 1) in;
 
 #if USE_BDA == 0
 	layout(binding = 0, std430) buffer src_buf { real src[]; };
@@ -119,6 +100,7 @@ void main()
 
 	// Loads the source lower triangle into local memory. Any values in the upper triangle or
 	// outside of the matrix are set to zero
+	[[unroll]]
 	for (int _j = 0; _j < INTERNAL_BLOCK_SIZE; _j += 1) {
 		bool condition = false;
 		if (is_upper != 0) {
@@ -155,6 +137,7 @@ void main()
 	if (is_upper != 0) {
 
 		// Computes the elements 0:j-1 of the j-th column
+		[[unroll]]
 		for (int j = 1; j < INTERNAL_BLOCK_SIZE; ++j) {
 			real sum;
 			if (thread_index < j) {
@@ -177,6 +160,7 @@ void main()
 	else {
 
 		// Computes the elements j+1:INTERNAL_BLOCK_SIZE-1 of the j-th column
+		[[unroll]]
 		for (int j = INTERNAL_BLOCK_SIZE - 2; j >= 0; --j) {
 			real sum;
 			if (thread_index > j) {

@@ -321,7 +321,7 @@ R"(
 
 // Sets a variable to zero
 #if ROUTINE_IS_COMPLEX
-	#define SetToZero(a) a = real(ZERO, ZERO)
+	#define SetToZero(a) { a = real(ZERO, ZERO); }
 #else
 	#define SetToZero(a) a = ZERO
 #endif
@@ -352,7 +352,7 @@ R"(
 
 // Negation (component-wise)
 #if ROUTINE_IS_COMPLEX
-	#define Negate(value) value.x = (-1.0(value.x)); value.y = (-1.0*(value.y))
+	#define Negate(value) value.x = (-1.0*(value.x)); value.y = (-1.0*(value.y))
 #else
 	#define Negate(value) value = (-1.0*(value))
 #endif
@@ -379,7 +379,7 @@ R"(
 
 // The scalar multiply function
 #if ROUTINE_IS_COMPLEX
-	#define Multiply(c,a,b) c = real(MulReal(a,b), MulImag(a,b))
+	#define Multiply(c,a,b) { c = real(MulReal(a,b), MulImag(a,b)); }
 #else
 	#define Multiply(c,a,b) c = a * b
 #endif

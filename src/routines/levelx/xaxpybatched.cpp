@@ -25,13 +25,7 @@ namespace clblast {
 
 // Constructor: forwards to base class constructor
 XaxpyBatched::XaxpyBatched(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Xaxpy"}, dtype, {},
-							{
-	#include "../../kernels-vk-inline/level1/xaxpy_batched.glsl.inl"
-							}
-,
- {"XaxpyBatched"}
-			) {
+		: Routine(queue, event, name, {"Xaxpy"}, dtype, {}) {
 }
 
 // =================================================================================================

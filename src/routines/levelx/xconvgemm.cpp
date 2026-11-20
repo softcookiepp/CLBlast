@@ -28,20 +28,7 @@ namespace clblast {
 
 // Constructor: forwards to base class constructor
 Xconvgemm::Xconvgemm(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name, const ConvGemmMethod method)
-		: Routine(queue, event, name, {"Xconvgemm"}, dtype, {},
-							{
-	// regular kernel
-	#include "../../kernels-vk-inline/levelx/xconvgemm_part2_xconvgemm_kernel.glsl.inl"
-	,
-	// normal
-	#include "../../kernels-vk-inline/levelx/xconvgemm_part2_xconvgemm_normal.glsl.inl"
-							}
-,
-			{
-				"Xconvgemm",
-				"XconvgemmNormal"
-			}
-		),
+		: Routine(queue, event, name, {"Xconvgemm"}, dtype, {}),
 			method_(method) {
 }
 

@@ -1,5 +1,6 @@
 #include "routine_aot_cache.hpp"
-#include "all-kernels-includes.hpp"
+//#include "all-kernels-includes.hpp"
+#include "all-blas-kernels.hpp"
 
 namespace clblast
 {
@@ -24,23 +25,23 @@ using namespace tart::kernels;
 #define DTYPE_VW_SWITCH(KERNEL, DTYPE, VW, DEVICE) \
 	if (DTYPE == tart::dtypes::float16) \
 	{ \
-		VW_SWITCH(f16, KERNEL, VW, DEVICE); \
+		VW_SWITCH(blas, F16##KERNEL, VW, DEVICE); \
 	} \
 	else if(DTYPE == tart::dtypes::float32) \
 	{ \
-		VW_SWITCH(f32, KERNEL, VW, DEVICE); \
+		VW_SWITCH(blas, F32##KERNEL, VW, DEVICE); \
 	} \
 	else if(DTYPE == tart::dtypes::float64) \
 	{ \
-		VW_SWITCH(f64, KERNEL, VW, DEVICE); \
+		VW_SWITCH(blas, F64##KERNEL, VW, DEVICE); \
 	} \
 	else if(DTYPE == tart::dtypes::complex64) \
 	{ \
-		VW_SWITCH(c64, KERNEL, VW, DEVICE); \
+		VW_SWITCH(blas, C64##KERNEL, VW, DEVICE); \
 	} \
 	else if(DTYPE == tart::dtypes::complex128) \
 	{ \
-		VW_SWITCH(c128, KERNEL, VW, DEVICE); \
+		VW_SWITCH(blas, C128##KERNEL, VW, DEVICE); \
 	} \
 	else \
 	{ \
@@ -66,23 +67,23 @@ using namespace tart::kernels;
 #define DTYPE_DUAL_VW_SWITCH(DTYPE, KERNEL, VW1, VW2, DEVICE) \
 	if (DTYPE == tart::dtypes::float16) \
 	{ \
-		DUAL_VW_SWITCH(f16, KERNEL, VW1, VW2, DEVICE); \
+		DUAL_VW_SWITCH(blas, F16##KERNEL, VW1, VW2, DEVICE); \
 	} \
 	else if(DTYPE == tart::dtypes::float32) \
 	{ \
-		DUAL_VW_SWITCH(f32, KERNEL, VW1, VW2, DEVICE); \
+		DUAL_VW_SWITCH(blas, F32##KERNEL, VW1, VW2, DEVICE); \
 	} \
 	else if(DTYPE == tart::dtypes::float64) \
 	{ \
-		DUAL_VW_SWITCH(f64, KERNEL, VW1, VW2, DEVICE); \
+		DUAL_VW_SWITCH(blas, F64##KERNEL, VW1, VW2, DEVICE); \
 	} \
 	else if(DTYPE == tart::dtypes::complex64) \
 	{ \
-		DUAL_VW_SWITCH(c64, KERNEL, VW1, VW2, DEVICE); \
+		DUAL_VW_SWITCH(blas, C64##KERNEL, VW1, VW2, DEVICE); \
 	} \
 	else if(DTYPE == tart::dtypes::complex128) \
 	{ \
-		DUAL_VW_SWITCH(c128, KERNEL, VW1, VW2, DEVICE); \
+		DUAL_VW_SWITCH(blas, C128##KERNEL, VW1, VW2, DEVICE); \
 	} \
 	else \
 	{ \
@@ -110,23 +111,23 @@ using namespace tart::kernels;
 #define DTYPE_DUAL_VW_SUBGROUP_SWITCH(DTYPE, KERNEL, SUBGROUP_SUPPORT, DEVICE) \
 	if (DTYPE == tart::dtypes::float16) \
 	{ \
-		SUBGROUP_SWITCH_VW1_VW1(f16, KERNEL, SUBGROUP_SUPPORT, DEVICE); \
+		SUBGROUP_SWITCH_VW1_VW1(blas, F16##KERNEL, SUBGROUP_SUPPORT, DEVICE); \
 	} \
 	else if(DTYPE == tart::dtypes::float32) \
 	{ \
-		SUBGROUP_SWITCH_VW1_VW1(f32, KERNEL, SUBGROUP_SUPPORT, DEVICE); \
+		SUBGROUP_SWITCH_VW1_VW1(blas, F32##KERNEL, SUBGROUP_SUPPORT, DEVICE); \
 	} \
 	else if(DTYPE == tart::dtypes::float64) \
 	{ \
-		SUBGROUP_SWITCH_VW1_VW1(f64, KERNEL, SUBGROUP_SUPPORT, DEVICE); \
+		SUBGROUP_SWITCH_VW1_VW1(blas, F64##KERNEL, SUBGROUP_SUPPORT, DEVICE); \
 	} \
 	else if(DTYPE == tart::dtypes::complex64) \
 	{ \
-		SUBGROUP_SWITCH_VW1_VW1(c64, KERNEL, SUBGROUP_SUPPORT, DEVICE); \
+		SUBGROUP_SWITCH_VW1_VW1(blas, C64##KERNEL, SUBGROUP_SUPPORT, DEVICE); \
 	} \
 	else if(DTYPE == tart::dtypes::complex128) \
 	{ \
-		SUBGROUP_SWITCH_VW1_VW1(c128, KERNEL, SUBGROUP_SUPPORT, DEVICE); \
+		SUBGROUP_SWITCH_VW1_VW1(blas, C128##KERNEL, SUBGROUP_SUPPORT, DEVICE); \
 	} \
 	else \
 	{ \
@@ -139,23 +140,23 @@ using namespace tart::kernels;
 #define DTYPE_SWITCH(KERNEL, DTYPE, DEVICE) \
 	if (DTYPE == tart::dtypes::float16) \
 	{ \
-		return f16::KERNEL(DEVICE); \
+		return blas::F16##KERNEL(DEVICE); \
 	} \
 	else if(DTYPE == tart::dtypes::float32) \
 	{ \
-		return f32::KERNEL(DEVICE); \
+		return blas::F32##KERNEL(DEVICE); \
 	} \
 	else if(DTYPE == tart::dtypes::float64) \
 	{ \
-		return f64::KERNEL(DEVICE); \
+		return blas::F64##KERNEL(DEVICE); \
 	} \
 	else if(DTYPE == tart::dtypes::complex64) \
 	{ \
-		return c64::KERNEL(DEVICE); \
+		return blas::C64##KERNEL(DEVICE); \
 	} \
 	else if(DTYPE == tart::dtypes::complex128) \
 	{ \
-		return c128::KERNEL(DEVICE); \
+		return blas::C128##KERNEL(DEVICE); \
 	} \
 	else \
 	{ \
@@ -165,90 +166,90 @@ using namespace tart::kernels;
 
 #endif
 
-tart::kernel_ptr getAmax(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(amax, dtype, device); }
-tart::kernel_ptr getAmaxEpilogue(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(amax_epilogue, dtype, device); }
+tart::kernel_ptr getAmax(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(xamax, dtype, device); }
+tart::kernel_ptr getAmaxEpilogue(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(xamax_epilogue, dtype, device); }
 
-tart::kernel_ptr getAsum(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(asum, dtype, device); }
-tart::kernel_ptr getAsumEpilogue(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(asum_epilogue, dtype, device); }
+tart::kernel_ptr getAsum(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(xasum, dtype, device); }
+tart::kernel_ptr getAsumEpilogue(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(xasum_epilogue, dtype, device); }
 
-tart::kernel_ptr getDot(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(dot, dtype, device); }
-tart::kernel_ptr getDotEpilogue(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(dot_epilogue, dtype, device); }
+tart::kernel_ptr getDot(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(xdot, dtype, device); }
+tart::kernel_ptr getDotEpilogue(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(xdot_epilogue, dtype, device); }
 
-tart::kernel_ptr getNrm2(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(nrm2, dtype, device); }
-tart::kernel_ptr getNrm2Epilogue(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(nrm2_epilogue, dtype, device); }
+tart::kernel_ptr getNrm2(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(xnrm2, dtype, device); }
+tart::kernel_ptr getNrm2Epilogue(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(xnrm2_epilogue, dtype, device); }
 
-tart::kernel_ptr getCopy(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(copy, dtype, vectorWidth, device); }
-tart::kernel_ptr getCopyFast(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(copy_fast, dtype, vectorWidth, device); }
+tart::kernel_ptr getCopy(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(xcopy, dtype, vectorWidth, device); }
+tart::kernel_ptr getCopyFast(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(xcopy_fast, dtype, vectorWidth, device); }
 
-tart::kernel_ptr getScal(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(scal, dtype, vectorWidth, device); }
-tart::kernel_ptr getScalFast(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(scal_fast, dtype, vectorWidth, device); }
+tart::kernel_ptr getScal(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(xscal, dtype, vectorWidth, device); }
+tart::kernel_ptr getScalFast(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(xscal_fast, dtype, vectorWidth, device); }
 
-tart::kernel_ptr getSwap(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(swap, dtype, vectorWidth, device); }
-tart::kernel_ptr getSwapFast(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(swap_fast, dtype, vectorWidth, device); }
+tart::kernel_ptr getSwap(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(xswap, dtype, vectorWidth, device); }
+tart::kernel_ptr getSwapFast(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(xswap_fast, dtype, vectorWidth, device); }
 
 tart::kernel_ptr getAxpy(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth)
 {
-	DTYPE_VW_SWITCH(axpy, dtype, vectorWidth, device);
+	DTYPE_VW_SWITCH(xaxpy, dtype, vectorWidth, device);
 }
 
 tart::kernel_ptr getAxpyFaster(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth)
 {
-	DTYPE_VW_SWITCH(axpy_faster, dtype, vectorWidth, device);
+	DTYPE_VW_SWITCH(xaxpy_faster, dtype, vectorWidth, device);
 }
 
 tart::kernel_ptr getAxpyFastest(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth)
 {
-	DTYPE_VW_SWITCH(axpy_fastest, dtype, vectorWidth, device);
+	DTYPE_VW_SWITCH(xaxpy_fastest, dtype, vectorWidth, device);
 }
-tart::kernel_ptr getAxpyBatched(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(axpy_batched, dtype, device); }
+tart::kernel_ptr getAxpyBatched(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(xaxpy_batched, dtype, device); }
 
-tart::kernel_ptr getHad(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(had, dtype, vectorWidth, device); }
-tart::kernel_ptr getHadFaster(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(had_faster, dtype, vectorWidth, device); }
-tart::kernel_ptr getHadFastest(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(had_fastest, dtype, vectorWidth, device); }
+tart::kernel_ptr getHad(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(xhad, dtype, vectorWidth, device); }
+tart::kernel_ptr getHadFaster(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(xhad_faster, dtype, vectorWidth, device); }
+tart::kernel_ptr getHadFastest(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(xhad_fastest, dtype, vectorWidth, device); }
 
-tart::kernel_ptr getGemv(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(gemv, dtype, device); }
-tart::kernel_ptr getGemvFast(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(gemv_fast, dtype, vectorWidth, device); }
-tart::kernel_ptr getGemvFastRot(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(gemv_fast_rot, dtype, vectorWidth, device); }
+tart::kernel_ptr getGemv(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(xgemv, dtype, device); }
+tart::kernel_ptr getGemvFast(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(xgemv_fast, dtype, vectorWidth, device); }
+tart::kernel_ptr getGemvFastRot(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vectorWidth) { DTYPE_VW_SWITCH(xgemv_fast_rot, dtype, vectorWidth, device); }
 
-tart::kernel_ptr getGer(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(ger, dtype, device); }
-tart::kernel_ptr getHer(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(her, dtype, device); }
-tart::kernel_ptr getHer2(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(her2, dtype, device); }
-tart::kernel_ptr getTrsvForward(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(trsv_forward, dtype, device); }
-tart::kernel_ptr getTrsvBackward(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(trsv_backward, dtype, device); }
-tart::kernel_ptr getTrsvFillVector(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(trsv_fill_vector, dtype, device); }
+tart::kernel_ptr getGer(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(xger, dtype, device); }
+tart::kernel_ptr getHer(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(xher, dtype, device); }
+tart::kernel_ptr getHer2(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(xher2, dtype, device); }
+tart::kernel_ptr getTrsvForward(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(xtrsv_forward, dtype, device); }
+tart::kernel_ptr getTrsvBackward(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(xtrsv_backward, dtype, device); }
+tart::kernel_ptr getTrsvFillVector(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(xtrsv_fill_vector, dtype, device); }
 
 tart::kernel_ptr getGemm(const tart::device_ptr& device, const tart::DType& dtype, const bool subgroupSupport, const uint32_t vwm, const uint32_t vwn)
 {
-	DTYPE_DUAL_VW_SUBGROUP_SWITCH(dtype, gemm, subgroupSupport, device)
+	DTYPE_DUAL_VW_SUBGROUP_SWITCH(dtype, xgemm, subgroupSupport, device)
 }
 tart::kernel_ptr getGemmUpper(const tart::device_ptr& device, const tart::DType& dtype, const bool subgroupSupport, const uint32_t vwm, const uint32_t vwn)
 {
-	DTYPE_DUAL_VW_SUBGROUP_SWITCH(dtype, gemm_upper, subgroupSupport, device)
+	DTYPE_DUAL_VW_SUBGROUP_SWITCH(dtype, xgemm_upper, subgroupSupport, device)
 }
 tart::kernel_ptr getGemmLower(const tart::device_ptr& device, const tart::DType& dtype, const bool subgroupSupport, const uint32_t vwm, const uint32_t vwn)
 {
-	DTYPE_DUAL_VW_SUBGROUP_SWITCH(dtype, gemm_lower, subgroupSupport, device)
+	DTYPE_DUAL_VW_SUBGROUP_SWITCH(dtype, xgemm_lower, subgroupSupport, device)
 }
 tart::kernel_ptr getGemmBatched(const tart::device_ptr& device, const tart::DType& dtype, const bool subgroupSupport, const uint32_t vwm, const uint32_t vwn)
 {
-	DTYPE_DUAL_VW_SUBGROUP_SWITCH(dtype, gemm_batched, subgroupSupport, device)
+	DTYPE_DUAL_VW_SUBGROUP_SWITCH(dtype, xgemm_batched, subgroupSupport, device)
 }
 tart::kernel_ptr getGemmStridedBatched(const tart::device_ptr& device, const tart::DType& dtype, const bool subgroupSupport, const uint32_t vwm, const uint32_t vwn)
 {
-	DTYPE_DUAL_VW_SUBGROUP_SWITCH(dtype, gemm_strided_batched, subgroupSupport, device)
+	DTYPE_DUAL_VW_SUBGROUP_SWITCH(dtype, xgemm_strided_batched, subgroupSupport, device)
 }
 
 tart::kernel_ptr getGemmDirect(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vwm, const uint32_t vwn)
 {
-	DTYPE_DUAL_VW_SWITCH(dtype, gemm_direct, vwm, vwn, device)
+	DTYPE_DUAL_VW_SWITCH(dtype, xgemm_direct, vwm, vwn, device)
 }
 tart::kernel_ptr getGemmDirectBatched(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vwm, const uint32_t vwn)
 {
-	DTYPE_DUAL_VW_SWITCH(dtype, gemm_direct_batched, vwm, vwn, device)
+	DTYPE_DUAL_VW_SWITCH(dtype, xgemm_direct_batched, vwm, vwn, device)
 }
 tart::kernel_ptr getGemmDirectStridedBatched(const tart::device_ptr& device, const tart::DType& dtype, const uint32_t vwm, const uint32_t vwn)
 {
-	DTYPE_DUAL_VW_SWITCH(dtype, gemm_direct_strided_batched, vwm, vwn, device)
+	DTYPE_DUAL_VW_SWITCH(dtype, xgemm_direct_strided_batched, vwm, vwn, device)
 }
 
 tart::kernel_ptr getConvertHermitianLower(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(convert_hermitian_lower, dtype, device); }
@@ -285,5 +286,9 @@ tart::kernel_ptr getConvgemmWithIm2col(const tart::device_ptr& device, const tar
 }
 tart::kernel_ptr getCol2im(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(col2im_kernel_normal, dtype, device); }
 tart::kernel_ptr getIm2col(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(im2col_kernel_normal, dtype, device); }
+
+tart::kernel_ptr getInvertDiagonalBlock(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(invert_diagonal_block, dtype, device); }
+tart::kernel_ptr getInvertTripleMatmul(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(invert_triple_matmul, dtype, device); }
+tart::kernel_ptr getInvertTripleMatmulPart2(const tart::device_ptr& device, const tart::DType& dtype) { DTYPE_SWITCH(invert_triple_matmul_part2, dtype, device); }
 
 } // namespace clblast

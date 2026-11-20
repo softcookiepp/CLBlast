@@ -26,31 +26,7 @@ namespace clblast
 
 // Constructor: forwards to base class constructor
 Xgemv::Xgemv(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Xgemv", "XgemvFast", "XgemvFastRot", "TrsvRoutine"}, dtype, {},
-							{
-	#include "../../kernels-vk-inline/level2/xgemv.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level2/xgemv_fast.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level2/xgemv_fast_rot.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level2/xtrsv-forward.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level2/xtrsv-backward.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level2/xtrsv-fill-vector.glsl.inl"
-							}
-,
-
-		{
-			"Xgemv",
-			"XgemvFast",
-			"XgemvFastRot",
-			"trsv_forward",
-			"trsv_backward",
-			"FillVector"
-		}
-	)
+		: Routine(queue, event, name, {"Xgemv", "XgemvFast", "XgemvFastRot", "TrsvRoutine"}, dtype, {})
 {
 	mGBMV = (name == "GBMV");
 	mHEMV = (name == "HEMV");

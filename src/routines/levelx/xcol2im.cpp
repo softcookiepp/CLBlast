@@ -24,13 +24,7 @@ namespace clblast {
 
 // Constructor: forwards to base class constructor
 Xcol2im::Xcol2im(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Copy"}, dtype, {},
-							{
-	#include "../../kernels-vk-inline/levelx/col2im_kernel_normal.glsl.inl"
-							}
-,
- {"Xcol2imKernelNormal"}
-		) {
+		: Routine(queue, event, name, {"Copy"}, dtype, {}) {
 }
 
 // =================================================================================================

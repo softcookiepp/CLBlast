@@ -25,15 +25,7 @@ namespace clblast {
 
 // Constructor: forwards to base class constructor
 Xscal::Xscal(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Xaxpy"}, dtype, {},
-							{
-	#include "../../kernels-vk-inline/level1/xscal.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level1/xscal-fast.glsl.inl"
-							}
-,
-		{"Xscal", "XscalFast"}
-	)
+		: Routine(queue, event, name, {"Xaxpy"}, dtype, {})
 {
 }
 

@@ -30,24 +30,8 @@ namespace clblast {
 
 // Constructor: forwards to base class constructor
 Xinvert::Xinvert(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Invert"}, dtype, {},
-							{
-	#include "../../kernels-vk-inline/level3/level3_fill_matrix.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part1_invert_diagonal_block.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_64_part1_upper.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/invert_diagonal_blocks_part2_64_part2_upper.glsl.inl"
-							}
-		,
-		{
-			"FillMatrix",
-			"InvertDiagonalBlock",
-			"TripleMatMul64Part1Upper",
-			"TripleMatMul64Part2Upper"
-		}
-			) {
+		: Routine(queue, event, name, {"Invert"}, dtype, {})
+{
 }
 
 // =================================================================================================
@@ -101,8 +85,8 @@ void Xinvert::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle tri
 	
 
 	// Inverts the diagonal IB by IB inner blocks of the matrix: one block per work-group
-	Kernel kernelOld(program_, "InvertDiagonalBlock");
-	tart::kernel_ptr kernel = kernelOld.get();
+	//Kernel kernelOld(program_, "InvertDiagonalBlock");
+	tart::kernel_ptr kernel = getInvertDiagonalBlock(this->mDevice, this->mDtype);
 	kernel->setArg(0, static_cast<int>(n));
 	kernel->setArg(1, src);
 	kernel->setArg(2, static_cast<int>(offset));
@@ -150,8 +134,7 @@ void Xinvert::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle tri
 		global[1] = global[1] / 4;
 
 		// Part 1
-		Kernel kernel1Old(program_, "TripleMatMul64Part1Upper");
-		tart::kernel_ptr kernel1 = kernel1Old.get();
+		tart::kernel_ptr kernel1 = getInvertTripleMatmul(this->mDevice, this->mDtype);
 		kernel1->setArg(0, static_cast<int>(n));
 		kernel1->setArg(1, src);
 		kernel1->setArg(2, static_cast<int>(offset));
@@ -163,8 +146,7 @@ void Xinvert::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle tri
 		kernel1->enqueue(global, spec2);
 
 		// Part 2
-		Kernel kernel2Old(program_, "TripleMatMul64Part2Upper");
-		tart::kernel_ptr kernel2 = kernel2Old.get();
+		tart::kernel_ptr kernel2 = getInvertTripleMatmulPart2(this->mDevice, this->mDtype);
 		kernel2->setArg(0, static_cast<int>(n));
 		kernel2->setArg(1, dest);
 		kernel2->setArg(2, static_cast<int>(current_size));

@@ -25,15 +25,8 @@ namespace clblast {
 
 // Constructor: forwards to base class constructor
 Xswap::Xswap(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Xaxpy"}, dtype, {},
-							{
-	#include "../../kernels-vk-inline/level1/xswap.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level1/xswap-fast.glsl.inl"
-							}
-,
-	 {"Xswap", "XswapFast"}
-							) {
+		: Routine(queue, event, name, {"Xaxpy"}, dtype, {})
+{
 }
 
 // =================================================================================================

@@ -50,7 +50,8 @@
 
 // Exception classes
 #include "cxpp11_common.hpp"
-#include <tart/tart.hpp>
+//#include <tart/tart.hpp>
+#include "tart.hpp"
 
 namespace clblast {
 // =================================================================================================

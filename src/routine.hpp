@@ -40,9 +40,7 @@ class Routine {
 	// NOTE: the caller must provide the same userDatabase for each combination of device, precision
 	// and routine list, otherwise the caching logic will break.
 	explicit Routine(Queue& queue, EventPointer event, const std::string& name, const std::vector<std::string>& routines,
-									 const tart::DType& dtype, const std::vector<database::NewDatabaseEntry>& userDatabase,
-									 std::initializer_list<const char*> source, std::vector<std::string> entryPointNames = {}
-									 );
+									 const tart::DType& dtype, const std::vector<database::NewDatabaseEntry>& userDatabase);
 
 	// List of kernel-routine look-ups
 	static const std::vector<std::string> routines_axpy;
@@ -53,10 +51,6 @@ class Routine {
 	static const std::vector<std::string> routines_gemm_syrk;
 	static const std::vector<std::string> routines_trsm;
 	static const std::unordered_map<std::string, const std::vector<std::string>> routines_by_kernel;
-
- private:
-	// Initializes program_, fetching cached program or building one
-	void InitProgram(std::initializer_list<const char*> source);
 
  protected:
 	// Non-static variable for the precision
@@ -78,11 +72,8 @@ class Routine {
 	// Connection to the database for all the device-specific parameters
 	Databases db_;
 	
-#if VULKAN_API
-	std::vector<std::string> mEntryPointNames;
 	static DatabaseKey sFirstDatabaseKey;
 	static bool sCreatedDatabase;
-#endif
 };
 
 // =================================================================================================

@@ -19,7 +19,8 @@
 #include <string>
 #include <vector>
 
-#include <tart/tart.hpp>
+//#include <tart/tart.hpp>
+#include "tart.hpp"
 #include "utilities/backend.hpp"
 #include "utilities/device_mapping.hpp"
 using tart::half;

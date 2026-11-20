@@ -27,34 +27,7 @@ namespace clblast {
 // Constructor: forwards to base class constructor
 XgemmBatched::XgemmBatched(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
 		: Routine(queue, event, name, {"Copy", "Pad", "Transpose", "Padtranspose", "Xgemm", "XgemmDirect", "GemmRoutine"},
-							dtype, {},
-							{
-	#include "../../kernels-vk-inline/level3/copy_matrix_batched.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/copy_pad_matrix_batched.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/transpose_matrix_batched.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_batched.glsl.inl"
-	,
-	// END OF COPY PAD TRANSPOSE ROUTINES
-	// xgemm batched
-	#include "../../kernels-vk-inline/level3/xgemm_batched.glsl.inl"
-	,
-	// direct batched tt
-	#include "../../kernels-vk-inline/level3/xgemm_direct_batched_tt.glsl.inl"
-							}
-,
-
-	{
-		"CopyMatrixBatched",
-		"CopyPadMatrixBatched",
-		"TransposeMatrixBatched",
-		"TransposePadMatrixBatched",
-		"XgemmBatched",
-		"XgemmDirectBatchedTT"
-	}
-							) {
+							dtype, {}) {
 }
 
 // =================================================================================================

@@ -25,15 +25,8 @@ namespace clblast {
 
 // Constructor: forwards to base class constructor
 Xnrm2::Xnrm2(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Xdot"}, dtype, {},
-							{
-	#include "../../kernels-vk-inline/level1/xnrm2.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level1/xnrm2-epilogue.glsl.inl"
-							}
-,
- {"Xnrm2", "Xnrm2Epilogue"}
-		) {
+		: Routine(queue, event, name, {"Xdot"}, dtype, {})
+{
 }
 
 // =================================================================================================

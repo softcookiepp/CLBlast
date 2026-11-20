@@ -26,65 +26,8 @@ namespace clblast {
 
 // Constructor: forwards to base class constructor
 Xherk::Xherk(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Copy", "Pad", "Transpose", "Padtranspose", "Xgemm"}, dtype, {},
-							{
-	#include "../../kernels-vk-inline/level3/copy_fast.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/copy_matrix.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/copy_matrix_batched.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/copy_matrix_strided_batched.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/copy_pad_matrix.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/copy_pad_matrix_batched.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/copy_pad_matrix_strided_batched.glsl.inl"
-	,
-	//ok...onto the next big thingy
-	#include "../../kernels-vk-inline/level3/transpose_fast.glsl.inl"
-	,
-	// wow this was a lot to translate, goodness...
-	#include "../../kernels-vk-inline/level3/transpose_matrix.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/transpose_matrix_batched.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/transpose_matrix_strided_batched.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/transpose_pad_matrix.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_batched.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_strided_batched.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/xgemm_part4_xgemm_lower.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/xgemm_part4_xgemm_upper.glsl.inl"
-							}
-,
-
-	{
-		"CopyMatrixFast",
-		"CopyMatrix",
-		"CopyMatrixBatched",
-		"CopyMatrixStridedBatched",
-		"CopyPadMatrix",
-		"CopyPadMatrixBatched",
-		"CopyPadMatrixStridedBatched",
-		
-		"TransposeMatrixFast",
-		"TransposeMatrix",
-		"TransposeMatrixBatched",
-		"TransposeMatrixStridedBatched",
-		"TransposePadMatrix",
-		"TransposePadMatrixBatched",
-		"TransposePadMatrixStridedBatched",
-		
-		"XgemmLower",
-		"XgemmUpper"
-	}
-		) {
+		: Routine(queue, event, name, {"Copy", "Pad", "Transpose", "Padtranspose", "Xgemm"}, dtype, {})
+{
 }
 
 // =================================================================================================

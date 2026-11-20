@@ -22,7 +22,6 @@
 #include <vector>
 
 #include "utilities/backend.hpp"
-#include "utilities/msvc.hpp"  // IWYU pragma: export
 
 namespace clblast {
 

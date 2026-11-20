@@ -25,13 +25,7 @@ namespace clblast {
 
 // Constructor: forwards to base class constructor
 Xdot::Xdot(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Xdot"}, dtype, {},
-	{
-		#include "../../kernels-vk-inline/level1/xdot.glsl.inl"
-		,
-		#include "../../kernels-vk-inline/level1/xdot_epilogue.glsl.inl"
-	},
-	{"Xdot", "XdotEpilogue"} )
+		: Routine(queue, event, name, {"Xdot"}, dtype, {})
 {
 }
 

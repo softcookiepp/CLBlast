@@ -25,13 +25,7 @@ namespace clblast {
 
 // Constructor: forwards to base class constructor
 Xher2::Xher2(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Xger"}, dtype, {},
-							{
-	#include "../../kernels-vk-inline/level2/xher2.glsl.inl"
-							}
-,
- {"Xher2"}
-		)
+		: Routine(queue, event, name, {"Xger"}, dtype, {})
 {
 	mHPR = static_cast<uint32_t>(name == "HPR");
 	mSPR = static_cast<uint32_t>(name == "SPR");

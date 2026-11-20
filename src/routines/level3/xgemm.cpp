@@ -26,71 +26,7 @@ namespace clblast {
 // Constructor: forwards to base class constructor
 Xgemm::Xgemm(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
 		: Routine(queue, event, name, {"Copy", "Pad", "Transpose", "Padtranspose", "Xgemm", "XgemmDirect", "GemmRoutine"},
-							dtype, {},
-							{
-	#include "../../kernels-vk-inline/level3/copy_fast.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/copy_matrix.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/copy_pad_matrix.glsl.inl"
-	,
-	//ok...onto the next big thingy
-	#include "../../kernels-vk-inline/level3/transpose_fast.glsl.inl"
-	,
-	// wow this was a lot to translate, goodness...
-	#include "../../kernels-vk-inline/level3/transpose_matrix.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/transpose_pad_matrix.glsl.inl"
-	,
-
-	// END OF THE COPY PAD TRANSPOSE ROUTINES
-	#include "../../kernels-vk-inline/level3/xgemm_direct.glsl.inl"
-	,
-	// the final boss
-	#include "../../kernels-vk-inline/level3/xgemm_part4_xgemm.glsl.inl"
-	,
-	// oh yeah, forgot to add these too
-	#include "../../kernels-vk-inline/level3/convert_hermitian_lower.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/convert_hermitian_upper.glsl.inl"
-	,
-	// and these
-	#include "../../kernels-vk-inline/level3/convert_symmetric_lower.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/convert_symmetric_upper.glsl.inl"
-	,
-	// and these
-	#include "../../kernels-vk-inline/level3/convert_triangular_lower.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/convert_triangular_upper.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/level3_fill_matrix.glsl.inl"
-							}
-,
-	{	
-		"CopyMatrixFast",
-		"CopyMatrix",
-		
-		"CopyPadMatrix",
-		"TransposeMatrixFast",
-		"TransposeMatrix",
-		"TransposePadMatrix",
-		"XgemmDirectTT",
-		
-		"Xgemm",
-		
-		"HermLowerToSquared",
-		"HermUpperToSquared",
-		
-		"SymmLowerToSquared",
-		"SymmUpperToSquared",
-		
-		"TriaLowerToSquared",
-		"TriaUpperToSquared",
-		
-		"FillMatrix"
-	}
-				) {
+							dtype, {}) {
 }
 
 // =================================================================================================

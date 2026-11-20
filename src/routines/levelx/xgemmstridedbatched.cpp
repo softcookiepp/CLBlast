@@ -27,34 +27,7 @@ namespace clblast {
 // Constructor: forwards to base class constructor
 XgemmStridedBatched::XgemmStridedBatched(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
 		: Routine(queue, event, name, {"Copy", "Pad", "Transpose", "Padtranspose", "Xgemm", "XgemmDirect", "GemmRoutine"},
-							dtype, {},
-							{
-	#include "../../kernels-vk-inline/level3/copy_matrix_strided_batched.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/copy_pad_matrix_strided_batched.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/transpose_matrix_strided_batched.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_strided_batched.glsl.inl"
-	// END OF COPY PAD TRANSPOSE ROUTINES
-	,
-	// xgemm strided batched
-	#include "../../kernels-vk-inline/level3/xgemm_batched_xgemm_strided_batched.glsl.inl"
-	,
-	// direct strided batched tt
-	#include "../../kernels-vk-inline/level3/xgemm_direct_strided_batched_tt.glsl.inl"
-							}
-,
-
-		{
-			"CopyMatrixStridedBatched",
-			"CopyPadMatrixStridedBatched",
-			"TransposeMatrixStridedBatched",
-			"TransposePadMatrixStridedBatched",
-			"XgemmStridedBatched",
-			"XgemmDirectStridedBatchedTT"
-		}
-	)
+							dtype, {})
 {
 }
 

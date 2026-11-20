@@ -25,40 +25,7 @@ namespace clblast {
 
 // Constructor: forwards to base class constructor
 Xomatcopy::Xomatcopy(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Copy", "Pad", "Transpose", "Padtranspose"}, dtype, {},
-							{
-	#include "../../kernels-vk-inline/level3/copy_fast.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/copy_pad_matrix.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/copy_pad_matrix_batched.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/copy_pad_matrix_strided_batched.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/copy_matrix.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/copy_matrix_batched.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/copy_matrix_strided_batched.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/transpose_fast.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/transpose_pad_matrix.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_batched.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/transpose_pad_matrix_strided_batched.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/transpose_matrix.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/transpose_matrix_batched.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level3/transpose_matrix_strided_batched.glsl.inl"
-							}
-,
-		{"CopyMatrixFast", "CopyPadMatrix", "CopyPadMatrixBatched", "CopyPadMatrixStridedBatched", "CopyMatrix", "CopyMatrixBatched", "CopyMatrixStridedBatched",
-			"TransposeMatrixFast", "TransposePadMatrix", "TransposePadMatrixBatched", "TransposePadMatrixStridedBatched", "TransposeMatrix", "TransposeMatrixBatched", "TransposeMatrixStridedBatched"}
-	)
+		: Routine(queue, event, name, {"Copy", "Pad", "Transpose", "Padtranspose"}, dtype, {})
 {
 }
 

@@ -43,8 +43,7 @@ TunerSettings XaxpyGetTunerSettings(const int, const Arguments<T>& args) {
 	settings.sourceMap = 
 	{
 		{
-			"XaxpyFastest",
-#include "../src/kernels-vk-inline/level1/xaxpy_fastest.glsl.inl"
+			"XaxpyFastest", ""
 		}
 	};
 

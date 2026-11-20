@@ -26,15 +26,7 @@ namespace clblast {
 
 // Constructor: forwards to base class constructor
 Xcopy::Xcopy(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Xaxpy"}, dtype, {},
-							{
-	#include "../../kernels-vk-inline/level1/xcopy.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level1/xcopy_fast.glsl.inl"
-							}
-						,
-		{"Xcopy", "XcopyFast"}
-	)
+		: Routine(queue, event, name, {"Xaxpy"}, dtype, {})
 {
 }
 

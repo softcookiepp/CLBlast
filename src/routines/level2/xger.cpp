@@ -25,13 +25,7 @@ namespace clblast {
 
 // Constructor: forwards to base class constructor
 Xger::Xger(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Xger"}, dtype, {},
-							{
-	#include "../../kernels-vk-inline/level2/xger.glsl.inl"
-			}
-,
- {"Xger"}
-	)
+		: Routine(queue, event, name, {"Xger"}, dtype, {})
 {
 	mHPR = static_cast<uint32_t>(name == "HPR");
 	mSPR = static_cast<uint32_t>(name == "SPR");

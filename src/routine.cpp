@@ -63,7 +63,7 @@ const std::unordered_map<std::string, const std::vector<std::string>> Routine::r
 // The constructor does all heavy work, errors are returned as exceptions
 Routine::Routine(Queue& queue, EventPointer event, const std::string& name,
 	const std::vector<std::string>& kernel_names, const tart::DType& dtype,
-	const std::vector<database::NewDatabaseEntry>& userDatabase, std::initializer_list<const char*> source, std::vector<std::string> entryPointNames)
+	const std::vector<database::NewDatabaseEntry>& userDatabase)
 		: 
 			mDtype(dtype),
 			routine_name_(name),
@@ -72,84 +72,9 @@ Routine::Routine(Queue& queue, EventPointer event, const std::string& name,
 			event_(event),
 			device_(queue.GetDevice()),
 			db_(kernel_names),
-			mEntryPointNames(entryPointNames),
 			mDevice(queue())
 {
 	InitDatabase(device_, kernel_names, dtype, userDatabase, db_);
-	InitProgram(source);
-}
-
-void Routine::InitProgram(std::initializer_list<const char*> source) {
-	// Determines the identifier for this particular routine call
-	auto routine_info = routine_name_;
-	for (const auto& kernel_name : kernel_names_) {
-		routine_info += "_" + kernel_name + db_(kernel_name).GetValuesString();
-	}
-
-	log_debug(routine_info);
-
-	// Queries the cache to see whether or not the program (context-specific) is already there
-	bool has_program;
-	program_ = ProgramCache::Instance().Get(ProgramKeyRef{device_(), mDtype, routine_info}, &has_program);
-	if (has_program)
-	{
-		return;
-	}
-
-
-	// Sets the build options from an environmental variable (if set)
-	auto options = std::vector<std::string>();
-
-	// Otherwise, the kernel will be compiled and program will be built. Both the binary and the
-	// program will be added to the cache.
-
-	// TODO: move these elsewhere to eliminate repetition
-	// Inspects whether or not FP64 is supported in case of double precision
-	if ( (mDtype == tart::dtypes::float64 || mDtype == tart::dtypes::complex128) 
-		&& !device_()->getMetadata().double_)
-	{
-		throw RuntimeErrorCode(StatusCode::kNoDoublePrecision);
-	}
-	// As above, but for FP16 (half precision)
-	if (mDtype == tart::dtypes::float64 && !device_()->getMetadata().half_)
-	{
-		throw RuntimeErrorCode(StatusCode::kNoHalfPrecision);
-	}
-
-	// the kernel names *must* have the same order as the underlying compute shaders they represent
-	std::vector<std::string>& kernelNames = mEntryPointNames;
-	if (mEntryPointNames.size() == 0) kernelNames = kernel_names_;
-
-	std::vector<std::string> defines;
-	{
-		// one define set per kernel name...
-		for (auto& kn : kernel_names_)
-		{
-			defines.push_back(db_(kn).GetDefines());
-		}
-	}
-
-	// create a map of kernel names and sources
-	std::map<std::string, std::string> kernelSources;
-	std::vector<std::string> preSources;
-	for (auto& str : source) preSources.push_back(str);
-	std::string allDefines;
-	for (auto& str : defines) allDefines += (str + "\n");
-	
-	for (size_t i = 0; i < source.size(); i += 1)
-	{
-		if (kernelNames.size() == i) throw std::runtime_error("not enough kernel names!");
-		if (preSources.size() == i) throw std::runtime_error("not enough presources!");
-		kernelSources.emplace(kernelNames[i], allDefines+preSources[i]);
-	}
-	std::string dummy("");
-
-	
-
-	program_ = CompileFromSource(dummy, mDtype, routine_name_, device_, options, 0, false, kernelSources);
-	
-	ProgramCache::Instance().Store(ProgramKey{device_(), mDtype, routine_info},
-																 std::shared_ptr<Program>{program_});
 }
 
 void Routine::InitDatabase(const Device& device, const std::vector<std::string>& kernel_names,

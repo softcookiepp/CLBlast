@@ -24,14 +24,7 @@ namespace clblast {
 
 // Constructor: forwards to base class constructor
 Xamax::Xamax(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
-	: Routine(queue, event, name, {"Xdot"}, dtype, {},
-		{
-			#include "../../kernels-vk-inline/level1/xamax.glsl.inl"
-			,
-			#include "../../kernels-vk-inline/level1/xamax_epilogue.glsl.inl"
-		},
-		{"Xamax", "XamaxEpilogue"}
-	)
+	: Routine(queue, event, name, {"Xdot"}, dtype, {})
 {
 	mMax = static_cast<uint32_t>(name == "MAX");
 	mMin = static_cast<uint32_t>(name == "MIN");

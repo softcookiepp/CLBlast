@@ -25,17 +25,7 @@ namespace clblast {
 
 // Constructor: forwards to base class constructor
 Xaxpy::Xaxpy(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Xaxpy"}, dtype, {},
-							{
-	#include "../../kernels-vk-inline/level1/xaxpy.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level1/xaxpy_faster.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level1/xaxpy_fastest.glsl.inl"
-							}
- ,{"Xaxpy", "XaxpyFaster", "XaxpyFastest"}
-
-				) {
+		: Routine(queue, event, name, {"Xaxpy"}, dtype, {}) {
 }
 
 // =================================================================================================

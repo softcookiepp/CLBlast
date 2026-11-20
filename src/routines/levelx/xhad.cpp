@@ -25,17 +25,7 @@ namespace clblast {
 
 // Constructor: forwards to base class constructor
 Xhad::Xhad(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Xaxpy"}, dtype, {},
-							{
-	#include "../../kernels-vk-inline/level1/xhad.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level1/xhad_faster.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level1/xhad_fastest.glsl.inl"
-							}
-,
- {"Xhad", "XhadFaster", "XhadFastest"}
-	) {
+		: Routine(queue, event, name, {"Xaxpy"}, dtype, {}) {
 }
 
 // =================================================================================================

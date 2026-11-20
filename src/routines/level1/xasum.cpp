@@ -25,16 +25,7 @@ namespace clblast {
 
 // Constructor: forwards to base class constructor
 Xasum::Xasum(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Xdot"}, dtype, {},
-							{
-	#include "../../kernels-vk-inline/level1/xasum.glsl.inl"
-	,
-	#include "../../kernels-vk-inline/level1/xasum_epilogue.glsl.inl"
-							}
-,
-		
-			{"Xasum", "XasumEpilogue"}
-			)							
+		: Routine(queue, event, name, {"Xdot"}, dtype, {})							
 {
 	mSum = static_cast<uint32_t>(name == "SUM");
 }

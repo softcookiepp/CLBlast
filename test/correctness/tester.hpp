@@ -99,7 +99,6 @@ class Tester {
 	// Testing against reference implementations
 	int compare_cblas_;
 	int compare_clblas_;
-	int compare_cublas_;
 
  private:
 	// Internal methods to report a passed, skipped, or failed test

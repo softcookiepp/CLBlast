@@ -221,11 +221,7 @@ Arguments<U> Client<T, U>::ParseArguments(int argc, char* argv[], const size_t l
 #else
 	args.compare_cblas = 0;
 #endif
-#ifdef CLBLAST_REF_CUBLAS
-	args.compare_cublas = GetArgument(command_line_args, help, kArgComparecublas, 1);
-#else
-	args.compare_cublas = 0;
-#endif
+
 	args.step = GetArgument(command_line_args, help, kArgStepSize, size_t{1});
 	args.num_steps = GetArgument(command_line_args, help, kArgNumSteps, size_t{0});
 	args.num_runs = GetArgument(command_line_args, help, kArgNumRuns, size_t{10});
@@ -250,26 +246,24 @@ Arguments<U> Client<T, U>::ParseArguments(int argc, char* argv[], const size_t l
 
 	// Comparison against a non-BLAS routine is not supported
 	if (level == 4) {	// level-4 == level-X
-		if (args.compare_clblas != 0 || args.compare_cblas != 0 || args.compare_cublas != 0) {
+		if (args.compare_clblas != 0 || args.compare_cblas != 0 ) {
 			if (!args.silent) {
-				fprintf(stdout, "* Disabling clBLAS/CBLAS/cuBLAS comparisons for this non-BLAS routine\n\n");
+				fprintf(stdout, "* Disabling clBLAS/CBLAS comparisons for this non-BLAS routine\n\n");
 			}
 		}
 		args.compare_clblas = 0;
 		args.compare_cblas = 0;
-		args.compare_cublas = 0;
 	}
 
 	// Comparison against other BLAS libraries is not supported in case of half-precision
 	if (args.precision == Precision::kHalf) {
-		if (args.compare_clblas != 0 || args.compare_cblas != 0 || args.compare_cublas != 0) {
+		if (args.compare_clblas != 0 || args.compare_cblas != 0 ) {
 			if (!args.silent) {
-				fprintf(stdout, "* Disabling clBLAS/CBLAS/cuBLAS comparisons for half-precision\n\n");
+				fprintf(stdout, "* Disabling clBLAS/CBLAS comparisons for half-precision\n\n");
 			}
 		}
 		args.compare_clblas = 0;
 		args.compare_cblas = 0;
-		args.compare_cublas = 0;
 	}
 
 	// Returns the arguments
@@ -284,11 +278,6 @@ void Client<T, U>::PerformanceTest(Arguments<U>& args, const SetMetric set_sizes
 	// Initializes OpenCL and the libraries
 	auto device = Device(platform, args.device_id);
 	auto queue = Queue(device);
-#ifdef CLBLAST_REF_CUBLAS
-	if (args.compare_cublas) {
-		cublasSetup(args);
-	}
-#endif
 
 	// Optionally overrides parameters if tuner files are given (semicolon separated)
 	OverrideParametersFromJSONFiles(args.tuner_files, device(), args.precision);
@@ -353,20 +342,6 @@ void Client<T, U>::PerformanceTest(Arguments<U>& args, const SetMetric set_sizes
 			HostToDevice(args, buffers, buffers_host, queue, buffers_out_);
 			timings.push_back(std::pair<std::string, TimeResult>("CPU BLAS", time_cblas));
 		}
-		if (args.compare_cublas) {
-			auto buffers_host = BuffersHost<T>();
-			auto buffers_cuda = BuffersCUDA<T>();
-			DeviceToHost(args, buffers, buffers_host, queue, buffers_in_);
-			HostToCUDA(args, buffers_cuda, buffers_host, buffers_in_);
-			TimeResult time_cublas;
-			try {
-				time_cublas = TimedExecution(args.num_runs, args, buffers_cuda, queue, run_reference3_, "cuBLAS");
-			} catch (std::runtime_error& e) {
-			}
-			CUDAToHost(args, buffers_cuda, buffers_host, buffers_out_);
-			HostToDevice(args, buffers, buffers_host, queue, buffers_out_);
-			timings.push_back(std::pair<std::string, TimeResult>("cuBLAS", time_cublas));
-		}
 
 		// Prints the performance of the tested libraries
 		PrintTableRow(args, timings);
@@ -385,11 +360,6 @@ void Client<T, U>::PerformanceTest(Arguments<U>& args, const SetMetric set_sizes
 	}
 
 // Cleans-up and returns
-#ifdef CLBLAST_REF_CUBLAS
-	if (args.compare_cublas) {
-		cublasTeardown(args);
-	}
-#endif
 }
 
 // =================================================================================================
@@ -468,9 +438,6 @@ void Client<T, U>::PrintTableHeader(const Arguments<U>& args) {
 			if (args.compare_cblas) {
 				fprintf(stdout, " | <--					 CPU BLAS						-->");
 			}
-			if (args.compare_cublas) {
-				fprintf(stdout, " | <--						cuBLAS						 -->");
-			}
 		} else {
 			fprintf(stdout, " | <--			 CLBlast			 -->");
 			if (args.compare_clblas) {
@@ -478,9 +445,6 @@ void Client<T, U>::PrintTableHeader(const Arguments<U>& args) {
 			}
 			if (args.compare_cblas) {
 				fprintf(stdout, " | <--			CPU BLAS			 -->");
-			}
-			if (args.compare_cublas) {
-				fprintf(stdout, " | <--			 cuBLAS				-->");
 			}
 		}
 		fprintf(stdout, " |\n");
@@ -498,9 +462,6 @@ void Client<T, U>::PrintTableHeader(const Arguments<U>& args) {
 		if (args.compare_cblas) {
 			fprintf(stdout, ";%9s;%9s;%9s;%9s", "min_ms_3", "max_ms_3", "mean_3", "stddev_3");
 		}
-		if (args.compare_cublas) {
-			fprintf(stdout, ";%9s;%9s;%9s;%9s", "min_ms_4", "max_ms_4", "mean_4", "stddev_4");
-		}
 	} else {
 		fprintf(stdout, "%9s;%9s;%9s", "ms_1", "GFLOPS_1", "GBs_1");
 		if (args.compare_clblas) {
@@ -508,9 +469,6 @@ void Client<T, U>::PrintTableHeader(const Arguments<U>& args) {
 		}
 		if (args.compare_cblas) {
 			fprintf(stdout, ";%9s;%9s;%9s", "ms_3", "GFLOPS_3", "GBs_3");
-		}
-		if (args.compare_cublas) {
-			fprintf(stdout, ";%9s;%9s;%9s", "ms_4", "GFLOPS_4", "GBs_4");
 		}
 	}
 	fprintf(stdout, "\n");

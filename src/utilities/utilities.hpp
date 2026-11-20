@@ -253,7 +253,6 @@ struct Arguments {
   // Client-specific arguments
   int compare_clblas = 1;
   int compare_cblas = 1;
-  int compare_cublas = 1;
   size_t step = 1;
   size_t num_steps = 0;
   size_t num_runs = 10;

@@ -27,7 +27,6 @@ namespace clblast {
 // The client-specific arguments in string form
 constexpr auto kArgCompareclblas = "clblas";
 constexpr auto kArgComparecblas = "cblas";
-constexpr auto kArgComparecublas = "cublas";
 constexpr auto kArgStepSize = "step";
 constexpr auto kArgNumSteps = "num_steps";
 constexpr auto kArgWarmUp = "warm_up";

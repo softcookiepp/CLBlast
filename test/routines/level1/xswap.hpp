@@ -71,8 +71,7 @@ class TestXswap {
 	}
 #endif
 
-// Describes how to run the cuBLAS routine (for correctness/performance comparison)
-#ifdef CLBLAST_REF_CUBLAS
+// Describes how to run the reference routine (for correctness/performance comparison)
 	static StatusCode RunReference3(const Arguments<T>& args, BuffersCUDA<T>& buffers, Queue&) {
 		auto status = cublasXswap(reinterpret_cast<cublasHandle_t>(args.cublas_handle), args.n, buffers.x_vec,
 															args.x_offset, args.x_inc, buffers.y_vec, args.y_offset, args.y_inc);

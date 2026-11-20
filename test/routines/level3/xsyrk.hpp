@@ -82,8 +82,7 @@ class TestXsyrk {
 	}
 #endif
 
-// Describes how to run the cuBLAS routine (for correctness/performance comparison)
-#ifdef CLBLAST_REF_CUBLAS
+// Describes how to run the reference routine (for correctness/performance comparison)
 	static StatusCode RunReference3(const Arguments<T>& args, BuffersCUDA<T>& buffers, Queue&) {
 		auto status =
 				cublasXsyrk(reinterpret_cast<cublasHandle_t>(args.cublas_handle), args.layout, convertToCUBLAS(args.triangle),

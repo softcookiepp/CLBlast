@@ -28,11 +28,11 @@ namespace clblast {
 // =================================================================================================
 
 // Sets all elements of a matrix to a constant value
-void FillMatrix(const tart::DType& dtype, const std::shared_ptr<Program> program, const size_t m, const size_t n, const size_t ld,
+void FillMatrix(const tart::DType& dtype, const size_t m, const size_t n, const size_t ld,
 	const size_t offset, const tart::buffer_ptr& dest, const tart::Scalar constant_value, const size_t local_size);
 
 // Sets all elements of a vector to a constant value
-void FillVector(const tart::DType& dtype, const std::shared_ptr<Program> program, const size_t n, const size_t inc, const size_t offset,
+void FillVector(const tart::DType& dtype, const size_t n, const size_t inc, const size_t offset,
 	const tart::buffer_ptr& dest, const tart::Scalar& constant_value, const size_t local_size);
 
 // =================================================================================================
@@ -43,7 +43,7 @@ inline void PadCopyTransposeMatrix(const tart::DType& dtype, const Databases& db
 	const size_t src_one, const size_t src_two,
 	const size_t src_ld, const size_t src_offset, const tart::buffer_ptr& src, const size_t dest_one,
 	const size_t dest_two, const size_t dest_ld, const size_t dest_offset,
-	const tart::buffer_ptr& dest, const tart::Scalar& alpha, const std::shared_ptr<Program>& program,
+	const tart::buffer_ptr& dest, const tart::Scalar& alpha,
 	const bool do_pad, const bool do_transpose, const bool do_conjugate,
 	const bool upper = false, const bool lower = false, const bool diagonal_imag_zero = false,
 	bool syrk = false, bool herk = false, bool syr2k = false, bool her2k = false)
@@ -187,7 +187,7 @@ inline void PadCopyTransposeMatrixBatched(const tart::DType& dtype, const Databa
 	const size_t src_ld, const tart::buffer_ptr& src_offsets, const tart::buffer_ptr& src,
 	const size_t dest_one, const size_t dest_two, const size_t dest_ld,
 	const tart::buffer_ptr& dest_offsets, const tart::buffer_ptr& dest,
-	const std::shared_ptr<Program>& program, const bool do_pad, const bool do_transpose,
+	const bool do_pad, const bool do_transpose,
 	const bool do_conjugate, const size_t batch_count,
 	bool syrk = false, bool herk = false, bool syr2k = false, bool her2k = false)
 {
@@ -262,7 +262,7 @@ inline void PadCopyTransposeMatrixStridedBatched(const tart::DType& dtype, const
 	const size_t src_stride, const tart::buffer_ptr& src, const size_t dest_one,
 	const size_t dest_two, const size_t dest_ld, const size_t dest_offset,
 	const size_t dest_stride, const tart::buffer_ptr& dest,
-	const std::shared_ptr<Program>& program, const bool do_pad,
+	const bool do_pad,
 	const bool do_transpose, const bool do_conjugate, const size_t batch_count,
 	bool syrk = false, bool herk = false, bool syr2k = false, bool her2k = false)
 {

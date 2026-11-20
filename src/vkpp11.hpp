@@ -131,27 +131,6 @@ public:
 
 // =================================================================================================
 
-// C++11 version of 'cl_program'.
-class Program {
-	std::string mSource;
-	tart::device_ptr mDevice = nullptr;
-	std::shared_ptr<tart::ShaderModule> mProgramContainer = nullptr;
-	tart::shader_module_ptr mShaderModule = nullptr;
-	//tart::cl_program_ptr mCLProgram = nullptr;
-public:
-	
-	// constructor for GLSL shaders
-	// requires multiple shader sources because each file can only have one entry point :c
-	explicit Program(const tart::device_ptr& device, std::map<std::string, std::string>& kernelSources);
-
-	// Accessor to the private data-member
-	std::shared_ptr<tart::ShaderModule> operator()() const;
-	
-	friend class Kernel;
-};
-
-// =================================================================================================
-
 // no idea how to handle this, since Tart uses a single queue
 // pretty sure I will just end up scrapping it, since tart::Device handles all this already (actually I can't)
 // C++11 version of 'cl_command_queue'
@@ -228,64 +207,6 @@ private:
 #endif
 
 // =================================================================================================
-
-#if 1
-typedef std::pair<std::string, tart::shader_module_ptr> kernel_t;
-
-// ahh, right. I remember how it works now
-// C++11 version of 'kernel_t'
-class Kernel {
-	std::string mEntryPoint;
-	std::shared_ptr<tart::ShaderModule> mProgramContainer = nullptr;
-	tart::kernel_ptr mKernel = nullptr;
-	tart::device_ptr mDevice;
-	// arguments
-	kernel_t kernel_;
-public:
-	// difference between Vulkan and OpenCL as far as local sizes go will influence this outcome greatly...
-	explicit Kernel(const kernel_t kernel);
-	explicit Kernel(tart::shader_module_ptr prg);
-	
-	// Regular constructor with memory management
-	explicit Kernel(const std::shared_ptr<Program> program, const std::string& name);
-
-	// Sets a kernel argument at the indicated position
-	template <typename T>
-	void SetArgument(const size_t index, const T& value) {
-		mKernel->setArg(index, value);
-	}
-
-	// Sets all arguments in one go using parameter packs. Note that this overwrites previously set
-	// arguments using 'SetArgument' or 'SetArguments'.
-	template <typename... Args>
-	void SetArguments(Args&... args) {
-		SetArgumentsRecursive(0, args...);
-	}
-
-	// Retrieves the name of the kernel
-	std::string GetFunctionName() const;
-
-	// As above, but with an event waiting list
-	void Launch(const Queue& queue, const std::vector<size_t>& global, const std::vector<size_t>& local);
-
-	// Accessor to the private data-member
-	const kernel_t& operator()() const;
-	
-	const tart::kernel_ptr& get() const { return mKernel; }
-
-private:
-	// Internal implementation for the recursive SetArguments function.
-	template <typename T>
-	void SetArgumentsRecursive(const size_t index, T& first) {
-		SetArgument(index, first);
-	}
-	template <typename T, typename... Args>
-	void SetArgumentsRecursive(const size_t index, T& first, Args&... args) {
-		SetArgument(index, first);
-		SetArgumentsRecursive(index + 1, args...);
-	}
-};
-#endif
 
 // =================================================================================================
 }	// namespace clblast

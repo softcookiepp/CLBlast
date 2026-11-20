@@ -21,7 +21,7 @@ namespace clblast {
 // =================================================================================================
 
 // Sets all elements of a matrix to a constant value
-void FillMatrix(const tart::DType& dtype, const std::shared_ptr<Program> program, const size_t m, const size_t n, const size_t ld,
+void FillMatrix(const tart::DType& dtype, const size_t m, const size_t n, const size_t ld,
 	const size_t offset, const tart::buffer_ptr& dest, const tart::Scalar constant_value, const size_t local_size)
 {
 	tart::kernel_ptr kernel = getFillMatrix(dest->getDevice(), dtype);
@@ -37,7 +37,7 @@ void FillMatrix(const tart::DType& dtype, const std::shared_ptr<Program> program
 }
 
 // Sets all elements of a vector to a constant value
-void FillVector(const tart::DType& dtype, const std::shared_ptr<Program> program, const size_t n, const size_t inc, const size_t offset,
+void FillVector(const tart::DType& dtype, const size_t n, const size_t inc, const size_t offset,
 	const tart::buffer_ptr& dest, const tart::Scalar& constant_value, const size_t local_size)
 {
 	tart::kernel_ptr kernel = getTrsvFillVector(dest->getDevice(), dtype);

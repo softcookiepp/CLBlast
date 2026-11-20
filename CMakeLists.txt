@@ -175,12 +175,10 @@ endif()
 set(SOURCES
 	src/database/database.cpp
 	src/routines/common.cpp
-	src/utilities/compile.cpp
 	src/utilities/clblast_exceptions.cpp
 	src/utilities/timing.cpp
 	src/utilities/utilities.cpp
 	src/api_common.cpp
-	src/cache.cpp
 	src/routine.cpp
 	src/routines/levelx/xinvert.cpp	# only source, don't include it as a test
 	src/tuning/configurations.cpp
@@ -294,7 +292,6 @@ endif()
 if(TUNERS)
 
 	set(TUNERS_COMMON
-			src/utilities/compile.cpp
 			src/utilities/clblast_exceptions.cpp
 			src/utilities/timing.cpp
 			src/utilities/utilities.cpp
@@ -488,7 +485,7 @@ if(TESTS)
 	# Miscellaneous tests
 	set(MISC_TESTS override_parameters retrieve_parameters)
 	if(MSVC)
-		set(TESTS_COMMON ${TESTS_COMMON} src/utilities/compile.cpp)
+		set(TESTS_COMMON ${TESTS_COMMON})
 	endif()
 	foreach(MISC_TEST ${MISC_TESTS})
 		add_executable(clblast_test_${MISC_TEST} ${TESTS_COMMON}

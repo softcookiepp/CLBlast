@@ -88,23 +88,6 @@ bool Device::IsGPU() const { return Type() == "GPU"; }
 
 const RawDeviceID Device::operator()() const { return mDevice; }
 
-
-// constructor for GLSL shaders
-// requires multiple shader sources because each file can only have one entry point :c
-Program::Program(const tart::device_ptr& device, std::map<std::string, std::string>& kernelSources)
-{
-	// Compile the first (main) kernel source to SPIR-V
-	if (kernelSources.empty()) {
-		throw std::runtime_error("Program requires at least one kernel source");
-	}
-	// Use the first source as the main shader
-	auto firstEntry = kernelSources.begin();
-	mProgramContainer = device->compileGLSL(firstEntry->second, {}, firstEntry->first);
-}
-
-// Accessor to the private data-member
-std::shared_ptr<tart::ShaderModule> Program::operator()() const { return mProgramContainer; }
-
 // Constructor based on the regular OpenCL data-type: memory management is handled elsewhere
 Queue::Queue(const tart::device_ptr queue) { mDevice = queue; }
 
@@ -268,61 +251,6 @@ template class Buffer<float>;
 template class Buffer<double>;
 template class Buffer<std::complex<float>>; // not using clblast::float2 because doing so requires circular includes that don't work
 template class Buffer<std::complex<double>>; // same as above, but with clblast::double2
-
-
-
-
-
-
-
-// difference between Vulkan and OpenCL as far as local sizes go will influence this outcome greatly...
-Kernel::Kernel(const kernel_t kernel) { kernel_ = kernel; }
-Kernel::Kernel(tart::shader_module_ptr prg) { std::string ep = "none"; kernel_ = {ep, prg}; }
-
-// Regular constructor with memory management
-Kernel::Kernel(const std::shared_ptr<Program> program, const std::string& name)
-{
-	// this will be a bit different.
-	// OpenCL allows kernels to be created that accept a variable local size.
-	// Vulkan allows pipelines to be created where the entry point is specified,
-	// but a fixed local size is used.
-	// tart::ShaderModule takes care of this, but it must be adapted to this library
-	mEntryPoint = name;
-	mProgramContainer = program->operator()();
-	mDevice = program->mDevice;
-	mKernel = mProgramContainer->createKernel(mEntryPoint);
-}
-
-// Retrieves the name of the kernel
-std::string Kernel::GetFunctionName() const {
-	return mEntryPoint;
-}
-
-// As above, but with an event waiting list
-void Kernel::Launch(const Queue& queue, const std::vector<size_t>& global, const std::vector<size_t>& local)
-{
-	if (global.size() != local.size() ) throw LogicError("local and global size must be same length");
-	std::vector<uint32_t> adjusted_global(global.size());
-	for (size_t i = 0; i < global.size(); i += 1 )
-	{
-		if (global[i] % local[i] > 0) throw LogicError("global size must be divisible by local size");
-		adjusted_global[i] = global[i] / local[i];
-	}
-	
-	// convert local to uint32_t
-	std::vector<uint32_t> local32(local.size());
-	for (size_t i = 0; i < local.size(); i += 1)
-	{
-		local32[i] = local[i];
-	}
-	// ensure size is correct
-	local32.resize(mKernel->getSpecConstantSize()/sizeof(uint32_t));
-	
-	mKernel->enqueue(adjusted_global, local32);
-}
-
-// Accessor to the private data-member
-const kernel_t& Kernel::operator()() const { return kernel_; }
 
 
 // =================================================================================================

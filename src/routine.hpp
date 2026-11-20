@@ -18,7 +18,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "cache.hpp"
 #include "database/database.hpp"
 #include "database/database_structure.hpp"
 #include "utilities/backend.hpp"
@@ -65,9 +64,6 @@ class Routine {
 	EventPointer event_;
 	const Device device_;
 	tart::device_ptr mDevice = nullptr;
-
-	// Compiled program (either retrieved from cache or compiled in slow path)
-	std::shared_ptr<Program> program_;
 
 	// Connection to the database for all the device-specific parameters
 	Databases db_;

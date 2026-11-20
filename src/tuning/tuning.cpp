@@ -29,7 +29,6 @@
 #include "tuning/configurations.hpp"
 #include "utilities/backend.hpp"
 #include "utilities/clblast_exceptions.hpp"
-#include "utilities/compile.hpp"
 #include "utilities/timing.hpp"
 #include "utilities/utilities.hpp"
 

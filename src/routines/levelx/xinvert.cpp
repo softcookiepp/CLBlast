@@ -78,14 +78,8 @@ void Xinvert::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle tri
 	// Fills the output buffer with zeros
 	FillMatrix(mDtype, program_, block_size,
 						 num_blocks * block_size, block_size, 0, dest, tart::Scalar::zero(), 16);
-	//event_wait_list.push_back(fill_matrix_event);
-	//device_()->enqueueBarrier({dest()});
-	
-	// used across all kernels here
-	
 
 	// Inverts the diagonal IB by IB inner blocks of the matrix: one block per work-group
-	//Kernel kernelOld(program_, "InvertDiagonalBlock");
 	tart::kernel_ptr kernel = getInvertDiagonalBlock(this->mDevice, this->mDtype);
 	kernel->setArg(0, static_cast<int>(n));
 	kernel->setArg(1, src);

@@ -11,7 +11,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "cache.hpp"
 #include "database/database.hpp"
 #include "database/database_structure.hpp"
 #include "utilities/backend.hpp"

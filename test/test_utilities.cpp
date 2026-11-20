@@ -18,7 +18,7 @@
 #include <string>
 #include <vector>
 
-#include "tart.hpp"
+#include <tart/tart.hpp>
 using tart::half;
 #include "utilities/backend.hpp"
 #include "utilities/utilities.hpp"

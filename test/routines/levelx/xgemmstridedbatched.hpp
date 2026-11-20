@@ -106,23 +106,6 @@ class TestXgemmStridedBatched {
 	}
 #endif
 
-// Describes how to run the reference routine (for correctness/performance comparison)
-	static StatusCode RunReference3(const Arguments<T>& args, BuffersCUDA<T>& buffers, Queue&) {
-		for (auto batch = size_t{0}; batch < args.batch_count; ++batch) {
-			const auto a_batch_offset = args.a_offset + PerBatchSizeA(args) * batch;
-			const auto b_batch_offset = args.c_offset + PerBatchSizeB(args) * batch;
-			const auto c_batch_offset = args.b_offset + PerBatchSizeC(args) * batch;
-			auto status = cublasXgemm(reinterpret_cast<cublasHandle_t>(args.cublas_handle), args.layout,
-																convertToCUBLAS(args.a_transpose), convertToCUBLAS(args.b_transpose), args.m, args.n,
-																args.k, args.alpha, buffers.a_mat, a_batch_offset, args.a_ld, buffers.b_mat,
-																b_batch_offset, args.b_ld, args.beta, buffers.c_mat, c_batch_offset, args.c_ld);
-			if (status != CUBLAS_STATUS_SUCCESS) {
-				return StatusCode::kUnknownError;
-			}
-		}
-		return StatusCode::kSuccess;
-	}
-#endif
 
 	// Describes how to download the results of the computation (more importantly: which buffer)
 	static std::vector<T> DownloadResult(const Arguments<T>& args, Buffers<T>& buffers, Queue& queue) {

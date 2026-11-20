@@ -1,5 +1,5 @@
 #include "routine_aot_cache.hpp"
-#include "all-blas-kernels.hpp"
+#include "all-kernels-includes.hpp"
 
 namespace clblast
 {

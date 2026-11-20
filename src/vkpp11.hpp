@@ -50,7 +50,7 @@
 
 // Exception classes
 #include "cxpp11_common.hpp"
-#include "tart.hpp"
+#include <tart/tart.hpp>
 
 namespace clblast {
 // =================================================================================================
@@ -134,7 +134,7 @@ public:
 class Program {
 	std::string mSource;
 	tart::device_ptr mDevice = nullptr;
-	std::shared_ptr<tart::Program> mProgramContainer = nullptr;
+	std::shared_ptr<tart::ShaderModule> mProgramContainer = nullptr;
 	tart::shader_module_ptr mShaderModule = nullptr;
 	//tart::cl_program_ptr mCLProgram = nullptr;
 public:
@@ -144,7 +144,9 @@ public:
 	explicit Program(const tart::device_ptr& device, std::map<std::string, std::string>& kernelSources);
 
 	// Accessor to the private data-member
-	std::shared_ptr<tart::Program> operator()() const;
+	std::shared_ptr<tart::ShaderModule> operator()() const;
+	
+	friend class Kernel;
 };
 
 // =================================================================================================
@@ -227,13 +229,13 @@ private:
 // =================================================================================================
 
 #if 1
-typedef std::pair<std::string, tart::program_ptr> kernel_t;
+typedef std::pair<std::string, tart::shader_module_ptr> kernel_t;
 
 // ahh, right. I remember how it works now
 // C++11 version of 'kernel_t'
 class Kernel {
 	std::string mEntryPoint;
-	std::shared_ptr<tart::Program> mProgramContainer = nullptr;
+	std::shared_ptr<tart::ShaderModule> mProgramContainer = nullptr;
 	tart::kernel_ptr mKernel = nullptr;
 	tart::device_ptr mDevice;
 	// arguments
@@ -241,7 +243,7 @@ class Kernel {
 public:
 	// difference between Vulkan and OpenCL as far as local sizes go will influence this outcome greatly...
 	explicit Kernel(const kernel_t kernel);
-	explicit Kernel(tart::program_ptr prg);
+	explicit Kernel(tart::shader_module_ptr prg);
 	
 	// Regular constructor with memory management
 	explicit Kernel(const std::shared_ptr<Program> program, const std::string& name);

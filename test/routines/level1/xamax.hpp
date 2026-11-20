@@ -72,34 +72,6 @@ class TestXamax {
 	}
 #endif
 
-// Describes how to run the reference routine (for correctness/performance comparison)
-	static StatusCode RunReference3(const Arguments<T>& args, BuffersCUDA<T>& buffers, Queue&) {
-		auto status = cublasXamax(reinterpret_cast<cublasHandle_t>(args.cublas_handle), args.n, buffers.scalar_uint,
-															args.imax_offset, buffers.x_vec, args.x_offset, args.x_inc);
-		if (status == CUBLAS_STATUS_SUCCESS) {
-			return StatusCode::kSuccess;
-		} else {
-			return StatusCode::kUnknownError;
-		}
-	}
-#endif
-#if 0
-	// Describes how to download the results of the computation (more importantly: which buffer)
-	// its different for half. so provide a different function
-	static std::vector<half> DownloadResult(const Arguments<half>& args, Buffers<half>& buffers, Queue& queue) {
-		
-		std::vector<unsigned int> result_uint(args.scalar_size, 0);
-		buffers.scalar_uint.Read(queue, args.scalar_size, result_uint);
-		// The result is an integer. However, since the test infrastructure assumes results of
-		// type 'T' (float/double/float2/double2/half), we store the results into T instead.
-		// The values might then become meaningless, but a comparison for testing should still
-		// be valid to verify correctness.
-		auto result_as_T = static_cast<half>(result_uint[0]);
-		std::vector<half> result(args.scalar_size);
-		result[0] = result_as_T;
-		return result;
-	}
-#endif
 	// Describes how to download the results of the computation (more importantly: which buffer)
 	static std::vector<T> DownloadResult(const Arguments<T>& args, Buffers<T>& buffers, Queue& queue) {
 		std::vector<unsigned int> result_uint(args.scalar_size, 0);

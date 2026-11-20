@@ -17,7 +17,7 @@
 #include <vector>
 
 // tart!
-#include "tart.hpp"
+#include <tart/tart.hpp>
 
 // Includes the CLBlast library
 #include <clblast_vk.h>

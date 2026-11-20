@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "cache.hpp"
+#include "database/database.hpp"
 #include "database/database_structure.hpp"
 #include "utilities/backend.hpp"
 #include "utilities/clblast_exceptions.hpp"
@@ -42,7 +43,7 @@ StatusCode RetrieveParameters(const RawDeviceID device, const std::string& kerne
 				DatabaseCache::Instance().Get(DatabaseKeyRef{device->getMetadata().deviceUUID, precisionToDataType(precision), kernel_name}, &in_cache);
 		if (!in_cache) {
 			log_debug("Searching database for kernel '" + kernel_name + "'");
-			database = Database(device(), kernel_name, precisionToDataType(precision));
+			database = Database(device, kernel_name, precisionToDataType(precision));
 		}
 
 		// Retrieves the parameters
@@ -70,7 +71,7 @@ StatusCode OverrideParameters(const RawDeviceID device, const std::string& kerne
 				DatabaseCache::Instance().Get(DatabaseKeyRef{device->getMetadata().deviceUUID, dt, kernel_name}, &in_cache);
 		if (!in_cache) {
 			log_debug("Searching database for kernel '" + kernel_name + "'");
-			current_database = Database(device(), kernel_name, dt);
+			current_database = Database(device, kernel_name, dt);
 		}
 
 		// Verifies the parameters size
@@ -105,7 +106,7 @@ StatusCode OverrideParameters(const RawDeviceID device, const std::string& kerne
 		const auto database_entry =
 				database::NewDatabaseEntry{kernel_name, precisionToDataType(precision), all_params, all_params, {database_vendor}};
 		const auto database = std::vector<database::NewDatabaseEntry>{database_entry};
-		const auto db = Database(device(), kernel_name, precisionToDataType(precision));
+		const auto db = Database(device, kernel_name, precisionToDataType(precision));
 
 		// Removes the old database entry and stores the new one in the cache
 		DatabaseCache::Instance().Remove(DatabaseKey{device->getMetadata().deviceUUID, dt, kernel_name});

@@ -44,7 +44,7 @@ option(BUILD_SHARED_LIBS "Build a shared (ON) or static library (OFF)" ON)
 option(SAMPLES "Enable compilation of the examples" OFF)
 option(TUNERS "Enable compilation of the tuners" ON)
 option(CLIENTS "Enable compilation of the clients to test and compare performance" OFF)
-option(TESTS "Enable compilation of the correctness tests" OFF)
+option(TESTS "Enable compilation of the correctness tests" ON)
 # VULKAN_BDA option (can be removed once BDA support is complete)
 option(VULKAN_BDA "Enable Vulkan support of Buffer Device Addresses" OFF)
 
@@ -93,9 +93,9 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${clblast_SOURCE_DIR}/cmake/Modules/
 # we need Tart, the vulkan frontend thingy
 add_subdirectory(${PROJECT_SOURCE_DIR}/tart)
 if(TART_ENABLE_SHADER_COMPILERS)
-	set(API_LIBRARIES tart tart_vulkan ${GLSLANG_LIBS})
+	set(API_LIBRARIES tart ${GLSLANG_LIBS})
 else()
-	set(API_LIBRARIES tart tart_vulkan subprocess)
+	set(API_LIBRARIES tart subprocess)
 endif()
 set(API_INCLUDE_DIRS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tart/include>	
 	$<INSTALL_INTERFACE:tart/include>	# <prefix>/include/mylib
@@ -181,16 +181,20 @@ set_target_properties(clblast PROPERTIES VERSION ${clblast_VERSION} SOVERSION ${
 target_link_libraries(clblast ${API_LIBRARIES})
 
 # Now this is where we add the precompiled kernel SPIR-V
-include(${PROJECT_SOURCE_DIR}/tart/cmake/CMakeVariables.cmake)
+# compile_kernels.cmake defines TART_AOT_KERNEL_SETS (needed by CMakeVariables.cmake)
+# Set the inliner path to match Tart's subdirectory build output
+set(TART_INLINER ${CMAKE_BINARY_DIR}/tart/tools/tart-spirv-inliner/tart-spirv-inliner)
 include(${PROJECT_SOURCE_DIR}/cmake/compile_kernels.cmake)
-tart_add_kernel_sources(clblast all-blas-kernels "${ALL_KERNEL_NAMESPACES}")
+include(${PROJECT_SOURCE_DIR}/cmake/CMakeVariables.cmake)
 
-check_cxx_symbol_exists(clblast::Swap<float> "clblast_vk.h" HAVE_SYMBOL_THINGY)
+include(CheckSymbolExists)
+check_symbol_exists(clblast::Swap<float> "clblast_vk.h" HAVE_SYMBOL_THINGY)
 
 # Includes directories: CLBlast and Tart
 target_include_directories(clblast PUBLIC
 	$<BUILD_INTERFACE:${clblast_SOURCE_DIR}/include>
 	$<BUILD_INTERFACE:${clblast_SOURCE_DIR}/src>
+	$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
 	$<INSTALL_INTERFACE:include>
 	${API_INCLUDE_DIRS})
 

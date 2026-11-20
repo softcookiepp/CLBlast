@@ -280,10 +280,10 @@ size_t RunTests(int argc, char* argv[], const bool silent, const std::string& na
 												C::RunRoutine,
 												reference_routine1,
 												reference_routine2,
-												C::DownloadResult,
-												C::GetResultIndex,
-												C::ResultID1,
-												C::ResultID2};
+												static_cast<typename TestBlas<T, U>::ResultGet>(C::DownloadResult),
+												static_cast<typename TestBlas<T, U>::ResultIndex>(C::GetResultIndex),
+												static_cast<typename TestBlas<T, U>::ResultIterator>(C::ResultID1),
+												static_cast<typename TestBlas<T, U>::ResultIterator>(C::ResultID2)};
 
 	// This variable holds the arguments relevant for this routine
 	auto args = Arguments<U>{};

@@ -209,7 +209,6 @@ class TestXinvert {
   static StatusCode RunReference2(const Arguments<T>& args, BuffersHost<T>& buffers_host, Queue&) {
     return RunReference(args, buffers_host);
   }
-  static StatusCode RunReference3(const Arguments<T>& args, BuffersCUDA<T>& buffers, Queue&) {
     return StatusCode::kUnknownError;
   }
 
@@ -239,5 +238,6 @@ class TestXinvert {
 // =================================================================================================
 }  // namespace clblast
 
-// CLBLAST_TEST_ROUTINES_XINVERT_H_
 #endif
+
+// CLBLAST_TEST_ROUTINES_XINVERT_H_

@@ -93,11 +93,17 @@ const RawDeviceID Device::operator()() const { return mDevice; }
 // requires multiple shader sources because each file can only have one entry point :c
 Program::Program(const tart::device_ptr& device, std::map<std::string, std::string>& kernelSources)
 {
-	mProgramContainer = std::make_shared<tart::Program>(device, kernelSources);
+	// Compile the first (main) kernel source to SPIR-V
+	if (kernelSources.empty()) {
+		throw std::runtime_error("Program requires at least one kernel source");
+	}
+	// Use the first source as the main shader
+	auto firstEntry = kernelSources.begin();
+	mProgramContainer = device->compileGLSL(firstEntry->second, {}, firstEntry->first);
 }
 
 // Accessor to the private data-member
-std::shared_ptr<tart::Program> Program::operator()() const { return mProgramContainer; }
+std::shared_ptr<tart::ShaderModule> Program::operator()() const { return mProgramContainer; }
 
 // Constructor based on the regular OpenCL data-type: memory management is handled elsewhere
 Queue::Queue(const tart::device_ptr queue) { mDevice = queue; }
@@ -271,7 +277,7 @@ template class Buffer<std::complex<double>>; // same as above, but with clblast:
 
 // difference between Vulkan and OpenCL as far as local sizes go will influence this outcome greatly...
 Kernel::Kernel(const kernel_t kernel) { kernel_ = kernel; }
-Kernel::Kernel(tart::program_ptr prg) { std::string ep = "none"; kernel_ = {ep, prg}; }
+Kernel::Kernel(tart::shader_module_ptr prg) { std::string ep = "none"; kernel_ = {ep, prg}; }
 
 // Regular constructor with memory management
 Kernel::Kernel(const std::shared_ptr<Program> program, const std::string& name)
@@ -280,11 +286,11 @@ Kernel::Kernel(const std::shared_ptr<Program> program, const std::string& name)
 	// OpenCL allows kernels to be created that accept a variable local size.
 	// Vulkan allows pipelines to be created where the entry point is specified,
 	// but a fixed local size is used.
-	// tart::CLProgram takes care of this, but it must be adapted to this library
+	// tart::ShaderModule takes care of this, but it must be adapted to this library
 	mEntryPoint = name;
 	mProgramContainer = program->operator()();
-	mDevice = mProgramContainer->getDevice();
-	mKernel = mProgramContainer->getKernel(mEntryPoint);
+	mDevice = program->mDevice;
+	mKernel = mProgramContainer->createKernel(mEntryPoint);
 }
 
 // Retrieves the name of the kernel

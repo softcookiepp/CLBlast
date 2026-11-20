@@ -70,18 +70,6 @@ class TestXasum {
 	}
 #endif
 
-// Describes how to run the reference routine (for correctness/performance comparison)
-	static StatusCode RunReference3(const Arguments<T>& args, BuffersCUDA<T>& buffers, Queue&) {
-		auto status = cublasXasum(reinterpret_cast<cublasHandle_t>(args.cublas_handle), args.n, buffers.scalar,
-															args.asum_offset, buffers.x_vec, args.x_offset, args.x_inc);
-		if (status == CUBLAS_STATUS_SUCCESS) {
-			return StatusCode::kSuccess;
-		} else {
-			return StatusCode::kUnknownError;
-		}
-	}
-#endif
-
 	// Describes how to download the results of the computation (more importantly: which buffer)
 	static std::vector<T> DownloadResult(const Arguments<T>& args, Buffers<T>& buffers, Queue& queue) {
 		std::vector<T> result(args.scalar_size, static_cast<T>(0));

@@ -158,7 +158,6 @@ class TestXomatcopy {
 	static StatusCode RunReference2(const Arguments<T>& args, BuffersHost<T>& buffers_host, Queue&) {
 		return RunReference(args, buffers_host);
 	}
-	static StatusCode RunReference3(const Arguments<T>&, BuffersCUDA<T>&, Queue&) { return StatusCode::kUnknownError; }
 
 	// Describes how to download the results of the computation (more importantly: which buffer)
 	static std::vector<T> DownloadResult(const Arguments<T>& args, Buffers<T>& buffers, Queue& queue) {
@@ -186,5 +185,6 @@ class TestXomatcopy {
 // =================================================================================================
 }	// namespace clblast
 
-// CLBLAST_TEST_ROUTINES_XOMATCOPY_H_
 #endif
+
+// CLBLAST_TEST_ROUTINES_XOMATCOPY_H_

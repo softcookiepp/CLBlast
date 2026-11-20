@@ -114,19 +114,6 @@ class TestXgemm {
 	}
 #endif
 
-// Describes how to run the reference routine (for correctness/performance comparison)
-	static StatusCode RunReference3(const Arguments<T>& args, BuffersCUDA<T>& buffers, Queue&) {
-		auto status = cublasXgemm(reinterpret_cast<cublasHandle_t>(args.cublas_handle), args.layout,
-															convertToCUBLAS(args.a_transpose), convertToCUBLAS(args.b_transpose), args.m, args.n,
-															args.k, args.alpha, buffers.a_mat, args.a_offset, args.a_ld, buffers.b_mat, args.b_offset,
-															args.b_ld, args.beta, buffers.c_mat, args.c_offset, args.c_ld);
-		if (status == CUBLAS_STATUS_SUCCESS) {
-			return StatusCode::kSuccess;
-		} else {
-			return StatusCode::kUnknownError;
-		}
-	}
-#endif
 
 	// Describes how to download the results of the computation (more importantly: which buffer)
 	static std::vector<T> DownloadResult(const Arguments<T>& args, Buffers<T>& buffers, Queue& queue) {

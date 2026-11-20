@@ -63,9 +63,8 @@ class Database {
 	// Obtain a list of OpenCL pre-processor defines based on the parameters
 	std::string GetDefines() const;
 
-	// Retrieves the values or names of all the parameters
+	// Retrieves the values as a string for cache key generation
 	std::string GetValuesString() const;
-	std::vector<std::string> GetParameterNames() const;
 
  private:
 	// Search method functions, returning a set of parameters (possibly empty)

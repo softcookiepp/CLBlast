@@ -551,10 +551,6 @@ StatusCode GemmTempBufferSize(const Layout layout, const Transpose a_transpose, 
 // for the same device. This cache can be cleared to free up system memory or in case of debugging.
 StatusCode PUBLIC_API ClearCache();
 
-// The cache can also be pre-initialized for a specific device with all possible CLBlast kernels.
-// Further CLBlast routine calls will then run at maximum speed.
-StatusCode PUBLIC_API FillCache(const tart::device_ptr device);
-
 // =================================================================================================
 
 // Retrieves current tuning parameters for a specific device-precision-kernel combination

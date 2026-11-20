@@ -158,29 +158,14 @@ std::string Database::GetDefines() const {
 	return defines;
 }
 
-// ... or just the values as string
+// Retrieves the values as a string for cache key generation
 std::string Database::GetValuesString() const {
-	std::string defines{};
+	std::string result{};
 	for (auto& def : mDefs)
 	{
-		defines += "_" + std::to_string(def.second);
+		result += "_" + std::to_string(def.second);
 	}
-	return defines;
-}
-
-// Retrieves the names of all the parameters
-std::vector<std::string> Database::GetParameterNames() const
-{
-	auto parameter_names = std::vector<std::string>();
-	for (auto& p : mDefs)
-	{
-		parameter_names.push_back(p.first);
-	}
-	for (auto& p : mSpecs)
-	{
-		parameter_names.push_back(p.first);
-	}
-	return parameter_names;
+	return result;
 }
 
 // =================================================================================================

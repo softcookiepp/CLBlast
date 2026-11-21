@@ -128,8 +128,9 @@ if(CLIENTS OR TESTS)
 	find_package(MKL)
 	if(NOT CBLAS_FOUND AND NOT MKL_FOUND)
 		if(TESTS)
-			message(STATUS "Could NOT find clBLAS nor a CPU BLAS, disabling the compilation of the tests")
-			set(TESTS OFF)
+			message(FATAL_ERROR "Could NOT find clBLAS nor a CPU BLAS (CBLAS or MKL). "
+				"Install libopenblas-dev (Ubuntu) or set CBLAS_ROOT. "
+				"Tests require a reference BLAS library for correctness verification.")
 		endif()
 		if(CLIENTS)
 			message(STATUS "Could NOT find clBLAS nor a CPU BLAS, head-to-head performance comparison not supported in the clients")

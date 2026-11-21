@@ -1,4 +1,11 @@
-
+function(tart_build_kernel_spv KERNEL_NAMESPACE KERNEL_NAME ENTRYPOINT LANGUAGE INPUT_FILENAME BUILD_ARGS)
+	find_package(Python3 COMPONENTS Interpreter REQUIRED)
+	find_package(Vulkan COMPONENTS glslc REQUIRED)
+	
+	execute_process(
+		COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/compile_shader.py ${Vulkan_GLSLC_EXECUTABLE} ${KERNEL_NAMESPACE} ${KERNEL_NAME} ${ENTRYPOINT} ${LANGUAGE} ${INPUT_FILENAME} spv ${BUILD_ARGS}
+	)
+endfunction()
 
 # most args will be consistent, so wrap it
 macro(build_kernel KERNEL_NAMESPACE KERNEL_NAME INPUT_FILENAME BUILD_ARGS)
@@ -121,3 +128,14 @@ foreach(DTYPE_PREFIX ${DTYPE_PREFIXES})
 		build_kernel(blas "${DTYPE_PREFIX}${KERNEL}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level1/${KERNEL}.glsl" "-DDTYPE=DTYPE_${DTYPE_PREFIX}")
 	endforeach()
 endforeach()
+
+function(create_kernel_source_file KERNEL_SOURCE_FILE_NAME)
+	find_package(Python3 COMPONENTS Interpreter REQUIRED)
+	execute_process(COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/create_kernel_source_file.py ${KERNEL_SOURCE_FILE_NAME} ${PROJECT_BINARY_DIR})
+endfunction()
+
+macro(add_kernel_sources DEST_TARGET KERNEL_SOURCE_FILE_NAME)
+    create_kernel_source_file(${KERNEL_SOURCE_FILE_NAME})
+	target_sources(${DEST_TARGET} PRIVATE "${PROJECT_BINARY_DIR}/${KERNEL_SOURCE_FILE_NAME}.cpp")
+    target_include_directories(${DEST_TARGET} PUBLIC ${PROJECT_BINARY_DIR})
+endmacro()

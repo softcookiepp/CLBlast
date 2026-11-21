@@ -12,8 +12,6 @@
 # Technically the minimum is 2.8.11 but to be compatible with CMake 4 this is set to 3.10
 cmake_minimum_required(VERSION 3.10)
 
-add_custom_command(OUTPUT INLINE_GEN_OUT COMMAND "python3 scripts/inline_gen.py")
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -174,6 +172,7 @@ endif()
 # Gathers all source-files (required for the compiler) and header-files (for IDEs only)
 set(SOURCES
 	src/database/database.cpp
+	src/cache.cpp
 	src/routines/common.cpp
 	src/utilities/clblast_exceptions.cpp
 	src/utilities/timing.cpp
@@ -215,8 +214,24 @@ target_link_libraries(clblast ${API_LIBRARIES})
 
 # Now this is where we add the precompiled kernel SPIR-V
 include(${PROJECT_SOURCE_DIR}/tart/cmake/CMakeVariables.cmake)
+
+# Set absolute SPIR-V output directory
+set(TART_KERNEL_DIRECTORY ${PROJECT_BINARY_DIR}/kernels)
+set(TART_SCRIPTS_DIRECTORY "${PROJECT_SOURCE_DIR}/scripts")
+
+# Collect kernel sources via CMakeVariables (copies GLSL includes, etc.)
+set(TART_AOT_KERNEL_SETS "blas-kernels")
+include(${PROJECT_SOURCE_DIR}/cmake/CMakeVariables.cmake)
+
+# Ensure Vulkan with glslc is available
+find_package(Vulkan COMPONENTS glslc REQUIRED)
+
+# Generate manifest, compile kernels in parallel, and wire into clblast
 include(${PROJECT_SOURCE_DIR}/cmake/compile_kernels.cmake)
-add_kernel_sources(clblast ${PROJECT_BINARY_DIR}/spv/all-blas-kernels)
+set(KERNEL_SPIV_DIR ${PROJECT_BINARY_DIR}/spv)
+tart_generate_kernel_manifest(${KERNEL_SPIV_DIR}/kernels-manifest.json ${PROJECT_SOURCE_DIR}/src ${KERNEL_SPIV_DIR} ${Vulkan_GLSLC_EXECUTABLE})
+tart_compile_all_kernels(${KERNEL_SPIV_DIR}/kernels-manifest.json)
+add_kernel_sources(clblast all-blas-kernels ${KERNEL_SPIV_DIR})
 
 check_cxx_symbol_exists(clblast::Swap<float> "clblast_vk.h" HAVE_SYMBOL_THINGY)
 

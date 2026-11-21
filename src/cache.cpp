@@ -108,9 +108,11 @@ Cache<Key, Value> Cache<Key, Value>::instance_;
 
 // =================================================================================================
 
+#if OPENCL_API
 template class Cache<ProgramKey, std::shared_ptr<Program>>;
 template std::shared_ptr<Program> ProgramCache::Get(const ProgramKeyRef&, bool*) const;
 template void ProgramCache::RemoveBySubset<1, 2>(const ProgramKey&);	// precision and routine name
+#endif
 
 // =================================================================================================
 

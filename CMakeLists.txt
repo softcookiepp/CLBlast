@@ -216,7 +216,7 @@ target_link_libraries(clblast ${API_LIBRARIES})
 # Now this is where we add the precompiled kernel SPIR-V
 include(${PROJECT_SOURCE_DIR}/tart/cmake/CMakeVariables.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/compile_kernels.cmake)
-add_kernel_sources(clblast all-blas-kernels "${ALL_KERNEL_NAMESPACES}")
+add_kernel_sources(clblast ${PROJECT_BINARY_DIR}/spv/all-blas-kernels)
 
 check_cxx_symbol_exists(clblast::Swap<float> "clblast_vk.h" HAVE_SYMBOL_THINGY)
 

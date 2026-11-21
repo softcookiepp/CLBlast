@@ -21,12 +21,14 @@ if __name__ == "__main__":
 	compiler_args = []
 	if len(args) > 6:
 		compiler_args = args[7:]
-	print(compiler_args)
+	
 	spv_path = os.path.join(kernel_directory, f"{namespace}____{kernel_name}____{entry_point}.spv")
-	if source_language == "glsl":
-		cmd = f"{compiler} --target-spv=spv1.5 -fshader-stage=compute {source_path} {' '.join(compiler_args)} -o {spv_path}"
-		print(cmd)
-		assert os.system(cmd) == 0
-	else:
-		raise NotImplementedError
+	if not os.path.exists(spv_path):
+		print(compiler_args)
+		if source_language == "glsl":
+			cmd = f"{compiler} --target-spv=spv1.5 -fshader-stage=compute {source_path} {' '.join(compiler_args)} -o {spv_path}"
+			print(cmd)
+			assert os.system(cmd) == 0
+		else:
+			raise NotImplementedError
 	

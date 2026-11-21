@@ -89,10 +89,12 @@ kernel_ptr $KERNEL_NAME(const device_ptr& device) { LOAD_CACHED_KERNEL(device, s
 	if persistent:
 		raise NotImplementedError
 	else:
-		with open(os.path.join(spv_directory, f"{source_file_name}.hpp"), "w") as f:
+		hpp_path = os.path.join(spv_directory, f"{source_file_name}.hpp")
+		with open(hpp_path, "w") as f:
 			f.write(full_hpp)
 		with open(os.path.join(spv_directory, f"{source_file_name}.cpp"), "w") as f:
 			f.write(full_cpp)
+		assert os.path.exists(hpp_path)
 	
 	
 
@@ -100,8 +102,12 @@ if __name__ == "__main__":
 	args = sys.argv[1:]
 	kernel_source_filename = args[0]
 	spv_directory = args[1]
+	print(f"\n\nKERNEL_SOURCE_FILENAME: {kernel_source_filename}\n\n")
+	print(f"\n\nSPV DIRECTORY: {spv_directory}\n\n")
 	sources = {}
-	for kf in os.listdir(spv_directory):
+	spv_files = os.listdir(spv_directory)
+	assert(len(spv_files) > 0)
+	for kf in spv_files:
 		if os.path.splitext(kf)[1] == ".spv":
 			kp = os.path.join(spv_directory, kf)
 			try:

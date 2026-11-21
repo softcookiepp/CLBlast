@@ -100,14 +100,14 @@ void Xherk::HerkAB(const Layout layout, const Triangle triangle, const Transpose
 	// case nothing has to be done, these kernels can be skipped. Two copies are created.
 	if (!a_no_temp) {
 		PadCopyTransposeMatrix(this->mDtype, db_, a_one, a_two, a_ld, a_offset,
-													 a_buffer, a_one_i, a_two_i, a_one_i, 0, a_temp, tart::Scalar::one(), program_, true,
+													 a_buffer, a_one_i, a_two_i, a_one_i, 0, a_temp, tart::Scalar::one(), true,
 													 a_do_transpose, a_conjugate,
 													 false, false, false,
 													 false, true, false, false);
 	}
 	if (!b_no_temp) {
 		PadCopyTransposeMatrix(this->mDtype, db_, b_one, b_two, b_ld, b_offset,
-													 b_buffer, b_one_i, b_two_i, b_one_i, 0, b_temp, tart::Scalar::one(), program_, true,
+													 b_buffer, b_one_i, b_two_i, b_one_i, 0, b_temp, tart::Scalar::one(), true,
 													 b_do_transpose, b_conjugate,
 													 false, false, false,
 													 false, true, false, false);
@@ -116,7 +116,7 @@ void Xherk::HerkAB(const Layout layout, const Triangle triangle, const Transpose
 	// Furthermore, also creates a (possibly padded) copy of matrix C, since it is not allowed to
 	// modify the other triangle.
 	PadCopyTransposeMatrix(this->mDtype, db_, n, n, c_ld, c_offset, c_buffer,
-												 n_ceiled, n_ceiled, n_ceiled, 0, c_temp, tart::Scalar::one(), program_, true, c_do_transpose,
+												 n_ceiled, n_ceiled, n_ceiled, 0, c_temp, tart::Scalar::one(), true, c_do_transpose,
 												 false,
 												 false, false, false,
 												 false, true, false, false);
@@ -175,7 +175,7 @@ void Xherk::HerkAB(const Layout layout, const Triangle triangle, const Transpose
 			Xgemm::c_want_rotated_(db_["GEMMK"]) ? (triangle == Triangle::kLower) : (triangle == Triangle::kUpper);
 	const auto lower = !upper;
 	PadCopyTransposeMatrix(this->mDtype, db_, n_ceiled, n_ceiled, n_ceiled, 0, c_temp, n,
-												 n, c_ld, c_offset, c_buffer, tart::Scalar::one(), program_, false, c_do_transpose, false, upper,
+												 n, c_ld, c_offset, c_buffer, tart::Scalar::one(), false, c_do_transpose, false, upper,
 												 lower, diagonal_to_zero,
 												 false, true, false, false);
 	

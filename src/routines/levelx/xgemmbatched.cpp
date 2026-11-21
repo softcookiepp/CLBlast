@@ -147,7 +147,7 @@ void XgemmBatched::BatchedGemmIndirect(
 		a_offsets_i_device->copyIn(a_offsets_i);
 		PadCopyTransposeMatrixBatched(mDtype, db_, a_one, a_two, a_ld,
 			a_offsets_device, a_buffer, a_one_i, a_two_i, a_one_i, a_offsets_i_device, a_temp,
-			program_, true, a_do_transpose, a_conjugate, batch_count);
+			 true, a_do_transpose, a_conjugate, batch_count);
 	}
 
 	// As above, but now for matrix B
@@ -158,7 +158,7 @@ void XgemmBatched::BatchedGemmIndirect(
 		b_offsets_i_device->copyIn(b_offsets_i);
 		PadCopyTransposeMatrixBatched(this->mDtype, db_, b_one, b_two, b_ld,
 			b_offsets_device, b_buffer, b_one_i, b_two_i, b_one_i, b_offsets_i_device, b_temp,
-			program_, true, b_do_transpose, b_conjugate, batch_count);
+			 true, b_do_transpose, b_conjugate, batch_count);
 	}
 
 	// As above, but now for matrix C
@@ -169,7 +169,7 @@ void XgemmBatched::BatchedGemmIndirect(
 		c_offsets_i_device->copyIn(c_offsets_i);
 		PadCopyTransposeMatrixBatched(this->mDtype, db_, c_one, c_two, c_ld,
 			c_offsets_device, c_buffer, c_one_i, c_two_i, c_one_i, c_offsets_i_device, c_temp,
-			program_, true, c_do_transpose, false, batch_count);
+			 true, c_do_transpose, false, batch_count);
 	}
 
 
@@ -225,7 +225,7 @@ void XgemmBatched::BatchedGemmIndirect(
 		//eventWaitList.push_back(eventKernel);
 		//this->//device_()->enqueueBarrier({c_buffer});
 		PadCopyTransposeMatrixBatched(this->mDtype, db_, c_one_i, c_two_i, c_one_i,
-																	c_offsets_i_device, c_temp, c_one, c_two, c_ld, c_offsets_device, c_buffer, program_,
+																	c_offsets_i_device, c_temp, c_one, c_two, c_ld, c_offsets_device, c_buffer,
 																	false, c_do_transpose, false, batch_count);
 	}
 }

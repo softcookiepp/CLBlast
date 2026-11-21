@@ -27,7 +27,6 @@ class Xtrsm : public Xgemm {
 	using Xgemm::queue_;
 	using Xgemm::device_;
 	using Xgemm::db_;
-	using Xgemm::program_;
 	using Xgemm::event_;
 	using Xgemm::DoGemm;
 

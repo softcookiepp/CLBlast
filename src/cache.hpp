@@ -63,11 +63,6 @@ class Cache {
 typedef std::tuple<RawDeviceID, tart::DType, std::string> ProgramKey;
 typedef std::tuple<const RawDeviceID&, const tart::DType&, const std::string&> ProgramKeyRef;
 
-typedef Cache<ProgramKey, std::shared_ptr<Program>> ProgramCache;
-
-extern template class Cache<ProgramKey, std::shared_ptr<Program>>;
-extern template std::shared_ptr<Program> ProgramCache::Get(const ProgramKeyRef&, bool*) const;
-
 // =================================================================================================
 
 class Database;

@@ -76,7 +76,7 @@ void Xinvert::InvertMatrixDiagonalBlocks(const Layout layout, const Triangle tri
 												 (triangle == Triangle::kLower && layout == Layout::kRowMajor));
 
 	// Fills the output buffer with zeros
-	FillMatrix(mDtype, program_, block_size,
+	FillMatrix(mDtype, block_size,
 						 num_blocks * block_size, block_size, 0, dest, tart::Scalar::zero(), 16);
 
 	// Inverts the diagonal IB by IB inner blocks of the matrix: one block per work-group

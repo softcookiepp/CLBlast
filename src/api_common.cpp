@@ -20,18 +20,6 @@
 namespace clblast {
 // =================================================================================================
 
-// Clears the cache of stored binaries
-StatusCode ClearCache() {
-	try {
-		ProgramCache::Instance().Invalidate();
-	} catch (...) {
-		return DispatchException();
-	}
-	return StatusCode::kSuccess;
-}
-
-// =================================================================================================
-
 // Retrieves the current tuning parameters for this device-precision-kernel combination
 StatusCode RetrieveParameters(const RawDeviceID device, const std::string& kernel_name, const Precision precision,
 															std::unordered_map<std::string, size_t>& parameters) {

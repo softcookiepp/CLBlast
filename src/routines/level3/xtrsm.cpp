@@ -105,7 +105,7 @@ void Xtrsm::TrsmColMajor(const Side side, const Triangle triangle, const Transpo
 	auto a_inv_buffer = this->mDevice->allocateBuffer(this->mDtype.size() * a_inv_size);
 
 	// Fills the output buffer with zeros
-	FillMatrix(this->mDtype, program_, x_one, x_two, x_ld, x_offset,
+	FillMatrix(this->mDtype, x_one, x_two, x_ld, x_offset,
 						 x_buffer, tart::Scalar::zero(), 16);
 
 	// Inverts the diagonal blocks

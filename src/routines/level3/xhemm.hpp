@@ -27,7 +27,6 @@ class Xhemm : public Xgemm {
 	using Xgemm::routine_name_;
 	using Xgemm::queue_;
 	using Xgemm::device_;
-	using Xgemm::program_;
 	using Xgemm::db_;
 	using Xgemm::DoGemm;
 

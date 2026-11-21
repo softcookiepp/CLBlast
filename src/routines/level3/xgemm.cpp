@@ -153,7 +153,7 @@ void Xgemm::GemmIndirect(const size_t m, const size_t n, const size_t k, const t
 	if (!a_no_temp)
 	{
 		PadCopyTransposeMatrix(this->mDtype, db_, a_one, a_two, a_ld, a_offset,
-													 a_buffer, a_one_i, a_two_i, a_one_i, 0, a_temp, tart::Scalar::one(), program_, true,
+													 a_buffer, a_one_i, a_two_i, a_one_i, 0, a_temp, tart::Scalar::one(), true,
 													 a_do_transpose, a_conjugate,
 													 false, false, false);
 	}
@@ -162,7 +162,7 @@ void Xgemm::GemmIndirect(const size_t m, const size_t n, const size_t k, const t
 	if (!b_no_temp)
 	{
 		PadCopyTransposeMatrix(this->mDtype, db_, b_one, b_two, b_ld, b_offset,
-													 b_buffer, b_one_i, b_two_i, b_one_i, b_temp_offset, b_temp, tart::Scalar::one(), program_, true,
+													 b_buffer, b_one_i, b_two_i, b_one_i, b_temp_offset, b_temp, tart::Scalar::one(), true,
 													 b_do_transpose, b_conjugate,
 													 false, false, false);
 	}
@@ -171,7 +171,7 @@ void Xgemm::GemmIndirect(const size_t m, const size_t n, const size_t k, const t
 	if (!c_no_temp && beta != tart::Scalar::zero())
 	{
 		PadCopyTransposeMatrix(this->mDtype, db_, c_one, c_two, c_ld, c_offset,
-													 c_buffer, c_one_i, c_two_i, c_one_i, c_temp_offset, c_temp, tart::Scalar::one(), program_, true,
+													 c_buffer, c_one_i, c_two_i, c_one_i, c_temp_offset, c_temp, tart::Scalar::one(), true,
 													 c_do_transpose, false,
 													 false, false, false);
 	}
@@ -224,7 +224,7 @@ void Xgemm::GemmIndirect(const size_t m, const size_t n, const size_t k, const t
 	if (!c_no_temp) {
 		// eventWaitList.push_back(eventKernel);
 		PadCopyTransposeMatrix(this->mDtype, db_, c_one_i, c_two_i, c_one_i, c_temp_offset,
-													 c_temp, c_one, c_two, c_ld, c_offset, c_buffer, tart::Scalar::one(), program_, false,
+													 c_temp, c_one, c_two, c_ld, c_offset, c_buffer, tart::Scalar::one(), false,
 													 c_do_transpose, false, false, false, false);
 	}
 }

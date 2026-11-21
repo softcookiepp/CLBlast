@@ -104,7 +104,7 @@ void Xtrsv::DoTrsv(const Layout layout, const Triangle triangle, const Transpose
 	device_()->enqueueCopyBuffer(x_buffer, b_buffer, 0, 0, x_size*this->mDtype.size());
 
 	// Fills the output buffer with zeros
-	FillVector(this->mDtype, program_, n, x_inc, x_offset, x_buffer, tart::Scalar::zero(), 16);
+	FillVector(this->mDtype, n, x_inc, x_offset, x_buffer, tart::Scalar::zero(), 16);
 
 	// Derives properties based on the arguments
 	const auto is_upper = ((triangle == Triangle::kUpper && a_transpose == Transpose::kNo) ||

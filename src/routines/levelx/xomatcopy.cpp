@@ -64,7 +64,7 @@ void Xomatcopy::DoOmatcopy(const Layout layout, const Transpose a_transpose, con
 	TestMatrixB(mDtype, b_one, b_two, b_buffer, b_offset, b_ld);
 
 	PadCopyTransposeMatrix(this->mDtype, db_, a_one, a_two, a_ld, a_offset, a_buffer, b_one,
-												 b_two, b_ld, b_offset, b_buffer, alpha, program_, false, transpose, conjugate);
+												 b_two, b_ld, b_offset, b_buffer, alpha, false, transpose, conjugate);
 }
 
 // =================================================================================================

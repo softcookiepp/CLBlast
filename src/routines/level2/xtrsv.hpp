@@ -28,7 +28,6 @@ class Xtrsv : public Xgemv {
 	using Xgemv::queue_;
 	using Xgemv::device_;
 	using Xgemv::db_;
-	using Xgemv::program_;
 	using Xgemv::event_;
 	using Xgemv::DoGemv;
 

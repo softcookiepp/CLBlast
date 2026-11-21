@@ -54,10 +54,8 @@ foreach(DTYPE_PREFIX ${DTYPE_PREFIXES})
 		invert_triple_matmul
 		invert_triple_matmul_part2
 		)
-	foreach(DTYPE_PREFIX ${DTYPE_PREFIXES})
-		foreach(KERNEL ${LEVEL3_NOARG_NOX_KERNELS})
-			build_kernel(blas "${DTYPE_PREFIX}${KERNEL}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level3/${KERNEL}.glsl" "-DDTYPE=DTYPE_${DTYPE_PREFIX}")
-		endforeach()
+	foreach(KERNEL ${LEVEL3_NOARG_NOX_KERNELS})
+		build_kernel(blas "${DTYPE_PREFIX}${KERNEL}" "${PROJECT_SOURCE_DIR}/src/kernels-vk/level3/${KERNEL}.glsl" "-DDTYPE=DTYPE_${DTYPE_PREFIX}")
 	endforeach()
 
 	set(LEVEL3_DUAL_VECTOR_WIDTH_KERNELS xgemm_direct xgemm_direct_batched xgemm_direct_strided_batched)

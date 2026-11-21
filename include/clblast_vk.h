@@ -548,12 +548,6 @@ StatusCode GemmTempBufferSize(const Layout layout, const Transpose a_transpose, 
 
 // =================================================================================================
 
-// CLBlast stores binaries of compiled kernels into a cache in case the same kernel is used later on
-// for the same device. This cache can be cleared to free up system memory or in case of debugging.
-StatusCode PUBLIC_API ClearCache();
-
-// =================================================================================================
-
 // Retrieves current tuning parameters for a specific device-precision-kernel combination
 StatusCode PUBLIC_API RetrieveParameters(const tart::device_ptr device, const std::string& kernel_name,
 																				 const Precision precision,

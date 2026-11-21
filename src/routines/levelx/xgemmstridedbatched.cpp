@@ -168,7 +168,7 @@ void XgemmStridedBatched::BatchedGemmIndirect(
 	if (!a_no_temp) {
 		PadCopyTransposeMatrixStridedBatched(this->mDtype, db_, a_one, a_two,
 			a_ld, a_offset, a_stride, a_buffer, a_one_i, a_two_i, a_one_i, 0,
-			a_one_i * a_two_i, a_temp, program_, true, a_do_transpose, a_conjugate,
+			a_one_i * a_two_i, a_temp, true, a_do_transpose, a_conjugate,
 			batch_count);
 		barrierBuffers.push_back(a_temp);
 	}
@@ -177,7 +177,7 @@ void XgemmStridedBatched::BatchedGemmIndirect(
 	if (!b_no_temp) {
 		PadCopyTransposeMatrixStridedBatched(this->mDtype, db_, b_one, b_two,
 																				 b_ld, b_offset, b_stride, b_buffer, b_one_i, b_two_i, b_one_i, 0,
-																				 b_one_i * b_two_i, b_temp, program_, true, b_do_transpose, b_conjugate,
+																				 b_one_i * b_two_i, b_temp, true, b_do_transpose, b_conjugate,
 																				 batch_count);
 		barrierBuffers.push_back(b_temp);
 	}
@@ -186,7 +186,7 @@ void XgemmStridedBatched::BatchedGemmIndirect(
 	if (!c_no_temp) {
 		PadCopyTransposeMatrixStridedBatched(this->mDtype, db_, c_one, c_two,
 																				 c_ld, c_offset, c_stride, c_buffer, c_one_i, c_two_i, c_one_i, 0,
-																				 c_one_i * c_two_i, c_temp, program_, true, c_do_transpose, false, batch_count);
+																				 c_one_i * c_two_i, c_temp, true, c_do_transpose, false, batch_count);
 		barrierBuffers.push_back(c_temp);
 	}
 
@@ -241,7 +241,7 @@ void XgemmStridedBatched::BatchedGemmIndirect(
 	if (!c_no_temp) {
 		PadCopyTransposeMatrixStridedBatched(this->mDtype, db_, c_one_i, c_two_i, c_one_i, 0,
 																				 c_one_i * c_two_i, c_temp, c_one, c_two, c_ld, c_offset, c_stride, c_buffer,
-																				 program_, false, c_do_transpose, false, batch_count);
+																				 false, c_do_transpose, false, batch_count);
 	}
 }
 

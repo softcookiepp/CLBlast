@@ -24,7 +24,7 @@ namespace clblast {
 // =================================================================================================
 
 template <typename F>
-double TimeFunction(const size_t num_runs, F const& function) {
+double TimeFunction(const uint32_t num_runs, F const& function) {
 	function();	// warm-up
 	auto timings = std::vector<double>(num_runs);
 	for (auto& timing : timings) {
@@ -38,19 +38,19 @@ double TimeFunction(const size_t num_runs, F const& function) {
 
 // =================================================================================================
 
-double RunKernelTimed(const size_t num_runs, Kernel& kernel, Queue& queue, const Device& device,
-	std::vector<size_t> global, const std::vector<size_t>& local,
+double RunKernelTimed(const uint32_t num_runs, const tart::kernel_ptr& kernel, Queue& queue, const Device& device,
+	std::vector<uint32_t> global, const std::vector<uint32_t>& local,
 	const std::vector<uint32_t>& spec = {});
 
-double TimeKernel(const size_t num_runs, Kernel& kernel, Queue& queue, const Device& device, std::vector<size_t> global,
-									const std::vector<size_t>& local, const bool silent = false, const std::vector<uint32_t>& spec = {});
+double TimeKernel(const uint32_t num_runs, const tart::kernel_ptr& kernel, Queue& queue, const Device& device, std::vector<uint32_t> global,
+									const std::vector<uint32_t>& local, const bool silent = false, const std::vector<uint32_t>& spec = {});
 
 // =================================================================================================
 
-using Timing = std::pair<size_t, double>;
+using Timing = std::pair<uint32_t, double>;
 
 template <typename T, typename F>
-std::vector<Timing> TimeRoutine(const size_t from, const size_t to, const size_t step, const size_t num_runs,
+std::vector<Timing> TimeRoutine(const uint32_t from, const uint32_t to, const uint32_t step, const uint32_t num_runs,
 	Queue& queue, const std::vector<Buffer<T>>& buffers, F const& routine)
 {
 	auto timings = std::vector<Timing>();

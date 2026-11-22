@@ -20,7 +20,7 @@
 // type, which is a typedef for unsigned short.
 //typedef unsigned short half;
 //#include <tart/tart.hpp>
-#include "tart.hpp"
+#include "tart/tart.hpp"
 typedef tart::float16_t half;
 
 // 32-bit union for conversions

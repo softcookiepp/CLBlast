@@ -232,7 +232,7 @@ include(${PROJECT_SOURCE_DIR}/cmake/compile_kernels.cmake)
 set(KERNEL_SPIV_DIR ${PROJECT_BINARY_DIR}/spv)
 tart_generate_kernel_manifest(${KERNEL_SPIV_DIR}/kernels-manifest.json ${PROJECT_SOURCE_DIR}/src ${KERNEL_SPIV_DIR} ${Vulkan_GLSLC_EXECUTABLE})
 tart_compile_all_kernels(${KERNEL_SPIV_DIR}/kernels-manifest.json)
-add_kernel_sources(clblast all-blas-kernels ${KERNEL_SPIV_DIR})
+add_kernel_sources(clblast all-blas-kernels ${KERNEL_SPIV_DIR} ${KERNEL_SPIV_DIR}/kernels-manifest.json)
 
 check_cxx_symbol_exists(clblast::Swap<float> "clblast_vk.h" HAVE_SYMBOL_THINGY)
 

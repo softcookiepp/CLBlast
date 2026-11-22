@@ -11,11 +11,11 @@ using namespace tart::kernels;
 #define VW_SWITCH(NAMESPACE, KERNEL, VW, DEVICE) \
 		switch(VW) \
 		{ \
-			case 1: return NAMESPACE::KERNEL##_vw1(DEVICE); \
-			case 2: return NAMESPACE::KERNEL##_vw2(DEVICE); \
-			case 4: return NAMESPACE::KERNEL##_vw4(DEVICE); \
-			case 8: return NAMESPACE::KERNEL##_vw8(DEVICE); \
-			case 16: return NAMESPACE::KERNEL##_vw16(DEVICE); \
+			case 1: return NAMESPACE::KERNEL##_vw1(DEVICE)->createKernel("main"); \
+			case 2: return NAMESPACE::KERNEL##_vw2(DEVICE)->createKernel("main"); \
+			case 4: return NAMESPACE::KERNEL##_vw4(DEVICE)->createKernel("main"); \
+			case 8: return NAMESPACE::KERNEL##_vw8(DEVICE)->createKernel("main"); \
+			case 16: return NAMESPACE::KERNEL##_vw16(DEVICE)->createKernel("main"); \
 			default: throw std::runtime_error("Invalid vector width"); \
 		}
 		
@@ -102,8 +102,8 @@ using namespace tart::kernels;
 
 #ifndef SUBGROUP_SWITCH_VW1_VW1
 #define SUBGROUP_SWITCH_VW1_VW1(NAMESPACE, KERNEL, SUBGROUP_SUPPORT, DEVICE) \
-	if (SUBGROUP_SUPPORT) { return NAMESPACE::KERNEL##_sub1##_vw1_vw1(DEVICE); } \
-	else { return NAMESPACE::KERNEL##_sub1##_vw1_vw1(DEVICE); } \
+	if (SUBGROUP_SUPPORT) { return NAMESPACE::KERNEL##_sub1##_vw1_vw1(DEVICE)->createKernel("main"); } \
+	else { return NAMESPACE::KERNEL##_sub0##_vw1_vw1(DEVICE)->createKernel("main"); } \
 	
 #endif
 
@@ -140,23 +140,23 @@ using namespace tart::kernels;
 #define DTYPE_SWITCH(KERNEL, DTYPE, DEVICE) \
 	if (DTYPE == tart::dtypes::float16) \
 	{ \
-		return blas::F16##KERNEL(DEVICE); \
+		return blas::F16##KERNEL(DEVICE)->createKernel("main"); \
 	} \
 	else if(DTYPE == tart::dtypes::float32) \
 	{ \
-		return blas::F32##KERNEL(DEVICE); \
+		return blas::F32##KERNEL(DEVICE)->createKernel("main"); \
 	} \
 	else if(DTYPE == tart::dtypes::float64) \
 	{ \
-		return blas::F64##KERNEL(DEVICE); \
+		return blas::F64##KERNEL(DEVICE)->createKernel("main"); \
 	} \
 	else if(DTYPE == tart::dtypes::complex64) \
 	{ \
-		return blas::C64##KERNEL(DEVICE); \
+		return blas::C64##KERNEL(DEVICE)->createKernel("main"); \
 	} \
 	else if(DTYPE == tart::dtypes::complex128) \
 	{ \
-		return blas::C128##KERNEL(DEVICE); \
+		return blas::C128##KERNEL(DEVICE)->createKernel("main"); \
 	} \
 	else \
 	{ \

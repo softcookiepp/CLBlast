@@ -24,17 +24,18 @@
 namespace clblast {
 // =================================================================================================
 
-// Constructor: forwards to base class constructor
-Xtrsv::Xtrsv(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) : Xgemv(dtype, queue, event, name) {}
+// Constructor
+Xtrsv::Xtrsv(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) {}
 
 // =================================================================================================
 
 void Xtrsv::Substitution(const Layout layout, const Triangle triangle, const Transpose a_transpose,
 	const Diagonal diagonal, const size_t n, const tart::buffer_ptr& a_buffer, const size_t a_offset,
 	const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_inc,
-	const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc)
+	const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
+	tart::device_ptr device, const tart::DType& dtype, const Databases& db)
 {
-	if (n > db_["TRSV_BLOCK_SIZE"]) {
+	if (n > db["TRSV_BLOCK_SIZE"]) {
 		throw BLASError(StatusCode::kUnexpectedError);
 	};
 
@@ -51,7 +52,7 @@ void Xtrsv::Substitution(const Layout layout, const Triangle triangle, const Tra
 												 (triangle == Triangle::kLower && a_transpose != Transpose::kNo));
 
 	// Retrieves the kernel from the compiled binary
-	tart::kernel_ptr kernel = (is_upper) ? getTrsvBackward(mDevice, mDtype) : getTrsvForward(mDevice, mDtype);
+	tart::kernel_ptr kernel = (is_upper) ? getTrsvBackward(device, dtype) : getTrsvForward(device, dtype);
 	
 	// Sets the kernel arguments
 	kernel->setArg(0, static_cast<int>(n));
@@ -69,7 +70,7 @@ void Xtrsv::Substitution(const Layout layout, const Triangle triangle, const Tra
 	kernel->setArg(12, static_cast<int>(do_conjugate));
 
 	// Launches the kernel
-	kernel->enqueue({1, 1, 1}, {db_["TRSV_BLOCK_SIZE"]});
+	kernel->enqueue({1, 1, 1}, {db["TRSV_BLOCK_SIZE"]});
 }
 
 // =================================================================================================
@@ -77,7 +78,8 @@ void Xtrsv::Substitution(const Layout layout, const Triangle triangle, const Tra
 // The main routine
 void Xtrsv::DoTrsv(const Layout layout, const Triangle triangle, const Transpose a_transpose,
 	const Diagonal diagonal, const size_t n, const tart::buffer_ptr& a_buffer, const size_t a_offset,
-	const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_inc)
+	const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_inc,
+	tart::device_ptr device, const tart::DType& dtype, const Databases& db)
 {
 	// Makes sure all dimensions are larger than zero
 	if (n == 0) {
@@ -85,13 +87,13 @@ void Xtrsv::DoTrsv(const Layout layout, const Triangle triangle, const Transpose
 	}
 
 	// Some parts of this kernel are not tunable and thus require some minimal OpenCL properties
-	if (device_.MaxWorkGroupSize() < 16) {	// minimum of total local work size of 16
+	if (device->getMetadata().maxSubgroupSize < 16) {	// minimum of total local work size of 16
 		throw RuntimeErrorCode(StatusCode::kNotImplemented);
 	}
 
 	// Tests the matrix and vector
-	TestMatrixA(this->mDtype, n, n, a_buffer, a_offset, a_ld);
-	TestVectorX(this->mDtype, n, b_buffer, b_offset, b_inc);
+	TestMatrixA(dtype, n, n, a_buffer, a_offset, a_ld);
+	TestVectorX(dtype, n, b_buffer, b_offset, b_inc);
 	
 	
 
@@ -100,11 +102,11 @@ void Xtrsv::DoTrsv(const Layout layout, const Triangle triangle, const Transpose
 	const auto x_offset = b_offset;
 	const auto x_inc = b_inc;
 	const auto x_size = (1 + (n - 1) * x_inc) + x_offset;
-	auto x_buffer = this->mDevice->allocateBuffer(x_size*this->mDtype.size());
-	device_()->enqueueCopyBuffer(x_buffer, b_buffer, 0, 0, x_size*this->mDtype.size());
+	auto x_buffer = device->allocateBuffer(x_size*dtype.size());
+	device->enqueueCopyBuffer(x_buffer, b_buffer, 0, 0, x_size*dtype.size());
 
 	// Fills the output buffer with zeros
-	FillVector(this->mDtype, n, x_inc, x_offset, x_buffer, tart::Scalar::zero(), 16);
+	FillVector(dtype, n, x_inc, x_offset, x_buffer, tart::Scalar::zero(), 16);
 
 	// Derives properties based on the arguments
 	const auto is_upper = ((triangle == Triangle::kUpper && a_transpose == Transpose::kNo) ||
@@ -114,8 +116,8 @@ void Xtrsv::DoTrsv(const Layout layout, const Triangle triangle, const Transpose
 
 	// Loops over the blocks
 	auto col = n;	// the initial column position
-	for (auto i = size_t{0}; i < n; i += db_["TRSV_BLOCK_SIZE"]) {
-		const auto block_size = std::min(db_["TRSV_BLOCK_SIZE"], n - i);
+	for (auto i = size_t{0}; i < n; i += db["TRSV_BLOCK_SIZE"]) {
+		const auto block_size = std::min(db["TRSV_BLOCK_SIZE"], n - i);
 
 		// Sets the next column position
 		col = (is_upper) ? col - block_size : i;
@@ -130,17 +132,16 @@ void Xtrsv::DoTrsv(const Layout layout, const Triangle triangle, const Transpose
 		if (i > 0) {
 			const auto gemv_m = (a_transpose == Transpose::kNo) ? block_size : i;
 			const auto gemv_n = (a_transpose == Transpose::kNo) ? i : block_size;
-			auto gemv = Xgemv(this->mDtype, queue_, nullptr);
-			gemv.DoGemv(layout, a_transpose, gemv_m, gemv_n, tart::Scalar::one(), a_buffer, a_offset + extra_offset_a, a_ld,
-									x_buffer, x_offset + extra_offset_x, x_inc, tart::Scalar::one(), x_buffer, x_offset + extra_offset_b,
-									x_inc);
+			DoGemv(layout, a_transpose, gemv_m, gemv_n, tart::Scalar::one(), a_buffer, a_offset + extra_offset_a, a_ld,
+					x_buffer, x_offset + extra_offset_x, x_inc, tart::Scalar::one(), x_buffer, x_offset + extra_offset_b,
+					x_inc, db);
 		}
 		Substitution(layout, triangle, a_transpose, diagonal, block_size, a_buffer, a_offset + col + col * a_ld, a_ld,
-								 b_buffer, b_offset + col * b_inc, b_inc, x_buffer, x_offset + col * x_inc, x_inc);
+								 b_buffer, b_offset + col * b_inc, b_inc, x_buffer, x_offset + col * x_inc, x_inc, device, dtype, db);
 	}
 
 	// Retrieves the results
-	device_()->enqueueCopyBuffer(b_buffer, x_buffer, 0, 0, x_size*this->mDtype.size());
+	device->enqueueCopyBuffer(b_buffer, x_buffer, 0, 0, x_size*dtype.size());
 }
 
 // =================================================================================================

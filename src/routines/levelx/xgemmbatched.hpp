@@ -3,7 +3,7 @@
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
 //
-// This file implements the XgemmBatched routine. This is a non-blas batched version of GEMM.
+// This file contains the functional interface for the XgemmBatched routine.
 //
 // =================================================================================================
 
@@ -14,61 +14,49 @@
 #include <string>
 #include <vector>
 
-#include "routine.hpp"
+#include "database/database.hpp"
 #include "utilities/backend.hpp"
 
 namespace clblast {
 // =================================================================================================
 
-// See comment at top of file for a description of the class
-class XgemmBatched : public Routine {
- public:
-	// Constructor
-	XgemmBatched(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "GEMMBATCHED");
-	
-	// non-templated implementation, taking buffers that are assumed to be of correct type
-	void DoGemmBatched(const Layout layout, const Transpose a_transpose, const Transpose b_transpose, const size_t m,
-										 const size_t n, const size_t k, const tart::buffer_ptr& alphas, const tart::buffer_ptr& a_buffer,
-										 const std::vector<size_t>& a_offsets, const size_t a_ld, const tart::buffer_ptr& b_buffer,
-										 const std::vector<size_t>& b_offsets, const size_t b_ld, const tart::buffer_ptr& betas,
-										 const tart::buffer_ptr& c_buffer, const std::vector<size_t>& c_offsets, const size_t c_ld,
-										 const size_t batch_count);
-	 // Templated-precision implementation of the routine (it just uploads the alphas + betas, then calls the other one
-	template <typename T>
-	void DoGemmBatched(const Layout layout, const Transpose a_transpose, const Transpose b_transpose, const size_t m,
-		const size_t n, const size_t k, const std::vector<T>& alphas, const tart::buffer_ptr& a_buffer,
-		const std::vector<size_t>& a_offsets, const size_t a_ld, const tart::buffer_ptr& b_buffer,
-		const std::vector<size_t>& b_offsets, const size_t b_ld, const std::vector<T>& betas,
-		const tart::buffer_ptr& c_buffer, const std::vector<size_t>& c_offsets, const size_t c_ld,
-		const size_t batch_count)
-	{
-		tart::buffer_ptr alphas_device = this->mDevice->allocateBuffer(batch_count*sizeof(T));
-		tart::buffer_ptr betas_device = this->mDevice->allocateBuffer(batch_count*sizeof(T));
-		alphas_device->copyIn(alphas);
-		betas_device->copyIn(betas);
-		DoGemmBatched(layout, a_transpose, b_transpose, m, n, k, alphas_device, a_buffer,
-			a_offsets, a_ld, b_buffer, b_offsets, b_ld, betas_device, c_buffer, c_offsets, c_ld, batch_count);
-	}
+// Functional implementation of XgemmBatched
+void DoGemmBatched(const Layout layout, const Transpose a_transpose, const Transpose b_transpose, const size_t m,
+                   const size_t n, const size_t k, const tart::buffer_ptr& alphas_device, const tart::buffer_ptr& a_buffer,
+                   const std::vector<size_t>& a_offsets, const size_t a_ld, const tart::buffer_ptr& b_buffer,
+                   const std::vector<size_t>& b_offsets, const size_t b_ld, const tart::buffer_ptr& betas_device,
+                   const tart::buffer_ptr& c_buffer, const std::vector<size_t>& c_offsets, const size_t c_ld,
+                   const size_t batch_count, tart::device_ptr device, const tart::DType& dtype, const Databases& db);
 
-	// Indirect version of batched GEMM (with pre and post-processing kernels)
-	void BatchedGemmIndirect(const size_t m, const size_t n, const size_t k, const tart::buffer_ptr& alphas,
-													 const tart::buffer_ptr& a_buffer, const std::vector<int>& a_offsets, const size_t a_ld,
-													 const tart::buffer_ptr& b_buffer, const std::vector<int>& b_offsets, const size_t b_ld,
-													 const tart::buffer_ptr& betas, const tart::buffer_ptr& c_buffer, const std::vector<int>& c_offsets,
-													 const size_t c_ld, const bool a_do_transpose, const bool b_do_transpose,
-													 const bool c_do_transpose, const bool a_conjugate, const bool b_conjugate,
-													 const size_t a_one, const size_t a_two, const size_t b_one, const size_t b_two,
-													 const size_t c_one, const size_t c_two, const size_t batch_count);
+// Helper function for template method
+template <typename T>
+void UploadGemmBatched(const size_t batch_count, const std::vector<T>& alphas, const std::vector<T>& betas,
+                       const tart::buffer_ptr& a_buffer, const std::vector<size_t>& a_offsets, const size_t a_ld,
+                       const tart::buffer_ptr& b_buffer, const std::vector<size_t>& b_offsets, const size_t b_ld,
+                       const tart::buffer_ptr& c_buffer, const std::vector<size_t>& c_offsets, const size_t c_ld,
+                       const Layout layout, const Transpose a_transpose, const Transpose b_transpose,
+                       const size_t m, const size_t n, const size_t k, tart::device_ptr device, const tart::DType& dtype,
+                       const Databases& db);
 
-	// Direct version of batched GEMM (no pre and post-processing kernels)
-	void BatchedGemmDirect(const size_t m, const size_t n, const size_t k, const tart::buffer_ptr& alphas,
-												 const tart::buffer_ptr& a_buffer, const std::vector<int>& a_offsets, const size_t a_ld,
-												 const tart::buffer_ptr& b_buffer, const std::vector<int>& b_offsets, const size_t b_ld,
-												 const tart::buffer_ptr& betas, const tart::buffer_ptr& c_buffer, const std::vector<int>& c_offsets,
-												 const size_t c_ld, const bool a_do_transpose, const bool b_do_transpose,
-												 const bool c_do_transpose, const bool a_conjugate, const bool b_conjugate,
-												 const size_t batch_count);
-};
+// Indirect version of batched GEMM
+void BatchedGemmIndirect(const size_t m, const size_t n, const size_t k, const tart::buffer_ptr& alphas,
+                         const tart::buffer_ptr& a_buffer, const std::vector<int>& a_offsets, const size_t a_ld,
+                         const tart::buffer_ptr& b_buffer, const std::vector<int>& b_offsets, const size_t b_ld,
+                         const tart::buffer_ptr& betas, const tart::buffer_ptr& c_buffer, const std::vector<int>& c_offsets,
+                         const size_t c_ld, const bool a_do_transpose, const bool b_do_transpose,
+                         const bool c_do_transpose, const bool a_conjugate, const bool b_conjugate,
+                         const size_t a_one, const size_t a_two, const size_t b_one, const size_t b_two,
+                         const size_t c_one, const size_t c_two, const size_t batch_count, tart::device_ptr device,
+                         const tart::DType& dtype, const Databases& db);
+
+// Direct version of batched GEMM
+void BatchedGemmDirect(const size_t m, const size_t n, const size_t k, const tart::buffer_ptr& alphas,
+                       const tart::buffer_ptr& a_buffer, const std::vector<int>& a_offsets, const size_t a_ld,
+                       const tart::buffer_ptr& b_buffer, const std::vector<int>& b_offsets, const size_t b_ld,
+                       const tart::buffer_ptr& betas, const tart::buffer_ptr& c_buffer, const std::vector<int>& c_offsets,
+                       const size_t c_ld, const bool a_do_transpose, const bool b_do_transpose,
+                       const bool c_do_transpose, const bool a_conjugate, const bool b_conjugate,
+                       const size_t batch_count, tart::device_ptr device, const tart::DType& dtype, const Databases& db);
 
 // =================================================================================================
 }	// namespace clblast

@@ -3,7 +3,7 @@
 // This file is part of the CLBlast project. Author(s):
 //   Cedric Nugteren <www.cedricnugteren.nl>
 //
-// This file implements the Xswap routine. The precision is implemented using a template argument.
+// This file contains the functional interface for the Xswap routine.
 //
 // =================================================================================================
 
@@ -11,27 +11,16 @@
 #define CLBLAST_ROUTINES_XSWAP_H_
 
 #include <cstddef>
-#include <string>
-
-#include "routine.hpp"
+#include "database/database.hpp"
 #include "utilities/backend.hpp"
 
 namespace clblast {
-// =================================================================================================
 
-// See comment at top of file for a description of the class
-class Xswap : public Routine {
- public:
-  // Constructor
-  Xswap(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "SWAP");
+void DoSwap(const tart::DType& dtype, const tart::device_ptr& device,
+            const size_t n, const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
+            const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
+            const Databases& db);
 
-  // Templated-precision implementation of the routine
-  void DoSwap(const size_t n, const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
-              const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc);
-};
-
-// =================================================================================================
 }  // namespace clblast
 
-// CLBLAST_ROUTINES_XSWAP_H_
 #endif

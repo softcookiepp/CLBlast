@@ -24,15 +24,16 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-Xtrmm::Xtrmm(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) : Xgemm(dtype, queue, event, name) {}
+Xtrmm::Xtrmm(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) {}
 
 // =================================================================================================
 
 // The main routine
 void Xtrmm::DoTrmm(const Layout layout, const Side side, const Triangle triangle, const Transpose a_transpose,
-											const Diagonal diagonal, const size_t m, const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer,
-											const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset,
-											const size_t b_ld) {
+										const Diagonal diagonal, const size_t m, const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer,
+										const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset,
+										const size_t b_ld,
+								tart::device_ptr device, const tart::DType& dtype, const Databases& db) {
 	// Makes sure all dimensions are larger than zero
 	if ((m == 0) || (n == 0)) {
 		throw BLASError(StatusCode::kInvalidDimension);
@@ -43,17 +44,17 @@ void Xtrmm::DoTrmm(const Layout layout, const Side side, const Triangle triangle
 	auto k = (side == Side::kLeft) ? m : n;
 
 	// Checks for validity of the triangular A matrix
-	TestMatrixA(this->mDtype, k, k, a_buffer, a_offset, a_ld);
+	TestMatrixA(dtype, k, k, a_buffer, a_offset, a_ld);
 
 	// Checks for validity of the input/output B matrix
 	const auto b_one = (layout == Layout::kRowMajor) ? n : m;
 	const auto b_two = (layout == Layout::kRowMajor) ? m : n;
-	TestMatrixB(this->mDtype, b_one, b_two, b_buffer, b_offset, b_ld);
+	TestMatrixB(dtype, b_one, b_two, b_buffer, b_offset, b_ld);
 
 	// Creates a copy of B to avoid overwriting input in GEMM while computing output
 	const auto b_size = (b_ld * (b_two - 1) + b_one + b_offset);
-	auto b_buffer_copy = this->mDevice->allocateBuffer(this->mDtype.size() * b_size);
-	b_buffer->copyTo(b_buffer_copy, 0, 0, b_size*this->mDtype.size());
+	auto b_buffer_copy = device->allocateBuffer(dtype.size() * b_size);
+	b_buffer->copyTo(b_buffer_copy, 0, 0, b_size*dtype.size());
 
 	// Determines which kernel to run based on the layout (the Xgemm kernel assumes column-major as
 	// default) and on whether we are dealing with an upper or lower triangle of the triangular matrix
@@ -64,11 +65,11 @@ void Xtrmm::DoTrmm(const Layout layout, const Side side, const Triangle triangle
 	auto unit_diagonal = (diagonal == Diagonal::kUnit) ? true : false;
 
 	// Temporary buffer for a copy of the triangular matrix
-	auto temp_triangular = this->mDevice->allocateBuffer(this->mDtype.size() * k * k);
+	auto temp_triangular = device->allocateBuffer(dtype.size() * k * k);
 
 	// Creates a general matrix from the triangular matrix to be able to run the regular Xgemm
 	// routine afterwards
-	tart::kernel_ptr kernel = (is_upper) ? getConvertTriangularUpper(this->mDevice, this->mDtype) : getConvertTriangularLower(this->mDevice, this->mDtype);
+	tart::kernel_ptr kernel = (is_upper) ? getConvertTriangularUpper(device, dtype) : getConvertTriangularLower(device, dtype);
 	
 	// Sets the arguments for the triangular-to-squared kernel
 	kernel->setArg(0, static_cast<int>(k));
@@ -83,24 +84,24 @@ void Xtrmm::DoTrmm(const Layout layout, const Side side, const Triangle triangle
 
 	// Uses the common padding kernel's thread configuration. This is allowed, since the
 	// triangular-to-squared kernel uses the same parameters.
-	std::vector<uint32_t> global = {Ceil(CeilDiv(k, db_["PAD_WPTX"]), db_["PAD_DIMX"]),
-																		Ceil(CeilDiv(k, db_["PAD_WPTY"]), db_["PAD_DIMY"])};
-	global[0] = global[0] / db_["PAD_DIMX"];
-	global[1] = global[1] / db_["PAD_DIMY"];
+	std::vector<uint32_t> global = {Ceil(CeilDiv(k, db["PAD_WPTX"]), db["PAD_DIMX"]),
+																		Ceil(CeilDiv(k, db["PAD_WPTY"]), db["PAD_DIMY"])};
+	global[0] = global[0] / db["PAD_DIMX"];
+	global[1] = global[1] / db["PAD_DIMY"];
 	std::vector<uint32_t> spec = {
-		db_["COPY_DIMX"],
-		db_["COPY_DIMY"],
-		db_["COPY_WPT"],
-		db_["PAD_DIMX"],
-		db_["PAD_DIMY"],
-		db_["PAD_WPTX"],
-		db_["PAD_WPTY"],
-		db_["TRA_DIM"],
-		db_["TRA_PAD"],
-		db_["TRA_SHUFFLE"],
-		db_["PADTRA_TILE"],
-		db_["PADTRA_WPT"],
-		db_["PADTRA_PAD"],
+		db["COPY_DIMX"],
+		db["COPY_DIMY"],
+		db["COPY_WPT"],
+		db["PAD_DIMX"],
+		db["PAD_DIMY"],
+		db["PAD_WPTX"],
+		db["PAD_WPTY"],
+		db["TRA_DIM"],
+		db["TRA_PAD"],
+		db["TRA_SHUFFLE"],
+		db["PADTRA_TILE"],
+		db["PADTRA_WPT"],
+		db["PADTRA_PAD"],
 		0, 0, 0, 0
 	};
 	kernel->enqueue(global, spec);
@@ -108,14 +109,14 @@ void Xtrmm::DoTrmm(const Layout layout, const Side side, const Triangle triangle
 	// Runs the regular Xgemm code with either "B := alpha*A*B" or ...
 	if (side == Side::kLeft) {
 		DoGemm(layout, a_transpose, Transpose::kNo, m, n, k, alpha, temp_triangular, 0, k, b_buffer_copy, b_offset, b_ld,
-					 tart::Scalar::zero(), b_buffer, b_offset, b_ld);
+					 tart::Scalar::zero(), b_buffer, b_offset, b_ld, tart::buffer_ptr{}, false, db, device, dtype);
 	}
 
 	// ... with "B := alpha*B*A". Note that A and B are now reversed.
 	else {
 		try {
 			DoGemm(layout, Transpose::kNo, a_transpose, m, n, k, alpha, b_buffer_copy, b_offset, b_ld, temp_triangular, 0, k,
-						 tart::Scalar::zero(), b_buffer, b_offset, b_ld);
+						 tart::Scalar::zero(), b_buffer, b_offset, b_ld, tart::buffer_ptr{}, false, db, device, dtype);
 		} catch (BLASError& e) {
 			// A and B are now reversed, so also reverse the error codes returned from the Xgemm routine
 			switch (e.status()) {

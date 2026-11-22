@@ -28,24 +28,26 @@ Xsyr2k::Xsyr2k(const tart::DType& dtype, Queue& queue, EventPointer event, const
 void Xsyr2k::DoSyr2k(const Layout layout, const Triangle triangle, const Transpose ab_transpose, const size_t n,
 												const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
 												const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld,
-												const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset, const size_t c_ld)
+												const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset, const size_t c_ld,
+												const Databases& db, tart::device_ptr device, const tart::DType& dtype)
 {
 	
 	
 	// Runs the first matrix multiplication
 	const auto negated_ab_transpose = (ab_transpose != Transpose::kNo) ? Transpose::kNo : Transpose::kYes;
 	SyrkAB(layout, triangle, ab_transpose, negated_ab_transpose, n, k, alpha, a_buffer, a_offset, a_ld, b_buffer,
-				 b_offset, b_ld, beta, c_buffer, c_offset, c_ld);
+				 b_offset, b_ld, beta, c_buffer, c_offset, c_ld, db, device, dtype);
 	
 	//first_syrk_event.WaitForCompletion();
 	// I have no idea which buffers actually need a barrier as of now. Will look closer after tests pass
-	this->device_()->enqueueBarrier({a_buffer, b_buffer, c_buffer});
+	device->enqueueBarrier({a_buffer, b_buffer, c_buffer});
 	
 	
 	// Swaps the arguments for matrices A and B, and sets 'beta' to 1
 	auto one = tart::Scalar::one();
 	SyrkAB(layout, triangle, ab_transpose, negated_ab_transpose, n, k, alpha, b_buffer, b_offset, b_ld, a_buffer,
-				 a_offset, a_ld, one, c_buffer, c_offset, c_ld);
+				 a_offset, a_ld, one, c_buffer, c_offset, c_ld, db, device, dtype);
+	
 	
 	
 }

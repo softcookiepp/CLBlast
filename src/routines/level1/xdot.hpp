@@ -3,7 +3,7 @@
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
 //
-// This file implements the Xdot routine. The precision is implemented using a template argument.
+// This file contains the functional interface for the Xdot routine.
 //
 // =================================================================================================
 
@@ -13,24 +13,18 @@
 #include <cstddef>
 #include <string>
 
-#include "routine.hpp"
+#include "database/database.hpp"
 #include "utilities/backend.hpp"
 
 namespace clblast {
 // =================================================================================================
 
-// See comment at top of file for a description of the class
-class Xdot : public Routine
-{
- public:
-	// Constructor
-	Xdot(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "DOT");
-
-	// Templated-precision implementation of the routine
-	void DoDot(const size_t n, const tart::buffer_ptr& dot_buffer, const size_t dot_offset, const tart::buffer_ptr& x_buffer,
-			 const size_t x_offset, const size_t x_inc, const tart::buffer_ptr& y_buffer, const size_t y_offset,
-			 const size_t y_inc, const bool do_conjugate = false);
-};
+// Functional implementation of Xdot
+void DoDot(const tart::DType& dtype, const tart::device_ptr& device,
+           const size_t n, const tart::buffer_ptr& dot_buffer, const size_t dot_offset,
+           const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
+           const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
+           const bool do_conjugate, const Databases& db);
 
 // =================================================================================================
 }	// namespace clblast

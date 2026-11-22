@@ -28,7 +28,8 @@ Xgbmv::Xgbmv(const tart::DType& dtype, Queue& queue, EventPointer event, const s
 void Xgbmv::DoGbmv(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const size_t kl,
 											const size_t ku, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
 											const size_t a_ld, const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
-											const tart::Scalar& beta, const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc)
+											const tart::Scalar& beta, const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
+											const Databases& db)
 {
 	// Reverses the upper and lower band count
 	auto rotated = (layout == Layout::kRowMajor);
@@ -40,7 +41,7 @@ void Xgbmv::DoGbmv(const Layout layout, const Transpose a_transpose, const size_
 	// ROUTINE_GBMV define.
 	bool fast_kernels = false;
 	MatVec(layout, a_transpose, m, n, alpha, a_buffer, a_offset, a_ld, x_buffer, x_offset, x_inc, beta, y_buffer,
-				 y_offset, y_inc, fast_kernels, fast_kernels, 0, false, kl_real, ku_real);
+				 y_offset, y_inc, fast_kernels, fast_kernels, 0, false, kl_real, ku_real, "GBMV", db);
 }
 
 // =================================================================================================

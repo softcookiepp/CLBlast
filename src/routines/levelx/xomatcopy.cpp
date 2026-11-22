@@ -3,7 +3,7 @@
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
 //
-// This file implements the Xomatcopy class (see the header for information about the class).
+// This file implements the functional Xomatcopy routine.
 //
 // =================================================================================================
 
@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 
-#include "routine.hpp"
+#include "database/database.hpp"
 #include "routines/common.hpp"
 #include "utilities/backend.hpp"
 #include "utilities/buffer_test.hpp"
@@ -23,48 +23,36 @@
 namespace clblast {
 // =================================================================================================
 
-// Constructor: forwards to base class constructor
-Xomatcopy::Xomatcopy(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Copy", "Pad", "Transpose", "Padtranspose"}, dtype, {})
-{
-}
-
-// =================================================================================================
-
 // The main routine
-void Xomatcopy::DoOmatcopy(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n,
-	const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
-	const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld)
+void DoOmatcopy(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n,
+                const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
+                const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld, const Databases& db,
+                tart::device_ptr device, const tart::DType& dtype)
 {
-	// Makes sure all dimensions are larger than zero
-	if ((m == 0) || (n == 0)) {
-		throw BLASError(StatusCode::kInvalidDimension);
-	}
+    // Makes sure all dimensions are larger than zero
+    if ((m == 0) || (n == 0)) {
+        throw BLASError(StatusCode::kInvalidDimension);
+    }
 
-	// Determines whether to transpose the matrix A
-	const auto transpose = (a_transpose != Transpose::kNo);
+    // Determines whether to transpose the matrix A
+    const auto transpose = (a_transpose != Transpose::kNo);
 
-	// In case of complex data-types, the transpose can also become a conjugate transpose
-	const auto conjugate = (a_transpose == Transpose::kConjugate);
+    // In case of complex data-types, the transpose can also become a conjugate transpose
+    const auto conjugate = (a_transpose == Transpose::kConjugate);
 
-	// Computes the dimensions of the two matrices
-	const auto rotated = (layout == Layout::kRowMajor);
-	const auto a_one = (rotated) ? n : m;
-	const auto a_two = (rotated) ? m : n;
-	const auto b_one = (transpose) ? a_two : a_one;
-	const auto b_two = (transpose) ? a_one : a_two;
+    // Computes the dimensions of the two matrices
+    const auto rotated = (layout == Layout::kRowMajor);
+    const auto a_one = (rotated) ? n : m;
+    const auto a_two = (rotated) ? m : n;
+    const auto b_one = (transpose) ? a_two : a_one;
+    const auto b_two = (transpose) ? a_one : a_two;
 
-	// Tests the matrices for validity, first from a perspective of the OpenCL buffers and their
-	// sizes, and then from a perspective of parameter values (e.g. m, n). Tests whether the OpenCL
-	// buffers are valid and non-zero and whether the OpenCL buffers have sufficient storage space.
-	// Also tests that the leading dimensions of:
-	//		matrix A cannot be less than N when rotated, or less than M when not-rotated
-	//		matrix B cannot be less than M when rotated, or less than N when not-rotated
-	TestMatrixA(mDtype, a_one, a_two, a_buffer, a_offset, a_ld);
-	TestMatrixB(mDtype, b_one, b_two, b_buffer, b_offset, b_ld);
+    // Tests the matrices for validity
+    TestMatrixA(dtype, a_one, a_two, a_buffer, a_offset, a_ld);
+    TestMatrixB(dtype, b_one, b_two, b_buffer, b_offset, b_ld);
 
-	PadCopyTransposeMatrix(this->mDtype, db_, a_one, a_two, a_ld, a_offset, a_buffer, b_one,
-												 b_two, b_ld, b_offset, b_buffer, alpha, false, transpose, conjugate);
+    PadCopyTransposeMatrix(dtype, db, a_one, a_two, a_ld, a_offset, a_buffer, b_one,
+                            b_two, b_ld, b_offset, b_buffer, alpha, false, transpose, conjugate);
 }
 
 // =================================================================================================

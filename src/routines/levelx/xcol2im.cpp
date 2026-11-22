@@ -3,7 +3,7 @@
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
 //
-// This file implements the Xcol2im class (see the header for information about the class).
+// This file implements the functional Xcol2im routine.
 //
 // =================================================================================================
 
@@ -13,7 +13,8 @@
 #include <string>
 #include <vector>
 
-#include "routine.hpp"
+#include "database/database.hpp"
+#include "routine_aot_cache.hpp"
 #include "routines/common.hpp"
 #include "utilities/backend.hpp"
 #include "utilities/clblast_exceptions.hpp"
@@ -22,76 +23,69 @@
 namespace clblast {
 // =================================================================================================
 
-// Constructor: forwards to base class constructor
-Xcol2im::Xcol2im(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Copy"}, dtype, {}) {
-}
-
-// =================================================================================================
-
 // The main routine
-void Xcol2im::DoCol2im(const KernelMode kernel_mode, const size_t channels, const size_t height, const size_t width,
-													const size_t kernel_h, const size_t kernel_w, const size_t pad_h, const size_t pad_w,
-													const size_t stride_h, const size_t stride_w, const size_t dilation_h,
-													const size_t dilation_w, const tart::buffer_ptr& col_buffer, const size_t col_offset,
-													const tart::buffer_ptr& im_buffer, const size_t im_offset)
+void DoCol2im(const KernelMode kernel_mode, const size_t channels, const size_t height, const size_t width,
+              const size_t kernel_h, const size_t kernel_w, const size_t pad_h, const size_t pad_w,
+              const size_t stride_h, const size_t stride_w, const size_t dilation_h,
+              const size_t dilation_w, const tart::buffer_ptr& col_buffer, const size_t col_offset,
+              const tart::buffer_ptr& im_buffer, const size_t im_offset, tart::device_ptr device, const tart::DType& dtype, const Databases& db)
 {
-	// Makes sure all dimensions are larger than zero
-	if ((channels == 0) || (height == 0) || (width == 0)) {
-		throw BLASError(StatusCode::kInvalidDimension);
-	}
+    // Makes sure all dimensions are larger than zero
+    if ((channels == 0) || (height == 0) || (width == 0)) {
+        throw BLASError(StatusCode::kInvalidDimension);
+    }
 
-	// Sets the output height and width
-	const auto size_h = height + 2 * pad_h;
-	const auto padding_h = dilation_h * (kernel_h - 1) + 1;
-	const auto col_h = (size_h >= padding_h) ? (size_h - padding_h) / stride_h + 1 : 1;
-	const auto size_w = width + 2 * pad_w;
-	const auto padding_w = dilation_w * (kernel_w - 1) + 1;
-	const auto col_w = (size_w >= padding_w) ? (size_w - padding_w) / stride_w + 1 : 1;
+    // Sets the output height and width
+    const auto size_h = height + 2 * pad_h;
+    const auto padding_h = dilation_h * (kernel_h - 1) + 1;
+    const auto col_h = (size_h >= padding_h) ? (size_h - padding_h) / stride_h + 1 : 1;
+    const auto size_w = width + 2 * pad_w;
+    const auto padding_w = dilation_w * (kernel_w - 1) + 1;
+    const auto col_w = (size_w >= padding_w) ? (size_w - padding_w) / stride_w + 1 : 1;
 
-	int stride_bez_h = 0;
-	int stride_bez_w = 0;
-	int dilation_bez_h = 0;
-	int dilation_bez_w = 0;
-	int gcd_h = 0;
-	int gcd_w = 0;
-	EuclidGCD(static_cast<int>(stride_h), static_cast<int>(dilation_h), stride_bez_h, dilation_bez_h, gcd_h);
-	EuclidGCD(static_cast<int>(stride_w), static_cast<int>(dilation_w), stride_bez_w, dilation_bez_w, gcd_w);
+    int stride_bez_h = 0;
+    int stride_bez_w = 0;
+    int dilation_bez_h = 0;
+    int dilation_bez_w = 0;
+    int gcd_h = 0;
+    int gcd_w = 0;
+    EuclidGCD(static_cast<int>(stride_h), static_cast<int>(dilation_h), stride_bez_h, dilation_bez_h, gcd_h);
+    EuclidGCD(static_cast<int>(stride_w), static_cast<int>(dilation_w), stride_bez_w, dilation_bez_w, gcd_w);
 
-	// Retrieves the kernel from the compiled binary
-	tart::kernel_ptr kernel = getCol2im(mDevice, mDtype);
+    // Retrieves the kernel from the compiled binary
+    tart::kernel_ptr kernel = getCol2im(device, dtype);
 
-	// Sets the kernel arguments
-	kernel->setArg(0, static_cast<int>(height));
-	kernel->setArg(1, static_cast<int>(width));
-	kernel->setArg(2, static_cast<int>(channels));
-	kernel->setArg(3, static_cast<int>(col_h));
-	kernel->setArg(4, static_cast<int>(col_w));
-	kernel->setArg(5, static_cast<int>(kernel_h));
-	kernel->setArg(6, static_cast<int>(kernel_w));
-	kernel->setArg(7, static_cast<int>(pad_h));
-	kernel->setArg(8, static_cast<int>(pad_w));
-	kernel->setArg(9, static_cast<int>(stride_h));
-	kernel->setArg(10, static_cast<int>(stride_w));
-	kernel->setArg(11, static_cast<int>(dilation_h));
-	kernel->setArg(12, static_cast<int>(dilation_w));
-	kernel->setArg(13, stride_bez_h);
-	kernel->setArg(14, stride_bez_w);
-	kernel->setArg(15, dilation_bez_h);
-	kernel->setArg(16, dilation_bez_w);
-	kernel->setArg(17, gcd_h);
-	kernel->setArg(18, gcd_w);
-	kernel->setArg(19, col_buffer);
-	kernel->setArg(20, static_cast<int>(col_offset));
-	kernel->setArg(21, im_buffer);
-	kernel->setArg(22, static_cast<int>(im_offset));
+    // Sets the kernel arguments
+    kernel->setArg(0, static_cast<int>(height));
+    kernel->setArg(1, static_cast<int>(width));
+    kernel->setArg(2, static_cast<int>(channels));
+    kernel->setArg(3, static_cast<int>(col_h));
+    kernel->setArg(4, static_cast<int>(col_w));
+    kernel->setArg(5, static_cast<int>(kernel_h));
+    kernel->setArg(6, static_cast<int>(kernel_w));
+    kernel->setArg(7, static_cast<int>(pad_h));
+    kernel->setArg(8, static_cast<int>(pad_w));
+    kernel->setArg(9, static_cast<int>(stride_h));
+    kernel->setArg(10, static_cast<int>(stride_w));
+    kernel->setArg(11, static_cast<int>(dilation_h));
+    kernel->setArg(12, static_cast<int>(dilation_w));
+    kernel->setArg(13, stride_bez_h);
+    kernel->setArg(14, stride_bez_w);
+    kernel->setArg(15, dilation_bez_h);
+    kernel->setArg(16, dilation_bez_w);
+    kernel->setArg(17, gcd_h);
+    kernel->setArg(18, gcd_w);
+    kernel->setArg(19, col_buffer);
+    kernel->setArg(20, static_cast<int>(col_offset));
+    kernel->setArg(21, im_buffer);
+    kernel->setArg(22, static_cast<int>(im_offset));
 
-	// Launches the kernel
-	const auto w_ceiled = Ceil((width - 1) / gcd_w + 1, db_["COPY_DIMX"]);
-	const auto h_ceiled = Ceil((height - 1) / gcd_h + 1, db_["COPY_DIMY"]);
-	const auto global = std::vector<uint32_t>{w_ceiled/db_["COPY_DIMX"], (h_ceiled * channels)/db_["COPY_DIMY"] };
-	kernel->enqueue(global, {db_["COPY_DIMX"], db_["COPY_DIMY"], static_cast<uint32_t>(kernel_mode == KernelMode::kConvolution)});
+    // Launches the kernel
+    const auto w_ceiled = Ceil((width - 1) / gcd_w + 1, db["COPY_DIMX"]);
+    const auto h_ceiled = Ceil((height - 1) / gcd_h + 1, db["COPY_DIMY"]);
+    const auto global = std::vector<uint32_t>{w_ceiled/db["COPY_DIMX"], (h_ceiled * channels)/db["COPY_DIMY"] };
+    kernel->enqueue(global, {db["COPY_DIMX"], db["COPY_DIMY"], static_cast<uint32_t>(kernel_mode == KernelMode::kConvolution)});
 }
 
 // =================================================================================================
-}	// namespace clblast
+}  // namespace clblast

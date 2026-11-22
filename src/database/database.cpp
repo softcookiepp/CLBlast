@@ -271,4 +271,34 @@ std::string Database::CharArrayToString(const database::Name char_array) const {
 }
 
 // =================================================================================================
+
+// Functional API: creates a Databases object for the given device, kernel names, and precision.
+// Uses the same caching mechanism as the old Routine-based approach.
+Databases GetDatabases(const tart::device_ptr& device,
+                       const std::vector<std::string>& kernel_names,
+                       const tart::DType& dtype)
+{
+	Databases databases(kernel_names);
+	
+	for (const auto& kernel_name : kernel_names) {
+		// Check cache first
+		bool has_db;
+		databases(kernel_name) =
+			DatabaseCache::Instance().Get(DatabaseKeyRef{device->getMetadata().deviceUUID, dtype, kernel_name}, &has_db);
+		if (has_db) {
+			continue;
+		}
+		
+		// Build database for this kernel
+		Database db(device, kernel_name, dtype);
+		DatabaseCache::Instance().Store(
+			DatabaseKey{device->getMetadata().deviceUUID, dtype, kernel_name},
+			Database{db}
+		);
+	}
+	
+	return databases;
+}
+
+// =================================================================================================
 }	// namespace clblast

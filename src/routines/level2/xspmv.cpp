@@ -28,7 +28,8 @@ Xspmv::Xspmv(const tart::DType& dtype, Queue& queue, EventPointer event, const s
 void Xspmv::DoSpmv(const Layout layout, const Triangle triangle, const size_t n, const tart::Scalar& alpha,
 	const tart::buffer_ptr& ap_buffer, const size_t ap_offset, const tart::buffer_ptr& x_buffer,
 	const size_t x_offset, const size_t x_inc, const tart::Scalar& beta, const tart::buffer_ptr& y_buffer,
-	const size_t y_offset, const size_t y_inc)
+	const size_t y_offset, const size_t y_inc,
+	const Databases& db)
 {
 	// The data is either in the upper or lower triangle
 	size_t is_upper = ((triangle == Triangle::kUpper && layout != Layout::kRowMajor) ||
@@ -39,7 +40,7 @@ void Xspmv::DoSpmv(const Layout layout, const Triangle triangle, const size_t n,
 	// ROUTINE_SPMV define.
 	bool fast_kernels = false;
 	MatVec(layout, Transpose::kNo, n, n, alpha, ap_buffer, ap_offset, n, x_buffer, x_offset, x_inc, beta, y_buffer,
-				 y_offset, y_inc, fast_kernels, fast_kernels, is_upper, true, 0, 0);
+				 y_offset, y_inc, fast_kernels, fast_kernels, is_upper, true, 0, 0, "SPMV", db);
 }
 
 // =================================================================================================

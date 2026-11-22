@@ -3,7 +3,7 @@
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
 //
-// This file implements the Xgemv routine. The precision is implemented using a template argument.
+// This file contains the functional interface for the Xgemv routine (matrix-vector multiplication).
 //
 // =================================================================================================
 
@@ -13,41 +13,51 @@
 #include <cstddef>
 #include <string>
 
-#include "routine.hpp"
+#include "database/database.hpp"
 #include "utilities/backend.hpp"
+#include "tart/dtypes.hpp"
 
 namespace clblast {
 // =================================================================================================
 
-// See comment at top of file for a description of the class
-class Xgemv : public Routine
-{
-	uint32_t mGBMV = 0;
-	uint32_t mHEMV = 0;
-	uint32_t mSYMV = 0;
-	uint32_t mTRMV = 0;
-	uint32_t mHBMV = 0;
-	uint32_t mSBMV = 0;
-	uint32_t mTBMV = 0;
-	uint32_t mHPMV = 0;
-	uint32_t mSPMV = 0;
-	uint32_t mTPMV = 0;
+// Functional implementation of Xgemv (matrix-vector multiplication)
+void DoGemv(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n,
+            const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
+            const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
+            const tart::Scalar& beta, const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
+            const Databases& db);
+
+// Generic version used also for other matrix-vector multiplications
+void MatVec(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n,
+            const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
+            const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
+            const tart::Scalar& beta, const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
+            bool fast_kernel, bool fast_kernel_rot, const size_t parameter, const bool packed,
+            const size_t kl, const size_t ku, const std::string& name, const Databases& db,
+            tart::device_ptr device, const tart::DType& dtype);
+
+// Minimal base class for Xgemv-derived routines
+class Xgemv {
  public:
 	// Constructor
 	Xgemv(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "GEMV");
 
 	// Templated-precision implementation of the routine
-	void DoGemv(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const tart::Scalar& alpha,
-							const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& x_buffer,
-							const size_t x_offset, const size_t x_inc, const tart::Scalar& beta, const tart::buffer_ptr& y_buffer, const size_t y_offset,
-							const size_t y_inc);
+	void DoGemv(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n,
+							const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
+							const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
+							const tart::Scalar& beta, const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
+							const Databases& db,
+							tart::device_ptr device = nullptr, const tart::DType& dtype = tart::dtypes::unknown_type);
 
 	// Generic version used also for other matrix-vector multiplications
-	void MatVec(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const tart::Scalar& alpha,
-							const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& x_buffer,
-							const size_t x_offset, const size_t x_inc, const tart::Scalar& beta, const tart::buffer_ptr& y_buffer, const size_t y_offset,
-							const size_t y_inc, bool fast_kernel, bool fast_kernel_rot, const size_t parameter, const bool packed,
-							const size_t kl, const size_t ku);
+void MatVec(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n,
+						const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
+						const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
+						const tart::Scalar& beta, const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
+						bool fast_kernel, bool fast_kernel_rot, const size_t parameter, const bool packed,
+						const size_t kl, const size_t ku, const std::string& name, const Databases& db,
+						tart::device_ptr device = nullptr, const tart::DType& dtype = tart::dtypes::unknown_type);
 };
 
 // =================================================================================================

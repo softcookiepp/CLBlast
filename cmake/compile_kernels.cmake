@@ -59,10 +59,8 @@ function(tart_create_kernel_source_file KERNEL_SOURCE_FILE_NAME SPV_DIR MANIFEST
     # Create the custom target that overwrites placeholders at build time
     # If .compiled marker exists, script skips compilation; otherwise compiles
     add_custom_target("${KERNEL_SOURCE_FILE_NAME}_gen"
-        COMMAND ${CMAKE_COMMAND} -E remove -f "${_HPP}" "${_CPP}"
+        COMMAND ${CMAKE_COMMAND} -E touch_nocreate "${_HPP}" "${_CPP}"
         COMMAND ${_COMPILE_CMD}
-        COMMAND ${CMAKE_COMMAND} -E touch "${_HPP}" "${_CPP}"
-        COMMAND ${CMAKE_COMMAND} -E echo "Kernels generated."
         COMMENT "Generating kernel C++ sources via tart-spirv-inliner..."
         DEPENDS compile_all_kernels
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}

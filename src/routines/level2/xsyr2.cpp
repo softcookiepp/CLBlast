@@ -26,11 +26,12 @@ Xsyr2::Xsyr2(const tart::DType& dtype, Queue& queue, EventPointer event, const s
 
 // The main routine
 void Xsyr2::DoSyr2(const Layout layout, const Triangle triangle, const size_t n, const tart::Scalar& alpha,
-                      const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc, const tart::buffer_ptr& y_buffer,
-                      const size_t y_offset, const size_t y_inc, const tart::buffer_ptr& a_buffer, const size_t a_offset,
-                      const size_t a_ld) {
+                     const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc, const tart::buffer_ptr& y_buffer,
+                     const size_t y_offset, const size_t y_inc, const tart::buffer_ptr& a_buffer, const size_t a_offset,
+                     const size_t a_ld, const Databases& db) {
   // Specific Xsyr2 functionality is implemented in the kernel using defines
-  DoHer2(layout, triangle, n, alpha, x_buffer, x_offset, x_inc, y_buffer, y_offset, y_inc, a_buffer, a_offset, a_ld);
+  DoHer2(layout, triangle, n, alpha, x_buffer, x_offset, x_inc, y_buffer, y_offset, y_inc, a_buffer, a_offset, a_ld,
+         false, "SYR2", db);
 }
 
 // =================================================================================================

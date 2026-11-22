@@ -27,10 +27,9 @@ Xspr::Xspr(const tart::DType& dtype, Queue& queue, EventPointer event, const std
 // The main routine
 void Xspr::DoSpr(const Layout layout, const Triangle triangle, const size_t n, const tart::Scalar& alpha,
                     const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc, const tart::buffer_ptr& ap_buffer,
-                    const size_t ap_offset) {
+                    const size_t ap_offset, tart::device_ptr device, const tart::DType& dtype, const Databases& db) {
   // Specific Xspr functionality is implemented in the kernel using defines
-  DoHer(layout, triangle, n, alpha, x_buffer, x_offset, x_inc, ap_buffer, ap_offset, n,
-        true);  // packed matrix
+  DoHer(layout, triangle, n, alpha, x_buffer, x_offset, x_inc, ap_buffer, ap_offset, 1, true, "SPR", db, device, dtype);
 }
 
 // =================================================================================================

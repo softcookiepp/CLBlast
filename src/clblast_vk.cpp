@@ -18,6 +18,45 @@
 
 #include "database/database.hpp"
 #include "routines/routines.hpp"
+#include "routines/level2/xgbmv.hpp"
+#include "routines/level2/xgemv.hpp"
+#include "routines/level2/xger.hpp"
+#include "routines/level2/xgerc.hpp"
+#include "routines/level2/xgeru.hpp"
+#include "routines/level2/xhbmv.hpp"
+#include "routines/level2/xhemv.hpp"
+#include "routines/level2/xher.hpp"
+#include "routines/level2/xher2.hpp"
+#include "routines/level2/xhpmv.hpp"
+#include "routines/level2/xhpr.hpp"
+#include "routines/level2/xhpr2.hpp"
+#include "routines/level2/xsbmv.hpp"
+#include "routines/level2/xspmv.hpp"
+#include "routines/level2/xsyr.hpp"
+#include "routines/level2/xspr.hpp"
+#include "routines/level2/xsyr2.hpp"
+#include "routines/level2/xtbmv.hpp"
+#include "routines/level2/xtpmv.hpp"
+#include "routines/level2/xtrmv.hpp"
+#include "routines/level2/xtrsv.hpp"
+#include "routines/level3/xgemm.hpp"
+#include "routines/level3/xhemm.hpp"
+#include "routines/level3/xher2k.hpp"
+#include "routines/level3/xherk.hpp"
+#include "routines/level3/xsyr2k.hpp"
+#include "routines/level3/xsyrk.hpp"
+#include "routines/level3/xsymm.hpp"
+#include "routines/level3/xtrmm.hpp"
+#include "routines/level3/xtrsm.hpp"
+#include "routines/levelx/xaxpybatched.hpp"
+#include "routines/levelx/xcol2im.hpp"
+#include "routines/levelx/xconvgemm.hpp"
+#include "routines/levelx/xgemmbatched.hpp"
+#include "routines/levelx/xgemmstridedbatched.hpp"
+#include "routines/levelx/xhad.hpp"
+#include "routines/levelx/xim2col.hpp"
+#include "routines/levelx/xinvert.hpp"
+#include "routines/levelx/xomatcopy.hpp"
 #include "utilities/backend.hpp"
 #include "utilities/clblast_exceptions.hpp"
 #include "utilities/utilities.hpp"
@@ -102,9 +141,9 @@ StatusCode Swap(const size_t n, tart::buffer_ptr x_buffer, const size_t x_offset
 {
 	try
 	{
-		auto queue_cpp = Queue(queue);
-		auto routine = Xswap(tart::getDType<T>(), queue_cpp, event);
-		routine.DoSwap(n, x_buffer, x_offset, x_inc, y_buffer, y_offset, y_inc);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Xaxpy"}, dtype);
+		DoSwap(dtype, queue, n, x_buffer, x_offset, x_inc, y_buffer, y_offset, y_inc, db);
 		return StatusCode::kSuccess;
 	}
 	catch (...)
@@ -128,9 +167,9 @@ template <typename T>
 StatusCode Scal(const size_t n, const T alpha, tart::buffer_ptr x_buffer, const size_t x_offset, const size_t x_inc,
 								tart::device_ptr queue, const EventPointer& event) {
 	try {
-		auto queue_cpp = Queue(queue);
-		auto routine = Xscal(tart::getDType<T>(), queue_cpp, event);
-		routine.DoScal(n, alpha, x_buffer, x_offset, x_inc);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Xaxpy"}, dtype);
+		DoScal(dtype, queue, n, alpha, x_buffer, x_offset, x_inc, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -152,9 +191,9 @@ template <typename T>
 StatusCode Copy(const size_t n, const tart::buffer_ptr x_buffer, const size_t x_offset, const size_t x_inc, tart::buffer_ptr y_buffer,
 								const size_t y_offset, const size_t y_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
-		auto queue_cpp = Queue(queue);
-		auto routine = Xcopy(tart::getDType<T>(), queue_cpp, event);
-		routine.DoCopy(n, x_buffer, x_offset, x_inc, y_buffer, y_offset, y_inc);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Xaxpy"}, dtype);
+		DoCopy(dtype, queue, n, x_buffer, x_offset, x_inc, y_buffer, y_offset, y_inc, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -176,9 +215,9 @@ template <typename T>
 StatusCode Axpy(const size_t n, const T alpha, const tart::buffer_ptr x_buffer, const size_t x_offset, const size_t x_inc,
 								tart::buffer_ptr y_buffer, const size_t y_offset, const size_t y_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
-		auto queue_cpp = Queue(queue);
-		auto routine = Xaxpy(tart::getDType<T>(), queue_cpp, event);
-		routine.DoAxpy(n, alpha, x_buffer, x_offset, x_inc, y_buffer, y_offset, y_inc);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Xaxpy"}, dtype);
+		DoAxpy(dtype, queue, n, alpha, x_buffer, x_offset, x_inc, y_buffer, y_offset, y_inc, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -201,10 +240,9 @@ StatusCode Dot(const size_t n, tart::buffer_ptr dot_buffer, const size_t dot_off
 							 const size_t x_inc, const tart::buffer_ptr y_buffer, const size_t y_offset, const size_t y_inc,
 							 tart::device_ptr queue, const EventPointer& event) {
 	try {
-		auto queue_cpp = Queue(queue);
-		auto routine = Xdot(tart::getDType<T>(), queue_cpp, event);
-		routine.DoDot(n, dot_buffer, dot_offset, x_buffer, x_offset, x_inc, y_buffer,
-									y_offset, y_inc, false);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Xdot"}, dtype);
+		DoDot(dtype, queue, n, dot_buffer, dot_offset, x_buffer, x_offset, x_inc, y_buffer, y_offset, y_inc, false, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -224,9 +262,9 @@ StatusCode Dotu(const size_t n, tart::buffer_ptr dot_buffer, const size_t dot_of
 								const size_t y_inc, tart::device_ptr queue, const EventPointer& event) {
 	try
 	{
-		auto queue_cpp = Queue(queue);
-		auto routine = Xdotu(tart::getDType<T>(), queue_cpp, event);
-		routine.DoDotu(n, dot_buffer, dot_offset, x_buffer, x_offset, x_inc, y_buffer, y_offset, y_inc);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Xdot"}, dtype);
+		DoDotu(dtype, queue, n, dot_buffer, dot_offset, x_buffer, x_offset, x_inc, y_buffer, y_offset, y_inc, db);
 		return StatusCode::kSuccess;
 	}
 	catch (...)
@@ -247,10 +285,9 @@ StatusCode Dotc(const size_t n, tart::buffer_ptr dot_buffer, const size_t dot_of
 								const size_t x_offset, const size_t x_inc, const tart::buffer_ptr y_buffer, const size_t y_offset,
 								const size_t y_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
-		auto queue_cpp = Queue(queue);
-		auto routine = Xdotc(tart::getDType<T>(), queue_cpp, event);
-		routine.DoDotc(n, dot_buffer, dot_offset, x_buffer, x_offset, x_inc, y_buffer,
-									 y_offset, y_inc);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Xdot"}, dtype);
+		DoDotc(dtype, queue, n, dot_buffer, dot_offset, x_buffer, x_offset, x_inc, y_buffer, y_offset, y_inc, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -268,9 +305,9 @@ template <typename T>
 StatusCode Nrm2(const size_t n, tart::buffer_ptr nrm2_buffer, const size_t nrm2_offset, const tart::buffer_ptr x_buffer,
 								const size_t x_offset, const size_t x_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
-		auto queue_cpp = Queue(queue);
-		auto routine = Xnrm2(tart::getDType<T>(), queue_cpp, event);
-		routine.DoNrm2(n, nrm2_buffer, nrm2_offset, x_buffer, x_offset, x_inc);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Xdot"}, dtype);
+		DoNrm2(dtype, queue, n, nrm2_buffer, nrm2_offset, x_buffer, x_offset, x_inc, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -292,9 +329,9 @@ template <typename T>
 StatusCode Asum(const size_t n, tart::buffer_ptr asum_buffer, const size_t asum_offset, const tart::buffer_ptr x_buffer,
 								const size_t x_offset, const size_t x_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
-		auto queue_cpp = Queue(queue);
-		auto routine = Xasum(tart::getDType<T>(), queue_cpp, event);
-		routine.DoAsum(n, asum_buffer, asum_offset, x_buffer, x_offset, x_inc);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Xdot"}, dtype);
+		DoAsum(dtype, queue, n, asum_buffer, asum_offset, x_buffer, x_offset, x_inc, 0, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -316,9 +353,9 @@ template <typename T>
 StatusCode Sum(const size_t n, tart::buffer_ptr sum_buffer, const size_t sum_offset, const tart::buffer_ptr x_buffer, const size_t x_offset,
 							 const size_t x_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
-		auto queue_cpp = Queue(queue);
-		auto routine = Xsum(tart::getDType<T>(), queue_cpp, event);
-		routine.DoSum(n, sum_buffer, sum_offset, x_buffer, x_offset, x_inc);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Xdot"}, dtype);
+		DoSum(dtype, queue, n, sum_buffer, sum_offset, x_buffer, x_offset, x_inc, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -340,9 +377,9 @@ template <typename T>
 StatusCode Amax(const size_t n, tart::buffer_ptr imax_buffer, const size_t imax_offset, const tart::buffer_ptr x_buffer,
 								const size_t x_offset, const size_t x_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
-		auto queue_cpp = Queue(queue);
-		auto routine = Xamax(tart::getDType<T>(), queue_cpp, event);
-		routine.DoAmax(n, imax_buffer, imax_offset, x_buffer, x_offset, x_inc);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Xdot"}, dtype);
+		DoAmax(dtype, queue, n, imax_buffer, imax_offset, x_buffer, x_offset, x_inc, 1, 0, 0, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -364,9 +401,9 @@ template <typename T>
 StatusCode Amin(const size_t n, tart::buffer_ptr imin_buffer, const size_t imin_offset, const tart::buffer_ptr x_buffer,
 								const size_t x_offset, const size_t x_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
-		auto queue_cpp = Queue(queue);
-		auto routine = Xamin(tart::getDType<T>(), queue_cpp, event);
-		routine.DoAmin(n, imin_buffer, imin_offset, x_buffer, x_offset, x_inc);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Xdot"}, dtype);
+		DoAmin(dtype, queue, n, imin_buffer, imin_offset, x_buffer, x_offset, x_inc, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -388,9 +425,9 @@ template <typename T>
 StatusCode Max(const size_t n, tart::buffer_ptr imax_buffer, const size_t imax_offset, const tart::buffer_ptr x_buffer,
 							 const size_t x_offset, const size_t x_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
-		auto queue_cpp = Queue(queue);
-		auto routine = Xmax(tart::getDType<T>(), queue_cpp, event);
-		routine.DoMax(n, imax_buffer, imax_offset, x_buffer, x_offset, x_inc);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Xdot"}, dtype);
+		DoMax(dtype, queue, n, imax_buffer, imax_offset, x_buffer, x_offset, x_inc, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -412,9 +449,9 @@ template <typename T>
 StatusCode Min(const size_t n, tart::buffer_ptr imin_buffer, const size_t imin_offset, const tart::buffer_ptr x_buffer,
 							 const size_t x_offset, const size_t x_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
-		auto queue_cpp = Queue(queue);
-		auto routine = Xmin(tart::getDType<T>(), queue_cpp, event);
-		routine.DoMin(n, imin_buffer, imin_offset, x_buffer, x_offset, x_inc);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Xdot"}, dtype);
+		DoMin(dtype, queue, n, imin_buffer, imin_offset, x_buffer, x_offset, x_inc, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -443,9 +480,10 @@ StatusCode Gemv(const Layout layout, const Transpose a_transpose, const size_t m
 								const size_t y_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xgemv(tart::getDType<T>(), queue_cpp, event);
-		routine.DoGemv(layout, a_transpose, m, n, alpha, a_buffer, a_offset, a_ld, x_buffer, x_offset,
-									 x_inc, beta, y_buffer, y_offset, y_inc);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Gemm"}, dtype);
+		DoGemv(layout, a_transpose, m, n, alpha, a_buffer, a_offset, a_ld, x_buffer, x_offset,
+					 x_inc, beta, y_buffer, y_offset, y_inc, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -480,9 +518,11 @@ StatusCode Gbmv(const Layout layout, const Transpose a_transpose, const size_t m
 								const size_t y_offset, const size_t y_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xgbmv(tart::getDType<T>(), queue_cpp, event);
-		routine.DoGbmv(layout, a_transpose, m, n, kl, ku, alpha, (a_buffer), a_offset, a_ld, (x_buffer),
-									 x_offset, x_inc, beta, (y_buffer), y_offset, y_inc);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Gemm"}, dtype);
+		auto routine = Xgbmv(dtype, queue_cpp, event);
+		routine.DoGbmv(layout, a_transpose, m, n, kl, ku, alpha, a_buffer, a_offset, a_ld, x_buffer,
+									 x_offset, x_inc, beta, y_buffer, y_offset, y_inc, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -517,9 +557,11 @@ StatusCode Hemv(const Layout layout, const Triangle triangle, const size_t n, co
 								tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xhemv(tart::getDType<T>(), queue_cpp, event);
-		routine.DoHemv(layout, triangle, n, alpha, (a_buffer), a_offset, a_ld, (x_buffer), x_offset,
-									 x_inc, beta, (y_buffer), y_offset, y_inc);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Gemm"}, dtype);
+		auto routine = Xhemv(dtype, queue_cpp, event);
+		routine.DoHemv(layout, triangle, n, alpha, a_buffer, a_offset, a_ld, x_buffer, x_offset,
+									 x_inc, beta, y_buffer, y_offset, y_inc, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -542,9 +584,11 @@ StatusCode Hbmv(const Layout layout, const Triangle triangle, const size_t n, co
 								const size_t y_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xhbmv(tart::getDType<T>(), queue_cpp, event);
-		routine.DoHbmv(layout, triangle, n, k, alpha, (a_buffer), a_offset, a_ld, (x_buffer), x_offset,
-									 x_inc, beta, (y_buffer), y_offset, y_inc);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Gemm"}, dtype);
+		auto routine = Xhbmv(dtype, queue_cpp, event);
+		routine.DoHbmv(layout, triangle, n, k, alpha, a_buffer, a_offset, a_ld, x_buffer, x_offset,
+									 x_inc, beta, y_buffer, y_offset, y_inc, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -566,9 +610,11 @@ StatusCode Hpmv(const Layout layout, const Triangle triangle, const size_t n, co
 								tart::buffer_ptr y_buffer, const size_t y_offset, const size_t y_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xhpmv(tart::getDType<T>(), queue_cpp, event);
-		routine.DoHpmv(layout, triangle, n, alpha, (ap_buffer), ap_offset, (x_buffer), x_offset, x_inc,
-									 beta, (y_buffer), y_offset, y_inc);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Gemm"}, dtype);
+		auto routine = Xhpmv(dtype, queue_cpp, event);
+		routine.DoHpmv(layout, triangle, n, alpha, ap_buffer, ap_offset, x_buffer, x_offset, x_inc,
+									 beta, y_buffer, y_offset, y_inc, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -589,9 +635,11 @@ StatusCode Symv(const Layout layout, const Triangle triangle, const size_t n, co
 								tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xsymv(tart::getDType<T>(), queue_cpp, event);
-		routine.DoSymv(layout, triangle, n, alpha, (a_buffer), a_offset, a_ld, (x_buffer), x_offset,
-									 x_inc, beta, (y_buffer), y_offset, y_inc);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Gemm"}, dtype);
+		auto routine = Xsymv(dtype, queue_cpp, event);
+		routine.DoSymv(layout, triangle, n, alpha, a_buffer, a_offset, a_ld, x_buffer, x_offset,
+									 x_inc, beta, y_buffer, y_offset, y_inc, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -617,9 +665,11 @@ StatusCode Sbmv(const Layout layout, const Triangle triangle, const size_t n, co
 								const size_t y_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xsbmv(tart::getDType<T>(), queue_cpp, event);
-		routine.DoSbmv(layout, triangle, n, k, alpha, (a_buffer), a_offset, a_ld, (x_buffer), x_offset,
-									 x_inc, beta, (y_buffer), y_offset, y_inc);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Gemm"}, dtype);
+		auto routine = Xsbmv(dtype, queue_cpp, event);
+		routine.DoSbmv(layout, triangle, n, k, alpha, a_buffer, a_offset, a_ld, x_buffer, x_offset,
+									 x_inc, beta, y_buffer, y_offset, y_inc, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -645,9 +695,11 @@ StatusCode Spmv(const Layout layout, const Triangle triangle, const size_t n, co
 								tart::buffer_ptr y_buffer, const size_t y_offset, const size_t y_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xspmv(tart::getDType<T>(), queue_cpp, event);
-		routine.DoSpmv(layout, triangle, n, alpha, (ap_buffer), ap_offset, (x_buffer), x_offset, x_inc,
-									 beta, (y_buffer), y_offset, y_inc);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Gemm"}, dtype);
+		auto routine = Xspmv(dtype, queue_cpp, event);
+		routine.DoSpmv(layout, triangle, n, alpha, ap_buffer, ap_offset, x_buffer, x_offset, x_inc,
+									 beta, y_buffer, y_offset, y_inc, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -670,9 +722,11 @@ StatusCode Trmv(const Layout layout, const Triangle triangle, const Transpose a_
 								const size_t x_offset, const size_t x_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xtrmv(tart::getDType<T>(), queue_cpp, event);
-		routine.DoTrmv(layout, triangle, a_transpose, diagonal, n, (a_buffer), a_offset, a_ld, (x_buffer),
-									 x_offset, x_inc);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Gemm"}, dtype);
+		auto routine = Xtrmv(dtype, queue_cpp, event);
+		routine.DoTrmv(layout, triangle, a_transpose, diagonal, n, a_buffer, a_offset, a_ld, x_buffer,
+									 x_offset, x_inc, queue, dtype, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -701,9 +755,11 @@ StatusCode Tbmv(const Layout layout, const Triangle triangle, const Transpose a_
 								tart::buffer_ptr x_buffer, const size_t x_offset, const size_t x_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xtbmv(tart::getDType<T>(), queue_cpp, event);
-		routine.DoTbmv(layout, triangle, a_transpose, diagonal, n, k, (a_buffer), a_offset, a_ld,
-			(x_buffer), x_offset, x_inc);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Gemm"}, dtype);
+		auto routine = Xtbmv(dtype, queue_cpp, event);
+		routine.DoTbmv(layout, triangle, a_transpose, diagonal, n, k, a_buffer, a_offset, a_ld,
+			x_buffer, x_offset, x_inc, queue, dtype, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -732,9 +788,11 @@ StatusCode Tpmv(const Layout layout, const Triangle triangle, const Transpose a_
 								const size_t x_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xtpmv(tart::getDType<T>(), queue_cpp, event);
-		routine.DoTpmv(layout, triangle, a_transpose, diagonal, n, (ap_buffer), ap_offset, (x_buffer),
-									 x_offset, x_inc);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Gemm"}, dtype);
+		auto routine = Xtpmv(dtype, queue_cpp, event);
+		routine.DoTpmv(layout, triangle, a_transpose, diagonal, n, ap_buffer, ap_offset, x_buffer,
+									 x_offset, x_inc, queue, dtype, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -763,9 +821,11 @@ StatusCode Trsv(const Layout layout, const Triangle triangle, const Transpose a_
 								const size_t x_offset, const size_t x_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xtrsv(tart::getDType<T>(), queue_cpp, event);
-		routine.DoTrsv(layout, triangle, a_transpose, diagonal, n, (a_buffer), a_offset, a_ld, (x_buffer),
-									 x_offset, x_inc);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Trsv"}, dtype);
+		auto routine = Xtrsv(dtype, queue_cpp, event);
+		routine.DoTrsv(layout, triangle, a_transpose, diagonal, n, a_buffer, a_offset, a_ld, x_buffer,
+									 x_offset, x_inc, queue, dtype, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -830,9 +890,11 @@ StatusCode Ger(const Layout layout, const size_t m, const size_t n, const T alph
 							 const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xger(tart::getDType<T>(), queue_cpp, event);
-		routine.DoGer(layout, m, n, alpha, (x_buffer), x_offset, x_inc, (y_buffer), y_offset, y_inc,
-									(a_buffer), a_offset, a_ld);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Ger"}, dtype);
+		auto routine = Xger(dtype, queue_cpp, event);
+		routine.DoGer(layout, m, n, alpha, x_buffer, x_offset, x_inc, y_buffer, y_offset, y_inc,
+									a_buffer, a_offset, a_ld, "GER", db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -856,9 +918,11 @@ StatusCode Geru(const Layout layout, const size_t m, const size_t n, const T alp
 								const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xgeru(tart::getDType<T>(), queue_cpp, event);
-		routine.DoGeru(layout, m, n, alpha, (x_buffer), x_offset, x_inc, (y_buffer), y_offset, y_inc,
-									 (a_buffer), a_offset, a_ld);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Ger"}, dtype);
+		auto routine = Xgeru(dtype, queue_cpp, event);
+		routine.DoGeru(layout, m, n, alpha, x_buffer, x_offset, x_inc, y_buffer, y_offset, y_inc,
+									 a_buffer, a_offset, a_ld, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -879,9 +943,11 @@ StatusCode Gerc(const Layout layout, const size_t m, const size_t n, const T alp
 								const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xgerc(tart::getDType<T>(), queue_cpp, event);
-		routine.DoGerc(layout, m, n, alpha, (x_buffer), x_offset, x_inc, (y_buffer), y_offset, y_inc,
-									 (a_buffer), a_offset, a_ld);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Ger"}, dtype);
+		auto routine = Xgerc(dtype, queue_cpp, event);
+		routine.DoGerc(layout, m, n, alpha, x_buffer, x_offset, x_inc, y_buffer, y_offset, y_inc,
+									 a_buffer, a_offset, a_ld, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -901,9 +967,11 @@ StatusCode Her(const Layout layout, const Triangle triangle, const size_t n, con
 							 tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xher(tart::getDType<std::complex<T>>(), queue_cpp, event);
-		routine.DoHer(layout, triangle, n, alpha, (x_buffer), x_offset, x_inc,
-									(a_buffer), a_offset, a_ld);
+		auto dtype = tart::getDType<std::complex<T>>();
+		auto db = GetDatabases(queue, {"Her"}, dtype);
+		auto routine = Xher(dtype, queue_cpp, event);
+		routine.DoHer(layout, triangle, n, alpha, x_buffer, x_offset, x_inc,
+									a_buffer, a_offset, a_ld, false, "HER", db, queue, dtype);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -923,9 +991,11 @@ StatusCode Hpr(const Layout layout, const Triangle triangle, const size_t n, con
 							 tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xhpr(tart::getDType<std::complex<T>>(), queue_cpp, event);
-		routine.DoHpr(layout, triangle, n, alpha, (x_buffer), x_offset, x_inc,
-									(ap_buffer), ap_offset);
+		auto dtype = tart::getDType<std::complex<T>>();
+		auto db = GetDatabases(queue, {"Her"}, dtype);
+		auto routine = Xhpr(dtype, queue_cpp, event);
+		routine.DoHpr(layout, triangle, n, alpha, x_buffer, x_offset, x_inc,
+									ap_buffer, ap_offset, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -946,9 +1016,11 @@ StatusCode Her2(const Layout layout, const Triangle triangle, const size_t n, co
 								const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xher2(tart::getDType<T>(), queue_cpp, event);
-		routine.DoHer2(layout, triangle, n, alpha, (x_buffer), x_offset, x_inc, (y_buffer), y_offset,
-									 y_inc, (a_buffer), a_offset, a_ld, false);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Her2"}, dtype);
+		auto routine = Xher2(dtype, queue_cpp, event);
+		routine.DoHer2(layout, triangle, n, alpha, x_buffer, x_offset, x_inc, y_buffer, y_offset,
+									 y_inc, a_buffer, a_offset, a_ld, false, "HER2", db, queue, dtype);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -969,9 +1041,11 @@ StatusCode Hpr2(const Layout layout, const Triangle triangle, const size_t n, co
 								const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xhpr2(tart::getDType<T>(), queue_cpp, event);
-		routine.DoHpr2(layout, triangle, n, alpha, (x_buffer), x_offset, x_inc, (y_buffer), y_offset,
-									 y_inc, (ap_buffer), ap_offset);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Her2"}, dtype);
+		auto routine = Xhpr2(dtype, queue_cpp, event);
+		routine.DoHpr2(layout, triangle, n, alpha, x_buffer, x_offset, x_inc, y_buffer, y_offset,
+									 y_inc, ap_buffer, ap_offset, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -991,9 +1065,11 @@ StatusCode Syr(const Layout layout, const Triangle triangle, const size_t n, con
 							 tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xsyr(tart::getDType<T>(), queue_cpp, event);
-		routine.DoSyr(layout, triangle, n, alpha, (x_buffer), x_offset, x_inc, (a_buffer), a_offset,
-									a_ld);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Her"}, dtype);
+		auto routine = Xsyr(dtype, queue_cpp, event);
+		routine.DoSyr(layout, triangle, n, alpha, x_buffer, x_offset, x_inc, a_buffer, a_offset,
+									a_ld, queue, dtype, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1016,8 +1092,11 @@ StatusCode Spr(const Layout layout, const Triangle triangle, const size_t n, con
 							 tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xspr(tart::getDType<T>(), queue_cpp, event);
-		routine.DoSpr(layout, triangle, n, alpha, (x_buffer), x_offset, x_inc, (ap_buffer), ap_offset);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Her"}, dtype);
+		auto routine = Xspr(dtype, queue_cpp, event);
+		routine.DoSpr(layout, triangle, n, alpha, x_buffer, x_offset, x_inc, ap_buffer, ap_offset,
+									queue, dtype, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1041,9 +1120,11 @@ StatusCode Syr2(const Layout layout, const Triangle triangle, const size_t n, co
 								const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xsyr2(tart::getDType<T>(), queue_cpp, event);
-		routine.DoSyr2(layout, triangle, n, alpha, (x_buffer), x_offset, x_inc, (y_buffer), y_offset,
-									 y_inc, (a_buffer), a_offset, a_ld);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Her2"}, dtype);
+		auto routine = Xsyr2(dtype, queue_cpp, event);
+		routine.DoSyr2(layout, triangle, n, alpha, x_buffer, x_offset, x_inc, y_buffer, y_offset,
+									 y_inc, a_buffer, a_offset, a_ld, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1067,9 +1148,11 @@ StatusCode Spr2(const Layout layout, const Triangle triangle, const size_t n, co
 								const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xspr2(tart::getDType<T>(), queue_cpp, event);
-		routine.DoSpr2(layout, triangle, n, alpha, (x_buffer), x_offset, x_inc, (y_buffer), y_offset,
-									 y_inc, (ap_buffer), ap_offset);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Her2"}, dtype);
+		auto routine = Xspr2(dtype, queue_cpp, event);
+		routine.DoSpr2(layout, triangle, n, alpha, x_buffer, x_offset, x_inc, y_buffer, y_offset,
+									 y_inc, ap_buffer, ap_offset, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1098,12 +1181,14 @@ StatusCode Gemm(const Layout layout, const Transpose a_transpose, const Transpos
 								tart::buffer_ptr temp_buffer) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xgemm(tart::getDType<T>(), queue_cpp, event);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Xgemm", "GemmRoutine"}, dtype);
+		auto routine = Xgemm(dtype, queue_cpp, event);
 		const auto temp_buffer_provided = temp_buffer != nullptr;
-		auto temp_buffer_cpp = temp_buffer_provided ? (temp_buffer) : (nullptr);
-		routine.DoGemm(layout, a_transpose, b_transpose, m, n, k, alpha, (a_buffer), a_offset, a_ld,
-									 (b_buffer), b_offset, b_ld, beta, (c_buffer), c_offset, c_ld, temp_buffer_cpp,
-									 temp_buffer_provided);
+		auto temp_buffer_cpp = temp_buffer_provided ? temp_buffer : nullptr;
+		routine.DoGemm(layout, a_transpose, b_transpose, m, n, k, alpha, a_buffer, a_offset, a_ld,
+									 b_buffer, b_offset, b_ld, beta, c_buffer, c_offset, c_ld, temp_buffer_cpp,
+									 temp_buffer_provided, db, queue, dtype);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1138,9 +1223,11 @@ StatusCode Symm(const Layout layout, const Side side, const Triangle triangle, c
 								const size_t c_ld, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xsymm(tart::getDType<T>(), queue_cpp, event);
-		routine.DoSymm(layout, side, triangle, m, n, alpha, (a_buffer), a_offset, a_ld, (b_buffer),
-									 b_offset, b_ld, beta, (c_buffer), c_offset, c_ld);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Gemm"}, dtype);
+		auto routine = Xsymm(dtype, queue_cpp, event);
+		routine.DoSymm(layout, side, triangle, m, n, alpha, a_buffer, a_offset, a_ld, b_buffer,
+									 b_offset, b_ld, beta, c_buffer, c_offset, c_ld, queue, dtype, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1175,9 +1262,11 @@ StatusCode Hemm(const Layout layout, const Side side, const Triangle triangle, c
 								const size_t c_ld, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xhemm(tart::getDType<T>(), queue_cpp, event);
-		routine.DoHemm(layout, side, triangle, m, n, alpha, (a_buffer), a_offset, a_ld, (b_buffer),
-									 b_offset, b_ld, beta, (c_buffer), c_offset, c_ld);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Gemm"}, dtype);
+		auto routine = Xhemm(dtype, queue_cpp, event);
+		routine.DoHemm(layout, side, triangle, m, n, alpha, a_buffer, a_offset, a_ld, b_buffer,
+									 b_offset, b_ld, beta, c_buffer, c_offset, c_ld, queue, dtype, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1200,9 +1289,11 @@ StatusCode Syrk(const Layout layout, const Triangle triangle, const Transpose a_
 								const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xsyrk(tart::getDType<T>(), queue_cpp, event);
-		routine.DoSyrk(layout, triangle, a_transpose, n, k, alpha, (a_buffer), a_offset, a_ld, beta,
-									 (c_buffer), c_offset, c_ld);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Syrk"}, dtype);
+		auto routine = Xsyrk(dtype, queue_cpp, event);
+		routine.DoSyrk(layout, triangle, a_transpose, n, k, alpha, a_buffer, a_offset, a_ld, beta,
+									 c_buffer, c_offset, c_ld, db, queue, dtype);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1232,9 +1323,11 @@ StatusCode Herk(const Layout layout, const Triangle triangle, const Transpose a_
 								const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xherk(tart::getDType<T>(), queue_cpp, event);
-		routine.DoHerk(layout, triangle, a_transpose, n, k, alpha, (a_buffer), a_offset, a_ld, beta,
-									 (c_buffer), c_offset, c_ld);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Herk"}, dtype);
+		auto routine = Xherk(dtype, queue_cpp, event);
+		routine.DoHerk(layout, triangle, a_transpose, n, k, alpha, a_buffer, a_offset, a_ld, beta,
+									 c_buffer, c_offset, c_ld, db, queue, dtype);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1255,9 +1348,11 @@ StatusCode Syr2k(const Layout layout, const Triangle triangle, const Transpose a
 								 const size_t c_offset, const size_t c_ld, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xsyr2k(tart::getDType<T>(), queue_cpp, event);
-		routine.DoSyr2k(layout, triangle, ab_transpose, n, k, alpha, (a_buffer), a_offset, a_ld,
-										(b_buffer), b_offset, b_ld, beta, (c_buffer), c_offset, c_ld);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Syrk"}, dtype);
+		auto routine = Xsyr2k(dtype, queue_cpp, event);
+		routine.DoSyr2k(layout, triangle, ab_transpose, n, k, alpha, a_buffer, a_offset, a_ld,
+										(b_buffer), b_offset, b_ld, beta, c_buffer, c_offset, c_ld, db, queue, dtype);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1292,9 +1387,12 @@ StatusCode Her2k(const Layout layout, const Triangle triangle, const Transpose a
 								 const size_t c_offset, const size_t c_ld, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xher2k(tart::getDType<T>(), queue_cpp, event);
-		routine.DoHer2k(layout, triangle, ab_transpose, n, k, alpha, (a_buffer), a_offset, a_ld,
-										(b_buffer), b_offset, b_ld, beta, (c_buffer), c_offset, c_ld);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Herk"}, dtype);
+		auto routine = Xher2k(dtype, queue_cpp, event);
+		routine.DoHer2k(layout, triangle, ab_transpose, n, k, alpha, a_buffer, a_offset, a_ld,
+										(b_buffer), b_offset, b_ld, beta, c_buffer, c_offset, c_ld,
+										queue, dtype, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1318,9 +1416,12 @@ StatusCode Trmm(const Layout layout, const Side side, const Triangle triangle, c
 								tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xtrmm(tart::getDType<T>(), queue_cpp, event);
-		routine.DoTrmm(layout, side, triangle, a_transpose, diagonal, m, n, alpha, (a_buffer), a_offset, a_ld,
-									 (b_buffer), b_offset, b_ld);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Gemm"}, dtype);
+		auto routine = Xtrmm(dtype, queue_cpp, event);
+		routine.DoTrmm(layout, side, triangle, a_transpose, diagonal, m, n, alpha, a_buffer, a_offset, a_ld,
+									 b_buffer, b_offset, b_ld,
+									 queue, dtype, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1355,9 +1456,11 @@ StatusCode Trsm(const Layout layout, const Side side, const Triangle triangle, c
 								tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xtrsm(tart::getDType<T>(), queue_cpp, event);
-		routine.DoTrsm(layout, side, triangle, a_transpose, diagonal, m, n, alpha, (a_buffer), a_offset, a_ld,
-									 (b_buffer), b_offset, b_ld);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Gemm", "Trsm"}, dtype);
+		auto routine = Xtrsm(dtype, queue_cpp, event);
+		routine.DoTrsm(layout, side, triangle, a_transpose, diagonal, m, n, alpha, a_buffer, a_offset, a_ld,
+									 b_buffer, b_offset, b_ld, queue, dtype, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1391,9 +1494,10 @@ StatusCode Had(const size_t n, const T alpha, const tart::buffer_ptr x_buffer, c
 							 const size_t z_offset, const size_t z_inc, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xhad(tart::getDType<T>(), queue_cpp, event);
-		routine.DoHad(n, alpha, (x_buffer), x_offset, x_inc, (y_buffer), y_offset, y_inc, beta,
-									(z_buffer), z_offset, z_inc);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Xhad"}, dtype);
+		DoHad(n, alpha, x_buffer, x_offset, x_inc, y_buffer, y_offset, y_inc, beta,
+					z_buffer, z_offset, z_inc, queue, dtype, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1422,9 +1526,10 @@ StatusCode Omatcopy(const Layout layout, const Transpose a_transpose, const size
 										const size_t b_offset, const size_t b_ld, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xomatcopy(tart::getDType<T>(), queue_cpp, event);
-		routine.DoOmatcopy(layout, a_transpose, m, n, alpha, (a_buffer), a_offset, a_ld, (b_buffer),
-											 b_offset, b_ld);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Omatcopy"}, dtype);
+		DoOmatcopy(layout, a_transpose, m, n, alpha, a_buffer, a_offset, a_ld, b_buffer,
+										 b_offset, b_ld, db, queue, dtype);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1455,9 +1560,10 @@ StatusCode Im2col(const KernelMode kernel_mode, const size_t channels, const siz
 									tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xim2col(tart::getDType<T>(), queue_cpp, event);
-		routine.DoIm2col(kernel_mode, channels, height, width, kernel_h, kernel_w, pad_h, pad_w, stride_h, stride_w,
-										 dilation_h, dilation_w, (im_buffer), im_offset, (col_buffer), col_offset);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Im2col"}, dtype);
+		DoIm2col(kernel_mode, channels, height, width, kernel_h, kernel_w, pad_h, pad_w, stride_h, stride_w,
+						 dilation_h, dilation_w, im_buffer, im_offset, col_buffer, col_offset, queue, dtype, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1493,9 +1599,10 @@ StatusCode Col2im(const KernelMode kernel_mode, const size_t channels, const siz
 									tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xcol2im(tart::getDType<T>(), queue_cpp, event);
-		routine.DoCol2im(kernel_mode, channels, height, width, kernel_h, kernel_w, pad_h, pad_w, stride_h, stride_w,
-										 dilation_h, dilation_w, (col_buffer), col_offset, (im_buffer), im_offset);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Col2im"}, dtype);
+		DoCol2im(kernel_mode, channels, height, width, kernel_h, kernel_w, pad_h, pad_w, stride_h, stride_w,
+						 dilation_h, dilation_w, col_buffer, col_offset, im_buffer, im_offset, queue, dtype, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1532,10 +1639,11 @@ StatusCode Convgemm(const KernelMode kernel_mode, const size_t channels, const s
 										const size_t result_offset, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = Xconvgemm(tart::getDType<T>(), queue_cpp, event);
-		routine.DoConvgemm(kernel_mode, channels, height, width, kernel_h, kernel_w, pad_h, pad_w, stride_h, stride_w,
-											 dilation_h, dilation_w, num_kernels, batch_count, (im_buffer), im_offset,
-											 (kernel_buffer), kernel_offset, (result_buffer), result_offset);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"Convgemm"}, dtype);
+		DoConvgemm(kernel_mode, channels, height, width, kernel_h, kernel_w, pad_h, pad_w, stride_h, stride_w,
+											 dilation_h, dilation_w, num_kernels, batch_count, im_buffer, im_offset,
+											 kernel_buffer, kernel_offset, result_buffer, result_offset, "CONVGEMM", queue, dtype, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1564,7 +1672,8 @@ StatusCode AxpyBatched(const size_t n, const T* alphas, const tart::buffer_ptr x
 											 const size_t batch_count, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = XaxpyBatched(tart::getDType<T>(), queue_cpp, event);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"XaxpyBatched"}, dtype);
 		auto alphas_cpp = std::vector<T>();
 		auto x_offsets_cpp = std::vector<size_t>();
 		auto y_offsets_cpp = std::vector<size_t>();
@@ -1573,8 +1682,10 @@ StatusCode AxpyBatched(const size_t n, const T* alphas, const tart::buffer_ptr x
 			x_offsets_cpp.push_back(x_offsets[batch]);
 			y_offsets_cpp.push_back(y_offsets[batch]);
 		}
-		routine.DoAxpyBatched(n, alphas_cpp, (x_buffer), x_offsets_cpp, x_inc, (y_buffer), y_offsets_cpp,
-													y_inc, batch_count);
+		auto alphas_device = queue->allocateBuffer(batch_count * sizeof(T));
+		alphas_device->copyIn(alphas_cpp);
+		DoAxpyBatched(n, alphas_device, x_buffer, x_offsets_cpp, x_inc, y_buffer, y_offsets_cpp,
+										y_inc, batch_count, queue, dtype, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1605,7 +1716,8 @@ StatusCode GemmBatched(const Layout layout, const Transpose a_transpose, const T
 											 const size_t batch_count, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = XgemmBatched(tart::getDType<T>(), queue_cpp, event);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"XgemmBatched"}, dtype);
 		auto alphas_cpp = std::vector<T>();
 		auto betas_cpp = std::vector<T>();
 		auto a_offsets_cpp = std::vector<size_t>();
@@ -1618,9 +1730,13 @@ StatusCode GemmBatched(const Layout layout, const Transpose a_transpose, const T
 			b_offsets_cpp.push_back(b_offsets[batch]);
 			c_offsets_cpp.push_back(c_offsets[batch]);
 		}
-		routine.DoGemmBatched(layout, a_transpose, b_transpose, m, n, k, alphas_cpp, (a_buffer), a_offsets_cpp,
-													a_ld, (b_buffer), b_offsets_cpp, b_ld, betas_cpp, (c_buffer), c_offsets_cpp,
-													c_ld, batch_count);
+		auto alphas_device = queue->allocateBuffer(batch_count * sizeof(T));
+		auto betas_device = queue->allocateBuffer(batch_count * sizeof(T));
+		alphas_device->copyIn(alphas_cpp);
+		betas_device->copyIn(betas_cpp);
+		DoGemmBatched(layout, a_transpose, b_transpose, m, n, k, alphas_device, a_buffer, a_offsets_cpp,
+										a_ld, b_buffer, b_offsets_cpp, b_ld, betas_device, c_buffer, c_offsets_cpp,
+										c_ld, batch_count, queue, dtype, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1663,10 +1779,11 @@ StatusCode GemmStridedBatched(const Layout layout, const Transpose a_transpose, 
 															const size_t batch_count, tart::device_ptr queue, const EventPointer& event) {
 	try {
 		auto queue_cpp = Queue(queue);
-		auto routine = XgemmStridedBatched(tart::getDType<T>(), queue_cpp, event);
-		routine.DoGemmStridedBatched(layout, a_transpose, b_transpose, m, n, k, alpha, (a_buffer), a_offset, a_ld,
-																 a_stride, (b_buffer), b_offset, b_ld, b_stride, beta, (c_buffer),
-																 c_offset, c_ld, c_stride, batch_count);
+		auto dtype = tart::getDType<T>();
+		auto db = GetDatabases(queue, {"XgemmStridedBatched"}, dtype);
+		DoGemmStridedBatched(layout, a_transpose, b_transpose, m, n, k, alpha, a_buffer, a_offset, a_ld,
+														 a_stride, b_buffer, b_offset, b_ld, b_stride, beta, c_buffer,
+														 c_offset, c_ld, c_stride, batch_count, queue, dtype, db);
 		return StatusCode::kSuccess;
 	} catch (...) {
 		return DispatchException();
@@ -1712,20 +1829,17 @@ StatusCode GemmTempBufferSize(const Layout layout, const Transpose a_transpose, 
 															const size_t b_offset, const size_t b_ld, const size_t c_offset, const size_t c_ld,
 															tart::device_ptr queue, size_t& temp_buffer_size) {
 	try {
-		// Retrieves the tuning database
-		const auto queue_cpp = Queue(queue);
-		const auto device = queue_cpp.GetDevice();
 		const auto kernel_names = std::vector<std::string>{"Xgemm", "GemmRoutine"};
-		Databases db(kernel_names);
-		Routine::InitDatabase(device, kernel_names, tart::getDType<T>(), {}, db);
+		const auto dtype = tart::getDType<T>();
+		const auto db = GetDatabases(queue, kernel_names, dtype);
 
 		// Computes the buffer size
-		if (Xgemm::UseDirectKernel(m, n, k, db["XGEMM_MIN_INDIRECT_SIZE"])) {
+		if (UseDirectKernel(m, n, k, db["XGEMM_MIN_INDIRECT_SIZE"])) {
 			temp_buffer_size = 0;
 		} else {
 			temp_buffer_size =
-					Xgemm::GetTempSize(layout, a_transpose, b_transpose, m, n, k, a_offset, a_ld, b_offset, b_ld, c_offset,
-																c_ld, db["MWG"], db["NWG"], db["KWG"] * db["KREG"], db["GEMMK"]);
+					GetTempSize(layout, a_transpose, b_transpose, m, n, k, a_offset, a_ld, b_offset, b_ld, c_offset,
+															c_ld, db["MWG"], db["NWG"], db["KWG"] * db["KREG"], db["GEMMK"]);
 		}
 		temp_buffer_size *= sizeof(T);	// translate from num-elements to bytes
 		return StatusCode::kSuccess;

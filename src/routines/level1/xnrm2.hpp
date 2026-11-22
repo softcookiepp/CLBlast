@@ -3,7 +3,7 @@
 // This file is part of the CLBlast project. Author(s):
 //   Cedric Nugteren <www.cedricnugteren.nl>
 //
-// This file implements the Xnrm2 routine. The precision is implemented using a template argument.
+// This file contains the functional interface for the Xnrm2 routine.
 //
 // =================================================================================================
 
@@ -13,22 +13,17 @@
 #include <cstddef>
 #include <string>
 
-#include "routine.hpp"
+#include "database/database.hpp"
 #include "utilities/backend.hpp"
 
 namespace clblast {
 // =================================================================================================
 
-// See comment at top of file for a description of the class
-class Xnrm2 : public Routine {
- public:
-  // Constructor
-  Xnrm2(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "NRM2");
-
-  // Templated-precision implementation of the routine
-  void DoNrm2(const size_t n, const tart::buffer_ptr& nrm2_buffer, const size_t nrm2_offset, const tart::buffer_ptr& x_buffer,
-              const size_t x_offset, const size_t x_inc);
-};
+// Functional implementation of Xnrm2 (Euclidean norm)
+void DoNrm2(const tart::DType& dtype, const tart::device_ptr& device,
+            const size_t n, const tart::buffer_ptr& nrm2_buffer, const size_t nrm2_offset,
+            const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
+            const Databases& db);
 
 // =================================================================================================
 }  // namespace clblast

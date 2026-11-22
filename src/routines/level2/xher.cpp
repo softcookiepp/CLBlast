@@ -3,7 +3,7 @@
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
 //
-// This file implements the Xher class (see the header for information about the class).
+// This file implements the functional Xher routine.
 //
 // =================================================================================================
 
@@ -13,7 +13,8 @@
 #include <string>
 #include <vector>
 
-#include "routine.hpp"
+#include "database/database.hpp"
+#include "routine_aot_cache.hpp"
 #include "routines/common.hpp"
 #include "utilities/backend.hpp"
 #include "utilities/buffer_test.hpp"
@@ -23,25 +24,12 @@
 namespace clblast {
 // =================================================================================================
 
-// Constructor: forwards to base class constructor
-Xher::Xher(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Xger"}, dtype, {})
-{
-	mHPR = static_cast<uint32_t>(name == "HPR");
-	mSPR = static_cast<uint32_t>(name == "SPR");
-	mGERC = static_cast<uint32_t>(name == "GERC");
-	mHER = static_cast<uint32_t>(name == "HER");
-	mHER2 = static_cast<uint32_t>(name == "HER2");
-	mHPR2 = static_cast<uint32_t>(name == "HPR2");
-	mSPR2 = static_cast<uint32_t>(name == "SPR2");
-}
-// =================================================================================================
-
 // The main routine
-void Xher::DoHer(const Layout layout, const Triangle triangle, const size_t n, const tart::Scalar& alpha,
-	const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc, const tart::buffer_ptr& a_buffer,
-	const size_t a_offset, const size_t a_ld, const bool packed)
-{
+void DoHer(const Layout layout, const Triangle triangle, const size_t n, const tart::Scalar& alpha,
+           const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
+           const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
+           const bool packed, const std::string& name, const Databases& db,
+           tart::device_ptr device, const tart::DType& dtype) {
 	// Makes sure the dimensions are larger than zero
 	if (n == 0) {
 		throw BLASError(StatusCode::kInvalidDimension);
@@ -54,11 +42,11 @@ void Xher::DoHer(const Layout layout, const Triangle triangle, const size_t n, c
 
 	// Tests the matrix and the vectors for validity
 	if (packed) {
-		TestMatrixAP(mDtype, n, a_buffer, a_offset);
+		TestMatrixAP(dtype, n, a_buffer, a_offset);
 	} else {
-		TestMatrixA(mDtype, n, n, a_buffer, a_offset, a_ld);
+		TestMatrixA(dtype, n, n, a_buffer, a_offset, a_ld);
 	}
-	TestVectorX(mDtype, n, x_buffer, x_offset, x_inc);
+	TestVectorX(dtype, n, x_buffer, x_offset, x_inc);
 	
 	// If alpha is zero an update is not required
 	if (alpha.get<double>() == 0.0)
@@ -66,12 +54,21 @@ void Xher::DoHer(const Layout layout, const Triangle triangle, const size_t n, c
 		return;
 	}
 
+	// Compute the flags from name
+	const auto mHPR = static_cast<uint32_t>(name == "HPR");
+	const auto mSPR = static_cast<uint32_t>(name == "SPR");
+	const auto mGERC = static_cast<uint32_t>(name == "GERC");
+	const auto mHER = static_cast<uint32_t>(name == "HER");
+	const auto mHER2 = static_cast<uint32_t>(name == "HER2");
+	const auto mHPR2 = static_cast<uint32_t>(name == "HPR2");
+	const auto mSPR2 = static_cast<uint32_t>(name == "SPR2");
+
 	// Retrieves the kernel from the compiled binary
-	tart::kernel_ptr kernel = getHer(this->mDevice, this->mDtype);
+	tart::kernel_ptr kernel = getHer(device, dtype);
 	
 	// Sets the kernel arguments
 	kernel->setArg(0, static_cast<int>(n));
-	kernel->setArgAs(mDtype, 1, alpha);
+	kernel->setArgAs(dtype, 1, alpha);
 	kernel->setArg(2, x_buffer);
 	kernel->setArg(3, static_cast<int>(x_offset));
 	kernel->setArg(4, static_cast<int>(x_inc));
@@ -82,10 +79,10 @@ void Xher::DoHer(const Layout layout, const Triangle triangle, const size_t n, c
 	kernel->setArg(9, static_cast<int>(is_rowmajor));
 
 	// Launches the kernel
-	auto global_one = Ceil(CeilDiv(n, db_["WPT"]), db_["WGS1"]);
-	auto global_two = Ceil(CeilDiv(n, db_["WPT"]), db_["WGS2"]);
-	auto global = std::vector<uint32_t>{global_one / db_["WGS1"], global_two / db_["WGS2"]};
-	kernel->enqueue(global, {db_["WGS1"], db_["WGS2"], db_["WPT"],
+	auto global_one = Ceil(CeilDiv(n, db["WPT"]), db["WGS1"]);
+	auto global_two = Ceil(CeilDiv(n, db["WPT"]), db["WGS2"]);
+	auto global = std::vector<uint32_t>{global_one / db["WGS1"], global_two / db["WGS2"]};
+	kernel->enqueue(global, {db["WGS1"], db["WGS2"], db["WPT"],
 		mHPR,
 		mSPR,
 		mGERC,
@@ -96,5 +93,17 @@ void Xher::DoHer(const Layout layout, const Triangle triangle, const size_t n, c
 	});
 }
 
+// Xher class implementation
+Xher::Xher(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) {}
+
+void Xher::DoHer(const Layout layout, const Triangle triangle, const size_t n, const tart::Scalar& alpha,
+                 const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
+                 const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
+                 const bool packed, const std::string& name2, const Databases& db,
+                 tart::device_ptr device, const tart::DType& dtype) {
+    DoHer(layout, triangle, n, alpha, x_buffer, x_offset, x_inc, a_buffer, a_offset, a_ld,
+          packed, name2, db, device ? device : device, dtype != tart::dtypes::unknown_type ? dtype : dtype);
+}
+
 // =================================================================================================
-}	// namespace clblast
+}  // namespace clblast

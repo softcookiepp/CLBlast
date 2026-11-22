@@ -24,7 +24,7 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-Xsymm::Xsymm(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) : Xgemm(dtype, queue, event, name) {}
+Xsymm::Xsymm(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) {}
 
 // =================================================================================================
 
@@ -32,7 +32,8 @@ Xsymm::Xsymm(const tart::DType& dtype, Queue& queue, EventPointer event, const s
 void Xsymm::DoSymm(const Layout layout, const Side side, const Triangle triangle, const size_t m, const size_t n,
 											const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
 											const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld, const tart::Scalar& beta,
-											const tart::buffer_ptr& c_buffer, const size_t c_offset, const size_t c_ld) {
+											const tart::buffer_ptr& c_buffer, const size_t c_offset, const size_t c_ld,
+											tart::device_ptr device, const tart::DType& dtype, const Databases& db) {
 	// Makes sure all dimensions are larger than zero
 	if ((m == 0) || (n == 0)) {
 		throw BLASError(StatusCode::kInvalidDimension);
@@ -43,7 +44,7 @@ void Xsymm::DoSymm(const Layout layout, const Side side, const Triangle triangle
 	auto k = (side == Side::kLeft) ? m : n;
 
 	// Checks for validity of the squared A matrix
-	TestMatrixA(this->mDtype, k, k, a_buffer, a_offset, a_ld);
+	TestMatrixA(dtype, k, k, a_buffer, a_offset, a_ld);
 
 	// Determines which kernel to run based on the layout (the Xgemm kernel assumes column-major as
 	// default) and on whether we are dealing with an upper or lower triangle of the symmetric matrix
@@ -51,11 +52,11 @@ void Xsymm::DoSymm(const Layout layout, const Side side, const Triangle triangle
 									 (triangle == Triangle::kLower && layout == Layout::kRowMajor));
 
 	// Temporary buffer for a copy of the symmetric matrix
-	auto temp_symm = this->mDevice->allocateBuffer(this->mDtype.size() * k * k);
+	auto temp_symm = device->allocateBuffer(dtype.size() * k * k);
 
 	// Creates a general matrix from the symmetric matrix to be able to run the regular Xgemm
 	// routine afterwards
-	tart::kernel_ptr kernel = (is_upper) ? getConvertSymmetricUpper(this->mDevice, this->mDtype) : getConvertSymmetricLower(this->mDevice, this->mDtype);
+	tart::kernel_ptr kernel = (is_upper) ? getConvertSymmetricUpper(device, dtype) : getConvertSymmetricLower(device, dtype);
 
 	// Sets the arguments for the symmetric-to-squared kernel
 	kernel->setArg(0, static_cast<int>(k));
@@ -69,25 +70,25 @@ void Xsymm::DoSymm(const Layout layout, const Side side, const Triangle triangle
 
 	// Uses the common padding kernel's thread configuration. This is allowed, since the
 	// symmetric-to-squared kernel uses the same parameters.
-	auto global = std::vector<uint32_t>{Ceil(CeilDiv(k, db_["PAD_WPTX"]), db_["PAD_DIMX"]),
-																		Ceil(CeilDiv(k, db_["PAD_WPTY"]), db_["PAD_DIMY"])};
-	auto local = std::vector<size_t>{db_["PAD_DIMX"], db_["PAD_DIMY"]};
+	auto global = std::vector<uint32_t>{Ceil(CeilDiv(k, db["PAD_WPTX"]), db["PAD_DIMX"]),
+																		Ceil(CeilDiv(k, db["PAD_WPTY"]), db["PAD_DIMY"])};
+	auto local = std::vector<size_t>{db["PAD_DIMX"], db["PAD_DIMY"]};
 	global[0] = global[0] / local[0];
 	global[1] = global[1] / local[1];
 	std::vector<uint32_t> spec = {
-		db_["COPY_DIMX"],
-		db_["COPY_DIMY"],
-		db_["COPY_WPT"],
-		db_["PAD_DIMX"],
-		db_["PAD_DIMY"],
-		db_["PAD_WPTX"],
-		db_["PAD_WPTY"],
-		db_["TRA_DIM"],
-		db_["TRA_PAD"],
-		db_["TRA_SHUFFLE"],
-		db_["PADTRA_TILE"],
-		db_["PADTRA_WPT"],
-		db_["PADTRA_PAD"],
+		db["COPY_DIMX"],
+		db["COPY_DIMY"],
+		db["COPY_WPT"],
+		db["PAD_DIMX"],
+		db["PAD_DIMY"],
+		db["PAD_WPTX"],
+		db["PAD_WPTY"],
+		db["TRA_DIM"],
+		db["TRA_PAD"],
+		db["TRA_SHUFFLE"],
+		db["PADTRA_TILE"],
+		db["PADTRA_WPT"],
+		db["PADTRA_PAD"],
 		0, 0, 0, 0
 	};
 	kernel->enqueue(global, spec);
@@ -95,14 +96,14 @@ void Xsymm::DoSymm(const Layout layout, const Side side, const Triangle triangle
 	// Runs the regular Xgemm code with either "C := AB+C" or ...
 	if (side == Side::kLeft) {
 		DoGemm(layout, Transpose::kNo, Transpose::kNo, m, n, k, alpha, temp_symm, 0, k, b_buffer, b_offset, b_ld, beta,
-					 c_buffer, c_offset, c_ld);
+					 c_buffer, c_offset, c_ld, tart::buffer_ptr{}, false, db, device, dtype);
 	}
 
 	// ... with "C := BA+C". Note that A and B are now reversed.
 	else {
 		try {
 			DoGemm(layout, Transpose::kNo, Transpose::kNo, m, n, k, alpha, b_buffer, b_offset, b_ld, temp_symm, 0, k, beta,
-						 c_buffer, c_offset, c_ld);
+						 c_buffer, c_offset, c_ld, tart::buffer_ptr{}, false, db, device, dtype);
 		} catch (BLASError& e) {
 			// A and B are now reversed, so also reverse the error codes returned from the Xgemm routine
 			switch (e.status()) {

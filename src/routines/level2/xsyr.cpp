@@ -27,9 +27,9 @@ Xsyr::Xsyr(const tart::DType& dtype, Queue& queue, EventPointer event, const std
 // The main routine
 void Xsyr::DoSyr(const Layout layout, const Triangle triangle, const size_t n, const tart::Scalar& alpha,
                     const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc, const tart::buffer_ptr& a_buffer,
-                    const size_t a_offset, const size_t a_ld) {
+                    const size_t a_offset, const size_t a_ld, tart::device_ptr device, const tart::DType& dtype, const Databases& db) {
   // Specific Xsyr functionality is implemented in the kernel using defines
-  DoHer(layout, triangle, n, alpha, x_buffer, x_offset, x_inc, a_buffer, a_offset, a_ld);
+  DoHer(layout, triangle, n, alpha, x_buffer, x_offset, x_inc, a_buffer, a_offset, a_ld, false, "SYR", db, device, dtype);
 }
 
 // =================================================================================================

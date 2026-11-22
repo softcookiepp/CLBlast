@@ -15,7 +15,6 @@
 #include "tuning/tuning.hpp"
 #include "utilities/backend.hpp"
 #include "utilities/utilities.hpp"
-#include "routine.hpp"
 
 namespace clblast {
 // =================================================================================================

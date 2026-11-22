@@ -21,19 +21,20 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-Xtrmv::Xtrmv(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) : Xgemv(dtype, queue, event, name) {}
+Xtrmv::Xtrmv(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) {}
 
 // =================================================================================================
 
 // The main routine
 void Xtrmv::DoTrmv(const Layout layout, const Triangle triangle, const Transpose a_transpose,
 	const Diagonal diagonal, const size_t n, const tart::buffer_ptr& a_buffer, const size_t a_offset,
-	const size_t a_ld, const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc)
+	const size_t a_ld, const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
+	tart::device_ptr device, const tart::DType& dtype, const Databases& db)
 {
 	// Creates a copy of X: a temporary scratch buffer
 	const auto x_size = (1 + (n - 1) * x_inc) + x_offset;
-	auto scratch_buffer = this->mDevice->allocateBuffer(x_size*this->mDtype.size());
-	x_buffer->copyTo(scratch_buffer, 0, 0, x_size*this->mDtype.size());
+	auto scratch_buffer = device->allocateBuffer(x_size * dtype.size());
+	x_buffer->copyTo(scratch_buffer, 0, 0, x_size * dtype.size());
 
 	// The data is either in the upper or lower triangle
 	size_t is_upper = ((triangle == Triangle::kUpper && layout != Layout::kRowMajor) ||
@@ -48,14 +49,13 @@ void Xtrmv::DoTrmv(const Layout layout, const Triangle triangle, const Transpose
 	auto fast_kernels = false;
 	try {
 		MatVec(layout, a_transpose, n, n, tart::Scalar::one(), a_buffer, a_offset, a_ld, scratch_buffer, x_offset, x_inc,
-					 tart::Scalar::zero(), x_buffer, x_offset, x_inc, fast_kernels, fast_kernels, parameter, false, 0, 0);
+					 tart::Scalar::zero(), x_buffer, x_offset, x_inc, fast_kernels, fast_kernels, parameter, false, 0, 0, "TRMV", db,
+					 device, dtype);
 	} catch (BLASError& e) {
 		// Returns the proper error code (renames vector Y to X)
 		switch (e.status()) {
 			case StatusCode::kInvalidVectorY:
 				throw BLASError(StatusCode::kInvalidVectorX, e.details());
-			case StatusCode::kInvalidIncrementY:
-				throw BLASError(StatusCode::kInvalidIncrementX, e.details());
 			case StatusCode::kInsufficientMemoryY:
 				throw BLASError(StatusCode::kInsufficientMemoryX, e.details());
 			default:

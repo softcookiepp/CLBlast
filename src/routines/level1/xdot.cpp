@@ -3,7 +3,7 @@
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
 //
-// This file implements the Xdot class (see the header for information about the class).
+// This file implements the functional Xdot routine.
 //
 // =================================================================================================
 
@@ -13,7 +13,6 @@
 #include <string>
 #include <vector>
 
-#include "routine.hpp"
 #include "routines/common.hpp"
 #include "utilities/backend.hpp"
 #include "utilities/buffer_test.hpp"
@@ -23,18 +22,12 @@
 namespace clblast {
 // =================================================================================================
 
-// Constructor: forwards to base class constructor
-Xdot::Xdot(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Xdot"}, dtype, {})
-{
-}
-
-// =================================================================================================
-
-// The main routine
-void Xdot::DoDot(const size_t n, const tart::buffer_ptr& dot_buffer, const size_t dot_offset, const tart::buffer_ptr& x_buffer,
-	const size_t x_offset, const size_t x_inc, const tart::buffer_ptr& y_buffer, const size_t y_offset,
-	const size_t y_inc, const bool do_conjugate)
+// Functional implementation of Xdot
+void DoDot(const tart::DType& dtype, const tart::device_ptr& device,
+           const size_t n, const tart::buffer_ptr& dot_buffer, const size_t dot_offset,
+           const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
+           const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
+           const bool do_conjugate, const Databases& db)
 {
 	// Makes sure all dimensions are larger than zero
 	if (n == 0) {
@@ -42,21 +35,21 @@ void Xdot::DoDot(const size_t n, const tart::buffer_ptr& dot_buffer, const size_
 	}
 
 	// Tests the vectors for validity
-	TestVectorX(mDtype, n, x_buffer, x_offset, x_inc);
-	TestVectorY(mDtype, n, y_buffer, y_offset, y_inc);
-	TestVectorScalar(mDtype, 1, dot_buffer, dot_offset);
+	TestVectorX(dtype, n, x_buffer, x_offset, x_inc);
+	TestVectorY(dtype, n, y_buffer, y_offset, y_inc);
+	TestVectorScalar(dtype, 1, dot_buffer, dot_offset);
 
 	// Retrieves the Xdot kernels from the compiled binary
-	tart::kernel_ptr kernel1 = getDot(this->mDevice, this->mDtype);
-	tart::kernel_ptr kernel2 = getDotEpilogue(this->mDevice, this->mDtype);
+	tart::kernel_ptr kernel1 = getDot(device, dtype);
+	tart::kernel_ptr kernel2 = getDotEpilogue(device, dtype);
 
 	// Creates the buffer for intermediate values
-	auto temp_size = 2 * db_["WGS2"] * mDtype.size();
-	auto temp_buffer = x_buffer->getDevice()->allocateBuffer(temp_size);
+	auto temp_size = 2 * db["WGS2"] * dtype.size();
+	auto temp_buffer = device->allocateBuffer(temp_size);
 	
 	// Sets the kernel arguments
 #if VULKAN_USE_BDA
-	tart::DeviceMetadata meta = device_()->getMetadata();
+	tart::DeviceMetadata meta = device->getMetadata();
 	if (meta.bda)
 	{
 		kernel1->setArg(0, static_cast<int>(n));
@@ -84,10 +77,10 @@ void Xdot::DoDot(const size_t n, const tart::buffer_ptr& dot_buffer, const size_
 	}
 
 	// Launches the main kernel
-	auto global1 = std::vector<size_t>{db_["WGS1"] * temp_size};
-	auto local1 = std::vector<size_t>{db_["WGS1"]};
+	auto global1 = std::vector<size_t>{db["WGS1"] * temp_size};
+	auto local1 = std::vector<size_t>{db["WGS1"]};
 	kernel1->setArg(9, static_cast<int>(temp_size));
-	kernel1->enqueue({temp_size}, {db_["WGS1"], 1});
+	kernel1->enqueue({temp_size}, {db["WGS1"], 1});
 	
 	// Sets the arguments for the epilogue kernel
 	#if VULKAN_USE_BDA
@@ -106,9 +99,9 @@ void Xdot::DoDot(const size_t n, const tart::buffer_ptr& dot_buffer, const size_
 	}
 
 	// Launches the epilogue kernel
-	auto global2 = std::vector<size_t>{db_["WGS2"]};
-	auto local2 = std::vector<size_t>{db_["WGS2"]};
-	kernel2->enqueue({1}, {db_["WGS2"], 1});
+	auto global2 = std::vector<size_t>{db["WGS2"]};
+	auto local2 = std::vector<size_t>{db["WGS2"]};
+	kernel2->enqueue({1}, {db["WGS2"], 1});
 }
 
 // =================================================================================================

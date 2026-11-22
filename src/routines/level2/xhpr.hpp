@@ -22,15 +22,16 @@ namespace clblast {
 // See comment at top of file for a description of the class
 class Xhpr : public Xher {
  public:
-  // Uses the regular Xher routine
-  using Xher::DoHer;
+   // Uses the regular Xher routine
+   using Xher::DoHer;
 
-  // Constructor
-  Xhpr(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "HPR");
+   // Constructor
+   Xhpr(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "HPR");
 
-  // Templated-precision implementation of the routine
-  void DoHpr(const Layout layout, const Triangle triangle, const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& x_buffer,
-             const size_t x_offset, const size_t x_inc, const tart::buffer_ptr& ap_buffer, const size_t ap_offset);
+   // Templated-precision implementation of the routine
+   void DoHpr(const Layout layout, const Triangle triangle, const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& x_buffer,
+              const size_t x_offset, const size_t x_inc, const tart::buffer_ptr& ap_buffer, const size_t ap_offset,
+              const Databases& db);
 };
 
 // =================================================================================================

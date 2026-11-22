@@ -123,6 +123,14 @@ class Databases {
 };
 
 // =================================================================================================
+
+// Functional API: creates a Databases object for the given device, kernel names, and precision.
+// This replaces the old OO approach where Routine::InitDatabase was called per-routine.
+Databases GetDatabases(const tart::device_ptr& device,
+                       const std::vector<std::string>& kernel_names,
+                       const tart::DType& dtype);
+
+// =================================================================================================
 }	// namespace clblast
 
 // CLBLAST_DATABASE_H_

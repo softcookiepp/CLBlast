@@ -1,13 +1,17 @@
 // lets see if this reduces build time
 #include "xamax.cpp"
+#include "xamin.cpp"
 #include "xasum.cpp"
 #include "xaxpy.cpp"
 #include "xcopy.cpp"
 #include "xdot.cpp"
 #include "xdotc.cpp"
 #include "xdotu.cpp"
+#include "xmax.cpp"
+#include "xmin.cpp"
 #include "xnrm2.cpp"
 #include "xscal.cpp"
+#include "xsum.cpp"
 #include "xswap.cpp"
 
 namespace clblast

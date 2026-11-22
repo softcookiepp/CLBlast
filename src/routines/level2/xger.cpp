@@ -3,7 +3,7 @@
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
 //
-// This file implements the Xger class (see the header for information about the class).
+// This file implements the functional Xger routine.
 //
 // =================================================================================================
 
@@ -13,7 +13,8 @@
 #include <string>
 #include <vector>
 
-#include "routine.hpp"
+#include "database/database.hpp"
+#include "routine_aot_cache.hpp"
 #include "routines/common.hpp"
 #include "utilities/backend.hpp"
 #include "utilities/buffer_test.hpp"
@@ -23,25 +24,13 @@
 namespace clblast {
 // =================================================================================================
 
-// Constructor: forwards to base class constructor
-Xger::Xger(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Xger"}, dtype, {})
-{
-	mHPR = static_cast<uint32_t>(name == "HPR");
-	mSPR = static_cast<uint32_t>(name == "SPR");
-	mGERC = static_cast<uint32_t>(name == "GERC");
-	mHER = static_cast<uint32_t>(name == "HER");
-	mHER2 = static_cast<uint32_t>(name == "HER2");
-	mHPR2 = static_cast<uint32_t>(name == "HPR2");
-	mSPR2 = static_cast<uint32_t>(name == "SPR2");
-}
-
-// =================================================================================================
-
 // The main routine
-void Xger::DoGer(const Layout layout, const size_t m, const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& x_buffer,
-										const size_t x_offset, const size_t x_inc, const tart::buffer_ptr& y_buffer, const size_t y_offset,
-										const size_t y_inc, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld) {
+void DoGer(const Layout layout, const size_t m, const size_t n, const tart::Scalar& alpha,
+           const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
+           const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
+           const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
+           const std::string& name, const Databases& db,
+           tart::device_ptr device, const tart::DType& dtype) {
 	// Makes sure all dimensions are larger than zero
 	if (m == 0 || n == 0) {
 		throw BLASError(StatusCode::kInvalidDimension);
@@ -53,17 +42,26 @@ void Xger::DoGer(const Layout layout, const size_t m, const size_t n, const tart
 	const auto a_two = (a_is_rowmajor) ? m : n;
 
 	// Tests the matrix and the vectors for validity
-	TestMatrixA(mDtype, a_one, a_two, a_buffer, a_offset, a_ld);
-	TestVectorX(mDtype, m, x_buffer, x_offset, x_inc);
-	TestVectorY(mDtype, n, y_buffer, y_offset, y_inc);
+	TestMatrixA(dtype, a_one, a_two, a_buffer, a_offset, a_ld);
+	TestVectorX(dtype, m, x_buffer, x_offset, x_inc);
+	TestVectorY(dtype, n, y_buffer, y_offset, y_inc);
+
+	// Compute the flags from name
+	const auto mHPR = static_cast<uint32_t>(name == "HPR");
+	const auto mSPR = static_cast<uint32_t>(name == "SPR");
+	const auto mGERC = static_cast<uint32_t>(name == "GERC");
+	const auto mHER = static_cast<uint32_t>(name == "HER");
+	const auto mHER2 = static_cast<uint32_t>(name == "HER2");
+	const auto mHPR2 = static_cast<uint32_t>(name == "HPR2");
+	const auto mSPR2 = static_cast<uint32_t>(name == "SPR2");
 
 	// Retrieves the kernel from the compiled binary
-	tart::kernel_ptr kernel = getGer(this->mDevice, this->mDtype);
+	tart::kernel_ptr kernel = getGer(device, dtype);
 	
 	// Sets the kernel arguments
 	kernel->setArg(0, static_cast<int>(a_one));
 	kernel->setArg(1, static_cast<int>(a_two));
-	kernel->setArgAs(mDtype, 2, alpha);
+	kernel->setArgAs(dtype, 2, alpha);
 	kernel->setArg(3, x_buffer);
 	kernel->setArg(4, static_cast<int>(x_offset));
 	kernel->setArg(5, static_cast<int>(x_inc));
@@ -76,12 +74,10 @@ void Xger::DoGer(const Layout layout, const size_t m, const size_t n, const tart
 	kernel->setArg(12, static_cast<int>(a_is_rowmajor));
 
 	// Launches the kernel
-	auto a_one_ceiled = CeilDiv(CeilDiv(a_one, db_["WPT"]), db_["WGS1"]);
-	auto a_two_ceiled = CeilDiv(CeilDiv(a_two, db_["WPT"]), db_["WGS2"]);
-	//auto global = std::vector<size_t>{a_one_ceiled, a_two_ceiled};
-	//auto local = std::vector<size_t>{db_["WGS1"], db_["WGS2"]};
+	auto a_one_ceiled = CeilDiv(CeilDiv(a_one, db["WPT"]), db["WGS1"]);
+	auto a_two_ceiled = CeilDiv(CeilDiv(a_two, db["WPT"]), db["WGS2"]);
 	kernel->enqueue({a_one_ceiled, a_two_ceiled}, {
-		db_["WGS1"], db_["WGS2"], db_["WPT"],
+		db["WGS1"], db["WGS2"], db["WPT"],
 		mHPR,
 		mSPR,
 		mGERC,
@@ -90,6 +86,20 @@ void Xger::DoGer(const Layout layout, const size_t m, const size_t n, const tart
 		mHPR2,
 		mSPR2
 	});
+}
+
+// Xger class implementation
+Xger::Xger(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) {}
+
+void Xger::DoGer(const Layout layout, const size_t m, const size_t n, const tart::Scalar& alpha,
+                 const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
+                 const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
+                 const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
+                 const std::string& name, const Databases& db,
+                 tart::device_ptr device, const tart::DType& dtype) {
+    DoGer(layout, m, n, alpha, x_buffer, x_offset, x_inc, y_buffer, y_offset, y_inc,
+          a_buffer, a_offset, a_ld, name, db,
+          device ? device : device, dtype != tart::dtypes::unknown_type ? dtype : dtype);
 }
 
 // =================================================================================================

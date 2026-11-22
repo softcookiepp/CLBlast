@@ -20,7 +20,6 @@
 #include "database/database.hpp"
 #include "utilities/backend.hpp"
 #include "utilities/utilities.hpp"
-#include "routine.hpp"
 #include "routine_aot_cache.hpp"
 
 namespace clblast {

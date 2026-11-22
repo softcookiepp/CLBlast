@@ -3,7 +3,7 @@
 // This file is part of the CLBlast project. Author(s):
 //   Cedric Nugteren <www.cedricnugteren.nl>
 //
-// This file contains all the common code to perform (partial) matrix inverting.
+// This file contains the functional interface for the Xinvert routine.
 //
 // =================================================================================================
 
@@ -13,22 +13,17 @@
 #include <cstddef>
 #include <string>
 
-#include "routine.hpp"
+#include "database/database.hpp"
 #include "utilities/backend.hpp"
 
 namespace clblast {
 // =================================================================================================
 
-class Xinvert : public Routine {
- public:
-  // Constructor
-  Xinvert(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "INVERT");
-
-  // Inverts diagonal square blocks of a matrix
-  void InvertMatrixDiagonalBlocks(const Layout layout, const Triangle triangle, const Diagonal diag, const size_t n,
-                                  const size_t block_size, const tart::buffer_ptr& src, const size_t offset,
-                                  const size_t ld_src, tart::buffer_ptr& dest);
-};
+// Functional implementation of Xinvert (inverts diagonal square blocks of a matrix)
+void InvertMatrixDiagonalBlocks(const Layout layout, const Triangle triangle, const Diagonal diag, const size_t n,
+                                const size_t block_size, const tart::buffer_ptr& src, const size_t offset,
+                                const size_t ld_src, tart::buffer_ptr& dest, const tart::device_ptr& device,
+                                const tart::DType& dtype, const Databases& db);
 
 // =================================================================================================
 }  // namespace clblast

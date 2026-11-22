@@ -3,7 +3,7 @@
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
 //
-// This file implements the Xamax class (see the header for information about the class).
+// This file implements the functional Xamax routine.
 //
 // =================================================================================================
 
@@ -22,45 +22,36 @@
 namespace clblast {
 // =================================================================================================
 
-// Constructor: forwards to base class constructor
-Xamax::Xamax(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
-	: Routine(queue, event, name, {"Xdot"}, dtype, {})
-{
-	mMax = static_cast<uint32_t>(name == "MAX");
-	mMin = static_cast<uint32_t>(name == "MIN");
-	mAmin = static_cast<uint32_t>(name == "AMIN");
-}
-
-// =================================================================================================
-
-// The main routine
-void Xamax::DoAmax(const size_t n, const tart::buffer_ptr& imax_buffer, const size_t imax_offset,
-											const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc) {
+// Functional implementation of Xamax (index of absolute maximum)
+void DoAmax(const tart::DType& dtype, const tart::device_ptr& device,
+            const size_t n, const tart::buffer_ptr& imax_buffer, const size_t imax_offset,
+            const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
+            uint32_t max_flag, uint32_t min_flag, uint32_t amin_flag, const Databases& db) {
 	// Makes sure all dimensions are larger than zero
 	if (n == 0) {
 		throw BLASError(StatusCode::kInvalidDimension);
 	}
 
 	// Tests the vectors for validity
-	TestVectorX(mDtype, n, x_buffer, x_offset, x_inc);
-	TestVectorIndex(mDtype, 1, imax_buffer, imax_offset);
+	TestVectorX(dtype, n, x_buffer, x_offset, x_inc);
+	TestVectorIndex(dtype, 1, imax_buffer, imax_offset);
 
 	// Retrieves the Xamax kernels from the compiled binary
-	tart::kernel_ptr kernel1 = getAmax(this->mDevice, this->mDtype);
-	tart::kernel_ptr kernel2 = getAmaxEpilogue(this->mDevice, this->mDtype);
+	tart::kernel_ptr kernel1 = getAmax(device, dtype);
+	tart::kernel_ptr kernel2 = getAmaxEpilogue(device, dtype);
 
 	// Creates the buffer for intermediate values
-	auto temp_size = 2 * db_["WGS2"];
-	auto temp_buffer1 = mDevice->allocateBuffer(temp_size*mDtype.size());
-	auto temp_buffer2 = mDevice->allocateBuffer(temp_size*sizeof(uint32_t));
+	auto temp_size = 2 * db["WGS2"];
+	auto temp_buffer1 = device->allocateBuffer(temp_size*dtype.size());
+	auto temp_buffer2 = device->allocateBuffer(temp_size*sizeof(uint32_t));
 
 	// Sets the kernel arguments
 #if VULKAN_USE_BDA
-	const tart::DeviceMetadata meta& = device_()->getMetadata();
+	const tart::DeviceMetadata meta = device->getMetadata();
 	if (meta.bda)
 	{
 		kernel1->setArg(0, static_cast<int>(n));
-		kernel1->setArg(1, x_buffer->getAddress() + x_offset*mDtype.size());
+		kernel1->setArg(1, x_buffer->getAddress() + x_offset*dtype.size());
 		kernel1->setArg(2, static_cast<int>(0));
 		kernel1->setArg(3, static_cast<int>(x_inc));
 		kernel1->setArg(4, temp_buffer1->getAddress());
@@ -78,15 +69,15 @@ void Xamax::DoAmax(const size_t n, const tart::buffer_ptr& imax_buffer, const si
 	}
 
 	// Launches the main kernel
-	//auto global1 = std::vector<size_t>{db_["WGS1"] * temp_size};
+	//auto global1 = std::vector<size_t>{db["WGS1"] * temp_size};
 	auto global1 = std::vector<uint32_t>{temp_size};
-	//auto local1 = std::vector<size_t>{db_["WGS1"]};
+	//auto local1 = std::vector<size_t>{db["WGS1"]};
 	
 	// the number of workgroups in the X dimension
 	int num_groups_0 = static_cast<int>(global1[0]);
 	kernel1->setArg(6, num_groups_0);
 	
-	kernel1->enqueue(global1, {db_["WGS1"], mMax, mMin, mAmin});
+	kernel1->enqueue(global1, {db["WGS1"], max_flag, min_flag, amin_flag});
 
 	// Sets the arguments for the epilogue kernel
 #if VULKAN_USE_BDA
@@ -102,10 +93,10 @@ void Xamax::DoAmax(const size_t n, const tart::buffer_ptr& imax_buffer, const si
 #endif
 
 	// Launches the epilogue kernel
-	//auto global2 = std::vector<size_t>{db_["WGS2"]};
+	//auto global2 = std::vector<size_t>{db["WGS2"]};
 	auto global2 = std::vector<uint32_t>{1};
-	auto local2 = std::vector<size_t>{db_["WGS2"]};
-	kernel2->enqueue(global2, {db_["WGS2"]});
+	auto local2 = std::vector<size_t>{db["WGS2"]};
+	kernel2->enqueue(global2, {db["WGS2"]});
 }
 
 // =================================================================================================

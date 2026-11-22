@@ -22,20 +22,18 @@ namespace clblast {
 // =================================================================================================
 
 // See comment at top of file for a description of the class
-class Xher2k : public Xherk {
+class Xher2k {
  public:
-  // Uses methods and variables the regular Xherk routine
-  using Xherk::event_;
-  using Xherk::HerkAB;
 
-  // Constructor
-  Xher2k(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "HER2K");
+   // Constructor
+   Xher2k(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "HER2K");
 
-  // Templated-precision implementation of the routine
-  void DoHer2k(const Layout layout, const Triangle triangle, const Transpose ab_transpose, const size_t n,
-               const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
-               const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld, const tart::Scalar& beta,
-               const tart::buffer_ptr& c_buffer, const size_t c_offset, const size_t c_ld);
+   // Templated-precision implementation of the routine
+   void DoHer2k(const Layout layout, const Triangle triangle, const Transpose ab_transpose, const size_t n,
+                const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
+                const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld, const tart::Scalar& beta,
+                const tart::buffer_ptr& c_buffer, const size_t c_offset, const size_t c_ld,
+                tart::device_ptr device, const tart::DType& dtype, const Databases& db);
 };
 
 // =================================================================================================

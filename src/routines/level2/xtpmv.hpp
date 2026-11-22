@@ -22,11 +22,8 @@ namespace clblast {
 // =================================================================================================
 
 // See comment at top of file for a description of the class
-class Xtpmv : public Xgemv {
+class Xtpmv {
  public:
-	// Uses the generic matrix-vector routine
-	using Xgemv::queue_;
-	using Xgemv::MatVec;
 
 	// Constructor
 	Xtpmv(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "TPMV");
@@ -34,7 +31,7 @@ class Xtpmv : public Xgemv {
 	// Templated-precision implementation of the routine
 	void DoTpmv(const Layout layout, const Triangle triangle, const Transpose a_transpose, const Diagonal diagonal,
 							const size_t n, const tart::buffer_ptr& ap_buffer, const size_t ap_offset, const tart::buffer_ptr& x_buffer,
-							const size_t x_offset, const size_t x_inc);
+							const size_t x_offset, const size_t x_inc, tart::device_ptr device, const tart::DType& dtype, const Databases& db);
 };
 
 // =================================================================================================

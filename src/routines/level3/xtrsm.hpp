@@ -21,14 +21,8 @@ namespace clblast {
 // =================================================================================================
 
 // See comment at top of file for a description of the class
-class Xtrsm : public Xgemm {
+class Xtrsm {
  public:
-	// Uses methods and variables the Xgemm routine
-	using Xgemm::queue_;
-	using Xgemm::device_;
-	using Xgemm::db_;
-	using Xgemm::event_;
-	using Xgemm::DoGemm;
 
 	// Constructor
 	Xtrsm(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "TRSM");
@@ -36,12 +30,14 @@ class Xtrsm : public Xgemm {
 	// Templated-precision implementation of the routine
 	void DoTrsm(const Layout layout, Side side, Triangle triangle, const Transpose a_transpose, const Diagonal diagonal,
 							size_t m, size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
-							const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld);
+							const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld,
+							tart::device_ptr device, const tart::DType& dtype, const Databases& db);
 
 	// Implementation of the column-major version
 	void TrsmColMajor(const Side side, const Triangle triangle, const Transpose a_transpose, const Diagonal diagonal,
 										const size_t m, const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
-										const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld);
+										const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld,
+										tart::device_ptr device, const tart::DType& dtype, const Databases& db);
 };
 
 // =================================================================================================

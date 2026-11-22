@@ -3,18 +3,15 @@
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
 //
-// This file implements the Xcopy class (see the header for information about the class).
+// This file implements the functional Xcopy routine.
 //
 // =================================================================================================
 
 #include "routines/level1/xcopy.hpp"
 #include "routine_aot_cache.hpp"
 #include <cstddef>
-#include <string>
 #include <vector>
 
-#include "routine.hpp"
-#include "routine_aot_cache.hpp"
 #include "routines/common.hpp"
 #include "utilities/backend.hpp"
 #include "utilities/buffer_test.hpp"
@@ -22,39 +19,24 @@
 #include "utilities/utilities.hpp"
 
 namespace clblast {
-// =================================================================================================
 
-// Constructor: forwards to base class constructor
-Xcopy::Xcopy(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Xaxpy"}, dtype, {})
+void DoCopy(const tart::DType& dtype, const tart::device_ptr& device,
+            const size_t n, const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
+            const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
+            const Databases& db)
 {
-}
-
-// =================================================================================================
-
-// The main routine
-void Xcopy::DoCopy(const size_t n, const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
-	const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc)
-{
-	// Makes sure all dimensions are larger than zero
-	if (n == 0) 
-	{
+	if (n == 0) {
 		throw BLASError(StatusCode::kInvalidDimension);
 	}
 
-	// Tests the vectors for validity
-	TestVectorX(mDtype, n, x_buffer, x_offset, x_inc);
-	TestVectorY(mDtype, n, y_buffer, y_offset, y_inc);
+	TestVectorX(dtype, n, x_buffer, x_offset, x_inc);
+	TestVectorY(dtype, n, y_buffer, y_offset, y_inc);
 
-	// Determines whether or not the fast-version can be used
-	// TODO: it may be possible to use pure transfer operations if we are doing this via Vulkan.
-	// Will look into it.
 	bool use_fast_kernel = (x_offset == 0) && (x_inc == 1) && (y_offset == 0) && (y_inc == 1) &&
-												 IsMultiple(n, db_["WGS"] * db_["WPT"] * db_["VW"]);
+												 IsMultiple(n, db["WGS"] * db["WPT"] * db["VW"]);
 	
-	tart::kernel_ptr kernel = (use_fast_kernel) ? getCopyFast(this->mDevice, this->mDtype, db_["VW"]) : getCopy(this->mDevice, this->mDtype, db_["VW"]);
+	tart::kernel_ptr kernel = (use_fast_kernel) ? getCopyFast(device, dtype, db["VW"]) : getCopy(device, dtype, db["VW"]);
 	
-	// Sets the kernel arguments
 	if (use_fast_kernel)
 	{
 		kernel->setArg(0, static_cast<int>(n));
@@ -72,18 +54,16 @@ void Xcopy::DoCopy(const size_t n, const tart::buffer_ptr& x_buffer, const size_
 		kernel->setArg(6, static_cast<int>(y_inc));
 	}
 
-	// Launches the kernel
 	std::vector<uint32_t> global(3, 1);
 	if (use_fast_kernel)
 	{
-		global[0] = CeilDiv(n, db_["WPT"] * db_["VW"]) / db_["WGS"];
+		global[0] = CeilDiv(n, db["WPT"] * db["VW"]) / db["WGS"];
 	}
 	else
 	{
-		global[0] = Ceil(n, db_["WGS"] * db_["WPT"]) / (db_["WGS"] * db_["WPT"]);
+		global[0] = Ceil(n, db["WGS"] * db["WPT"]) / (db["WGS"] * db["WPT"]);
 	}
-	kernel->enqueue(global, {db_["WGS"], db_["WPT"]});
+	kernel->enqueue(global, {db["WGS"], db["WPT"]});
 }
 
-// =================================================================================================
 }	// namespace clblast

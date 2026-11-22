@@ -20,7 +20,7 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-Xher2k::Xher2k(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) : Xherk(dtype, queue, event, name) {}
+Xher2k::Xher2k(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) {}
 
 // =================================================================================================
 
@@ -28,7 +28,8 @@ Xher2k::Xher2k(const tart::DType& dtype, Queue& queue, EventPointer event, const
 void Xher2k::DoHer2k(const Layout layout, const Triangle triangle, const Transpose ab_transpose, const size_t n,
 	const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
 	const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld,
-	const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset, const size_t c_ld)
+	const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset, const size_t c_ld,
+	tart::device_ptr device, const tart::DType& dtype, const Databases& db)
 {
 	
 	
@@ -36,15 +37,17 @@ void Xher2k::DoHer2k(const Layout layout, const Triangle triangle, const Transpo
 	tart::Scalar complex_beta(std::complex<double>(beta.get<double>(), 0.0));
 	const auto negated_ab_transpose = (ab_transpose != Transpose::kNo) ? Transpose::kNo : Transpose::kYes;
 	HerkAB(layout, triangle, ab_transpose, negated_ab_transpose, n, k, alpha, a_buffer, a_offset, a_ld, b_buffer,
-				 b_offset, b_ld, complex_beta, c_buffer, c_offset, c_ld, false);
+				 b_offset, b_ld, complex_beta, c_buffer, c_offset, c_ld, false, db, device, dtype);
 
 	// Swaps the arguments for matrices A and B, sets 'beta' to 1, and conjugate alpha
 	std::complex<double> alpha_value = alpha.getComplex<double>();
 	tart::Scalar conjugate_alpha(std::complex<double>(alpha_value.real(), -alpha_value.imag()));
 	auto complex_one = tart::Scalar::one();
 	HerkAB(layout, triangle, ab_transpose, negated_ab_transpose, n, k, conjugate_alpha, b_buffer, b_offset, b_ld,
-				 a_buffer, a_offset, a_ld, complex_one, c_buffer, c_offset, c_ld, true);
+				 a_buffer, a_offset, a_ld, complex_one, c_buffer, c_offset, c_ld, true, db, device, dtype);
 				 
+	
+	
 	
 }
 

@@ -3,9 +3,7 @@
 // This file is part of the CLBlast project. Author(s):
 //   Cedric Nugteren <www.cedricnugteren.nl>
 //
-// This file implements the Xconvgemm routine. The precision is implemented as a template argument.
-// This implements batched convolution of a 4D input 'image' tensor, a 3D input 'kernel' matrix,
-// resulting in a 4D output 'result' tensor.
+// This file contains the functional interface for the Xconvgemm routine.
 //
 // =================================================================================================
 
@@ -15,31 +13,20 @@
 #include <cstddef>
 #include <string>
 
-#include "routine.hpp"
+#include "database/database.hpp"
 #include "utilities/backend.hpp"
 
 namespace clblast {
 // =================================================================================================
 
-// See comment at top of file for a description of the class
-class Xconvgemm : public Routine {
- public:
-  // Constructor
-  enum class ConvGemmMethod { kWithIm2Col, kSingleKernel };
-  Xconvgemm(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "CONVGEMM",
-            const ConvGemmMethod method = ConvGemmMethod::kSingleKernel);
-
-  // Templated-precision implementation of the routine
-  void DoConvgemm(const KernelMode kernel_mode, const size_t channels, const size_t height, const size_t width,
-                  const size_t kernel_h, const size_t kernel_w, const size_t pad_h, const size_t pad_w,
-                  const size_t stride_h, const size_t stride_w, const size_t dilation_h, const size_t dilation_w,
-                  const size_t num_kernels, const size_t batch_count, const tart::buffer_ptr& im_buffer,
-                  const size_t im_offset, const tart::buffer_ptr& kernel_buffer, const size_t kernel_offset,
-                  const tart::buffer_ptr& result_buffer, const size_t result_offset);
-
- private:
-  const ConvGemmMethod method_;
-};
+// Functional implementation of Xconvgemm (batched convolution as GEMM)
+void DoConvgemm(const KernelMode kernel_mode, const size_t channels, const size_t height, const size_t width,
+                const size_t kernel_h, const size_t kernel_w, const size_t pad_h, const size_t pad_w,
+                const size_t stride_h, const size_t stride_w, const size_t dilation_h, const size_t dilation_w,
+                const size_t num_kernels, const size_t batch_count, const tart::buffer_ptr& im_buffer,
+                const size_t im_offset, const tart::buffer_ptr& kernel_buffer, const size_t kernel_offset,
+                const tart::buffer_ptr& result_buffer, const size_t result_offset, const std::string& name,
+                tart::device_ptr device, const tart::DType& dtype, const Databases& db);
 
 // =================================================================================================
 }  // namespace clblast

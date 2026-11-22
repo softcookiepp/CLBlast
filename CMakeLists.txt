@@ -169,7 +169,6 @@ set(SOURCES
 	src/utilities/timing.cpp
 	src/utilities/utilities.cpp
 	src/api_common.cpp
-	src/routine.cpp
 	src/routines/levelx/xinvert.cpp	# only source, don't include it as a test
 	src/tuning/configurations.cpp
 	src/vkpp11.cpp

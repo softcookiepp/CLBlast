@@ -3,7 +3,7 @@
 // This file is part of the CLBlast project. Author(s):
 //	 Cedric Nugteren <www.cedricnugteren.nl>
 //
-// This file implements the Xasum class (see the header for information about the class).
+// This file implements the functional Xasum routine.
 //
 // =================================================================================================
 
@@ -13,7 +13,6 @@
 #include <string>
 #include <vector>
 
-#include "routine.hpp"
 #include "routines/common.hpp"
 #include "utilities/backend.hpp"
 #include "utilities/buffer_test.hpp"
@@ -23,18 +22,11 @@
 namespace clblast {
 // =================================================================================================
 
-// Constructor: forwards to base class constructor
-Xasum::Xasum(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name)
-		: Routine(queue, event, name, {"Xdot"}, dtype, {})							
-{
-	mSum = static_cast<uint32_t>(name == "SUM");
-}
-
-// =================================================================================================
-
-// The main routine
-void Xasum::DoAsum(const size_t n, const tart::buffer_ptr& asum_buffer, const size_t asum_offset, const tart::buffer_ptr& x_buffer,
-											const size_t x_offset, const size_t x_inc)
+// Functional implementation of Xasum (absolute sum)
+void DoAsum(const tart::DType& dtype, const tart::device_ptr& device,
+            const size_t n, const tart::buffer_ptr& asum_buffer, const size_t asum_offset,
+            const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
+            uint32_t sum_flag, const Databases& db)
 {
 	// Makes sure all dimensions are larger than zero
 	if (n == 0)
@@ -43,25 +35,25 @@ void Xasum::DoAsum(const size_t n, const tart::buffer_ptr& asum_buffer, const si
 	}
 
 	// Tests the vectors for validity
-	TestVectorX(mDtype, n, x_buffer, x_offset, x_inc);
-	TestVectorScalar(mDtype, 1, asum_buffer, asum_offset);
+	TestVectorX(dtype, n, x_buffer, x_offset, x_inc);
+	TestVectorScalar(dtype, 1, asum_buffer, asum_offset);
 
 	// Retrieves the Xasum kernels from the compiled binary
-	tart::kernel_ptr kernel1 = getAsum(this->mDevice, this->mDtype);
-	tart::kernel_ptr kernel2 = getAsumEpilogue(this->mDevice, this->mDtype);
+	tart::kernel_ptr kernel1 = getAsum(device, dtype);
+	tart::kernel_ptr kernel2 = getAsumEpilogue(device, dtype);
 	
 	// Creates the buffer for intermediate values
-	auto temp_size = 2 * db_["WGS2"];
-	auto temp_buffer = this->mDevice->allocateBuffer(temp_size*this->mDtype.size());
+	auto temp_size = 2 * db["WGS2"];
+	auto temp_buffer = device->allocateBuffer(temp_size*dtype.size());
 
 	// Sets the kernel arguments
 	#if VULKAN_USE_BDA
-		tart::DeviceMetadata meta = device_()->getMetadata();
+		tart::DeviceMetadata meta = device->getMetadata();
 		kernel1->setArg(0, static_cast<int>(n));
 		if (meta.bda)
-			kernel1->setArg(1, x_buffer()->getAddress());
+			kernel1->setArg(1, x_buffer->getAddress());
 		else
-			kernel1->setArg(1, x_buffer());
+			kernel1->setArg(1, x_buffer);
 		kernel1->setArg(2, static_cast<int>(x_offset));
 		kernel1->setArg(3, static_cast<int>(x_inc));
 		if (meta.bda)
@@ -77,19 +69,19 @@ void Xasum::DoAsum(const size_t n, const tart::buffer_ptr& asum_buffer, const si
 	#endif
 
 	// Launches the main kernel
-	kernel1->enqueue({temp_size, 1, 1}, {db_["WGS1"], mSum});
+	kernel1->enqueue({temp_size, 1, 1}, {db["WGS1"], sum_flag});
 
 	// Sets the arguments for the epilogue kernel
 #if VULKAN_USE_BDA
 	if (meta.bda)
 	{
 		kernel2->setArg(0, temp_buffer->getAddress());
-		kernel2->setArg(1, asum_buffer()->getAddress());
+		kernel2->setArg(1, asum_buffer->getAddress());
 	}
 	else
 	{
 		kernel2->setArg(0, temp_buffer);
-		kernel2->setArg(1, asum_buffer());
+		kernel2->setArg(1, asum_buffer);
 	}
 	kernel2->setArg(2, static_cast<int>(asum_offset));
 #else
@@ -99,7 +91,7 @@ void Xasum::DoAsum(const size_t n, const tart::buffer_ptr& asum_buffer, const si
 #endif
 
 	// Launches the epilogue kernel
-	kernel2->enqueue({1, 1, 1}, {db_["WGS2"], mSum});
+	kernel2->enqueue({1, 1, 1}, {db["WGS2"], sum_flag});
 }
 
 // =================================================================================================

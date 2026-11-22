@@ -26,11 +26,11 @@ Xhpr::Xhpr(const tart::DType& dtype, Queue& queue, EventPointer event, const std
 
 // The main routine
 void Xhpr::DoHpr(const Layout layout, const Triangle triangle, const size_t n, const tart::Scalar& alpha,
-                       const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc, const tart::buffer_ptr& ap_buffer,
-                       const size_t ap_offset) {
+                        const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc, const tart::buffer_ptr& ap_buffer,
+                        const size_t ap_offset, const Databases& db) {
   // Specific Xhpr functionality is implemented in the kernel using defines
   DoHer(layout, triangle, n, alpha, x_buffer, x_offset, x_inc, ap_buffer, ap_offset, n,
-        true);  // packed matrix
+        true, "HPR", db);  // packed matrix
 }
 
 // =================================================================================================

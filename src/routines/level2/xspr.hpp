@@ -30,7 +30,9 @@ class Xspr : public Xher {
 
   // Templated-precision implementation of the routine
   void DoSpr(const Layout layout, const Triangle triangle, const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& x_buffer,
-             const size_t x_offset, const size_t x_inc, const tart::buffer_ptr& ap_buffer, const size_t ap_offset);
+             const size_t x_offset, const size_t x_inc, const tart::buffer_ptr& ap_buffer, const size_t ap_offset,
+              tart::device_ptr device, const tart::DType& dtype,
+              const Databases& db);
 };
 
 // =================================================================================================

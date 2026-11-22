@@ -3,8 +3,7 @@
 // This file is part of the CLBlast project. Author(s):
 //   Cedric Nugteren <www.cedricnugteren.nl>
 //
-// This file implements the Xcol2im routine. The precision is implemented using a template argument.
-// Uses the tuning parameters from the regular copy kernel.
+// This file contains the functional interface for the Xcol2im routine.
 //
 // =================================================================================================
 
@@ -14,25 +13,18 @@
 #include <cstddef>
 #include <string>
 
-#include "routine.hpp"
+#include "database/database.hpp"
 #include "utilities/backend.hpp"
 
 namespace clblast {
 // =================================================================================================
 
-// See comment at top of file for a description of the class
-class Xcol2im : public Routine {
- public:
-  // Constructor
-  Xcol2im(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "COL2IM");
-
-  // Templated-precision implementation of the routine
-  void DoCol2im(const KernelMode kernel_mode, const size_t channels, const size_t height, const size_t width,
-                const size_t kernel_h, const size_t kernel_w, const size_t pad_h, const size_t pad_w,
-                const size_t stride_h, const size_t stride_w, const size_t dilation_h, const size_t dilation_w,
-                const tart::buffer_ptr& col_buffer, const size_t col_offset, const tart::buffer_ptr& im_buffer,
-                const size_t im_offset);
-};
+// Functional implementation of Xcol2im (column-to-image)
+void DoCol2im(const KernelMode kernel_mode, const size_t channels, const size_t height, const size_t width,
+              const size_t kernel_h, const size_t kernel_w, const size_t pad_h, const size_t pad_w,
+              const size_t stride_h, const size_t stride_w, const size_t dilation_h, const size_t dilation_w,
+              const tart::buffer_ptr& col_buffer, const size_t col_offset, const tart::buffer_ptr& im_buffer,
+              const size_t im_offset, tart::device_ptr device, const tart::DType& dtype, const Databases& db);
 
 // =================================================================================================
 }  // namespace clblast

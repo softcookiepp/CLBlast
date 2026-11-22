@@ -121,19 +121,17 @@ set(API_INCLUDE_DIRS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tart/include>
 )
 
 
-# Locates the reference BLAS libraries in case the tests need to be compiled. The "FindclBLAS.cmake",
-# "FindCBLAS.cmake", "FindMKL.cmake", and "FindcuBLAS.cmake" are included.
+# Locates the CBLAS reference BLAS library for the tests and clients. The "FindCBLAS.cmake" is included.
 if(CLIENTS OR TESTS)
 	find_package(CBLAS)
-	find_package(MKL)
-	if(NOT CBLAS_FOUND AND NOT MKL_FOUND)
+	if(NOT CBLAS_FOUND)
 		if(TESTS)
-			message(FATAL_ERROR "Could NOT find clBLAS nor a CPU BLAS (CBLAS or MKL). "
+			message(FATAL_ERROR "Could NOT find CBLAS. "
 				"Install libopenblas-dev (Ubuntu) or set CBLAS_ROOT. "
 				"Tests require a reference BLAS library for correctness verification.")
 		endif()
 		if(CLIENTS)
-			message(STATUS "Could NOT find clBLAS nor a CPU BLAS, head-to-head performance comparison not supported in the clients")
+			message(STATUS "Could NOT find CBLAS, head-to-head performance comparison not supported in the clients")
 		endif()
 	endif()
 endif()
@@ -376,21 +374,11 @@ endif()
 # Section for the tests: common part for both performance ('CLIENTS') and correctness ('TESTS')
 if(CLIENTS OR TESTS)
 
-	# Sets the specifics for the reference BLAS libraries
-	set(REF_INCLUDES )
-	set(REF_LIBRARIES )
-	if(CBLAS_FOUND OR MKL_FOUND)
-		if(MKL_FOUND)	# prefers MKL over another CBLAS implementation
-			set(REF_INCLUDES ${REF_INCLUDES} ${MKL_INCLUDE_DIRS})
-			set(REF_LIBRARIES ${REF_LIBRARIES} ${MKL_LIBRARIES})
-			add_compile_definitions(CLBLAST_REF_CBLAS_MKL)
-		else()
-			set(REF_INCLUDES ${REF_INCLUDES} ${CBLAS_INCLUDE_DIRS})
-			set(REF_LIBRARIES ${REF_LIBRARIES} ${CBLAS_LIBRARIES})
-		endif()
-		set(WRAPPERS ${WRAPPERS} test/wrapper_cblas.hpp)
-		add_compile_definitions(CLBLAST_REF_CBLAS)
-	endif()
+	# Sets the specifics for the CBLAS reference library
+	set(REF_INCLUDES ${CBLAS_INCLUDE_DIRS})
+	set(REF_LIBRARIES ${CBLAS_LIBRARIES})
+	set(WRAPPERS ${WRAPPERS} test/wrapper_cblas.hpp)
+	add_compile_definitions(CLBLAST_REF_CBLAS)
 endif()
 
 # ==================================================================================================

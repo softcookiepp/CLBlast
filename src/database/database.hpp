@@ -105,11 +105,7 @@ class Databases {
 	Database& operator()(const std::string& kernel_name) { return databases_[kernel_name]; }
 
 	// Retrieves a parameter from the database
-	#if 0
-		size_t get(const std::string& key) const
-	#else
-		size_t operator[](const std::string& key) const
-	#endif
+	size_t operator[](const std::string& key) const
 	{
 		for (const auto& kernel_name : kernel_names_) {
 			const auto& kernel_db = databases_.find(kernel_name)->second;

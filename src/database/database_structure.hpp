@@ -29,18 +29,8 @@ namespace database {
 using Name = std::array<char, 51>;			// name as stored in database (50 chars + string terminator)
 using Params = std::vector<size_t>;	// parameters as stored in database
 
-#if 0
-	// now that defs and specs will be separated...
-	struct Parameters
-	{
-		std::map<std::string, uint32_t> defs;
-		std::map<std::string, uint32_t> specs;
-		size_t size() const { return defs.size() + specs.size(); }
-	};
-#else
-	// Type alias after extracting from the database (sorted map for improved code readability)
-	using Parameters = std::map<std::string, size_t>;	// parameters after reading from DB
-#endif
+// Type alias after extracting from the database (sorted map for improved code readability)
+using Parameters = std::map<std::string, size_t>;	// parameters after reading from DB
 
 // default name
 const Name kDeviceNameDefault = {"default"};
@@ -54,7 +44,7 @@ struct NewDatabaseDevice
 {
 	Name name;
 	uint32_t deviceID;
-	//Params parameters;	// parameter values
+	Params parameters;	// parameter values
 	Params defs; // define-based parameters
 	Params specs; // specialization constants
 };

@@ -30,6 +30,20 @@ def main():
         print("No kernels to compile.")
         return 0
 
+    # Check if .compiled marker exists (survives rm between CMake commands)
+    compiled_marker = manifest_path + ".compiled"
+    if os.path.exists(compiled_marker):
+        # Files were already compiled - recreate them in case rm deleted them
+        output_hpp = os.path.join(output_dir, "all-blas-kernels.hpp")
+        output_cpp = os.path.join(output_dir, "all-blas-kernels.cpp")
+        hpp_ok = os.path.exists(output_hpp) and os.path.getsize(output_hpp) > 100
+        cpp_ok = os.path.exists(output_cpp) and os.path.getsize(output_cpp) > 100
+        if not (hpp_ok and cpp_ok):
+            print("Compiling kernels (output missing or empty)...")
+        else:
+            print("Kernels already compiled, skipping.")
+            return 0
+
     # Create output directory
     os.makedirs(output_dir, exist_ok=True)
 
@@ -84,6 +98,12 @@ def main():
         return 1
 
     print(f"\nAll kernels compiled and headers generated successfully.")
+
+    # Create the .compiled marker file so CMake doesn't re-run
+    compiled_marker = manifest_path + ".compiled"
+    with open(compiled_marker, "w") as f:
+        f.write("compiled\n")
+
     return 0
 
 

@@ -122,12 +122,6 @@ void TestBlas<T, U>::TestRegular(std::vector<Arguments<U>>& test_vector, const s
 		// Optionally prepares the input data
 		prepare_data_(args, queue_, kSeed, x_source_, y_source_, a_source_, b_source_, c_source_, ap_source_,
 									scalar_source_);
-#if 0
-		std::cout << "\n	x_source_: ";
-		for (T& t : x_source_)
-			std::cout << t << ", ";
-		std::cout << std::endl;
-#endif
 
 		// Set-up for the CLBlast run
 		auto x_vec2 = Buffer<T>(queue_(), args.x_size);

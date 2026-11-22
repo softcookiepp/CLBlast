@@ -43,7 +43,7 @@ option(SAMPLES "Enable compilation of the examples" OFF)
 option(TUNERS "Enable compilation of the tuners" OFF)
 option(CLIENTS "Enable compilation of the clients to test and compare performance" OFF)
 option(TESTS "Enable compilation of the correctness tests" OFF)
-option(CUBLAS "Enables performance comparison against cuBLAS on NVIDIA GPUs" OFF)
+
 option(VULKAN_BDA "Enable Vulkan support of Buffer Device Addresses" OFF) # this may be eventually removed once BDA support is complete
 
 # The optional Netlib API for CLBlast
@@ -153,19 +153,11 @@ set(LEVELX_ROUTINES xhad xomatcopy xim2col xcol2im xconvgemm xaxpybatched xgemmb
 set(ROUTINES ${LEVEL1_ROUTINES} ${LEVEL2_ROUTINES} ${LEVEL3_ROUTINES} ${LEVELX_ROUTINES})
 set(PRECISIONS 32 64 3232 6464 16)
 
-# Sample programs
-if(FALSE)
-	set(SAMPLE_PROGRAMS_CPP sgemm sgemm_batched dtrsm tuning_api)
-	set(SAMPLE_PROGRAMS_C sasum samax dgemv sgemm haxpy cache)
-	if(NETLIB)
-		set(SAMPLE_PROGRAMS_C ${SAMPLE_PROGRAMS_C} sgemm_netlib)
-	endif()
-elseif(VULKAN)
-	# nothing yet :c
-	set(SAMPLE_PROGRAMS_CPP)
-	set(SAMPLE_PROGRAMS_C)
-endif()
 
+# Sample programs
+if(VULKAN)
+	set(SAMPLE_PROGRAMS_CPP sgemm_vk tuning_api)
+endif()
 # ==================================================================================================
 
 # Gathers all source-files (required for the compiler) and header-files (for IDEs only)
@@ -188,14 +180,7 @@ set(SOURCES
 	src/routine_aot_cache.cpp
 )
 
-if(OPENCL)
-	set(SOURCES ${SOURCES} src/clblast.cpp src/clblast_c.cpp src/tuning/tuning_api.cpp)
-	if(NETLIB)
-		set(SOURCES ${SOURCES} src/clblast_netlib_c.cpp)
-	endif()
-elseif(VULKAN)
-	set(SOURCES ${SOURCES} src/clblast_vk.cpp)
-endif()
+set(SOURCES ${SOURCES} src/clblast_vk.cpp)
 
 foreach(DATABASE ${DATABASES})
 	set(SOURCES ${SOURCES} src/database/kernels/${DATABASE}/${DATABASE}.cpp)
@@ -278,24 +263,11 @@ endif()
 # This section contains all the code related to the examples
 if(SAMPLES)
 
-	# Downloads the opencl.hpp file from Khronos
-	if(OPENCL)
-		set(CLHPP_VERSION v2024.05.08)
-		file(DOWNLOAD https://raw.githubusercontent.com/KhronosGroup/OpenCL-CLHPP/refs/tags/${CLHPP_VERSION}/include/CL/opencl.hpp ${clblast_SOURCE_DIR}/samples/opencl.hpp)
-	endif()
-
 	# Adds sample programs (C++)
 	foreach(SAMPLE ${SAMPLE_PROGRAMS_CPP})
 		add_executable(clblast_sample_${SAMPLE} samples/${SAMPLE}.cpp)
 		target_link_libraries(clblast_sample_${SAMPLE} clblast ${API_LIBRARIES})
 		install(TARGETS clblast_sample_${SAMPLE} DESTINATION bin)
-	endforeach()
-
-	# Adds sample programs (C)
-	foreach(SAMPLE ${SAMPLE_PROGRAMS_C})
-		add_executable(clblast_sample_${SAMPLE}_c samples/${SAMPLE}.c)
-		target_link_libraries(clblast_sample_${SAMPLE}_c clblast ${API_LIBRARIES})
-		install(TARGETS clblast_sample_${SAMPLE}_c DESTINATION bin)
 	endforeach()
 
 endif()

@@ -227,22 +227,34 @@ database::Parameters Database::SearchDevice(
 
 			// Sets the parameters accordingly
 			auto parameters = database::Parameters();
-			if (spec_names.size() > device.specs.size() || def_names.size() > device.defs.size())
+			auto total_needed = def_names.size() + spec_names.size();
+			auto total_available = device.parameters.size() + device.defs.size() + device.specs.size();
+			if (total_needed > total_available)
 			{
 				// this should not happen
 				throw std::invalid_argument("parameter size mismatch");
 				return database::Parameters();
 			}
-			// this will be changed later.
+			// Read from parameters and defs (old-style: all values concatenated)
+			// def_names read from device.parameters, spec_names read from device.defs
 			for (size_t i = 0; i < def_names.size(); i += 1)
 			{
-				parameters[def_names[i]] = static_cast<size_t>(device.defs[i]);
-				mDefs[def_names[i]] = static_cast<uint32_t>(device.defs[i]);
+				if (i < device.parameters.size()) {
+					parameters[def_names[i]] = static_cast<size_t>(device.parameters[i]);
+				}
+				mDefs[def_names[i]] = static_cast<uint32_t>(
+					i < device.parameters.size() ? device.parameters[i] : device.defs[i - device.parameters.size()]);
 			}
 			for (size_t i = 0; i < spec_names.size(); i += 1)
 			{
-				parameters[spec_names[i]] = static_cast<size_t>(device.specs[i]);
-				mSpecs[spec_names[i]] = static_cast<uint32_t>(device.specs[i]);
+				size_t idx = device.parameters.size() + i;
+				if (idx < device.parameters.size() + device.defs.size()) {
+					parameters[spec_names[i]] = static_cast<size_t>(device.defs[i]);
+				} else if (idx < total_available) {
+					parameters[spec_names[i]] = static_cast<size_t>(device.specs[idx - device.parameters.size() - device.defs.size()]);
+				}
+				mSpecs[spec_names[i]] = static_cast<uint32_t>(
+					idx < device.parameters.size() + device.defs.size() ? device.defs[i] : device.specs[idx - device.parameters.size() - device.defs.size()]);
 			}
 			return parameters;
 		}

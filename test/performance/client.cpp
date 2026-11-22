@@ -39,13 +39,12 @@ const int Client<T, U>::kSeed = 42;	// fixed seed for reproducibility
 // Constructor
 template <typename T, typename U>
 Client<T, U>::Client(const Routine run_routine, const Reference1 run_reference1, const Reference2 run_reference2,
-										 const Reference3 run_reference3, const std::vector<std::string>& options,
+										const std::vector<std::string>& options,
 										 const std::vector<std::string>& buffers_in, const std::vector<std::string>& buffers_out,
 										 const GetMetric get_flops, const GetMetric get_bytes)
 		: run_routine_(run_routine),
 			run_reference1_(run_reference1),
 			run_reference2_(run_reference2),
-			run_reference3_(run_reference3),
 			options_(options),
 			buffers_in_(buffers_in),
 			buffers_out_(buffers_out),

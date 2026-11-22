@@ -362,10 +362,7 @@ void Tuner(int argc, char* argv[], const int V, GetTunerDefaultsFunc GetTunerDef
 	print_separator(settings.parameters.size());
 
 	// First runs a reference example to compare against
-#if 0
-	try {
-#endif
-		printf("|	ref |		 - |");
+	printf("|	ref |		 - |");
 		for (auto i = size_t{0}; i < settings.parameters.size() - 1; ++i) {
 			printf("		 ");
 		}
@@ -418,16 +415,6 @@ void Tuner(int argc, char* argv[], const int V, GetTunerDefaultsFunc GetTunerDef
 			device_buffers[id].Read(queue, buffer_sizes[id], reference_buffers[id]);
 		}
 		printf("			%sreference OK%s |\n", kPrintSuccess.c_str(), kPrintEnd.c_str());
-#if 0
-	}
-	
-	catch (...)
-	{
-		const auto status_code = DispatchExceptionCatchAll(false);
-		printf("* Exception caught with status %d while running the reference, aborting\n", static_cast<int>(status_code));
-		return;
-	}
-#endif
 	print_separator(settings.parameters.size());
 
 	// Perform the OpenCL kernel compilation in parallel

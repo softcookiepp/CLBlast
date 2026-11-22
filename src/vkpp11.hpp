@@ -50,7 +50,6 @@
 
 // Exception classes
 #include "cxpp11_common.hpp"
-//#include <tart/tart.hpp>
 #include "tart/tart.hpp"
 
 namespace clblast {
@@ -207,6 +206,25 @@ private:
 #endif
 
 // =================================================================================================
+
+// Kernel wrapper: provides OpenCL-like SetArgument() API over tart::kernel_ptr
+class Kernel {
+	tart::kernel_ptr mKernel;
+public:
+	explicit Kernel(const tart::kernel_ptr kernel) : mKernel(kernel) {}
+
+	// Sets push constant at index
+	template <typename T>
+	void SetArgument(const size_t index, const T& value) {
+		mKernel->setArg(index, value);
+	}
+
+	// Expose underlying tart::kernel_ptr for TimeKernel and setArgAs
+	tart::kernel_ptr get() const { return mKernel; }
+
+	// Accessor
+	const tart::kernel_ptr& operator()() const { return mKernel; }
+};
 
 // =================================================================================================
 }	// namespace clblast

@@ -179,14 +179,6 @@ void Buffer<T>::Write(const Queue& queue, const size_t size, const T* host, cons
 template <typename T>
 void Buffer<T>::Write(const Queue& queue, const size_t size, const std::vector<T>& host, const size_t offset)
 {
-#if 0
-	if (size > host.size())
-	{
-		std::cout << "sizeof T: " << sizeof(T)
-			<< "\nsize: " << size << "\nhost.size(): " << host.size() << std::endl; 
-		throw std::runtime_error("something about this isn't working");
-	}
-#endif
 	if (size > host.size() - offset)
 	{
 		// lets see if that works
@@ -202,13 +194,7 @@ void Buffer<T>::Write(const Queue& queue, const size_t size, const std::vector<T
 	size_t adjustedSize = size > host.size() - offset ? host.size() - offset : size;
 	if (buffer_->getSize() - offset*sizeof(T) < size*sizeof(T))
 		throw std::runtime_error("trying to copy too much data");
-	#if 0
-		
-		void* hostptr = const_cast<void*>(host.data());
-		buffer_->copyIn(hostptr, size*sizeof(T), offset*sizeof(T));
-	#else
-		Write(queue, adjustedSize, host.data(), offset);
-	#endif
+	Write(queue, adjustedSize, host.data(), offset);
 }
 
 // Copies the contents of this buffer into another device buffer

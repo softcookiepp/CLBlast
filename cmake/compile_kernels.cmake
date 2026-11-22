@@ -52,13 +52,19 @@ function(tart_create_kernel_source_file KERNEL_SOURCE_FILE_NAME SPV_DIR MANIFEST
     file(WRITE "${_HPP}" "// Placeholder - generated at build time")
     file(WRITE "${_CPP}" "// Placeholder - generated at build time")
 
+    # Compile command
+    set(_COMPILE_CMD ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/compile_all_kernels.py
+                     "${MANIFEST_PATH}" "${TART_SPIRV_INLINER}")
+
     # Create the custom target that overwrites placeholders at build time
+    # If .compiled marker exists, script skips compilation; otherwise compiles
     add_custom_target("${KERNEL_SOURCE_FILE_NAME}_gen"
         COMMAND ${CMAKE_COMMAND} -E remove -f "${_HPP}" "${_CPP}"
-        COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/compile_all_kernels.py
-                "${MANIFEST_PATH}" "${TART_SPIRV_INLINER}"
+        COMMAND ${_COMPILE_CMD}
+        COMMAND ${CMAKE_COMMAND} -E touch "${_HPP}" "${_CPP}"
+        COMMAND ${CMAKE_COMMAND} -E echo "Kernels generated."
         COMMENT "Generating kernel C++ sources via tart-spirv-inliner..."
-        DEPENDS tart-spirv-inliner
+        DEPENDS compile_all_kernels
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
         VERBATIM
     )

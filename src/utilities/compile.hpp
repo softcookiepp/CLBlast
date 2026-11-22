@@ -12,6 +12,7 @@
 #define CLBLAST_UTILITIES_COMPILE_H_
 
 #include <cstddef>
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -21,25 +22,19 @@
 namespace clblast {
 // =================================================================================================
 
-// Compiles a program from source code
+// Compiles a program from source code (Vulkan)
 std::shared_ptr<Program> CompileFromSource(const std::string& source_string, const tart::DType& dtype,
                                            const std::string& routine_name, const Device& device,
                                            std::vector<std::string>& options,
-                                           const size_t run_preprocessor,  // 0: platform dependent, 1: always, 2: never
-                                           const bool silent
-#if VULKAN_API
-,
-											std::map<std::string, std::string>& kernelSources
-#endif
-                                           );
-// fewer arguments because stuff is picky    
-#if VULKAN_API
-std::shared_ptr<Program> CompileFromSource(const std::string& source_string, const tart::DType& dtype,
-                                           const std::string& routine_name, const Device& device,
-                                           std::vector<std::string>& options,
-                                           const size_t run_preprocessor,  // 0: platform dependent, 1: always, 2: never
+                                           const size_t run_preprocessor,
                                            const bool silent = false);
-#endif
+// Multi-kernel version
+std::shared_ptr<Program> CompileFromSource(const std::string& source_string, const tart::DType& dtype,
+                                           const std::string& routine_name, const Device& device,
+                                           std::vector<std::string>& options,
+                                           const size_t run_preprocessor,
+                                           const bool silent, std::map<std::string, std::string>& kernelSources);
+
 // =================================================================================================
 }  // namespace clblast
 

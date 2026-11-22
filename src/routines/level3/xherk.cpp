@@ -161,14 +161,8 @@ void Xherk::HerkAB(const Layout layout, const Triangle triangle, const Transpose
 	if (subgroupSupported)
 		spec[15] = 1; // this may actually not need to be a spec constant
 	
-	#if 0
-		Xtrmm xtrmm(layout, const Side side, const Triangle triangle, const Transpose a_transpose,
-							const Diagonal diagonal, const size_t m, const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer,
-							a_offset, a_ld, b_temp, b_offset, b_ld);
-	#else
 		// Launches the kernel
 		kernel->enqueue(global, spec);
-	#endif
 
 	// Runs the post-processing kernel
 	const auto upper =

@@ -3,7 +3,6 @@
 
 #include "clblast_vk.h"
 #include <cstdint>
-//#include <tart/tart.hpp>
 #include "tart/tart.hpp"
 
 namespace clblast

@@ -6,5 +6,4 @@
 #include "xgemmstridedbatched.cpp"
 #include "xhad.cpp"
 #include "xim2col.cpp"
-//#include "xinvert.cpp"
 #include "xomatcopy.cpp"

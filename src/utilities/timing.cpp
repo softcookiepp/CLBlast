@@ -58,15 +58,6 @@ double TimeKernel(const uint32_t num_runs, const tart::kernel_ptr& kernel, Queue
 		printf(" %9.2lf ms |", time_ms);
 	}
 	return time_ms;
-#if 0
-	} catch (...) {
-		const auto status_code = DispatchExceptionCatchAll(false);
-		if (!silent) {
-			printf("	error %-5d |", static_cast<int>(status_code));
-		}
-		return -1.0;	// invalid
-	}
-#endif
 }
 
 // =================================================================================================

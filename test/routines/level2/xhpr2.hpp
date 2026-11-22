@@ -63,7 +63,7 @@ class TestXhpr2 {
 		auto queue_plain = queue();
 		auto status =
 				Hpr2(args.layout, args.triangle, args.n, args.alpha, buffers.x_vec(), args.x_offset, args.x_inc,
-						 buffers.y_vec(), args.y_offset, args.y_inc, buffers.ap_mat(), args.ap_offset, queue_plain);
+						 buffers.y_vec(), args.y_offset, args.y_inc, buffers.ap_mat(), args.ap_offset);
 		queue_plain->sync();
 		return status;
 	}

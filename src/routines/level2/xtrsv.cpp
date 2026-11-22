@@ -134,7 +134,7 @@ void Xtrsv::DoTrsv(const Layout layout, const Triangle triangle, const Transpose
 			const auto gemv_n = (a_transpose == Transpose::kNo) ? i : block_size;
 			DoGemv(layout, a_transpose, gemv_m, gemv_n, tart::Scalar::one(), a_buffer, a_offset + extra_offset_a, a_ld,
 					x_buffer, x_offset + extra_offset_x, x_inc, tart::Scalar::one(), x_buffer, x_offset + extra_offset_b,
-					x_inc, db);
+					x_inc, db, device, dtype);
 		}
 		Substitution(layout, triangle, a_transpose, diagonal, block_size, a_buffer, a_offset + col + col * a_ld, a_ld,
 								 b_buffer, b_offset + col * b_inc, b_inc, x_buffer, x_offset + col * x_inc, x_inc, device, dtype, db);

@@ -62,7 +62,7 @@ class TestXdotu {
 	static StatusCode RunRoutine(const Arguments<T>& args, Buffers<T>& buffers, Queue& queue) {
 		auto queue_plain = queue();
 		auto status = Dotu<T>(args.n, buffers.scalar(), args.dot_offset, buffers.x_vec(), args.x_offset, args.x_inc,
-													buffers.y_vec(), args.y_offset, args.y_inc, queue_plain);
+													buffers.y_vec(), args.y_offset, args.y_inc);
 		queue_plain->sync();
 		return status;
 	}

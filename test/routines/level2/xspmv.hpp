@@ -64,7 +64,7 @@ class TestXspmv {
 		auto queue_plain = queue();
 		auto status =
 				Spmv(args.layout, args.triangle, args.n, args.alpha, buffers.ap_mat(), args.ap_offset, buffers.x_vec(),
-						 args.x_offset, args.x_inc, args.beta, buffers.y_vec(), args.y_offset, args.y_inc, queue_plain);
+						 args.x_offset, args.x_inc, args.beta, buffers.y_vec(), args.y_offset, args.y_inc);
 		queue_plain->sync();
 		return status;
 	}

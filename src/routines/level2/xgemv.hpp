@@ -25,7 +25,7 @@ void DoGemv(const Layout layout, const Transpose a_transpose, const size_t m, co
             const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
             const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
             const tart::Scalar& beta, const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
-            const Databases& db);
+            const Databases& db, tart::device_ptr device, const tart::DType& dtype);
 
 // Generic version used also for other matrix-vector multiplications
 void MatVec(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n,

@@ -67,7 +67,7 @@ class TestXherk {
 		auto queue_plain = queue();
 		auto status =
 				Herk(args.layout, args.triangle, args.a_transpose, args.n, args.k, args.alpha, buffers.a_mat(), args.a_offset,
-						 args.a_ld, args.beta, buffers.c_mat(), args.c_offset, args.c_ld, queue_plain);
+						 args.a_ld, args.beta, buffers.c_mat(), args.c_offset, args.c_ld);
 		queue_plain->sync();
 		return status;
 	}

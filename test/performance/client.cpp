@@ -25,7 +25,6 @@
 #include <vector>
 
 #include "clblast_vk.h"
-#include "routine.hpp"
 #include "test/test_utilities.hpp"
 #include "utilities/backend.hpp"
 #include "utilities/utilities.hpp"
@@ -275,7 +274,7 @@ Arguments<U> Client<T, U>::ParseArguments(int argc, char* argv[], const size_t l
 template <typename T, typename U>
 void Client<T, U>::PerformanceTest(Arguments<U>& args, const SetMetric set_sizes) {
 	// Initializes OpenCL and the libraries
-	auto device = Device(platform, args.device_id);
+	auto device = Device(args.device_id);
 	auto queue = Queue(device);
 
 	// Optionally overrides parameters if tuner files are given (semicolon separated)

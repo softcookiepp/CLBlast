@@ -61,7 +61,7 @@ class TestXtbmv {
 	static StatusCode RunRoutine(const Arguments<T>& args, Buffers<T>& buffers, Queue& queue) {
 		auto queue_plain = queue();
 		auto status = Tbmv<T>(args.layout, args.triangle, args.a_transpose, args.diagonal, args.n, args.kl, buffers.a_mat(),
-													args.a_offset, args.a_ld, buffers.x_vec(), args.x_offset, args.x_inc, queue_plain);
+													args.a_offset, args.a_ld, buffers.x_vec(), args.x_offset, args.x_inc);
 		queue_plain->sync();
 		return status;
 	}

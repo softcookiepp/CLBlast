@@ -140,7 +140,7 @@ class TestXomatcopy {
 	static StatusCode RunRoutine(const Arguments<T>& args, Buffers<T>& buffers, Queue& queue) {
 		auto queue_plain = queue();
 		auto status = Omatcopy<T>(args.layout, args.a_transpose, args.m, args.n, args.alpha, buffers.a_mat(), args.a_offset,
-															args.a_ld, buffers.b_mat(), args.b_offset, args.b_ld, queue_plain);
+															args.a_ld, buffers.b_mat(), args.b_offset, args.b_ld);
 		queue_plain->sync();
 		return status;
 	}

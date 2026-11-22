@@ -18,7 +18,6 @@
 #include <cstdio>
 #include <string>
 #include <vector>
-#include "routine.hpp"
 #include "test/correctness/tester.hpp"
 #include "test/test_utilities.hpp"
 #include "utilities/backend.hpp"

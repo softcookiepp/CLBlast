@@ -59,7 +59,7 @@ class TestXamax {
 	{
 		auto queue_plain = queue();
 		auto status = Amax<T>(args.n, buffers.scalar_uint(), args.imax_offset, buffers.x_vec(), args.x_offset, args.x_inc,
-														queue_plain, nullptr);
+													 nullptr);
 		queue_plain->sync();
 		return status;
 	}

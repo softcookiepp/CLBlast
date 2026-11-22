@@ -60,7 +60,7 @@ class TestXhpr {
 	static StatusCode RunRoutine(const Arguments<U>& args, Buffers<T>& buffers, Queue& queue) {
 		auto queue_plain = queue();
 		auto status = Hpr(args.layout, args.triangle, args.n, args.alpha, buffers.x_vec(), args.x_offset, args.x_inc,
-											buffers.ap_mat(), args.ap_offset, queue_plain);
+											buffers.ap_mat(), args.ap_offset);
 		queue_plain->sync();
 		return status;
 	}

@@ -61,7 +61,7 @@ class TestXtpmv {
 	{
 		auto queue_plain = queue();
 		auto status = Tpmv<T>(args.layout, args.triangle, args.a_transpose, args.diagonal, args.n, buffers.ap_mat(),
-													args.ap_offset, buffers.x_vec(), args.x_offset, args.x_inc, queue_plain);
+													args.ap_offset, buffers.x_vec(), args.x_offset, args.x_inc);
 		queue_plain->sync();
 		return status;
 	}

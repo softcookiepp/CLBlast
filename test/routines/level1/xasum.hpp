@@ -57,7 +57,7 @@ class TestXasum {
 	// Describes how to run the CLBlast routine
 	static StatusCode RunRoutine(const Arguments<T>& args, Buffers<T>& buffers, Queue& queue)
 	{
-		auto status = Asum<T>(args.n, buffers.scalar(), args.asum_offset, buffers.x_vec(), args.x_offset, args.x_inc, queue(), nullptr);
+		auto status = Asum<T>(args.n, buffers.scalar(), args.asum_offset, buffers.x_vec(), args.x_offset, args.x_inc);
 		queue()->sync();
 		return status;
 	}

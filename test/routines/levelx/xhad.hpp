@@ -109,8 +109,7 @@ class TestXhad {
 	{
 		auto queue_plain = queue();
 		auto status = Had(args.n, args.alpha, buffers.x_vec(), args.x_offset, args.x_inc, buffers.y_vec(), args.y_offset,
-											args.y_inc, args.beta, buffers.c_mat(), 0, 1,	// used for 'vector z'
-											queue_plain);
+											args.y_inc, args.beta, buffers.c_mat(), 0, 1);	// used for 'vector z'
 		queue_plain->sync();
 		return status;
 	}

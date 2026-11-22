@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/clblast_sample_sgemm_vk.dir/samples/sgemm_vk.cpp.o -o clblast_sample_sgemm_vk  -Wl,-rpath,/home/me/development/CLBlast-vk/build2:/home/me/development/CLBlast-vk/build2/tart: libclblast.so.1.6.3 tart/libtart.so.0.1.0 

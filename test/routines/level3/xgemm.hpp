@@ -99,7 +99,7 @@ class TestXgemm {
 	auto status =
 				Gemm(args.layout, args.a_transpose, args.b_transpose, args.m, args.n, args.k, args.alpha, buffers.a_mat(),
 						 args.a_offset, args.a_ld, buffers.b_mat(), args.b_offset, args.b_ld, args.beta, buffers.c_mat(),
-						 args.c_offset, args.c_ld, queue_plain, nullptr, buffers.ap_mat());
+						 args.c_offset, args.c_ld, nullptr, buffers.ap_mat());
 		queue_plain->sync();
 		return status;
 	}

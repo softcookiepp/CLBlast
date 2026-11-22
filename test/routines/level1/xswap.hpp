@@ -58,7 +58,7 @@ class TestXswap {
 	static StatusCode RunRoutine(const Arguments<T>& args, Buffers<T>& buffers, Queue& queue) {
 	auto queue_plain = queue();
 		auto status = Swap<T>(args.n, buffers.x_vec(), args.x_offset, args.x_inc, buffers.y_vec(), args.y_offset,
-		args.y_inc, queue_plain, nullptr);
+		args.y_inc, nullptr);
 	queue_plain->sync();
 		return status;
 	}

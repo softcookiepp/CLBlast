@@ -82,7 +82,7 @@ class TestXim2col {
 		auto queue_plain = queue();
 		auto status = Im2col<T>(args.kernel_mode, args.channels, args.height, args.width, args.kernel_h, args.kernel_w,
 														args.pad_h, args.pad_w, args.stride_h, args.stride_w, args.dilation_h, args.dilation_w,
-														buffers.a_mat(), args.a_offset, buffers.b_mat(), args.b_offset, queue_plain);
+														buffers.a_mat(), args.a_offset, buffers.b_mat(), args.b_offset);
 		queue_plain->sync();
 		return status;
 	}

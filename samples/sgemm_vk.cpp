@@ -108,7 +108,7 @@ int main() {
 #if 1
 	auto status =
 			clblast::Gemm(clblast::Layout::kRowMajor, clblast::Transpose::kNo, clblast::Transpose::kNo, m, n, k, alpha,
-										device_a, 0, a_ld, device_b, 0, b_ld, beta, device_c, 0, c_ld, device);
+										device_a, 0, a_ld, device_b, 0, b_ld, beta, device_c, 0, c_ld);
 #else
 	auto queue_plain = queue();
 	auto status =

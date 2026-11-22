@@ -24,20 +24,16 @@ int main() {
 
   // Initialize Vulkan device via Tart
   tart::Instance instance;
-  if (instance.getDeviceCount() == 0 || device_id >= instance.getDeviceCount()) {
+  auto device = instance.getDevice(device_id);
+  if (!device) {
     fprintf(stderr, "No Vulkan device available\n");
     return 1;
   }
-  auto device = instance.getDevice(device_id);
-
-  // Creates a Tart command queue
-  auto queue = device->createQueue();
 
   // Performs the tuning
   printf("Starting the tuning...\n");
   std::unordered_map<std::string, size_t> parameters;
-  auto tart_queue = queue.get();
-  auto status = clblast::TuneCopy<float>(&tart_queue, m, n, fraction, parameters);
+  auto status = clblast::TuneCopy<float>(device, m, n, fraction, parameters);
 
   // Tuning completed. See "clblast_vk.h" for status codes (0 -> success).
   printf("Completed TuneCopy with status %d (0 == OK), found parameters:\n", static_cast<int>(status));
@@ -46,7 +42,7 @@ int main() {
   }
 
   // Set the new parameters
-  status = clblast::OverrideParameters(device(), "Copy", clblast::Precision::kSingle, parameters);
+  status = clblast::OverrideParameters(device, "Copy", clblast::Precision::kSingle, parameters);
   printf("Completed OverrideParameters with status %d (0 == OK)\n", static_cast<int>(status));
   return 0;
 }

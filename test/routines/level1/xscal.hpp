@@ -54,7 +54,7 @@ class TestXscal {
 	static StatusCode RunRoutine(const Arguments<T>& args, Buffers<T>& buffers, Queue& queue) {
 
 	auto queue_plain = queue();
-		auto status = Scal(args.n, args.alpha, buffers.x_vec(), args.x_offset, args.x_inc, queue_plain, nullptr);
+		auto status = Scal(args.n, args.alpha, buffers.x_vec(), args.x_offset, args.x_inc, nullptr);
 	queue_plain->sync();
 
 		return status;

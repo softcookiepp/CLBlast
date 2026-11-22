@@ -64,7 +64,7 @@ class TestXsymv {
 		auto queue_plain = queue();
 		auto status =
 				Symv(args.layout, args.triangle, args.n, args.alpha, buffers.a_mat(), args.a_offset, args.a_ld, buffers.x_vec(),
-						 args.x_offset, args.x_inc, args.beta, buffers.y_vec(), args.y_offset, args.y_inc, queue_plain);
+						 args.x_offset, args.x_inc, args.beta, buffers.y_vec(), args.y_offset, args.y_inc);
 		queue_plain->sync();
 		return status;
 	}

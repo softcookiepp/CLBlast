@@ -1,0 +1,1 @@
+/usr/bin/c++ "CMakeFiles/tart-spirv-inliner.dir/src/main.cpp.o" "CMakeFiles/tart-spirv-inliner.dir/src/shader_compiler.cpp.o" "CMakeFiles/tart-spirv-inliner.dir/src/spirv_renderer.cpp.o" "CMakeFiles/tart-spirv-inliner.dir/src/header_writer.cpp.o" -o tart-spirv-inliner 

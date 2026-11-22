@@ -60,7 +60,7 @@ class TestXher {
 	static StatusCode RunRoutine(const Arguments<U>& args, Buffers<T>& buffers, Queue& queue) {
 		auto queue_plain = queue();
 		auto status = Her(args.layout, args.triangle, args.n, args.alpha, buffers.x_vec(), args.x_offset, args.x_inc,
-											buffers.a_mat(), args.a_offset, args.a_ld, queue_plain);
+											buffers.a_mat(), args.a_offset, args.a_ld);
 		queue_plain->sync();
 		return status;
 	}

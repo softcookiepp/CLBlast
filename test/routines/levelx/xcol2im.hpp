@@ -84,7 +84,7 @@ class TestXcol2im {
 															args.pad_h, args.pad_w, args.stride_h, args.stride_w, args.dilation_h, args.dilation_w,
 															buffers.b_mat(), args.b_offset,	// col
 															buffers.a_mat(), args.a_offset,	// im
-															queue_plain, nullptr);
+														 nullptr);
 		queue_plain->sync();
 		return status;
 	}

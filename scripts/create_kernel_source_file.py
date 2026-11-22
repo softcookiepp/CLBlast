@@ -27,7 +27,7 @@ def read_spv(filepath):
 
 def render_source_file(spv_directory, source_file_name, sources, persistent = False):
 	full_hpp = """
-#include "tart.hpp"
+#include <tart/tart.hpp>
 
 namespace tart
 {

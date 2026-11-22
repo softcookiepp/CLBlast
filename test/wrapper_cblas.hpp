@@ -11,7 +11,7 @@
 #ifndef CLBLAST_TEST_WRAPPER_CBLAS_H_
 #define CLBLAST_TEST_WRAPPER_CBLAS_H_
 //#include <tart/tart.hpp>
-#include "tart.hpp"
+#include "tart/tart.hpp"
 
 #include <cstddef>
 #include <vector>

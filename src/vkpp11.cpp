@@ -46,7 +46,7 @@ size_t Device::VersionNumber() const {
 // TODO: implement some of this stuff in tart
 std::string Device::Vendor() const
 {
-	switch(mDevice->getMetadata().physicalDeviceProperties.vendorID)
+	switch(static_cast<tart::VendorID>(mDevice->getMetadata().physicalDeviceProperties.vendorID))
 	{
 	case tart::VendorID::eNVIDIA:
 		return "NVIDIA";

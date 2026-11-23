@@ -26,7 +26,7 @@ class Xgerc : public Xger {
    using Xger::DoGer;
 
    // Constructor
-   Xgerc(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "GERC");
+   Xgerc(const tart::DType& dtype, Queue& queue, const std::string& name = "GERC");
 
    // Templated-precision implementation of the routine
    void DoGerc(const Layout layout, const size_t m, const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& x_buffer,

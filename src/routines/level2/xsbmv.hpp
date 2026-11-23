@@ -28,7 +28,7 @@ class Xsbmv : public Xgemv {
 	using Xgemv::MatVec;
 
 	// Constructor
-	Xsbmv(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "SBMV");
+	Xsbmv(const tart::DType& dtype, Queue& queue, const std::string& name = "SBMV");
 
 	// Templated-precision implementation of the routine
 	void DoSbmv(const Layout layout, const Triangle triangle, const size_t n, const size_t k, const tart::Scalar& alpha,

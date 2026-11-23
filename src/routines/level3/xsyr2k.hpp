@@ -28,7 +28,7 @@ class Xsyr2k : public Xsyrk {
    using Xsyrk::SyrkAB;
 
    // Constructor
-   Xsyr2k(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "SYR2K");
+   Xsyr2k(const tart::DType& dtype, Queue& queue, const std::string& name = "SYR2K");
 
    // Templated-precision implementation of the routine
    void DoSyr2k(const Layout layout, const Triangle triangle, const Transpose ab_transpose, const size_t n,

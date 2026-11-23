@@ -20,7 +20,7 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-Xgerc::Xgerc(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) : Xger(dtype, queue, event, name) {}
+Xgerc::Xgerc(const tart::DType& dtype, Queue& queue, const std::string& name) : Xger(dtype, queue, name) {}
 
 // =================================================================================================
 

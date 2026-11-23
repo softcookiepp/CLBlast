@@ -26,7 +26,7 @@ class Xhpr2 : public Xher2 {
    using Xher2::DoHer2;
 
    // Constructor
-   Xhpr2(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "HPR2");
+   Xhpr2(const tart::DType& dtype, Queue& queue, const std::string& name = "HPR2");
 
    // Templated-precision implementation of the routine
    void DoHpr2(const Layout layout, const Triangle triangle, const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& x_buffer,

@@ -27,7 +27,7 @@ class Xsymm {
  public:
 
 	// Constructor
-	Xsymm(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "SYMM");
+	Xsymm(const tart::DType& dtype, Queue& queue, const std::string& name = "SYMM");
 
 	// Templated-precision implementation of the routine
 	void DoSymm(const Layout layout, const Side side, const Triangle triangle, const size_t m, const size_t n,

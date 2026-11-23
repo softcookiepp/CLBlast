@@ -38,7 +38,7 @@ void HerkAB(const Layout layout, const Triangle triangle, const Transpose a_tran
 class Xherk {
  public:
 	// Constructor
-	Xherk(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "HERK");
+	Xherk(const tart::DType& dtype, Queue& queue, const std::string& name = "HERK");
 
 	// Templated-precision implementation of the routine
 	void DoHerk(const Layout layout, const Triangle triangle, const Transpose a_transpose, const size_t n, const size_t k,

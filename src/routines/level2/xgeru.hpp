@@ -26,7 +26,7 @@ class Xgeru : public Xger {
    using Xger::DoGer;
 
    // Constructor
-   Xgeru(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "GERU");
+   Xgeru(const tart::DType& dtype, Queue& queue, const std::string& name = "GERU");
 
    // Templated-precision implementation of the routine
    void DoGeru(const Layout layout, const size_t m, const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& x_buffer,

@@ -21,7 +21,7 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-Xtrmv::Xtrmv(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) {}
+Xtrmv::Xtrmv(const tart::DType& dtype, Queue& queue, const std::string& name) {}
 
 // =================================================================================================
 

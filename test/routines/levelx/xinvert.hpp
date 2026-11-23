@@ -179,13 +179,13 @@ class TestXinvert {
       clWaitForEvents(1, &event);
       clReleaseEvent(event);
 #elif CUDA_API
-      auto inverter = Xinvert<T>(queue, nullptr);
+      auto inverter = Xinvert<T>(queue);
       inverter.InvertMatrixDiagonalBlocks(args.layout, args.triangle, args.diagonal, args.n, args.m, buffers.a_mat,
                                           args.a_offset, args.a_ld, buffers.b_mat);
       cuStreamSynchronize(queue());
 #elif VULKAN_API
     auto queue_plain = queue();
-    auto inverter = Xinvert<T>(queue, nullptr);
+    auto inverter = Xinvert<T>(queue);
       inverter.InvertMatrixDiagonalBlocks(args.layout, args.triangle, args.diagonal, args.n, args.m, buffers.a_mat,
                                           args.a_offset, args.a_ld, buffers.b_mat);
     queue_plain->sync();

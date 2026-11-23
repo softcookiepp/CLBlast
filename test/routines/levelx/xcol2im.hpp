@@ -83,8 +83,7 @@ class TestXcol2im {
 			auto status = Col2im<T>(args.kernel_mode, args.channels, args.height, args.width, args.kernel_h, args.kernel_w,
 															args.pad_h, args.pad_w, args.stride_h, args.stride_w, args.dilation_h, args.dilation_w,
 															buffers.b_mat(), args.b_offset,	// col
-															buffers.a_mat(), args.a_offset,	// im
-														 nullptr);
+															buffers.a_mat(), args.a_offset);	// im
 		queue_plain->sync();
 		return status;
 	}

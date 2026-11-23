@@ -28,7 +28,7 @@ class Xhpmv : public Xgemv {
 	using Xgemv::MatVec;
 
 	// Constructor
-	Xhpmv(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "HPMV");
+	Xhpmv(const tart::DType& dtype, Queue& queue, const std::string& name = "HPMV");
 
 	// Templated-precision implementation of the routine
 	void DoHpmv(const Layout layout, const Triangle triangle, const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& ap_buffer,

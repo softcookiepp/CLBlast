@@ -40,7 +40,7 @@ void MatVec(const Layout layout, const Transpose a_transpose, const size_t m, co
 class Xgemv {
  public:
 	// Constructor
-	Xgemv(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "GEMV");
+	Xgemv(const tart::DType& dtype, Queue& queue, const std::string& name = "GEMV");
 
 	// Templated-precision implementation of the routine
 	void DoGemv(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n,

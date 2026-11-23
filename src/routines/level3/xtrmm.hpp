@@ -26,7 +26,7 @@ class Xtrmm {
  public:
 
 	// Constructor
-	Xtrmm(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "TRMM");
+	Xtrmm(const tart::DType& dtype, Queue& queue, const std::string& name = "TRMM");
 
 	// Templated-precision implementation of the routine
 	void DoTrmm(const Layout layout, const Side side, const Triangle triangle, const Transpose a_transpose,

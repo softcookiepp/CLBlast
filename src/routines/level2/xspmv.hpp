@@ -28,7 +28,7 @@ class Xspmv : public Xgemv {
 	using Xgemv::MatVec;
 
 	// Constructor
-	Xspmv(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "SPMV");
+	Xspmv(const tart::DType& dtype, Queue& queue, const std::string& name = "SPMV");
 
 	// Templated-precision implementation of the routine
 	void DoSpmv(const Layout layout, const Triangle triangle, const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& ap_buffer,

@@ -31,7 +31,7 @@ void DoHer(const Layout layout, const Triangle triangle, const size_t n, const t
 class Xher {
  public:
 	// Constructor
-	Xher(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "HER");
+	Xher(const tart::DType& dtype, Queue& queue, const std::string& name = "HER");
 
 	// Templated-precision implementation of the routine
 	void DoHer(const Layout layout, const Triangle triangle, const size_t n, const tart::Scalar& alpha,

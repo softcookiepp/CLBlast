@@ -161,7 +161,7 @@ void SyrkAB(const Layout layout, const Triangle triangle, const Transpose a_tran
 }
 
 // Xsyrk class implementation
-Xsyrk::Xsyrk(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) {}
+Xsyrk::Xsyrk(const tart::DType& dtype, Queue& queue, const std::string& name) {}
 
 void Xsyrk::DoSyrk(const Layout layout, const Triangle triangle, const Transpose a_transpose, const size_t n,
                    const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,

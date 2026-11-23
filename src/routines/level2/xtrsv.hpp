@@ -25,7 +25,7 @@ namespace clblast {
 class Xtrsv {
  public:
 	// Constructor
-	Xtrsv(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "TRSV");
+	Xtrsv(const tart::DType& dtype, Queue& queue, const std::string& name = "TRSV");
 
 	// Templated-precision implementation of the routine
 	void DoTrsv(const Layout layout, const Triangle triangle, const Transpose a_transpose, const Diagonal diagonal,

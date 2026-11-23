@@ -26,7 +26,7 @@ class Xtbmv {
  public:
 
 	// Constructor
-	Xtbmv(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "TBMV");
+	Xtbmv(const tart::DType& dtype, Queue& queue, const std::string& name = "TBMV");
 
 	// Templated-precision implementation of the routine
 	void DoTbmv(const Layout layout, const Triangle triangle, const Transpose a_transpose, const Diagonal diagonal,

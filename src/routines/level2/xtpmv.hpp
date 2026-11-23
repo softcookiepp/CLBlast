@@ -26,7 +26,7 @@ class Xtpmv {
  public:
 
 	// Constructor
-	Xtpmv(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "TPMV");
+	Xtpmv(const tart::DType& dtype, Queue& queue, const std::string& name = "TPMV");
 
 	// Templated-precision implementation of the routine
 	void DoTpmv(const Layout layout, const Triangle triangle, const Transpose a_transpose, const Diagonal diagonal,

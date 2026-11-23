@@ -73,7 +73,7 @@ class TestXaxpyBatched {
 		auto queue_plain = queue();
 			auto status =
 					AxpyBatched(args.n, args.alphas.data(), buffers.x_vec(), args.x_offsets.data(), args.x_inc, buffers.y_vec(),
-											args.y_offsets.data(), args.y_inc, args.batch_count, nullptr);
+											args.y_offsets.data(), args.y_inc, args.batch_count);
 		queue_plain->sync();
 		return status;
 	}

@@ -20,7 +20,7 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-Xhbmv::Xhbmv(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) : Xgemv(dtype, queue, event, name) {}
+Xhbmv::Xhbmv(const tart::DType& dtype, Queue& queue, const std::string& name) : Xgemv(dtype, queue, name) {}
 
 // =================================================================================================
 

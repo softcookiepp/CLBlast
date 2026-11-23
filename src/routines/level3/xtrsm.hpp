@@ -25,7 +25,7 @@ class Xtrsm {
  public:
 
 	// Constructor
-	Xtrsm(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "TRSM");
+	Xtrsm(const tart::DType& dtype, Queue& queue, const std::string& name = "TRSM");
 
 	// Templated-precision implementation of the routine
 	void DoTrsm(const Layout layout, Side side, Triangle triangle, const Transpose a_transpose, const Diagonal diagonal,

@@ -20,7 +20,7 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-Xsyr2k::Xsyr2k(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) : Xsyrk(dtype, queue, event, name) {}
+Xsyr2k::Xsyr2k(const tart::DType& dtype, Queue& queue, const std::string& name) : Xsyrk(dtype, queue, name) {}
 
 // =================================================================================================
 

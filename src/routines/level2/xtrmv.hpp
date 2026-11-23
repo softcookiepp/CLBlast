@@ -25,7 +25,7 @@ namespace clblast {
 class Xtrmv {
  public:
 	// Constructor
-	Xtrmv(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "TRMV");
+	Xtrmv(const tart::DType& dtype, Queue& queue, const std::string& name = "TRMV");
 
 	// Templated-precision implementation of the routine
 	void DoTrmv(const Layout layout, const Triangle triangle, const Transpose a_transpose, const Diagonal diagonal,

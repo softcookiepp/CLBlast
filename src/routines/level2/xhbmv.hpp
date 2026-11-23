@@ -28,7 +28,7 @@ class Xhbmv : public Xgemv {
 	using Xgemv::MatVec;
 
 	// Constructor
-	Xhbmv(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "HBMV");
+	Xhbmv(const tart::DType& dtype, Queue& queue, const std::string& name = "HBMV");
 
 	// Templated-precision implementation of the routine
 	void DoHbmv(const Layout layout, const Triangle triangle, const size_t n, const size_t k, const tart::Scalar& alpha,

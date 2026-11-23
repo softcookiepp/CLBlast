@@ -25,7 +25,7 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor
-Xtrsv::Xtrsv(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) {}
+Xtrsv::Xtrsv(const tart::DType& dtype, Queue& queue, const std::string& name) {}
 
 // =================================================================================================
 

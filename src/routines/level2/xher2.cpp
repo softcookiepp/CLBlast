@@ -94,7 +94,7 @@ void DoHer2(const Layout layout, const Triangle triangle, const size_t n, const 
 }
 
 // Xher2 class implementation
-Xher2::Xher2(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) {}
+Xher2::Xher2(const tart::DType& dtype, Queue& queue, const std::string& name) {}
 
 void Xher2::DoHer2(const Layout layout, const Triangle triangle, const size_t n, const tart::Scalar& alpha,
                    const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,

@@ -26,7 +26,7 @@ class Xspr : public Xher {
   using Xher::DoHer;
 
   // Constructor
-  Xspr(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "SPR");
+  Xspr(const tart::DType& dtype, Queue& queue, const std::string& name = "SPR");
 
   // Templated-precision implementation of the routine
   void DoSpr(const Layout layout, const Triangle triangle, const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& x_buffer,

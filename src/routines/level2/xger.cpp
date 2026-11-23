@@ -89,7 +89,7 @@ void DoGer(const Layout layout, const size_t m, const size_t n, const tart::Scal
 }
 
 // Xger class implementation
-Xger::Xger(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) {}
+Xger::Xger(const tart::DType& dtype, Queue& queue, const std::string& name) {}
 
 void Xger::DoGer(const Layout layout, const size_t m, const size_t n, const tart::Scalar& alpha,
                  const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,

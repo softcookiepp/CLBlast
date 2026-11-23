@@ -25,7 +25,7 @@ class Xhemm {
  public:
 
 	// Constructor
-	Xhemm(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "HEMM");
+	Xhemm(const tart::DType& dtype, Queue& queue, const std::string& name = "HEMM");
 
 	// Templated-precision implementation of the routine
 	void DoHemm(const Layout layout, const Side side, const Triangle triangle, const size_t m, const size_t n,

@@ -94,7 +94,7 @@ void DoHer(const Layout layout, const Triangle triangle, const size_t n, const t
 }
 
 // Xher class implementation
-Xher::Xher(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) {}
+Xher::Xher(const tart::DType& dtype, Queue& queue, const std::string& name) {}
 
 void Xher::DoHer(const Layout layout, const Triangle triangle, const size_t n, const tart::Scalar& alpha,
                  const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,

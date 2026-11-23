@@ -58,8 +58,7 @@ class TestXamax {
 	static StatusCode RunRoutine(const Arguments<T>& args, Buffers<T>& buffers, Queue& queue)
 	{
 		auto queue_plain = queue();
-		auto status = Amax<T>(args.n, buffers.scalar_uint(), args.imax_offset, buffers.x_vec(), args.x_offset, args.x_inc,
-													 nullptr);
+		auto status = Amax<T>(args.n, buffers.scalar_uint(), args.imax_offset, buffers.x_vec(), args.x_offset, args.x_inc);
 		queue_plain->sync();
 		return status;
 	}

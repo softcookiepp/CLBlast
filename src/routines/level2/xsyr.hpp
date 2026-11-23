@@ -26,7 +26,7 @@ class Xsyr : public Xher {
   using Xher::DoHer;
 
   // Constructor
-  Xsyr(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "SYR");
+  Xsyr(const tart::DType& dtype, Queue& queue, const std::string& name = "SYR");
 
   // Templated-precision implementation of the routine
   void DoSyr(const Layout layout, const Triangle triangle, const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& x_buffer,

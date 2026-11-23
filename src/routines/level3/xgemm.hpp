@@ -89,7 +89,7 @@ void GemmDirect(const size_t m, const size_t n, const size_t k, const tart::Scal
 class Xgemm {
  public:
 	// Constructor
-	Xgemm(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "GEMM");
+	Xgemm(const tart::DType& dtype, Queue& queue, const std::string& name = "GEMM");
 
 	// Templated-precision implementation of the routine
 	void DoGemm(const Layout layout, const Transpose a_transpose, const Transpose b_transpose, const size_t m,

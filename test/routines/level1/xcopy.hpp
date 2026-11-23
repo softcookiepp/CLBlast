@@ -59,7 +59,7 @@ class TestXcopy {
 	{
 		auto queue_plain = queue();
 			auto status = Copy<T>(args.n, buffers.x_vec(), args.x_offset, args.x_inc, buffers.y_vec(), args.y_offset,
-														args.y_inc, nullptr);
+														args.y_inc);
 		queue_plain->sync();
 		return status;
 	}

@@ -38,7 +38,7 @@ void SyrkAB(const Layout layout, const Triangle triangle, const Transpose a_tran
 class Xsyrk {
  public:
 	// Constructor
-	Xsyrk(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "SYRK");
+	Xsyrk(const tart::DType& dtype, Queue& queue, const std::string& name = "SYRK");
 
 	// Templated-precision implementation of the routine
 	void DoSyrk(const Layout layout, const Triangle triangle, const Transpose a_transpose, const size_t n, const size_t k,

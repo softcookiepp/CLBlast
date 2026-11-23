@@ -361,7 +361,7 @@ void GemmDirect(const size_t m, const size_t n, const size_t k, const tart::Scal
 }
 
 // Xgemm class implementation
-Xgemm::Xgemm(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) {}
+Xgemm::Xgemm(const tart::DType& dtype, Queue& queue, const std::string& name) {}
 
 void Xgemm::DoGemm(const Layout layout, const Transpose a_transpose, const Transpose b_transpose, const size_t m,
                    const size_t n, const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
@@ -400,7 +400,7 @@ void Xgemm::GemmDirect(const size_t m, const size_t n, const size_t k, const tar
 }
 
 // Xgemv class implementation
-Xgemv::Xgemv(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) {}
+Xgemv::Xgemv(const tart::DType& dtype, Queue& queue, const std::string& name) {}
 
 void Xgemv::DoGemv(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n,
                    const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,

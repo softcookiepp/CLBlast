@@ -158,7 +158,7 @@ void HerkAB(const Layout layout, const Triangle triangle, const Transpose a_tran
 }
 
 // Xherk class implementation
-Xherk::Xherk(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name) {}
+Xherk::Xherk(const tart::DType& dtype, Queue& queue, const std::string& name) {}
 
 void Xherk::DoHerk(const Layout layout, const Triangle triangle, const Transpose a_transpose, const size_t n,
                    const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,

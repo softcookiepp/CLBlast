@@ -31,7 +31,7 @@ void DoGer(const Layout layout, const size_t m, const size_t n, const tart::Scal
 class Xger {
  public:
 	// Constructor
-	Xger(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "GER");
+	Xger(const tart::DType& dtype, Queue& queue, const std::string& name = "GER");
 
 	// Templated-precision implementation of the routine
 	void DoGer(const Layout layout, const size_t m, const size_t n, const tart::Scalar& alpha,

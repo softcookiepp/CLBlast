@@ -28,7 +28,7 @@ class Xgbmv : public Xgemv {
 	using Xgemv::MatVec;
 
 	// Constructor
-	Xgbmv(const tart::DType& dtype, Queue& queue, EventPointer event, const std::string& name = "GBMV");
+	Xgbmv(const tart::DType& dtype, Queue& queue, const std::string& name = "GBMV");
 
 	// Templated-precision implementation of the routine
 	void DoGbmv(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const size_t kl,

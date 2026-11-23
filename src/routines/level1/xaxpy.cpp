@@ -39,8 +39,10 @@ void DoAxpy(const tart::DType& dtype, const tart::device_ptr& device,
 	TestVectorY(dtype, n, y_buffer, y_offset, y_inc);
 
 	// Determines whether or not the fast-version can be used
-	const auto use_faster_kernel = (x_offset == 0) && (x_inc == 1) && (y_offset == 0) && (y_inc == 1) && IsMultiple(n, db["WPT"] * db["VW"]);
-	const auto use_fastest_kernel = use_faster_kernel && IsMultiple(n, db["WGS"] * db["WPT"] * db["VW"]);
+	bool use_faster_kernel = (x_offset == 0) && (x_inc == 1) && (y_offset == 0) && (y_inc == 1) && IsMultiple(n, db["WPT"] * db["VW"]);
+	bool use_fastest_kernel = use_faster_kernel && IsMultiple(n, db["WGS"] * db["WPT"] * db["VW"]);
+	use_faster_kernel = false;
+	use_fastest_kernel = false;
 
 	// If possible, run the fast-version of the kernel
 	const auto kernel_name = (use_fastest_kernel) ? "XaxpyFastest" : (use_faster_kernel) ? "XaxpyFaster" : "Xaxpy";

@@ -21,15 +21,15 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-Xtrmv::Xtrmv(const tart::DType& dtype, Queue& queue, const std::string& name) {}
+Xtrmv::Xtrmv(const tart::DType& dtype, [[maybe_unused]] Queue& queue, const std::string& name) {}
 
 // =================================================================================================
 
 // The main routine
 void Xtrmv::DoTrmv(const Layout layout, const Triangle triangle, const Transpose a_transpose,
-	const Diagonal diagonal, const size_t n, const tart::buffer_ptr& a_buffer, const size_t a_offset,
+	const Diagonal diagonal, const uint32_t n, const tart::buffer_ptr& a_buffer, const size_t a_offset,
 	const size_t a_ld, const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
-	tart::device_ptr device, const tart::DType& dtype, const Databases& db)
+	tart::device_ptr device, const tart::DType& dtype, [[maybe_unused]] const Databases& db)
 {
 	// Creates a copy of X: a temporary scratch buffer
 	const auto x_size = (1 + (n - 1) * x_inc) + x_offset;

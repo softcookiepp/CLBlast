@@ -27,7 +27,7 @@
 namespace clblast
 {
 
-void TestMatrixAP(const tart::DType& dtype, const size_t n, const tart::buffer_ptr& buffer, const size_t offset)
+void TestMatrixAP(const tart::DType& dtype, const uint32_t n, const tart::buffer_ptr& buffer, const uint32_t offset)
 {
 	try
 	{

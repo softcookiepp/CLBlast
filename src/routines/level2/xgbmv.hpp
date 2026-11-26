@@ -31,7 +31,7 @@ class Xgbmv : public Xgemv {
 	Xgbmv(const tart::DType& dtype, Queue& queue, const std::string& name = "GBMV");
 
 	// Templated-precision implementation of the routine
-	void DoGbmv(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n, const size_t kl,
+	void DoGbmv(const Layout layout, const Transpose a_transpose, const uint32_t m, const uint32_t n, const size_t kl,
 							const size_t ku, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
 							const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc, const tart::Scalar& beta,
 							const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc, const Databases& db);

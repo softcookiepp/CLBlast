@@ -21,7 +21,7 @@
 namespace clblast {
 
 void DoCopy(const tart::DType& dtype, const tart::device_ptr& device,
-            const size_t n, const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
+            const uint32_t n, const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
             const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
             const Databases& db)
 {
@@ -63,7 +63,7 @@ void DoCopy(const tart::DType& dtype, const tart::device_ptr& device,
 	{
 		global[0] = Ceil(n, db["WGS"] * db["WPT"]) / (db["WGS"] * db["WPT"]);
 	}
-	kernel->enqueue(global, {db["WGS"], db["WPT"]});
+	kernel->enqueue(global, {static_cast<uint32_t>(db["WGS"]), static_cast<uint32_t>(db["WPT"])});
 }
 
 }	// namespace clblast

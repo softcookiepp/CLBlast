@@ -24,7 +24,7 @@ namespace clblast {
 // =================================================================================================
 
 // The main routine
-void DoCol2im(const KernelMode kernel_mode, const size_t channels, const size_t height, const size_t width,
+void DoCol2im(const KernelMode kernel_mode, const size_t channels, const uint32_t height, const uint32_t width,
               const size_t kernel_h, const size_t kernel_w, const size_t pad_h, const size_t pad_w,
               const size_t stride_h, const size_t stride_w, const size_t dilation_h,
               const size_t dilation_w, const tart::buffer_ptr& col_buffer, const size_t col_offset,
@@ -83,8 +83,8 @@ void DoCol2im(const KernelMode kernel_mode, const size_t channels, const size_t 
     // Launches the kernel
     const auto w_ceiled = Ceil((width - 1) / gcd_w + 1, db["COPY_DIMX"]);
     const auto h_ceiled = Ceil((height - 1) / gcd_h + 1, db["COPY_DIMY"]);
-    const auto global = std::vector<uint32_t>{w_ceiled/db["COPY_DIMX"], (h_ceiled * channels)/db["COPY_DIMY"] };
-    kernel->enqueue(global, {db["COPY_DIMX"], db["COPY_DIMY"], static_cast<uint32_t>(kernel_mode == KernelMode::kConvolution)});
+    const auto global = std::vector<uint32_t>{static_cast<uint32_t>(w_ceiled/db["COPY_DIMX"]), static_cast<uint32_t>((h_ceiled * channels)/db["COPY_DIMY"]) };
+    kernel->enqueue(global, {static_cast<uint32_t>(db["COPY_DIMX"]), static_cast<uint32_t>(db["COPY_DIMY"]), static_cast<uint32_t>(kernel_mode == KernelMode::kConvolution)});
 }
 
 // =================================================================================================

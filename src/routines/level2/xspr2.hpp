@@ -29,7 +29,7 @@ class Xspr2 : public Xher2 {
    Xspr2(const tart::DType& dtype, Queue& queue, const std::string& name = "SPR2");
 
    // Templated-precision implementation of the routine
-   void DoSpr2(const Layout layout, const Triangle triangle, const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& x_buffer,
+   void DoSpr2(const Layout layout, const Triangle triangle, const uint32_t n, const tart::Scalar& alpha, const tart::buffer_ptr& x_buffer,
                const size_t x_offset, const size_t x_inc, const tart::buffer_ptr& y_buffer, const size_t y_offset,
                const size_t y_inc, const tart::buffer_ptr& ap_buffer, const size_t ap_offset,
                const Databases& db);

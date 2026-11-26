@@ -104,9 +104,9 @@ template <typename T>
 void XgemmDirectTestValidArguments(const int, const Arguments<T>&) {}
 std::vector<Constraint> XgemmDirectSetConstraints(const int V) {
   auto constraints = std::vector<Constraint>();
-  auto MultipleOfX = [](std::vector<size_t> v) { return IsMultiple(v[0], v[1]); };
-  auto MultipleOfXMulY = [](std::vector<size_t> v) { return IsMultiple(v[0], v[1] * v[2]); };
-  auto MultipleOfXMulYDivZ = [](std::vector<size_t> v) { return IsMultiple(v[0], (v[1] * v[2]) / v[3]); };
+  auto MultipleOfX = [](std::vector<uint32_t> v) { return IsMultiple(v[0], v[1]); };
+  auto MultipleOfXMulY = [](std::vector<uint32_t> v) { return IsMultiple(v[0], v[1] * v[2]); };
+  auto MultipleOfXMulYDivZ = [](std::vector<uint32_t> v) { return IsMultiple(v[0], (v[1] * v[2]) / v[3]); };
   // Requirement for unrolling the WGD loop
   constraints.push_back({MultipleOfX, {"WGD", "KWID"}});
   // Required for integer MWID and NWID
@@ -121,7 +121,7 @@ std::vector<Constraint> XgemmDirectSetConstraints(const int V) {
 
   // Extra constraints for variation 1 to limit the set of options significantly
   if (V == 1) {
-    auto IsEqual = [](std::vector<size_t> v) { return v[0] == v[1]; };
+    auto IsEqual = [](std::vector<uint32_t> v) { return v[0] == v[1]; };
     constraints.push_back({IsEqual, {"MDIMCD", "MDIMAD"}});
     constraints.push_back({IsEqual, {"NDIMCD", "NDIMBD"}});
   }
@@ -129,7 +129,7 @@ std::vector<Constraint> XgemmDirectSetConstraints(const int V) {
 }
 template <typename T>
 LocalMemSizeInfo XgemmDirectComputeLocalMemSize(const int) {
-  return {[](std::vector<size_t> v) -> size_t {
+  return {[](std::vector<uint32_t> v) -> uint32_t {
             return GetBytes(PrecisionValue<T>()) * ((v[0] * (v[0] + v[1]) + v[0] * (v[0] + v[2])));
           },
           {"WGD", "PADA", "PADB"}};

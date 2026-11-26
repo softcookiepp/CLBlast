@@ -16,7 +16,7 @@ namespace clblast {
 
 // Functional implementation of Xmax (index of maximum value, non-BLAS)
 void DoMax(const tart::DType& dtype, const tart::device_ptr& device,
-           const size_t n, const tart::buffer_ptr& imax_buffer, const size_t imax_offset,
+           const uint32_t n, const tart::buffer_ptr& imax_buffer, const size_t imax_offset,
            const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
            const Databases& db) {
 	// max_flag=1, min_flag=0, amin_flag=0 indicates "MAX"

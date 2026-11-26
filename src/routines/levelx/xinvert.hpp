@@ -20,8 +20,8 @@ namespace clblast {
 // =================================================================================================
 
 // Functional implementation of Xinvert (inverts diagonal square blocks of a matrix)
-void InvertMatrixDiagonalBlocks(const Layout layout, const Triangle triangle, const Diagonal diag, const size_t n,
-                                const size_t block_size, const tart::buffer_ptr& src, const size_t offset,
+void InvertMatrixDiagonalBlocks(const Layout layout, const Triangle triangle, const Diagonal diag, const uint32_t n,
+                                const uint32_t block_size, const tart::buffer_ptr& src, const uint32_t offset,
                                 const size_t ld_src, tart::buffer_ptr& dest, const tart::device_ptr& device,
                                 const tart::DType& dtype, const Databases& db);
 

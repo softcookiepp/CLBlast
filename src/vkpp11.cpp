@@ -40,7 +40,7 @@ Device::Device(const size_t device_id) {
 
 // Methods to retrieve device information
 std::string Device::Version() const { return "Vulkan 1.2"; } // pretty sure this will work?
-size_t Device::VersionNumber() const {
+uint32_t Device::VersionNumber() const {
 	return 120;
 }
 // TODO: implement some of this stuff in tart
@@ -60,11 +60,11 @@ std::string Device::Vendor() const
 }
 std::string Device::Name() const { return "device name not implemented"; }
 std::string Device::Type() const { return "GPU"; } // everything is a GPU when it comes to Vulkan! (for the most part)
-size_t Device::MaxWorkGroupSize() const
+uint32_t Device::MaxWorkGroupSize() const
 {
 	return mDevice->getMetadata().physicalDeviceProperties.limits.maxComputeWorkGroupInvocations;
 }
-std::vector<size_t> Device::MaxWorkItemSizes() const { return {1000000, 1000000, 1000000}; } // TODO: implement in Tart
+std::vector<uint32_t> Device::MaxWorkItemSizes() const { return {1000000, 1000000, 1000000}; } // TODO: implement in Tart
 
 // Not sure if Tart has a public method for querying extensions; might be a good idea to implement this.
 std::string Device::Capabilities() const { return "not implemented"; }
@@ -116,7 +116,7 @@ Buffer<T>::Buffer(const tart::buffer_ptr buffer) { buffer_ = buffer; }
 // the memory will not be freed automatically afterwards. If the size is set to 0, this will
 // become a stub containing a nullptr
 template <typename T>
-Buffer<T>::Buffer(const tart::device_ptr& device, const size_t size)
+Buffer<T>::Buffer(const tart::device_ptr& device, const uint32_t size)
 {
 	if (size == 0)
 		buffer_ = nullptr;
@@ -127,13 +127,13 @@ Buffer<T>::Buffer(const tart::device_ptr& device, const size_t size)
 // Copies from device to host: reading the device buffer a-synchronously
 // (this is currently impossible in tart, so it will just sync for now)
 template <typename T>
-void Buffer<T>::ReadAsync(const Queue& queue, const size_t size, T* host, const size_t offset) const
+void Buffer<T>::ReadAsync(const Queue& queue, const uint32_t size, T* host, const uint32_t offset) const
 {
 	if (offset > 0) throw LogicError("not implemented");
 	buffer_->copyOut(host, size*sizeof(T), offset*sizeof(T));
 }
 template <typename T>
-void Buffer<T>::ReadAsync(const Queue& queue, const size_t size, std::vector<T>& host, const size_t offset) const
+void Buffer<T>::ReadAsync(const Queue& queue, const uint32_t size, std::vector<T>& host, const uint32_t offset) const
 {
 	if (host.size() < size) {
 		throw LogicError("Buffer: target host buffer is too small");
@@ -143,18 +143,18 @@ void Buffer<T>::ReadAsync(const Queue& queue, const size_t size, std::vector<T>&
 
 // Copies from device to host: reading the device buffer
 template <typename T>
-void Buffer<T>::Read(const Queue& queue, const size_t size, T* host, const size_t offset) const {
+void Buffer<T>::Read(const Queue& queue, const uint32_t size, T* host, const uint32_t offset) const {
 	ReadAsync(queue, size, host, offset);
 	queue.Finish();
 }
 template <typename T>
-void Buffer<T>::Read(const Queue& queue, const size_t size, std::vector<T>& host, const size_t offset) const {
+void Buffer<T>::Read(const Queue& queue, const uint32_t size, std::vector<T>& host, const uint32_t offset) const {
 	Read(queue, size, host.data(), offset);
 }
 
 // Copies from host to device: writing the device buffer a-synchronously
 template <typename T>
-void Buffer<T>::WriteAsync(const Queue& queue, const size_t size, const T* host, const size_t offset) {
+void Buffer<T>::WriteAsync(const Queue& queue, const uint32_t size, const T* host, const uint32_t offset) {
 	if (GetSize() < (offset + size) * sizeof(T)) {
 		throw LogicError("Buffer: target device buffer is too small");
 	}
@@ -166,18 +166,18 @@ void Buffer<T>::WriteAsync(const Queue& queue, const size_t size, const T* host,
 	//																nullptr));
 }
 template <typename T>
-void Buffer<T>::WriteAsync(const Queue& queue, const size_t size, const std::vector<T>& host, const size_t offset) {
+void Buffer<T>::WriteAsync(const Queue& queue, const uint32_t size, const std::vector<T>& host, const uint32_t offset) {
 	WriteAsync(queue, size, host.data(), offset);
 }
 
 // Copies from host to device: writing the device buffer
 template <typename T>
-void Buffer<T>::Write(const Queue& queue, const size_t size, const T* host, const size_t offset) {
+void Buffer<T>::Write(const Queue& queue, const uint32_t size, const T* host, const uint32_t offset) {
 	WriteAsync(queue, size, host, offset);
 	queue.Finish();
 }
 template <typename T>
-void Buffer<T>::Write(const Queue& queue, const size_t size, const std::vector<T>& host, const size_t offset)
+void Buffer<T>::Write(const Queue& queue, const uint32_t size, const std::vector<T>& host, const uint32_t offset)
 {
 	if (size > host.size() - offset)
 	{
@@ -199,14 +199,14 @@ void Buffer<T>::Write(const Queue& queue, const size_t size, const std::vector<T
 
 // Copies the contents of this buffer into another device buffer
 template <typename T>
-void Buffer<T>::CopyToAsync(const Queue& queue, const size_t size, const Buffer<T>& destination,
+void Buffer<T>::CopyToAsync(const Queue& queue, const uint32_t size, const Buffer<T>& destination,
 								 EventPointer event) const {
 	if (event != nullptr) throw LogicError("copying with events is not implemented yet");
 	buffer_->copyTo(destination(), 0, 0, size*sizeof(T));
 	//CheckError(clEnqueueCopyBuffer(queue(), *buffer_, destination(), 0, 0, size * sizeof(T), 0, nullptr, event));
 }
 template <typename T>
-void Buffer<T>::CopyTo(const Queue& queue, const size_t size, const Buffer<T>& destination) const {
+void Buffer<T>::CopyTo(const Queue& queue, const uint32_t size, const Buffer<T>& destination) const {
 	CopyToAsync(queue, size, destination);
 	queue.Finish();
 }

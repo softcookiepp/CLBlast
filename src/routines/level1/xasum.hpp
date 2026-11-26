@@ -22,7 +22,7 @@ namespace clblast {
 
 // Functional implementation of Xasum (absolute sum)
 void DoAsum(const tart::DType& dtype, const tart::device_ptr& device,
-            const size_t n, const tart::buffer_ptr& asum_buffer, const size_t asum_offset,
+            const uint32_t n, const tart::buffer_ptr& asum_buffer, const size_t asum_offset,
             const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
             uint32_t sum_flag, const Databases& db);
 

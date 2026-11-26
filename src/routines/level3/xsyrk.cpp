@@ -25,8 +25,8 @@ namespace clblast {
 // =================================================================================================
 
 // The main routine
-void DoSyrk(const Layout layout, const Triangle triangle, const Transpose a_transpose, const size_t n,
-            const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
+void DoSyrk(const Layout layout, const Triangle triangle, const Transpose a_transpose, const uint32_t n,
+            const uint32_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
             const size_t a_ld, const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset,
             const size_t c_ld, const Databases& db,
             tart::device_ptr device, const tart::DType& dtype) {
@@ -39,7 +39,7 @@ void DoSyrk(const Layout layout, const Triangle triangle, const Transpose a_tran
 }
 
 void SyrkAB(const Layout layout, const Triangle triangle, const Transpose a_transpose,
-            const Transpose b_transpose, const size_t n, const size_t k, const tart::Scalar& alpha,
+            const Transpose b_transpose, const uint32_t n, const uint32_t k, const tart::Scalar& alpha,
             const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& b_buffer,
             const size_t b_offset, const size_t b_ld, const tart::Scalar& beta, const tart::buffer_ptr& c_buffer,
             const size_t c_offset, const size_t c_ld, const Databases& db,
@@ -122,8 +122,8 @@ void SyrkAB(const Layout layout, const Triangle triangle, const Transpose a_tran
     kernel->setArg(8, b_temp);
 
     // Computes the global and local thread sizes
-    auto global = std::vector<uint32_t>{(n_ceiled * db["MDIMC"]) / db["MWG"], (n_ceiled * db["NDIMC"]) / db["NWG"]};
-    auto local = std::vector<size_t>{db["MDIMC"], db["NDIMC"]};
+    auto global = std::vector<uint32_t>{static_cast<uint32_t>((n_ceiled * db["MDIMC"]) / db["MWG"]), static_cast<uint32_t>((n_ceiled * db["NDIMC"]) / db["NWG"])};
+    auto local = std::vector<uint32_t>{db["MDIMC"], db["NDIMC"]};
     global[0] = global[0] / local[0];
     global[1] = global[1] / local[1];
     const bool subgroupSupported = device->getMetadata().subgroupAdd;
@@ -161,10 +161,10 @@ void SyrkAB(const Layout layout, const Triangle triangle, const Transpose a_tran
 }
 
 // Xsyrk class implementation
-Xsyrk::Xsyrk(const tart::DType& dtype, Queue& queue, const std::string& name) {}
+Xsyrk::Xsyrk(const tart::DType& dtype, [[maybe_unused]] Queue& queue, const std::string& name) {}
 
-void Xsyrk::DoSyrk(const Layout layout, const Triangle triangle, const Transpose a_transpose, const size_t n,
-                   const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
+void Xsyrk::DoSyrk(const Layout layout, const Triangle triangle, const Transpose a_transpose, const uint32_t n,
+                   const uint32_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
                    const size_t a_ld, const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset,
                    const size_t c_ld, const Databases& db,
                    tart::device_ptr device, const tart::DType& dtype) {
@@ -173,7 +173,7 @@ void Xsyrk::DoSyrk(const Layout layout, const Triangle triangle, const Transpose
 }
 
 void Xsyrk::SyrkAB(const Layout layout, const Triangle triangle, const Transpose a_transpose, const Transpose b_transpose,
-                   const size_t n, const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer,
+                   const uint32_t n, const uint32_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer,
                    const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset,
                    const size_t b_ld, const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset,
                    const size_t c_ld, const Databases& db,

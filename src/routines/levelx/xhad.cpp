@@ -25,7 +25,7 @@ namespace clblast {
 // =================================================================================================
 
 // The main routine
-void DoHad(const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& x_buffer, const size_t x_offset,
+void DoHad(const uint32_t n, const tart::Scalar& alpha, const tart::buffer_ptr& x_buffer, const size_t x_offset,
            const size_t x_inc, const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
            const tart::Scalar& beta, const tart::buffer_ptr& z_buffer, const size_t z_offset, const size_t z_inc,
            tart::device_ptr device, const tart::DType& dtype, const Databases& db)
@@ -85,7 +85,7 @@ void DoHad(const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& x_
     {
         global[0] = Ceil(n, db["WGS"] * db["WPT"]) / db["WPT"];
     }
-    kernel->enqueue(global, {db["WGS"], db["WPT"]});
+    kernel->enqueue(global, {static_cast<uint32_t>(db["WGS"]), static_cast<uint32_t>(db["WPT"])});
 }
 
 // =================================================================================================

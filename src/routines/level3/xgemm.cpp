@@ -45,7 +45,7 @@ size_t ComputeTempSize(const bool a_no_temp, const bool b_no_temp, const bool c_
 
 
 // Computes the first and second "internal" (ceiled) dimensions of the 3 matrices
-void CalculateInternalDimensions(const size_t m, const size_t n, const size_t k, const size_t mwg,
+void CalculateInternalDimensions(const uint32_t m, const uint32_t n, const uint32_t k, const size_t mwg,
                                  const size_t nwg, const size_t kwg, size_t& a_one_i, size_t& a_two_i,
                                  size_t& b_one_i, size_t& b_two_i, size_t& c_one_i, size_t& c_two_i,
                                  const size_t gemm_kernel_id) {
@@ -63,7 +63,7 @@ void CalculateInternalDimensions(const size_t m, const size_t n, const size_t k,
 }
 
 // Selects which version of GEMM to run
-bool UseDirectKernel(const size_t m, const size_t n, const size_t k, const size_t min_indirect_size) {
+bool UseDirectKernel(const uint32_t m, const uint32_t n, const uint32_t k, const size_t min_indirect_size) {
     const auto m_n_k =
             static_cast<unsigned long long>(m) * static_cast<unsigned long long>(n) * static_cast<unsigned long long>(k);
     const auto min_indirect_size_ll = static_cast<unsigned long long>(min_indirect_size);
@@ -73,7 +73,7 @@ bool UseDirectKernel(const size_t m, const size_t n, const size_t k, const size_
 
 // Process the user-arguments, computes secondary parameters
 void ProcessArguments(const Layout layout, const Transpose a_transpose, const Transpose b_transpose,
-                      const size_t m, const size_t n, const size_t k, size_t& a_one, size_t& a_two,
+                      const uint32_t m, const uint32_t n, const uint32_t k, size_t& a_one, size_t& a_two,
                       size_t& b_one, size_t& b_two, size_t& c_one, size_t& c_two, bool& a_do_transpose,
                       bool& b_do_transpose, bool& c_do_transpose, bool& a_conjugate, bool& b_conjugate,
                       const size_t gemm_kernel_id) {
@@ -107,7 +107,7 @@ void ProcessArguments(const Layout layout, const Transpose a_transpose, const Tr
 
 // Computes the size of the temporary GEMM buffer
 size_t GetTempSize(const Layout layout, const Transpose a_transpose, const Transpose b_transpose,
-                   const size_t m, const size_t n, const size_t k, const size_t a_offset, const size_t a_ld,
+                   const uint32_t m, const uint32_t n, const uint32_t k, const size_t a_offset, const size_t a_ld,
                    const size_t b_offset, const size_t b_ld, const size_t c_offset, const size_t c_ld,
                    const size_t mwg, const size_t nwg, const size_t kwg, const size_t gemm_kernel_id) {
     size_t a_one, a_two, b_one, b_two, c_one, c_two;
@@ -131,8 +131,8 @@ size_t GetTempSize(const Layout layout, const Transpose a_transpose, const Trans
 // =================================================================================================
 
 // The main routine
-void DoGemm(const Layout layout, const Transpose a_transpose, const Transpose b_transpose, const size_t m,
-            const size_t n, const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
+void DoGemm(const Layout layout, const Transpose a_transpose, const Transpose b_transpose, const uint32_t m,
+            const uint32_t n, const uint32_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
             const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld,
             const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset, const size_t c_ld,
             const tart::buffer_ptr& temp_buffer, const bool temp_buffer_provided, const Databases& db,
@@ -167,7 +167,7 @@ void DoGemm(const Layout layout, const Transpose a_transpose, const Transpose b_
 // =================================================================================================
 
 // The indirect version of GEMM
-void GemmIndirect(const size_t m, const size_t n, const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer,
+void GemmIndirect(const uint32_t m, const uint32_t n, const uint32_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer,
                   const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset,
                   const size_t b_ld, const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset,
                   const size_t c_ld, const bool a_do_transpose, const bool b_do_transpose,
@@ -269,7 +269,7 @@ void GemmIndirect(const size_t m, const size_t n, const size_t k, const tart::Sc
     kernel->setArg(11, static_cast<int>(c_temp_offset / db["VWM"]));
 
     // Computes the global and local thread sizes
-    const auto global = std::vector<uint32_t>{c_one_i / db["MWG"], c_two_i / db["NWG"]};
+    const auto global = std::vector<uint32_t>{static_cast<uint32_t>(c_one_i / db["MWG"]), static_cast<uint32_t>(c_two_i / db["NWG"])};
 
     const bool subgroupSupported = device->getMetadata().subgroupAdd;
     std::vector<uint32_t> spec(subgroupSupported ? 16 : 15);
@@ -305,7 +305,7 @@ void GemmIndirect(const size_t m, const size_t n, const size_t k, const tart::Sc
 // =================================================================================================
 
 // The direct version of GEMM
-void GemmDirect(const size_t m, const size_t n, const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer,
+void GemmDirect(const uint32_t m, const uint32_t n, const uint32_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer,
                 const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset,
                 const size_t b_ld, const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset,
                 const size_t c_ld, const bool a_do_transpose, const bool b_do_transpose, const bool c_do_transpose,
@@ -341,17 +341,17 @@ void GemmDirect(const size_t m, const size_t n, const size_t k, const tart::Scal
     // Computes the global and local thread sizes
     const auto m_ceiled = Ceil(m, db["WGD"]);
     const auto n_ceiled = Ceil(n, db["WGD"]);
-    const auto global = std::vector<uint32_t>{m_ceiled / db["WGD"], n_ceiled / db["WGD"], 1};
+    const auto global = std::vector<uint32_t>{static_cast<uint32_t>(m_ceiled / db["WGD"]), static_cast<uint32_t>(n_ceiled / db["WGD"]), 1};
     
     const std::vector<uint32_t> spec({
-        db["WGD"],
-        db["MDIMCD"],
-        db["NDIMCD"],
-        db["MDIMAD"],
-        db["NDIMBD"],
-        db["KWID"],
-        db["PADA"],
-        db["PADB"],
+        static_cast<uint32_t>(db["WGD"]),
+        static_cast<uint32_t>(db["MDIMCD"]),
+        static_cast<uint32_t>(db["NDIMCD"]),
+        static_cast<uint32_t>(db["MDIMAD"]),
+        static_cast<uint32_t>(db["NDIMBD"]),
+        static_cast<uint32_t>(db["KWID"]),
+        static_cast<uint32_t>(db["PADA"]),
+        static_cast<uint32_t>(db["PADB"]),
         static_cast<uint32_t>(a_do_transpose),
         static_cast<uint32_t>(b_do_transpose)
     });
@@ -361,10 +361,10 @@ void GemmDirect(const size_t m, const size_t n, const size_t k, const tart::Scal
 }
 
 // Xgemm class implementation
-Xgemm::Xgemm(const tart::DType& dtype, Queue& queue, const std::string& name) {}
+Xgemm::Xgemm(const tart::DType& dtype, [[maybe_unused]] Queue& queue, const std::string& name) {}
 
-void Xgemm::DoGemm(const Layout layout, const Transpose a_transpose, const Transpose b_transpose, const size_t m,
-                   const size_t n, const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
+void Xgemm::DoGemm(const Layout layout, const Transpose a_transpose, const Transpose b_transpose, const uint32_t m,
+                   const uint32_t n, const uint32_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
                    const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld,
                    const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset, const size_t c_ld,
                    const tart::buffer_ptr& temp_buffer, const bool temp_buffer_provided, const Databases& db,
@@ -374,7 +374,7 @@ void Xgemm::DoGemm(const Layout layout, const Transpose a_transpose, const Trans
            device ? device : device, dtype != tart::dtypes::unknown_type ? dtype : dtype);
 }
 
-void Xgemm::GemmIndirect(const size_t m, const size_t n, const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer,
+void Xgemm::GemmIndirect(const uint32_t m, const uint32_t n, const uint32_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer,
                          const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset,
                          const size_t b_ld, const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset,
                          const size_t c_ld, const bool a_do_transpose, const bool b_do_transpose, const bool c_do_transpose,
@@ -388,7 +388,7 @@ void Xgemm::GemmIndirect(const size_t m, const size_t n, const size_t k, const t
                  device ? device : device, dtype != tart::dtypes::unknown_type ? dtype : dtype);
 }
 
-void Xgemm::GemmDirect(const size_t m, const size_t n, const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer,
+void Xgemm::GemmDirect(const uint32_t m, const uint32_t n, const uint32_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer,
                        const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset,
                        const size_t b_ld, const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset,
                        const size_t c_ld, const bool a_do_transpose, const bool b_do_transpose, const bool c_do_transpose,
@@ -400,9 +400,9 @@ void Xgemm::GemmDirect(const size_t m, const size_t n, const size_t k, const tar
 }
 
 // Xgemv class implementation
-Xgemv::Xgemv(const tart::DType& dtype, Queue& queue, const std::string& name) {}
+Xgemv::Xgemv(const tart::DType& dtype, [[maybe_unused]] Queue& queue, const std::string& name) {}
 
-void Xgemv::DoGemv(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n,
+void Xgemv::DoGemv(const Layout layout, const Transpose a_transpose, const uint32_t m, const uint32_t n,
                    const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
                    const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
                    const tart::Scalar& beta, const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
@@ -413,12 +413,12 @@ void Xgemv::DoGemv(const Layout layout, const Transpose a_transpose, const size_
            device ? device : device, dtype != tart::dtypes::unknown_type ? dtype : dtype);
 }
 
-void Xgemv::MatVec(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n,
+void Xgemv::MatVec(const Layout layout, const Transpose a_transpose, const uint32_t m, const uint32_t n,
                    const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
                    const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
                    const tart::Scalar& beta, const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
                    bool fast_kernel, bool fast_kernel_rot, const size_t parameter, const bool packed,
-                   const size_t kl, const size_t ku, const std::string& name, const Databases& db,
+                   const size_t kl, const size_t ku, const std::string& name, [[maybe_unused]] const Databases& db,
                    tart::device_ptr device, const tart::DType& dtype) {
     MatVec(layout, a_transpose, m, n, alpha, a_buffer, a_offset, a_ld, x_buffer, x_offset, x_inc,
            beta, y_buffer, y_offset, y_inc, fast_kernel, fast_kernel_rot, parameter, packed, kl, ku, name,

@@ -21,7 +21,7 @@
 namespace clblast {
 
 void DoSwap(const tart::DType& dtype, const tart::device_ptr& device,
-            const size_t n, const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
+            const uint32_t n, const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
             const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
             const Databases& db)
 {
@@ -89,7 +89,7 @@ void DoSwap(const tart::DType& dtype, const tart::device_ptr& device,
 		auto n_ceiled = Ceil(n, db["WGS"] * db["WPT"]);
 		global[0] = n_ceiled / (db["WPT"]*db["WGS"]);
 	}
-	kernel->enqueue(global, {db["WGS"], db["WPT"]});
+	kernel->enqueue(global, {static_cast<uint32_t>(db["WGS"]), static_cast<uint32_t>(db["WPT"])});
 }
 
 }	// namespace clblast

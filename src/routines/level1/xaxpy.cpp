@@ -23,8 +23,8 @@ namespace clblast {
 // =================================================================================================
 
 // Functional implementation of Xaxpy (y = alpha*x + y)
-void DoAxpy(const tart::DType& dtype, const tart::device_ptr& device,
-            const size_t n, const tart::Scalar& alpha,
+void DoAxpy(const tart::DType& dtype, [[maybe_unused]] const tart::device_ptr& device,
+            const uint32_t n, const tart::Scalar& alpha,
             const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
             const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
             const Databases& db)
@@ -114,7 +114,7 @@ void DoAxpy(const tart::DType& dtype, const tart::device_ptr& device,
 		const auto n_ceiled = Ceil(n, db["WGS"] * db["WPT"])/db["WGS"];
 		global[0] = n_ceiled / db["WPT"];
 	}
-	kernel->enqueue(global, {db["WGS"], db["WPT"]});
+	kernel->enqueue(global, {static_cast<uint32_t>(db["WGS"]), static_cast<uint32_t>(db["WPT"])});
 }
 
 // =================================================================================================

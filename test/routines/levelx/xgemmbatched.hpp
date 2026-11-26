@@ -64,9 +64,9 @@ class TestXgemmBatched {
 		args.c_size = GetSizeC(args);
 
 		// Also sets the batch-related variables
-		args.a_offsets = std::vector<size_t>(args.batch_count);
-		args.b_offsets = std::vector<size_t>(args.batch_count);
-		args.c_offsets = std::vector<size_t>(args.batch_count);
+		args.a_offsets = std::vector<uint32_t>(args.batch_count);
+		args.b_offsets = std::vector<uint32_t>(args.batch_count);
+		args.c_offsets = std::vector<uint32_t>(args.batch_count);
 		args.alphas = std::vector<T>(args.batch_count);
 		args.betas = std::vector<T>(args.batch_count);
 		for (auto batch = size_t{0}; batch < args.batch_count; ++batch) {

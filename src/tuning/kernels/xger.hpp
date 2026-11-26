@@ -80,25 +80,26 @@ void XgerTestValidArguments(const int, const Arguments<T>&) {}
 std::vector<Constraint> XgerSetConstraints(const int) { return {}; }
 template <typename T>
 LocalMemSizeInfo XgerComputeLocalMemSize(const int) {
-  return {[](std::vector<size_t>) -> size_t { return 0; }, {}};
+  return {[](std::vector<uint32_t>) -> uint32_t { return 0; }, {}};
 }
 
 // Sets the kernel's arguments
 template <typename T>
-void XgerSetArguments(const int, tart::kernel_ptr& kernel, const Arguments<T>& args, std::vector<Buffer<T>>& buffers) {
-  kernel->setArg(0, static_cast<int>(args.m));
-  kernel->setArg(1, static_cast<int>(args.n));
-  kernel->setArgAs(tart::getDType<T>(), 2, (args.alpha));
-  kernel->setArg(3, buffers[0]());               // 0 == X vector
-  kernel->setArg(4, 0);                          // x_offset
-  kernel->setArg(5, 1);                          // x_increment
-  kernel->setArg(6, buffers[1]());               // 1 == Y vector
-  kernel->setArg(7, 0);                          // y_offset
-  kernel->setArg(8, 1);                          // y_increment
-  kernel->setArg(9, buffers[2]());               // 2 == A matrix
-  kernel->setArg(10, 0);                         // a_offset
-  kernel->setArg(11, static_cast<int>(args.m));  // a_ld
-  kernel->setArg(12, 0);                         // a_is_rowmajor
+void XgerSetArguments(const int, Kernel& kernel, const Arguments<T>& args, std::vector<Buffer<T>>& buffers) {
+  auto k = kernel.get();
+  k->setArg(0, static_cast<int>(args.m));
+  k->setArg(1, static_cast<int>(args.n));
+  k->setArgAs(tart::getDType<T>(), 2, (args.alpha));
+  k->setArg(3, buffers[0]());               // 0 == X vector
+  k->setArg(4, 0);                          // x_offset
+  k->setArg(5, 1);                          // x_increment
+  k->setArg(6, buffers[1]());               // 1 == Y vector
+  k->setArg(7, 0);                          // y_offset
+  k->setArg(8, 1);                          // y_increment
+  k->setArg(9, buffers[2]());               // 2 == A matrix
+  k->setArg(10, 0);                         // a_offset
+  k->setArg(11, static_cast<int>(args.m));  // a_ld
+  k->setArg(12, 0);                         // a_is_rowmajor
 }
 
 // =================================================================================================

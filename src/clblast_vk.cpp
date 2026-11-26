@@ -1637,8 +1637,8 @@ template StatusCode PUBLIC_API Convgemm<half>(const KernelMode, const size_t, co
 
 // Batched version of AXPY: SAXPYBATCHED/DAXPYBATCHED/CAXPYBATCHED/ZAXPYBATCHED/HAXPYBATCHED
 template <typename T>
-StatusCode AxpyBatched(const size_t n, const T* alphas, const tart::buffer_ptr x_buffer, const size_t* x_offsets,
-											 const size_t x_inc, tart::buffer_ptr y_buffer, const size_t* y_offsets, const size_t y_inc,
+StatusCode AxpyBatched(const size_t n, const T* alphas, const tart::buffer_ptr x_buffer, const uint32_t* x_offsets,
+											 const size_t x_inc, tart::buffer_ptr y_buffer, const uint32_t* y_offsets, const size_t y_inc,
 											 const size_t batch_count) {
 	try {
 		auto device = x_buffer->getDevice();
@@ -1646,8 +1646,8 @@ StatusCode AxpyBatched(const size_t n, const T* alphas, const tart::buffer_ptr x
 		auto dtype = tart::getDType<T>();
 		auto db = GetDatabases(device, {"XaxpyBatched"}, dtype);
 		auto alphas_cpp = std::vector<T>();
-		auto x_offsets_cpp = std::vector<size_t>();
-		auto y_offsets_cpp = std::vector<size_t>();
+		auto x_offsets_cpp = std::vector<uint32_t>();
+		auto y_offsets_cpp = std::vector<uint32_t>();
 		for (auto batch = size_t{0}; batch < batch_count; ++batch) {
 			alphas_cpp.push_back(alphas[batch]);
 			x_offsets_cpp.push_back(x_offsets[batch]);
@@ -1662,23 +1662,23 @@ StatusCode AxpyBatched(const size_t n, const T* alphas, const tart::buffer_ptr x
 		return DispatchException();
 	}
 }
-template StatusCode PUBLIC_API AxpyBatched<float>(const size_t, const float*, const tart::buffer_ptr, const size_t*, const size_t,
-																									tart::buffer_ptr, const size_t*, const size_t, const size_t);
-template StatusCode PUBLIC_API AxpyBatched<double>(const size_t, const double*, const tart::buffer_ptr, const size_t*,
-																									 const size_t, tart::buffer_ptr, const size_t*, const size_t, const size_t);
-template StatusCode PUBLIC_API AxpyBatched<float2>(const size_t, const float2*, const tart::buffer_ptr, const size_t*,
-																									 const size_t, tart::buffer_ptr, const size_t*, const size_t, const size_t);
-template StatusCode PUBLIC_API AxpyBatched<double2>(const size_t, const double2*, const tart::buffer_ptr, const size_t*,
-																										const size_t, tart::buffer_ptr, const size_t*, const size_t, const size_t);
-template StatusCode PUBLIC_API AxpyBatched<half>(const size_t, const half*, const tart::buffer_ptr, const size_t*, const size_t,
-																								 tart::buffer_ptr, const size_t*, const size_t, const size_t);
+template StatusCode PUBLIC_API AxpyBatched<float>(const size_t, const float*, const tart::buffer_ptr, const uint32_t*, const size_t,
+																									tart::buffer_ptr, const uint32_t*, const size_t, const size_t);
+template StatusCode PUBLIC_API AxpyBatched<double>(const size_t, const double*, const tart::buffer_ptr, const uint32_t*,
+																									 const size_t, tart::buffer_ptr, const uint32_t*, const size_t, const size_t);
+template StatusCode PUBLIC_API AxpyBatched<float2>(const size_t, const float2*, const tart::buffer_ptr, const uint32_t*,
+																									 const size_t, tart::buffer_ptr, const uint32_t*, const size_t, const size_t);
+template StatusCode PUBLIC_API AxpyBatched<double2>(const size_t, const double2*, const tart::buffer_ptr, const uint32_t*,
+																										const size_t, tart::buffer_ptr, const uint32_t*, const size_t, const size_t);
+template StatusCode PUBLIC_API AxpyBatched<half>(const size_t, const half*, const tart::buffer_ptr, const uint32_t*, const size_t,
+																								 tart::buffer_ptr, const uint32_t*, const size_t, const size_t);
 
 // Batched version of GEMM: SGEMMBATCHED/DGEMMBATCHED/CGEMMBATCHED/ZGEMMBATCHED/HGEMMBATCHED
 template <typename T>
 StatusCode GemmBatched(const Layout layout, const Transpose a_transpose, const Transpose b_transpose, const size_t m,
-											 const size_t n, const size_t k, const T* alphas, const tart::buffer_ptr a_buffer, const size_t* a_offsets,
-											 const size_t a_ld, const tart::buffer_ptr b_buffer, const size_t* b_offsets, const size_t b_ld,
-											 const T* betas, tart::buffer_ptr c_buffer, const size_t* c_offsets, const size_t c_ld,
+											 const size_t n, const size_t k, const T* alphas, const tart::buffer_ptr a_buffer, const uint32_t* a_offsets,
+											 const size_t a_ld, const tart::buffer_ptr b_buffer, const uint32_t* b_offsets, const size_t b_ld,
+											 const T* betas, tart::buffer_ptr c_buffer, const uint32_t* c_offsets, const size_t c_ld,
 											 const size_t batch_count) {
 	try {
 		auto device = a_buffer->getDevice();
@@ -1687,9 +1687,9 @@ StatusCode GemmBatched(const Layout layout, const Transpose a_transpose, const T
 		auto db = GetDatabases(device, {"XgemmBatched"}, dtype);
 		auto alphas_cpp = std::vector<T>();
 		auto betas_cpp = std::vector<T>();
-		auto a_offsets_cpp = std::vector<size_t>();
-		auto b_offsets_cpp = std::vector<size_t>();
-		auto c_offsets_cpp = std::vector<size_t>();
+		auto a_offsets_cpp = std::vector<uint32_t>();
+		auto b_offsets_cpp = std::vector<uint32_t>();
+		auto c_offsets_cpp = std::vector<uint32_t>();
 		for (auto batch = size_t{0}; batch < batch_count; ++batch) {
 			alphas_cpp.push_back(alphas[batch]);
 			betas_cpp.push_back(betas[batch]);
@@ -1710,28 +1710,28 @@ StatusCode GemmBatched(const Layout layout, const Transpose a_transpose, const T
 	}
 }
 template StatusCode PUBLIC_API GemmBatched<float>(const Layout, const Transpose, const Transpose, const size_t,
-																									const size_t, const size_t, const float*, const tart::buffer_ptr, const size_t*,
-																									const size_t, const tart::buffer_ptr, const size_t*, const size_t, const float*,
-																									tart::buffer_ptr, const size_t*, const size_t, const size_t);
+																									const size_t, const size_t, const float*, const tart::buffer_ptr, const uint32_t*,
+																									const size_t, const tart::buffer_ptr, const uint32_t*, const size_t, const float*,
+																									tart::buffer_ptr, const uint32_t*, const size_t, const size_t);
 template StatusCode PUBLIC_API GemmBatched<double>(const Layout, const Transpose, const Transpose, const size_t,
 																									 const size_t, const size_t, const double*, const tart::buffer_ptr,
-																									 const size_t*, const size_t, const tart::buffer_ptr, const size_t*,
-																									 const size_t, const double*, tart::buffer_ptr, const size_t*, const size_t,
+																									 const uint32_t*, const size_t, const tart::buffer_ptr, const uint32_t*,
+																									 const size_t, const double*, tart::buffer_ptr, const uint32_t*, const size_t,
 																									 const size_t);
 template StatusCode PUBLIC_API GemmBatched<float2>(const Layout, const Transpose, const Transpose, const size_t,
 																									 const size_t, const size_t, const float2*, const tart::buffer_ptr,
-																									 const size_t*, const size_t, const tart::buffer_ptr, const size_t*,
-																									 const size_t, const float2*, tart::buffer_ptr, const size_t*, const size_t,
+																									 const uint32_t*, const size_t, const tart::buffer_ptr, const uint32_t*,
+																									 const size_t, const float2*, tart::buffer_ptr, const uint32_t*, const size_t,
 																									 const size_t);
 template StatusCode PUBLIC_API GemmBatched<double2>(const Layout, const Transpose, const Transpose, const size_t,
 																										const size_t, const size_t, const double2*, const tart::buffer_ptr,
-																										const size_t*, const size_t, const tart::buffer_ptr, const size_t*,
-																										const size_t, const double2*, tart::buffer_ptr, const size_t*, const size_t,
+																										const uint32_t*, const size_t, const tart::buffer_ptr, const uint32_t*,
+																										const size_t, const double2*, tart::buffer_ptr, const uint32_t*, const size_t,
 																										const size_t);
 template StatusCode PUBLIC_API GemmBatched<half>(const Layout, const Transpose, const Transpose, const size_t,
-																								 const size_t, const size_t, const half*, const tart::buffer_ptr, const size_t*,
-																								 const size_t, const tart::buffer_ptr, const size_t*, const size_t, const half*,
-																								 tart::buffer_ptr, const size_t*, const size_t, const size_t);
+																								 const size_t, const size_t, const half*, const tart::buffer_ptr, const uint32_t*,
+																								 const size_t, const tart::buffer_ptr, const uint32_t*, const size_t, const half*,
+																								 tart::buffer_ptr, const uint32_t*, const size_t, const size_t);
 
 // StridedBatched version of GEMM:
 // SGEMMSTRIDEDBATCHED/DGEMMSTRIDEDBATCHED/CGEMMSTRIDEDBATCHED/ZGEMMSTRIDEDBATCHED/HGEMMSTRIDEDBATCHED

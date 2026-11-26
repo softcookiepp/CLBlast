@@ -100,13 +100,13 @@ public:
 	// Methods to retrieve device information
 	// (platform id is always 0)
 	std::string Version() const;
-	size_t VersionNumber() const;
+	uint32_t VersionNumber() const;
 
 	std::string Vendor() const;
 	std::string Name() const;
 	std::string Type() const;
-	size_t MaxWorkGroupSize() const;
-	std::vector<size_t> MaxWorkItemSizes() const;
+	uint32_t MaxWorkGroupSize() const;
+	std::vector<uint32_t> MaxWorkItemSizes() const;
 
 	// Not sure if Tart has a public method for querying extensions; might be a good idea to implement this.
 	std::string Capabilities() const;
@@ -168,29 +168,29 @@ public:
 	// Regular constructor with memory management. If this class does not own the buffer object, then
 	// the memory will not be freed automatically afterwards. If the size is set to 0, this will
 	// become a stub containing a nullptr
-	explicit Buffer(const tart::device_ptr& device, const size_t size);
+	explicit Buffer(const tart::device_ptr& device, const uint32_t size);
 
 	// Copies from device to host: reading the device buffer a-synchronously
 	// (this is currently impossible in tart, so it will just sync for now)
-	void ReadAsync(const Queue& queue, const size_t size, T* host, const size_t offset = 0) const;
-	void ReadAsync(const Queue& queue, const size_t size, std::vector<T>& host, const size_t offset = 0) const;
+	void ReadAsync(const Queue& queue, const uint32_t size, T* host, const uint32_t offset = 0) const;
+	void ReadAsync(const Queue& queue, const uint32_t size, std::vector<T>& host, const uint32_t offset = 0) const;
 
 	// Copies from device to host: reading the device buffer
-	void Read(const Queue& queue, const size_t size, T* host, const size_t offset = 0) const;
-	void Read(const Queue& queue, const size_t size, std::vector<T>& host, const size_t offset = 0) const;
+	void Read(const Queue& queue, const uint32_t size, T* host, const uint32_t offset = 0) const;
+	void Read(const Queue& queue, const uint32_t size, std::vector<T>& host, const uint32_t offset = 0) const;
 
 	// Copies from host to device: writing the device buffer a-synchronously
-	void WriteAsync(const Queue& queue, const size_t size, const T* host, const size_t offset = 0);
-	void WriteAsync(const Queue& queue, const size_t size, const std::vector<T>& host, const size_t offset = 0);
+	void WriteAsync(const Queue& queue, const uint32_t size, const T* host, const uint32_t offset = 0);
+	void WriteAsync(const Queue& queue, const uint32_t size, const std::vector<T>& host, const uint32_t offset = 0);
 
 	// Copies from host to device: writing the device buffer
-	void Write(const Queue& queue, const size_t size, const T* host, const size_t offset = 0);
-	void Write(const Queue& queue, const size_t size, const std::vector<T>& host, const size_t offset = 0);
+	void Write(const Queue& queue, const uint32_t size, const T* host, const uint32_t offset = 0);
+	void Write(const Queue& queue, const uint32_t size, const std::vector<T>& host, const uint32_t offset = 0);
 
 	// Copies the contents of this buffer into another device buffer
-	void CopyToAsync(const Queue& queue, const size_t size, const Buffer<T>& destination,
+	void CopyToAsync(const Queue& queue, const uint32_t size, const Buffer<T>& destination,
 									 EventPointer event = nullptr) const;
-	void CopyTo(const Queue& queue, const size_t size, const Buffer<T>& destination) const ;
+	void CopyTo(const Queue& queue, const uint32_t size, const Buffer<T>& destination) const ;
 
 	// Retrieves the actual allocated size in bytes
 	size_t GetSize() const;
@@ -207,15 +207,41 @@ private:
 
 // =================================================================================================
 
+// Program wrapper: compiles multiple GLSL sources into Tart ShaderModules and provides kernel access
+class Program {
+	std::map<std::string, tart::shader_module_ptr> mShaderModules;
+public:
+	Program(const tart::device_ptr device, const std::map<std::string, std::string>& kernelSources) {
+		for (const auto& [name, source] : kernelSources) {
+			mShaderModules[name] = device->compileGLSL(source, {}, name);
+		}
+	}
+
+	// Get a kernel for the named entry point
+	tart::kernel_ptr getKernel(const std::string& name) const {
+		auto it = mShaderModules.find(name);
+		if (it == mShaderModules.end()) {
+			throw std::runtime_error("Kernel not found: " + name);
+		}
+		return it->second->createKernel(name);
+	}
+};
+
+// =================================================================================================
+
 // Kernel wrapper: provides OpenCL-like SetArgument() API over tart::kernel_ptr
 class Kernel {
 	tart::kernel_ptr mKernel;
 public:
 	explicit Kernel(const tart::kernel_ptr kernel) : mKernel(kernel) {}
 
+	// Constructor that extracts kernel from a Program wrapper
+	Kernel(const std::shared_ptr<Program>& program, const std::string& kernelName)
+		: mKernel(program->getKernel(kernelName)) {}
+
 	// Sets push constant at index
 	template <typename T>
-	void SetArgument(const size_t index, const T& value) {
+	void SetArgument(const uint32_t index, const T& value) {
 		mKernel->setArg(index, value);
 	}
 

@@ -21,16 +21,16 @@ namespace clblast {
 // =================================================================================================
 
 // Functional implementation of XaxpyBatched (batched AXPY)
-void DoAxpyBatched(const size_t n, const tart::buffer_ptr& alphas_device, const tart::buffer_ptr& x_buffer,
-                   const std::vector<size_t>& x_offsets, const size_t x_inc, const tart::buffer_ptr& y_buffer,
-                   const std::vector<size_t>& y_offsets, const size_t y_inc, const size_t batch_count,
+void DoAxpyBatched(const uint32_t n, const tart::buffer_ptr& alphas_device, const tart::buffer_ptr& x_buffer,
+                   const std::vector<uint32_t>& x_offsets, const size_t x_inc, const tart::buffer_ptr& y_buffer,
+                   const std::vector<uint32_t>& y_offsets, const size_t y_inc, const uint32_t batch_count,
                    tart::device_ptr device, const tart::DType& dtype, const Databases& db);
 
 // Helper function for template method
 template <typename T>
-void UploadAxpyBatched(const size_t n, const std::vector<T>& alphas, const tart::buffer_ptr& x_buffer,
-                       const std::vector<size_t>& x_offsets, const size_t x_inc, const tart::buffer_ptr& y_buffer,
-                       const std::vector<size_t>& y_offsets, const size_t y_inc, const size_t batch_count,
+void UploadAxpyBatched(const uint32_t n, const std::vector<T>& alphas, const tart::buffer_ptr& x_buffer,
+                       const std::vector<uint32_t>& x_offsets, const size_t x_inc, const tart::buffer_ptr& y_buffer,
+                       const std::vector<uint32_t>& y_offsets, const size_t y_inc, const uint32_t batch_count,
                        tart::device_ptr device, const tart::DType& dtype, const Databases& db);
 
 // =================================================================================================

@@ -29,6 +29,7 @@
 #include "tuning/configurations.hpp"
 #include "utilities/backend.hpp"
 #include "utilities/clblast_exceptions.hpp"
+#include "utilities/compile.hpp"
 #include "utilities/timing.hpp"
 #include "utilities/utilities.hpp"
 
@@ -103,16 +104,16 @@ struct ThreadInfo {
 	Kernel kernel{nullptr};
 	bool ready = false;
 	std::condition_variable cv;
-	std::vector<size_t> global;
-	std::vector<size_t> local;
+	std::vector<uint32_t> global;
+	std::vector<uint32_t> local;
 };
 
 template <typename... Args>
 inline void addPrintInfo(std::string& str, const char* format, Args&&... args) {
-	const auto size = std::snprintf(nullptr, 0, format, std::forward<Args>(args)...);
+	const auto size = std::snprintf(nullptr, 0, "%s", format);
 	const auto original_size = str.size();
 	str.resize(original_size + size);
-	std::snprintf(&str[original_size], size + 1, format, std::forward<Args>(args)...);
+	std::snprintf(&str[original_size], size + 1, "%s", format);
 }
 
 template <typename T>
@@ -311,7 +312,7 @@ void Tuner(int argc, char* argv[], const int V, GetTunerDefaultsFunc GetTunerDef
 	const auto device_name = GetDeviceName(device);
 
 	// Creates input buffers with random data. Adds a 'canary' region to detect buffer overflows.
-	const auto buffer_sizes = std::vector<size_t>{settings.size_x + kCanarySize, settings.size_y + kCanarySize,
+	const auto buffer_sizes = std::vector<uint32_t>{settings.size_x + kCanarySize, settings.size_y + kCanarySize,
 																								settings.size_a + kCanarySize, settings.size_b + kCanarySize,
 																								settings.size_c + kCanarySize, settings.size_temp + kCanarySize};
 	std::mt19937 mt(kSeed);
@@ -404,7 +405,8 @@ void Tuner(int argc, char* argv[], const int V, GetTunerDefaultsFunc GetTunerDef
 		printf("						 %sOK%s |", kPrintSuccess.c_str(), kPrintEnd.c_str());
 
 		// Runs the kernel
-		const auto time_ms = TimeKernel(args.num_runs, kernel, queue, device, global, local);
+		const auto time_ms = TimeKernel(args.num_runs, kernel.get(), queue, device,
+			std::vector<uint32_t>(global.begin(), global.end()), std::vector<uint32_t>(local.begin(), local.end()));
 		printf("			- |");
 		if (time_ms == -1.0) {
 			throw std::runtime_error("Error in reference implementation");
@@ -437,8 +439,8 @@ void Tuner(int argc, char* argv[], const int V, GetTunerDefaultsFunc GetTunerDef
 			}
 
 			Kernel kernel{nullptr};
-			std::vector<size_t> global;
-			std::vector<size_t> local;
+			std::vector<uint32_t> global;
+			std::vector<uint32_t> local;
 			{
 				if (args.extra_threads == 0) {
 					kernelCompilationThread<T>(thread_infos, configurations, config_id, settings, args, device,
@@ -454,7 +456,8 @@ void Tuner(int argc, char* argv[], const int V, GetTunerDefaultsFunc GetTunerDef
 
 			// Runs the kernel
 			SetArguments(V, kernel, args, device_buffers);
-			const auto time_ms = TimeKernel(args.num_runs, kernel, queue, device, global, local);
+			const auto time_ms = TimeKernel(args.num_runs, kernel.get(), queue, device,
+				std::vector<uint32_t>(global.begin(), global.end()), std::vector<uint32_t>(local.begin(), local.end()));
 
 			// Kernel run was not successful
 			if (time_ms == -1.0) {

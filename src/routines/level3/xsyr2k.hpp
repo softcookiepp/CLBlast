@@ -31,8 +31,8 @@ class Xsyr2k : public Xsyrk {
    Xsyr2k(const tart::DType& dtype, Queue& queue, const std::string& name = "SYR2K");
 
    // Templated-precision implementation of the routine
-   void DoSyr2k(const Layout layout, const Triangle triangle, const Transpose ab_transpose, const size_t n,
-                const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
+   void DoSyr2k(const Layout layout, const Triangle triangle, const Transpose ab_transpose, const uint32_t n,
+                const uint32_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
                 const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld, const tart::Scalar& beta,
                 const tart::buffer_ptr& c_buffer, const size_t c_offset, const size_t c_ld,
                 const Databases& db, tart::device_ptr device, const tart::DType& dtype);

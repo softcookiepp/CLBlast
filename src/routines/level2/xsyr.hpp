@@ -29,7 +29,7 @@ class Xsyr : public Xher {
   Xsyr(const tart::DType& dtype, Queue& queue, const std::string& name = "SYR");
 
   // Templated-precision implementation of the routine
-  void DoSyr(const Layout layout, const Triangle triangle, const size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& x_buffer,
+  void DoSyr(const Layout layout, const Triangle triangle, const uint32_t n, const tart::Scalar& alpha, const tart::buffer_ptr& x_buffer,
              const size_t x_offset, const size_t x_inc, const tart::buffer_ptr& a_buffer, const size_t a_offset,
              const size_t a_ld,
              tart::device_ptr device, const tart::DType& dtype, const Databases& db);

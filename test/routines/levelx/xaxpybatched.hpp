@@ -43,8 +43,8 @@ class TestXaxpyBatched {
 		args.y_size = GetSizeY(args);
 
 		// Also sets the batch-related variables
-		args.x_offsets = std::vector<size_t>(args.batch_count);
-		args.y_offsets = std::vector<size_t>(args.batch_count);
+		args.x_offsets = std::vector<uint32_t>(args.batch_count);
+		args.y_offsets = std::vector<uint32_t>(args.batch_count);
 		args.alphas = std::vector<T>(args.batch_count);
 		for (auto batch = size_t{0}; batch < args.batch_count; ++batch) {
 			args.x_offsets[batch] = batch * PerBatchSizeX(args) + args.x_offset;

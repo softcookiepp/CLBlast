@@ -28,8 +28,8 @@ namespace clblast {
 
 // Inverts diagonal square blocks of a matrix
 void InvertMatrixDiagonalBlocks(const Layout layout, const Triangle triangle, const Diagonal diag,
-                                const size_t n, const size_t block_size, const tart::buffer_ptr& src,
-                                const size_t offset, const size_t ld_src, tart::buffer_ptr& dest,
+                                const uint32_t n, const uint32_t block_size, const tart::buffer_ptr& src,
+                                const uint32_t offset, const size_t ld_src, tart::buffer_ptr& dest,
                                 const tart::device_ptr& device, const tart::DType& dtype, const Databases& db)
 {
     // Makes sure all dimensions are larger than zero
@@ -79,14 +79,14 @@ void InvertMatrixDiagonalBlocks(const Layout layout, const Triangle triangle, co
     kernel->setArg(5, static_cast<int>(block_size));
     kernel->setArg(6, static_cast<int>(unit_diagonal));
     kernel->setArg(7, static_cast<int>(is_upper));
-    const auto local_invert = std::vector<size_t>{internal_block_size};
-    auto global_invert = std::vector<uint32_t>{num_internal_blocks * internal_block_size};
+    const auto local_invert = std::vector<uint32_t>{internal_block_size};
+    auto global_invert = std::vector<uint32_t>{static_cast<uint32_t>(num_internal_blocks * internal_block_size)};
     global_invert[0] = global_invert[0] / local_invert[0];
     std::vector<uint32_t> spec = {
-        db["INTERNAL_BLOCK_SIZE"],
-        db["LOCALPAD"],
-        db["TMMWGSX"],
-        db["TMMWGSY"],
+        static_cast<uint32_t>(db["INTERNAL_BLOCK_SIZE"]),
+        static_cast<uint32_t>(db["LOCALPAD"]),
+        static_cast<uint32_t>(db["TMMWGSX"]),
+        static_cast<uint32_t>(db["TMMWGSY"]),
         0,
         static_cast<uint32_t>(is_upper)
     };
@@ -98,19 +98,19 @@ void InvertMatrixDiagonalBlocks(const Layout layout, const Triangle triangle, co
         assert(current_size == 16 || current_size == 32 || current_size == 64);
         
         std::vector<uint32_t> spec2 = {
-            db["INTERNAL_BLOCK_SIZE"],
-            db["LOCALPAD"],
-            db["TMMWGSX"],
-            db["TMMWGSY"],
-            current_size,
+            static_cast<uint32_t>(db["INTERNAL_BLOCK_SIZE"]),
+            static_cast<uint32_t>(db["LOCALPAD"]),
+            static_cast<uint32_t>(db["TMMWGSX"]),
+            static_cast<uint32_t>(db["TMMWGSY"]),
+            static_cast<uint32_t>(current_size),
             static_cast<uint32_t>(is_upper)
         };
 
         // Emulates a 3D grid: NX * (NY * npages)
         const auto npages = CeilDiv(n, current_size * 2);
         const auto local0 = (current_size <= 32) ? current_size / 4 : 16;
-        const auto local = std::vector<size_t>{local0, 4};
-        auto global = std::vector<uint32_t>{Ceil(current_size / local[1], local[0]), Ceil(npages * (current_size / 16) * local[1], local[1])};
+        const auto local = std::vector<uint32_t>{local0, 4};
+        auto global = std::vector<uint32_t>{static_cast<uint32_t>(Ceil(current_size / local[1], local[0])), static_cast<uint32_t>(Ceil(npages * (current_size / 16) * local[1], local[1]))};
         global[0] = global[0] / local0;
         global[1] = global[1] / 4;
 

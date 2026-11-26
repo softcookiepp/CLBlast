@@ -21,7 +21,7 @@ namespace clblast {
 // =================================================================================================
 
 // Functional implementation of Xger (general rank-1 matrix update)
-void DoGer(const Layout layout, const size_t m, const size_t n, const tart::Scalar& alpha,
+void DoGer(const Layout layout, const uint32_t m, const uint32_t n, const tart::Scalar& alpha,
            const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
            const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
            const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
@@ -34,7 +34,7 @@ class Xger {
 	Xger(const tart::DType& dtype, Queue& queue, const std::string& name = "GER");
 
 	// Templated-precision implementation of the routine
-	void DoGer(const Layout layout, const size_t m, const size_t n, const tart::Scalar& alpha,
+	void DoGer(const Layout layout, const uint32_t m, const uint32_t n, const tart::Scalar& alpha,
 							const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
 							const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
 							const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,

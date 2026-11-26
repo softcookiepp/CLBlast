@@ -66,11 +66,6 @@ StatusCode DispatchException(const bool silent) {
 		message = e.what();
 		status = StatusCode::kUnknownError;
 	}
-	catch (std::runtime_error& e)
-	{
-		message = e.what();
-		status = StatusCode::kUnknownError;
-	}
 	if (message && !silent) {
 		fprintf(stderr, "CLBlast: %s\n", message);
 	}
@@ -97,11 +92,6 @@ StatusCode DispatchExceptionCatchAll(const bool silent) {
 		status = StatusCode::kUnknownError;
 	}
 	catch (const std::runtime_error& e)
-	{
-		message = e.what();
-		status = StatusCode::kUnknownError;
-	}
-	catch (std::runtime_error& e)
 	{
 		message = e.what();
 		status = StatusCode::kUnknownError;

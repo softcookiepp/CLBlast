@@ -99,11 +99,11 @@ void XgemvTestValidArguments(const int, const Arguments<T>&) {}
 std::vector<Constraint> XgemvSetConstraints(const int V) {
   auto constraints = std::vector<Constraint>();
   if (V == 2 || V == 3) {
-    auto MultipleOfX = [](std::vector<size_t> v) { return IsMultiple(v[0], v[1]); };
+    auto MultipleOfX = [](std::vector<uint32_t> v) { return IsMultiple(v[0], v[1]); };
     constraints.push_back({MultipleOfX, {"WPT" + std::to_string(V), "VW" + std::to_string(V)}});
   }
   if (V == 3) {
-    auto LargerOrEqual = [](std::vector<size_t> v) { return v[0] >= v[1]; };
+    auto LargerOrEqual = [](std::vector<uint32_t> v) { return v[0] >= v[1]; };
     constraints.push_back({LargerOrEqual, {"WGS" + std::to_string(V), "WPT" + std::to_string(V)}});
   }
   return constraints;
@@ -111,10 +111,10 @@ std::vector<Constraint> XgemvSetConstraints(const int V) {
 template <typename T>
 LocalMemSizeInfo XgemvComputeLocalMemSize(const int V) {
   if (V == 1 || V == 2) {
-    return {[](std::vector<size_t> v) -> size_t { return GetBytes(PrecisionValue<T>()) * v[0]; },
+    return {[](std::vector<uint32_t> v) -> uint32_t { return GetBytes(PrecisionValue<T>()) * v[0]; },
             {"WGS" + std::to_string(V)}};
   }
-  return {[](std::vector<size_t> v) -> size_t { return GetBytes(PrecisionValue<T>()) * (v[0] + v[1] * v[2]); },
+  return {[](std::vector<uint32_t> v) -> uint32_t { return GetBytes(PrecisionValue<T>()) * (v[0] + v[1] * v[2]); },
           {"WGS3", "WPT3", "WGS3"}};
 }
 

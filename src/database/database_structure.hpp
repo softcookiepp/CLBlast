@@ -27,10 +27,10 @@ namespace database {
 
 // Type alias for the database storage (arrays for fast compilation/efficiency)
 using Name = std::array<char, 51>;			// name as stored in database (50 chars + string terminator)
-using Params = std::vector<size_t>;	// parameters as stored in database
+using Params = std::vector<uint32_t>;	// parameters as stored in database
 
 // Type alias after extracting from the database (sorted map for improved code readability)
-using Parameters = std::map<std::string, size_t>;	// parameters after reading from DB
+using Parameters = std::map<std::string, uint32_t>;	// parameters after reading from DB
 
 // default name
 const Name kDeviceNameDefault = {"default"};

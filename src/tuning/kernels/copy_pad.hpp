@@ -81,7 +81,7 @@ void PadTestValidArguments(const int, const Arguments<T>&) {}
 std::vector<Constraint> PadSetConstraints(const int) { return {}; }
 template <typename T>
 LocalMemSizeInfo PadComputeLocalMemSize(const int) {
-	return {[](std::vector<size_t>) -> size_t { return 0; }, {}};
+	return {[](std::vector<uint32_t>) -> uint32_t { return 0; }, {}};
 }
 
 // Sets the kernel's arguments

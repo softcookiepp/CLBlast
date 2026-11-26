@@ -30,7 +30,7 @@ class Xsymm {
 	Xsymm(const tart::DType& dtype, Queue& queue, const std::string& name = "SYMM");
 
 	// Templated-precision implementation of the routine
-	void DoSymm(const Layout layout, const Side side, const Triangle triangle, const size_t m, const size_t n,
+	void DoSymm(const Layout layout, const Side side, const Triangle triangle, const uint32_t m, const uint32_t n,
 							const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
 							const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld, const tart::Scalar& beta,
 							const tart::buffer_ptr& c_buffer, const size_t c_offset, const size_t c_ld,

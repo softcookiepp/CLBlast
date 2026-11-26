@@ -58,7 +58,7 @@ std::vector<Timing> TimeRoutine(const uint32_t from, const uint32_t to, const ui
 	printf("x--------x--------------x\n");
 	for (auto value = from; value < to; value += step)
 	{
-		printf("| %6zu |", value);
+		printf("| %6u |", value);
 		try
 		{
 			const auto FunctionToTune = [&]() { routine(value, queue, buffers); };

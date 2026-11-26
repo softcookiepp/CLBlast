@@ -27,11 +27,11 @@ namespace clblast {
 
 // The main routine
 void DoGemmBatched(const Layout layout, const Transpose a_transpose, const Transpose b_transpose,
-                   const size_t m, const size_t n, const size_t k, const tart::buffer_ptr& alphas_device,
-                   const tart::buffer_ptr& a_buffer, const std::vector<size_t>& a_offsets, const size_t a_ld,
-                   const tart::buffer_ptr& b_buffer, const std::vector<size_t>& b_offsets, const size_t b_ld,
+                   const uint32_t m, const uint32_t n, const uint32_t k, const tart::buffer_ptr& alphas_device,
+                   const tart::buffer_ptr& a_buffer, const std::vector<uint32_t>& a_offsets, const size_t a_ld,
+                   const tart::buffer_ptr& b_buffer, const std::vector<uint32_t>& b_offsets, const size_t b_ld,
                    const tart::buffer_ptr& betas_device, const tart::buffer_ptr& c_buffer,
-                   const std::vector<size_t>& c_offsets, const size_t c_ld, const size_t batch_count,
+                   const std::vector<uint32_t>& c_offsets, const size_t c_ld, const uint32_t batch_count,
                    tart::device_ptr device, const tart::DType& dtype, const Databases& db)
 {
     // Tests for a valid batch count
@@ -84,13 +84,13 @@ void DoGemmBatched(const Layout layout, const Transpose a_transpose, const Trans
 // =================================================================================================
 
 // The indirect version of batched GEMM
-void BatchedGemmIndirect(const size_t m, const size_t n, const size_t k, const tart::buffer_ptr& alphas,
+void BatchedGemmIndirect(const uint32_t m, const uint32_t n, const uint32_t k, const tart::buffer_ptr& alphas,
                          const tart::buffer_ptr& a_buffer, const std::vector<int>& a_offsets, const size_t a_ld,
                          const tart::buffer_ptr& b_buffer, const std::vector<int>& b_offsets, const size_t b_ld,
                          const tart::buffer_ptr& betas, const tart::buffer_ptr& c_buffer, const std::vector<int>& c_offsets,
                          const size_t c_ld, const bool a_do_transpose, const bool b_do_transpose, const bool c_do_transpose,
                          const bool a_conjugate, const bool b_conjugate, const size_t a_one, const size_t a_two,
-                         const size_t b_one, const size_t b_two, const size_t c_one, const size_t c_two, const size_t batch_count,
+                         const size_t b_one, const size_t b_two, const size_t c_one, const size_t c_two, const uint32_t batch_count,
                          tart::device_ptr device, const tart::DType& dtype, const Databases& db)
 {
     // Calculates the ceiled versions of m, n, and k
@@ -179,7 +179,7 @@ void BatchedGemmIndirect(const size_t m, const size_t n, const size_t k, const t
     kernel->setArg(13, static_cast<int>(c_two_i));
 
     // Computes the global and local thread sizes
-    const auto global = std::vector<uint32_t>{(c_one_i) / db["MWG"], (c_two_i) / db["NWG"], batch_count};
+    const auto global = std::vector<uint32_t>{static_cast<uint32_t>((c_one_i) / db["MWG"]), static_cast<uint32_t>((c_two_i) / db["NWG"]), static_cast<uint32_t>(batch_count)};
 
     const bool subgroupSupported = device->getMetadata().subgroupAdd;
     std::vector<uint32_t> spec(subgroupSupported ? 16 : 15);
@@ -215,13 +215,13 @@ void BatchedGemmIndirect(const size_t m, const size_t n, const size_t k, const t
 // =================================================================================================
 
 // The direct version of batched GEMM
-void BatchedGemmDirect(const size_t m, const size_t n, const size_t k, const tart::buffer_ptr& alphas,
+void BatchedGemmDirect(const uint32_t m, const uint32_t n, const uint32_t k, const tart::buffer_ptr& alphas,
                        const tart::buffer_ptr& a_buffer, const std::vector<int>& a_offsets, const size_t a_ld,
                        const tart::buffer_ptr& b_buffer, const std::vector<int>& b_offsets, const size_t b_ld,
                        const tart::buffer_ptr& betas, const tart::buffer_ptr& c_buffer,
                        const std::vector<int>& c_offsets, const size_t c_ld, const bool a_do_transpose,
                        const bool b_do_transpose, const bool c_do_transpose, const bool a_conjugate,
-                       const bool b_conjugate, const size_t batch_count, tart::device_ptr device, const tart::DType& dtype, const Databases& db)
+                       const bool b_conjugate, const uint32_t batch_count, tart::device_ptr device, const tart::DType& dtype, const Databases& db)
 {
     // Uploads the offsets to the device
     auto a_offsets_device = device->allocateBuffer(sizeof(int) * batch_count);
@@ -264,17 +264,17 @@ void BatchedGemmDirect(const size_t m, const size_t n, const size_t k, const tar
     // Computes the global and local thread sizes
     const auto m_ceiled = Ceil(m, db["WGD"]);
     const auto n_ceiled = Ceil(n, db["WGD"]);
-    const auto global = std::vector<uint32_t>{m_ceiled / db["WGD"], n_ceiled / db["WGD"], batch_count};
+    const auto global = std::vector<uint32_t>{static_cast<uint32_t>(m_ceiled / db["WGD"]), static_cast<uint32_t>(n_ceiled / db["WGD"]), static_cast<uint32_t>(batch_count)};
     
     const std::vector<uint32_t> spec({
-        db["WGD"],
-        db["MDIMCD"],
-        db["NDIMCD"],
-        db["MDIMAD"],
-        db["NDIMBD"],
-        db["KWID"],
-        db["PADA"],
-        db["PADB"],
+        static_cast<uint32_t>(db["WGD"]),
+        static_cast<uint32_t>(db["MDIMCD"]),
+        static_cast<uint32_t>(db["NDIMCD"]),
+        static_cast<uint32_t>(db["MDIMAD"]),
+        static_cast<uint32_t>(db["NDIMBD"]),
+        static_cast<uint32_t>(db["KWID"]),
+        static_cast<uint32_t>(db["PADA"]),
+        static_cast<uint32_t>(db["PADB"]),
         a_do_transpose,
         b_do_transpose
     });

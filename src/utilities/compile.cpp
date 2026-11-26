@@ -60,12 +60,12 @@ std::shared_ptr<Program> CompileFromSource(const std::string& source_string, con
 		const std::string& routine_name, const Device& device,
 		std::vector<std::string>& options,
 		const size_t run_preprocessor,	// 0: platform dependent, 1: always, 2: never
-		const bool silent, std::map<std::string, std::string>& kernelSources)
+		[[maybe_unused]] const bool silent, std::map<std::string, std::string>& kernelSources)
 {
 	auto header_string = BuildDefinesHeader(dtype, device);
 
 	// For specific devices, use staggered/shuffled workgroup indices.
-	if (device()->getMetadata().physicalDeviceProperties.vendorID == tart::VendorID::eAMD)
+	if (static_cast<tart::VendorID>(device()->getMetadata().physicalDeviceProperties.vendorID) == tart::VendorID::eAMD)
 	{
 		header_string += "#define USE_STAGGERED_INDICES 1\n";
 	}

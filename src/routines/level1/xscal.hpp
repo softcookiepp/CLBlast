@@ -21,7 +21,7 @@ namespace clblast {
 
 // Functional implementation of Xscal
 void DoScal(const tart::DType& dtype, const tart::device_ptr& device,
-            const size_t n, const tart::Scalar& alpha,
+            const uint32_t n, const tart::Scalar& alpha,
             const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
             const Databases& db);
 

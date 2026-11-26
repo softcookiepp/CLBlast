@@ -30,7 +30,7 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-Xtrsm::Xtrsm(const tart::DType& dtype, Queue& queue, const std::string& name) {}
+Xtrsm::Xtrsm(const tart::DType& dtype, [[maybe_unused]] Queue& queue, const std::string& name) {}
 
 // =================================================================================================
 
@@ -39,7 +39,7 @@ void Xtrsm::DoTrsm(const Layout layout, Side side, Triangle triangle, const Tran
 											const Diagonal diagonal, size_t m, size_t n, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer,
 											const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset,
 											const size_t b_ld,
-											tart::device_ptr device, const tart::DType& dtype, const Databases& db) {
+											tart::device_ptr device, const tart::DType& dtype, [[maybe_unused]] const Databases& db) {
 	// Converts row-major to a col-major problem:
 	// The idea is that
 	//	 B = A*X
@@ -63,10 +63,10 @@ void Xtrsm::DoTrsm(const Layout layout, Side side, Triangle triangle, const Tran
 
 // The main routine
 void Xtrsm::TrsmColMajor(const Side side, const Triangle triangle, const Transpose a_transpose,
-														const Diagonal diagonal, const size_t m, const size_t n, const tart::Scalar& alpha,
+														const Diagonal diagonal, const uint32_t m, const uint32_t n, const tart::Scalar& alpha,
 														const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
 														const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld,
-														tart::device_ptr device, const tart::DType& dtype, const Databases& db) {
+														tart::device_ptr device, const tart::DType& dtype, [[maybe_unused]] const Databases& db) {
 	// Settings
 	constexpr auto block_size = size_t{16};	// tuneable
 

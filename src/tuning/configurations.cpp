@@ -20,7 +20,7 @@ namespace clblast {
 
 // Finds all configurations. It also applies the user-defined constraints within.
 std::vector<Configuration> SetConfigurations(const Device& device, const std::vector<Parameter>& parameters,
-                                             const std::vector<size_t>& local_size_base,
+                                             const std::vector<uint32_t>& local_size_base,
                                              const TransformVector& mul_local_config,
                                              const TransformVector& div_local_config, const Constraints& constraints,
                                              const LocalMemSizeInfo& local_mem_size_info) {
@@ -35,11 +35,11 @@ std::vector<Configuration> SetConfigurations(const Device& device, const std::ve
 }
 
 // Iterates recursively over all permutations of the user-defined parameters
-void PopulateConfigurations(const std::vector<Parameter>& parameters, const std::vector<size_t>& local_size_base,
+void PopulateConfigurations(const std::vector<Parameter>& parameters, const std::vector<uint32_t>& local_size_base,
                             const TransformVector& mul_local_config, const TransformVector& div_local_config,
                             const size_t index, const Configuration& config, std::vector<Configuration>& configuration,
                             const size_t local_mem_max, const Constraints& constraints,
-                            const LocalMemSizeInfo& local_mem_size_info, const std::vector<size_t>& max_work_item_sizes,
+                            const LocalMemSizeInfo& local_mem_size_info, const std::vector<uint32_t>& max_work_item_sizes,
                             const size_t max_work_group_size) {
   // End of the chain: all parameters are considered, store the resulting configuration if it is a
   // valid one according to the constraints
@@ -64,13 +64,13 @@ void PopulateConfigurations(const std::vector<Parameter>& parameters, const std:
 
 // Loops over all user-defined constraints to check whether or not the configuration is valid
 bool ValidConfiguration(const Configuration& config, const size_t local_mem_max, const Constraints& constraints,
-                        const LocalMemSizeInfo& local_mem_size_info, const std::vector<size_t>& local_size_base,
+                        const LocalMemSizeInfo& local_mem_size_info, const std::vector<uint32_t>& local_size_base,
                         const TransformVector& mul_local_config, const TransformVector& div_local_config,
-                        const std::vector<size_t>& max_work_item_sizes, const size_t max_work_group_size) {
+                        const std::vector<uint32_t>& max_work_item_sizes, const size_t max_work_group_size) {
   // Iterates over all constraints
   for (auto& constraint : constraints) {
     // Finds the values of the parameters
-    auto values = std::vector<size_t>(constraint.parameters.size());
+    auto values = std::vector<uint32_t>(constraint.parameters.size());
     for (auto i = size_t{0}; i < constraint.parameters.size(); ++i) {
       values[i] = config.at(constraint.parameters[i]);
     }
@@ -82,7 +82,7 @@ bool ValidConfiguration(const Configuration& config, const size_t local_mem_max,
   }
 
   // Finds the values of the local memory parameters
-  auto local_mem_values = std::vector<size_t>(local_mem_size_info.parameters.size());
+  auto local_mem_values = std::vector<uint32_t>(local_mem_size_info.parameters.size());
   for (auto i = size_t{0}; i < local_mem_size_info.parameters.size(); ++i) {
     local_mem_values[i] = config.at(local_mem_size_info.parameters[i]);
   }
@@ -112,7 +112,7 @@ bool ValidConfiguration(const Configuration& config, const size_t local_mem_max,
 }
 
 // Multiplies and/or dividers a thread configuration (local/global)
-std::vector<size_t> SetThreadConfiguration(const Configuration& config, const std::vector<size_t>& base,
+std::vector<uint32_t> SetThreadConfiguration(const Configuration& config, const std::vector<uint32_t>& base,
                                            const TransformVector& mul_config, const TransformVector& div_config) {
   auto result = base;
   for (const auto& multipliers : mul_config) {

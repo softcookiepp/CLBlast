@@ -68,14 +68,14 @@ struct TunerSettings {
 	size_t size_temp = 1;
 
 	// Inputs and outputs (X:0, Y:1, A:2, B:3, C:4, temp:5)
-	std::vector<size_t> inputs = {};
-	std::vector<size_t> outputs = {};
+	std::vector<uint32_t> inputs = {};
+	std::vector<uint32_t> outputs = {};
 
 	// Sets the base thread configuration
-	std::vector<size_t> global_size = {};
-	std::vector<size_t> global_size_ref = {};
-	std::vector<size_t> local_size = {};
-	std::vector<size_t> local_size_ref = {};
+	std::vector<uint32_t> global_size = {};
+	std::vector<uint32_t> global_size_ref = {};
+	std::vector<uint32_t> local_size = {};
+	std::vector<uint32_t> local_size_ref = {};
 
 	// Transforms the thread configuration based on the parameters
 	TransformVector mul_local = {};

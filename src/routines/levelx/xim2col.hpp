@@ -20,7 +20,7 @@ namespace clblast {
 // =================================================================================================
 
 // Functional implementation of Xim2col (image-to-column)
-void DoIm2col(const KernelMode kernel_mode, const size_t channels, const size_t height, const size_t width,
+void DoIm2col(const KernelMode kernel_mode, const size_t channels, const uint32_t height, const uint32_t width,
               const size_t kernel_h, const size_t kernel_w, const size_t pad_h, const size_t pad_w,
               const size_t stride_h, const size_t stride_w, const size_t dilation_h, const size_t dilation_w,
               const tart::buffer_ptr& im_buffer, const size_t im_offset, const tart::buffer_ptr& col_buffer,

@@ -165,12 +165,14 @@ set(SOURCES
 	src/database/database.cpp
 	src/cache.cpp
 	src/routines/common.cpp
+	src/utilities/compile.cpp
 	src/utilities/clblast_exceptions.cpp
 	src/utilities/timing.cpp
 	src/utilities/utilities.cpp
 	src/api_common.cpp
 	src/routines/levelx/xinvert.cpp	# only source, don't include it as a test
 	src/tuning/configurations.cpp
+	src/tuning/tuning_api.cpp
 	src/vkpp11.cpp
 	src/routines/level1/level1.cpp
 	src/routines/level2/level2.cpp
@@ -277,6 +279,7 @@ endif()
 if(TUNERS)
 
 	set(TUNERS_COMMON
+			src/utilities/compile.cpp
 			src/utilities/clblast_exceptions.cpp
 			src/utilities/timing.cpp
 			src/utilities/utilities.cpp

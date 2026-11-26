@@ -18,7 +18,7 @@ namespace clblast
 {
 
 // perfect place to put this too!
-void TestVectorScalar(const tart::DType& dtype, const size_t n, const tart::buffer_ptr& buffer, const size_t offset)
+void TestVectorScalar(const tart::DType& dtype, const uint32_t n, const tart::buffer_ptr& buffer, const uint32_t offset)
 {
 	try
 	{
@@ -34,7 +34,7 @@ void TestVectorScalar(const tart::DType& dtype, const size_t n, const tart::buff
 }
 
 
-void TestVectorIndex(const tart::DType& dtype, const size_t n, const tart::buffer_ptr& buffer, const size_t offset) {
+void TestVectorIndex(const tart::DType& dtype, const uint32_t n, const tart::buffer_ptr& buffer, const uint32_t offset) {
 	try {
 		const auto required_size = (n + offset) * dtype.size();
 		if (buffer->getSize() < required_size) {
@@ -46,7 +46,7 @@ void TestVectorIndex(const tart::DType& dtype, const size_t n, const tart::buffe
 }
 
 // Tests vector 'X' for validity
-void TestVectorX(const tart::DType& dtype, const size_t n, const tart::buffer_ptr& buffer, const size_t offset, const size_t inc)
+void TestVectorX(const tart::DType& dtype, const uint32_t n, const tart::buffer_ptr& buffer, const uint32_t offset, const uint32_t inc)
 {
 	if (inc == 0) {
 		throw BLASError(StatusCode::kInvalidIncrementX);
@@ -62,7 +62,7 @@ void TestVectorX(const tart::DType& dtype, const size_t n, const tart::buffer_pt
 }
 
 // Tests vector 'Y' for validity
-void TestVectorY(const tart::DType& dtype, const size_t n, const tart::buffer_ptr& buffer, const size_t offset, const size_t inc)
+void TestVectorY(const tart::DType& dtype, const uint32_t n, const tart::buffer_ptr& buffer, const uint32_t offset, const uint32_t inc)
 {
 	if (inc == 0) {
 		throw BLASError(StatusCode::kInvalidIncrementY);
@@ -78,7 +78,7 @@ void TestVectorY(const tart::DType& dtype, const size_t n, const tart::buffer_pt
 }
 
 // Tests vector 'Z' for validity
-void TestVectorZ(const tart::DType& dtype, const size_t n, const tart::buffer_ptr& buffer, const size_t offset, const size_t inc)
+void TestVectorZ(const tart::DType& dtype, const uint32_t n, const tart::buffer_ptr& buffer, const uint32_t offset, const uint32_t inc)
 {
 	if (inc == 0) {
 		throw BLASError(StatusCode::kInvalidIncrementZ);

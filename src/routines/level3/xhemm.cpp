@@ -24,16 +24,16 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor: forwards to base class constructor
-Xhemm::Xhemm(const tart::DType& dtype, Queue& queue, const std::string& name) {}
+Xhemm::Xhemm(const tart::DType& dtype, [[maybe_unused]] Queue& queue, const std::string& name) {}
 
 // =================================================================================================
 
 // The main routine
-void Xhemm::DoHemm(const Layout layout, const Side side, const Triangle triangle, const size_t m, const size_t n,
+void Xhemm::DoHemm(const Layout layout, const Side side, const Triangle triangle, const uint32_t m, const uint32_t n,
 											const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
 											const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld, const tart::Scalar& beta,
 											const tart::buffer_ptr& c_buffer, const size_t c_offset, const size_t c_ld,
-											tart::device_ptr device, const tart::DType& dtype, const Databases& db) {
+											tart::device_ptr device, const tart::DType& dtype, [[maybe_unused]] const Databases& db) {
 	// Makes sure all dimensions are larger than zero
 	if ((m == 0) || (n == 0)) {
 		throw BLASError(StatusCode::kInvalidDimension);
@@ -70,24 +70,24 @@ void Xhemm::DoHemm(const Layout layout, const Side side, const Triangle triangle
 
 	// Uses the common padding kernel's thread configuration. This is allowed, since the
 	// hermitian-to-squared kernel uses the same parameters.
-	std::vector<uint32_t> global = {Ceil(CeilDiv(k, db["PAD_WPTX"]), db["PAD_DIMX"]), Ceil(CeilDiv(k, db["PAD_WPTY"]), db["PAD_DIMY"])};
-	auto local = std::vector<size_t>{db["PAD_DIMX"], db["PAD_DIMY"]};
+	std::vector<uint32_t> global = {static_cast<uint32_t>(Ceil(CeilDiv(k, db["PAD_WPTX"]), db["PAD_DIMX"])), static_cast<uint32_t>(Ceil(CeilDiv(k, db["PAD_WPTY"]), db["PAD_DIMY"]))};
+	auto local = std::vector<uint32_t>{static_cast<uint32_t>(db["PAD_DIMX"]), static_cast<uint32_t>(db["PAD_DIMY"])};
 	global[0] = global[0] / local[0];
 	global[1] = global[1] / local[1];
 	std::vector<uint32_t> spec = {
-		db["COPY_DIMX"],
-		db["COPY_DIMY"],
-		db["COPY_WPT"],
-		db["PAD_DIMX"],
-		db["PAD_DIMY"],
-		db["PAD_WPTX"],
-		db["PAD_WPTY"],
-		db["TRA_DIM"],
-		db["TRA_PAD"],
-		db["TRA_SHUFFLE"],
-		db["PADTRA_TILE"],
-		db["PADTRA_WPT"],
-		db["PADTRA_PAD"],
+		static_cast<uint32_t>(db["COPY_DIMX"]),
+		static_cast<uint32_t>(db["COPY_DIMY"]),
+		static_cast<uint32_t>(db["COPY_WPT"]),
+		static_cast<uint32_t>(db["PAD_DIMX"]),
+		static_cast<uint32_t>(db["PAD_DIMY"]),
+		static_cast<uint32_t>(db["PAD_WPTX"]),
+		static_cast<uint32_t>(db["PAD_WPTY"]),
+		static_cast<uint32_t>(db["TRA_DIM"]),
+		static_cast<uint32_t>(db["TRA_PAD"]),
+		static_cast<uint32_t>(db["TRA_SHUFFLE"]),
+		static_cast<uint32_t>(db["PADTRA_TILE"]),
+		static_cast<uint32_t>(db["PADTRA_WPT"]),
+		static_cast<uint32_t>(db["PADTRA_PAD"]),
 		0, 0, 0, 0
 	};
 	kernel->enqueue(global, spec);

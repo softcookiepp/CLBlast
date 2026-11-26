@@ -25,7 +25,7 @@ namespace clblast {
 // =================================================================================================
 
 // The main routine
-void DoGemv(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n,
+void DoGemv(const Layout layout, const Transpose a_transpose, const uint32_t m, const uint32_t n,
             const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
             const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
             const tart::Scalar& beta, const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
@@ -39,7 +39,7 @@ void DoGemv(const Layout layout, const Transpose a_transpose, const size_t m, co
 // =================================================================================================
 
 // The generic implementation, also suited for other (non general) matrix-vector multiplications
-void MatVec(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n,
+void MatVec(const Layout layout, const Transpose a_transpose, const uint32_t m, const uint32_t n,
             const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
             const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
             const tart::Scalar& beta, const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
@@ -172,29 +172,29 @@ void MatVec(const Layout layout, const Transpose a_transpose, const size_t m, co
 	}
 
 	// Launches the kernel
-	auto global = std::vector<uint32_t>{global_size / local_size};
-	//auto local = std::vector<size_t>{local_size};
+	auto global = std::vector<uint32_t>{static_cast<uint32_t>(global_size / local_size)};
+	//auto local = std::vector<uint32_t>{local_size};
 	
 	std::vector<uint32_t> spec;
 	if (fast_kernel)
 	{
 		spec = {
-			db["WGS2"],
-			db["WPT2"]
+			static_cast<uint32_t>(db["WGS2"]),
+			static_cast<uint32_t>(db["WPT2"])
 		};
 	}
 	else if (fast_kernel_rot)
 	{
 		spec = {
-			db["WGS3"],
-			db["WPT3"]
+			static_cast<uint32_t>(db["WGS3"]),
+			static_cast<uint32_t>(db["WPT3"])
 		};
 	}
 	else
 	{
 		spec = {
-			db["WGS1"],
-			db["WPT1"],
+			static_cast<uint32_t>(db["WGS1"]),
+			static_cast<uint32_t>(db["WPT1"]),
 			32, //db["UNROLL1"], // apparently this isn't in the database for whatever reason
 			mGBMV,
 			mHEMV,

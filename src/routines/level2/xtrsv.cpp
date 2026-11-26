@@ -25,15 +25,15 @@ namespace clblast {
 // =================================================================================================
 
 // Constructor
-Xtrsv::Xtrsv(const tart::DType& dtype, Queue& queue, const std::string& name) {}
+Xtrsv::Xtrsv(const tart::DType& dtype, [[maybe_unused]] Queue& queue, const std::string& name) {}
 
 // =================================================================================================
 
 void Xtrsv::Substitution(const Layout layout, const Triangle triangle, const Transpose a_transpose,
-	const Diagonal diagonal, const size_t n, const tart::buffer_ptr& a_buffer, const size_t a_offset,
+	const Diagonal diagonal, const uint32_t n, const tart::buffer_ptr& a_buffer, const size_t a_offset,
 	const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_inc,
 	const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
-	tart::device_ptr device, const tart::DType& dtype, const Databases& db)
+	tart::device_ptr device, const tart::DType& dtype, [[maybe_unused]] const Databases& db)
 {
 	if (n > db["TRSV_BLOCK_SIZE"]) {
 		throw BLASError(StatusCode::kUnexpectedError);
@@ -70,16 +70,16 @@ void Xtrsv::Substitution(const Layout layout, const Triangle triangle, const Tra
 	kernel->setArg(12, static_cast<int>(do_conjugate));
 
 	// Launches the kernel
-	kernel->enqueue({1, 1, 1}, {db["TRSV_BLOCK_SIZE"]});
+	kernel->enqueue({1, 1, 1}, {static_cast<uint32_t>(db["TRSV_BLOCK_SIZE"])});
 }
 
 // =================================================================================================
 
 // The main routine
 void Xtrsv::DoTrsv(const Layout layout, const Triangle triangle, const Transpose a_transpose,
-	const Diagonal diagonal, const size_t n, const tart::buffer_ptr& a_buffer, const size_t a_offset,
+	const Diagonal diagonal, const uint32_t n, const tart::buffer_ptr& a_buffer, const size_t a_offset,
 	const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_inc,
-	tart::device_ptr device, const tart::DType& dtype, const Databases& db)
+	tart::device_ptr device, const tart::DType& dtype, [[maybe_unused]] const Databases& db)
 {
 	// Makes sure all dimensions are larger than zero
 	if (n == 0) {
@@ -116,8 +116,8 @@ void Xtrsv::DoTrsv(const Layout layout, const Triangle triangle, const Transpose
 
 	// Loops over the blocks
 	auto col = n;	// the initial column position
-	for (auto i = size_t{0}; i < n; i += db["TRSV_BLOCK_SIZE"]) {
-		const auto block_size = std::min(db["TRSV_BLOCK_SIZE"], n - i);
+	for (auto i = uint32_t{0}; i < n; i += db["TRSV_BLOCK_SIZE"]) {
+		const auto block_size = std::min<uint32_t>(db["TRSV_BLOCK_SIZE"], n - i);
 
 		// Sets the next column position
 		col = (is_upper) ? col - block_size : i;

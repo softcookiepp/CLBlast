@@ -27,12 +27,12 @@ namespace clblast {
 // =================================================================================================
 
 // Sets all elements of a matrix to a constant value
-void FillMatrix(const tart::DType& dtype, const size_t m, const size_t n, const size_t ld,
-	const size_t offset, const tart::buffer_ptr& dest, const tart::Scalar constant_value, const size_t local_size);
+void FillMatrix(const tart::DType& dtype, const uint32_t m, const uint32_t n, const uint32_t ld,
+	const uint32_t offset, const tart::buffer_ptr& dest, const tart::Scalar constant_value, const uint32_t local_size);
 
 // Sets all elements of a vector to a constant value
-void FillVector(const tart::DType& dtype, const size_t n, const size_t inc, const size_t offset,
-	const tart::buffer_ptr& dest, const tart::Scalar& constant_value, const size_t local_size);
+void FillVector(const tart::DType& dtype, const uint32_t n, const uint32_t inc, const uint32_t offset,
+	const tart::buffer_ptr& dest, const tart::Scalar& constant_value, const uint32_t local_size);
 
 // =================================================================================================
 
@@ -124,19 +124,19 @@ inline void PadCopyTransposeMatrix(const tart::DType& dtype, const Databases& db
 	std::vector<uint32_t> global(3, 1);
 	std::vector<uint32_t> local(3, 1);
 	std::vector<uint32_t> spec = {
-		db["COPY_DIMX"],
-		db["COPY_DIMY"],
-		db["COPY_WPT"],
-		db["PAD_DIMX"],
-		db["PAD_DIMY"],
-		db["PAD_WPTX"],
-		db["PAD_WPTY"],
-		db["TRA_DIM"],
-		db["TRA_PAD"],
-		db["TRA_SHUFFLE"],
-		db["PADTRA_TILE"],
-		db["PADTRA_WPT"],
-		db["PADTRA_PAD"]
+		static_cast<uint32_t>(db["COPY_DIMX"]),
+		static_cast<uint32_t>(db["COPY_DIMY"]),
+		static_cast<uint32_t>(db["COPY_WPT"]),
+		static_cast<uint32_t>(db["PAD_DIMX"]),
+		static_cast<uint32_t>(db["PAD_DIMY"]),
+		static_cast<uint32_t>(db["PAD_WPTX"]),
+		static_cast<uint32_t>(db["PAD_WPTY"]),
+		static_cast<uint32_t>(db["TRA_DIM"]),
+		static_cast<uint32_t>(db["TRA_PAD"]),
+		static_cast<uint32_t>(db["TRA_SHUFFLE"]),
+		static_cast<uint32_t>(db["PADTRA_TILE"]),
+		static_cast<uint32_t>(db["PADTRA_WPT"]),
+		static_cast<uint32_t>(db["PADTRA_PAD"])
 	};
 	if (!use_fast_kernel)
 	{
@@ -150,27 +150,27 @@ inline void PadCopyTransposeMatrix(const tart::DType& dtype, const Databases& db
 	{
 		if (use_fast_kernel)
 		{
-			global = {dest_one / db["TRA_WPT"], dest_two / db["TRA_WPT"]};
-			local = {db["TRA_DIM"], db["TRA_DIM"]};
+			global = {static_cast<uint32_t>(dest_one / db["TRA_WPT"]), static_cast<uint32_t>(dest_two / db["TRA_WPT"])};
+			local = {static_cast<uint32_t>(db["TRA_DIM"]), static_cast<uint32_t>(db["TRA_DIM"])};
 		}
 		else
 		{
-			global = {Ceil(CeilDiv(dest_one, db["PADTRA_WPT"]), db["PADTRA_TILE"]),
-																							Ceil(CeilDiv(dest_two, db["PADTRA_WPT"]), db["PADTRA_TILE"])};
-			local = {db["PADTRA_TILE"], db["PADTRA_TILE"]};
+			global = {static_cast<uint32_t>(Ceil(CeilDiv(dest_one, db["PADTRA_WPT"]), db["PADTRA_TILE"])),
+																							static_cast<uint32_t>(Ceil(CeilDiv(dest_two, db["PADTRA_WPT"]), db["PADTRA_TILE"]))};
+			local = {static_cast<uint32_t>(db["PADTRA_TILE"]), static_cast<uint32_t>(db["PADTRA_TILE"])};
 		}
 	}
 	else
 	{
 		if (use_fast_kernel)
 		{
-			global = {dest_one / db["COPY_VW"], dest_two / db["COPY_WPT"]};
-			local = {db["COPY_DIMX"], db["COPY_DIMY"]};
+			global = {static_cast<uint32_t>(dest_one / db["COPY_VW"]), static_cast<uint32_t>(dest_two / db["COPY_WPT"])};
+			local = {static_cast<uint32_t>(db["COPY_DIMX"]), static_cast<uint32_t>(db["COPY_DIMY"])};
 		} 
 		else
 		{
-			global = {Ceil(CeilDiv(dest_one, db["PAD_WPTX"]), db["PAD_DIMX"]), Ceil(CeilDiv(dest_two, db["PAD_WPTY"]), db["PAD_DIMY"])};
-			local = {db["PAD_DIMX"], db["PAD_DIMY"]};
+			global = {static_cast<uint32_t>(static_cast<uint32_t>(Ceil(CeilDiv(dest_one, db["PAD_WPTX"]), db["PAD_DIMX"]))), static_cast<uint32_t>(static_cast<uint32_t>(Ceil(CeilDiv(dest_two, db["PAD_WPTY"]), db["PAD_DIMY"])))};
+			local = {static_cast<uint32_t>(db["PAD_DIMX"]), static_cast<uint32_t>(db["PAD_DIMY"])};
 		}
 	}
 	global.resize(3, 1);
@@ -187,7 +187,7 @@ inline void PadCopyTransposeMatrixBatched(const tart::DType& dtype, const Databa
 	const size_t dest_one, const size_t dest_two, const size_t dest_ld,
 	const tart::buffer_ptr& dest_offsets, const tart::buffer_ptr& dest,
 	const bool do_pad, const bool do_transpose,
-	const bool do_conjugate, const size_t batch_count,
+	const bool do_conjugate, const uint32_t batch_count,
 	bool syrk = false, bool herk = false, bool syr2k = false, bool her2k = false)
 {
 	// Determines the right kernel
@@ -220,32 +220,32 @@ inline void PadCopyTransposeMatrixBatched(const tart::DType& dtype, const Databa
 	std::vector<uint32_t> global(3, 1);
 	std::vector<uint32_t> local(3, 1);
 	std::vector<uint32_t> spec = {
-		db["COPY_DIMX"],
-		db["COPY_DIMY"],
-		db["COPY_WPT"],
-		db["PAD_DIMX"],
-		db["PAD_DIMY"],
-		db["PAD_WPTX"],
-		db["PAD_WPTY"],
-		db["TRA_DIM"],
-		db["TRA_PAD"],
-		db["TRA_SHUFFLE"],
-		db["PADTRA_TILE"],
-		db["PADTRA_WPT"],
-		db["PADTRA_PAD"],
+		static_cast<uint32_t>(db["COPY_DIMX"]),
+		static_cast<uint32_t>(db["COPY_DIMY"]),
+		static_cast<uint32_t>(db["COPY_WPT"]),
+		static_cast<uint32_t>(db["PAD_DIMX"]),
+		static_cast<uint32_t>(db["PAD_DIMY"]),
+		static_cast<uint32_t>(db["PAD_WPTX"]),
+		static_cast<uint32_t>(db["PAD_WPTY"]),
+		static_cast<uint32_t>(db["TRA_DIM"]),
+		static_cast<uint32_t>(db["TRA_PAD"]),
+		static_cast<uint32_t>(db["TRA_SHUFFLE"]),
+		static_cast<uint32_t>(db["PADTRA_TILE"]),
+		static_cast<uint32_t>(db["PADTRA_WPT"]),
+		static_cast<uint32_t>(db["PADTRA_PAD"]),
 		static_cast<uint32_t>(syrk),
 		static_cast<uint32_t>(herk),
 		static_cast<uint32_t>(syr2k),
 		static_cast<uint32_t>(her2k)
 	};
 	if (do_transpose) {
-		global = {Ceil(CeilDiv(dest_one, db["PADTRA_WPT"]), db["PADTRA_TILE"]),
-																						Ceil(CeilDiv(dest_two, db["PADTRA_WPT"]), db["PADTRA_TILE"]), batch_count};
-		local = {db["PADTRA_TILE"], db["PADTRA_TILE"], 1};
+		global = {static_cast<uint32_t>(Ceil(CeilDiv(dest_one, db["PADTRA_WPT"]), db["PADTRA_TILE"])),
+																						static_cast<uint32_t>(Ceil(CeilDiv(dest_two, db["PADTRA_WPT"]), db["PADTRA_TILE"])), static_cast<uint32_t>(batch_count)};
+		local = {static_cast<uint32_t>(db["PADTRA_TILE"]), static_cast<uint32_t>(db["PADTRA_TILE"]), 1};
 	} else {
-		global = {Ceil(CeilDiv(dest_one, db["PAD_WPTX"]), db["PAD_DIMX"]),
-																						Ceil(CeilDiv(dest_two, db["PAD_WPTY"]), db["PAD_DIMY"]), batch_count};
-		local = {db["PAD_DIMX"], db["PAD_DIMY"], 1};
+		global = {static_cast<uint32_t>(Ceil(CeilDiv(dest_one, db["PAD_WPTX"]), db["PAD_DIMX"])),
+																						static_cast<uint32_t>(Ceil(CeilDiv(dest_two, db["PAD_WPTY"]), db["PAD_DIMY"])), static_cast<uint32_t>(batch_count)};
+		local = {static_cast<uint32_t>(db["PAD_DIMX"]), static_cast<uint32_t>(db["PAD_DIMY"]), 1};
 	}
 	global.resize(3, 1);
 	local.resize(3, 1);
@@ -262,7 +262,7 @@ inline void PadCopyTransposeMatrixStridedBatched(const tart::DType& dtype, const
 	const size_t dest_two, const size_t dest_ld, const size_t dest_offset,
 	const size_t dest_stride, const tart::buffer_ptr& dest,
 	const bool do_pad,
-	const bool do_transpose, const bool do_conjugate, const size_t batch_count,
+	const bool do_transpose, const bool do_conjugate, const uint32_t batch_count,
 	bool syrk = false, bool herk = false, bool syr2k = false, bool her2k = false)
 {
 	// Determines the right kernel
@@ -297,34 +297,34 @@ inline void PadCopyTransposeMatrixStridedBatched(const tart::DType& dtype, const
 	std::vector<uint32_t> global(3, 1);
 	std::vector<uint32_t> local(3, 1);
 	std::vector<uint32_t> spec = {
-		db["COPY_DIMX"],
-		db["COPY_DIMY"],
-		db["COPY_WPT"],
-		db["PAD_DIMX"],
-		db["PAD_DIMY"],
-		db["PAD_WPTX"],
-		db["PAD_WPTY"],
-		db["TRA_DIM"],
-		db["TRA_PAD"],
-		db["TRA_SHUFFLE"],
-		db["PADTRA_TILE"],
-		db["PADTRA_WPT"],
-		db["PADTRA_PAD"],
+		static_cast<uint32_t>(db["COPY_DIMX"]),
+		static_cast<uint32_t>(db["COPY_DIMY"]),
+		static_cast<uint32_t>(db["COPY_WPT"]),
+		static_cast<uint32_t>(db["PAD_DIMX"]),
+		static_cast<uint32_t>(db["PAD_DIMY"]),
+		static_cast<uint32_t>(db["PAD_WPTX"]),
+		static_cast<uint32_t>(db["PAD_WPTY"]),
+		static_cast<uint32_t>(db["TRA_DIM"]),
+		static_cast<uint32_t>(db["TRA_PAD"]),
+		static_cast<uint32_t>(db["TRA_SHUFFLE"]),
+		static_cast<uint32_t>(db["PADTRA_TILE"]),
+		static_cast<uint32_t>(db["PADTRA_WPT"]),
+		static_cast<uint32_t>(db["PADTRA_PAD"]),
 		static_cast<uint32_t>(syrk),
 		static_cast<uint32_t>(herk),
 		static_cast<uint32_t>(syr2k),
 		static_cast<uint32_t>(her2k)
 	};
 	if (do_transpose) {
-		global = {Ceil(CeilDiv(dest_one, db["PADTRA_WPT"]), db["PADTRA_TILE"]),
-																						Ceil(CeilDiv(dest_two, db["PADTRA_WPT"]), db["PADTRA_TILE"]), batch_count};
-		local = {db["PADTRA_TILE"], db["PADTRA_TILE"], 1};
+		global = {static_cast<uint32_t>(Ceil(CeilDiv(dest_one, db["PADTRA_WPT"]), db["PADTRA_TILE"])),
+																						static_cast<uint32_t>(Ceil(CeilDiv(dest_two, db["PADTRA_WPT"]), db["PADTRA_TILE"])), static_cast<uint32_t>(batch_count)};
+		local = {static_cast<uint32_t>(db["PADTRA_TILE"]), static_cast<uint32_t>(db["PADTRA_TILE"]), 1};
 	}
 	else
 	{
-		global = {Ceil(CeilDiv(dest_one, db["PAD_WPTX"]), db["PAD_DIMX"]),
-																						Ceil(CeilDiv(dest_two, db["PAD_WPTY"]), db["PAD_DIMY"]), batch_count};
-		local = {db["PAD_DIMX"], db["PAD_DIMY"], 1};
+		global = {static_cast<uint32_t>(Ceil(CeilDiv(dest_one, db["PAD_WPTX"]), db["PAD_DIMX"])),
+																						static_cast<uint32_t>(Ceil(CeilDiv(dest_two, db["PAD_WPTY"]), db["PAD_DIMY"])), static_cast<uint32_t>(batch_count)};
+		local = {static_cast<uint32_t>(db["PAD_DIMX"]), static_cast<uint32_t>(db["PAD_DIMY"]), 1};
 	}
 	global.resize(3, 1);
 	local.resize(3, 1);

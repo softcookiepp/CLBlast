@@ -23,55 +23,55 @@ namespace clblast {
 // =================================================================================================
 
 // Tests matrix 'A' for validity
-void TestMatrixA(const tart::DType& dtype, const size_t one, const size_t two, const tart::buffer_ptr& buffer, const size_t offset, const size_t ld, const bool test_lead_dim = true);
+void TestMatrixA([[maybe_unused]] const tart::DType& dtype, const uint32_t one, const uint32_t two, const tart::buffer_ptr& buffer, const uint32_t offset, const uint32_t ld, const bool test_lead_dim = true);
 
 // Tests matrix 'B' for validity
-void TestMatrixB(const tart::DType& dtype, const size_t one, const size_t two, const tart::buffer_ptr& buffer, const size_t offset, const size_t ld, const bool test_lead_dim = true);
+void TestMatrixB([[maybe_unused]] const tart::DType& dtype, const uint32_t one, const uint32_t two, const tart::buffer_ptr& buffer, const uint32_t offset, const uint32_t ld, const bool test_lead_dim = true);
 
 // Tests matrix 'C' for validity
-void TestMatrixC(const tart::DType& dtype, const size_t one, const size_t two, const tart::buffer_ptr& buffer, const size_t offset, const size_t ld, const bool test_lead_dim = true);
+void TestMatrixC([[maybe_unused]] const tart::DType& dtype, const uint32_t one, const uint32_t two, const tart::buffer_ptr& buffer, const uint32_t offset, const uint32_t ld, const bool test_lead_dim = true);
 
 // Tests matrix 'AP' for validity
-void TestMatrixAP(const tart::DType& dtype, const size_t n, const tart::buffer_ptr& buffer, const size_t offset);
+void TestMatrixAP([[maybe_unused]] const tart::DType& dtype, const uint32_t n, const tart::buffer_ptr& buffer, const uint32_t offset);
 
 // =================================================================================================
 
 // Tests vector 'X' for validity
-void TestVectorX(const tart::DType& dtype, const size_t n, const tart::buffer_ptr& buffer, const size_t offset, const size_t inc);
+void TestVectorX([[maybe_unused]] const tart::DType& dtype, const uint32_t n, const tart::buffer_ptr& buffer, const uint32_t offset, const uint32_t inc);
 
 // Tests vector 'Y' for validity
-void TestVectorY(const tart::DType& dtype, const size_t n, const tart::buffer_ptr& buffer, const size_t offset, const size_t inc);
+void TestVectorY([[maybe_unused]] const tart::DType& dtype, const uint32_t n, const tart::buffer_ptr& buffer, const uint32_t offset, const uint32_t inc);
 
 // Tests vector 'Z' for validity
-void TestVectorZ(const tart::DType& dtype, const size_t n, const tart::buffer_ptr& buffer, const size_t offset, const size_t inc);
+void TestVectorZ([[maybe_unused]] const tart::DType& dtype, const uint32_t n, const tart::buffer_ptr& buffer, const uint32_t offset, const uint32_t inc);
 
 // =================================================================================================
 
 // Tests vector 'scalar' for validity
-void TestVectorScalar(const tart::DType& dtype, const size_t n, const tart::buffer_ptr& buffer, const size_t offset);
+void TestVectorScalar([[maybe_unused]] const tart::DType& dtype, const uint32_t n, const tart::buffer_ptr& buffer, const uint32_t offset);
 
 // Tests vector 'index' for validity
-void TestVectorIndex(const tart::DType& dtype, const size_t n, const tart::buffer_ptr& buffer, const size_t offset);
+void TestVectorIndex([[maybe_unused]] const tart::DType& dtype, const uint32_t n, const tart::buffer_ptr& buffer, const uint32_t offset);
 
 // =================================================================================================
 
 // Tests matrix 'A' for validity in a batched setting
-inline void TestBatchedMatrixA(const tart::DType& dtype, const size_t one, const size_t two, const tart::buffer_ptr& buffer, const std::vector<size_t>& offsets,
-												const size_t ld, const bool test_lead_dim = true) {
+inline void TestBatchedMatrixA([[maybe_unused]] const tart::DType& dtype, const uint32_t one, const uint32_t two, const tart::buffer_ptr& buffer, const std::vector<uint32_t>& offsets,
+												const uint32_t ld, const bool test_lead_dim = true) {
 	const auto max_offset = *std::max_element(offsets.begin(), offsets.end());
 	TestMatrixA(dtype, one, two, buffer, max_offset, ld, test_lead_dim);
 }
 
 // Tests matrix 'B' for validity in a batched setting
-inline void TestBatchedMatrixB(const tart::DType& dtype, const size_t one, const size_t two, const tart::buffer_ptr& buffer, const std::vector<size_t>& offsets,
-												const size_t ld, const bool test_lead_dim = true) {
+inline void TestBatchedMatrixB([[maybe_unused]] const tart::DType& dtype, const uint32_t one, const uint32_t two, const tart::buffer_ptr& buffer, const std::vector<uint32_t>& offsets,
+												const uint32_t ld, const bool test_lead_dim = true) {
 	const auto max_offset = *std::max_element(offsets.begin(), offsets.end());
 	TestMatrixB(dtype, one, two, buffer, max_offset, ld, test_lead_dim);
 }
 
 // Tests matrix 'C' for validity in a batched setting
-inline void TestBatchedMatrixC(const tart::DType& dtype, const size_t one, const size_t two, const tart::buffer_ptr& buffer, const std::vector<size_t>& offsets,
-												const size_t ld) {
+inline void TestBatchedMatrixC([[maybe_unused]] const tart::DType& dtype, const uint32_t one, const uint32_t two, const tart::buffer_ptr& buffer, const std::vector<uint32_t>& offsets,
+												const uint32_t ld) {
 	const auto max_offset = *std::max_element(offsets.begin(), offsets.end());
 	TestMatrixC(dtype, one, two, buffer, max_offset, ld);
 }
@@ -79,24 +79,24 @@ inline void TestBatchedMatrixC(const tart::DType& dtype, const size_t one, const
 // =================================================================================================
 
 // Tests matrix 'A' for validity in a strided batched setting
-inline void TestStridedBatchedMatrixA(const tart::DType& dtype, const size_t one, const size_t two, const tart::buffer_ptr& buffer, const size_t offset,
-															 const size_t stride, const size_t batch_count, const size_t ld,
+inline void TestStridedBatchedMatrixA([[maybe_unused]] const tart::DType& dtype, const uint32_t one, const uint32_t two, const tart::buffer_ptr& buffer, const uint32_t offset,
+															 const uint32_t stride, const uint32_t batch_count, const uint32_t ld,
 															 const bool test_lead_dim = true) {
 	const auto last_batch_offset = (batch_count - 1) * stride;
 	TestMatrixA(dtype, one, two, buffer, offset + last_batch_offset, ld, test_lead_dim);
 }
 
 // Tests matrix 'B' for validity in a strided batched setting
-inline void TestStridedBatchedMatrixB(const tart::DType& dtype, const size_t one, const size_t two, const tart::buffer_ptr& buffer, const size_t offset,
-															 const size_t stride, const size_t batch_count, const size_t ld,
+inline void TestStridedBatchedMatrixB([[maybe_unused]] const tart::DType& dtype, const uint32_t one, const uint32_t two, const tart::buffer_ptr& buffer, const uint32_t offset,
+															 const uint32_t stride, const uint32_t batch_count, const uint32_t ld,
 															 const bool test_lead_dim = true) {
 	const auto last_batch_offset = (batch_count - 1) * stride;
 	TestMatrixB(dtype, one, two, buffer, offset + last_batch_offset, ld, test_lead_dim);
 }
 
 // Tests matrix 'C' for validity in a strided batched setting
-inline void TestStridedBatchedMatrixC(const tart::DType& dtype, const size_t one, const size_t two, const tart::buffer_ptr& buffer, const size_t offset,
-															 const size_t stride, const size_t batch_count, const size_t ld) {
+inline void TestStridedBatchedMatrixC([[maybe_unused]] const tart::DType& dtype, const uint32_t one, const uint32_t two, const tart::buffer_ptr& buffer, const uint32_t offset,
+															 const uint32_t stride, const uint32_t batch_count, const uint32_t ld) {
 	const auto last_batch_offset = (batch_count - 1) * stride;
 	TestMatrixC(dtype, one, two, buffer, offset + last_batch_offset, ld);
 }

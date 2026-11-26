@@ -21,14 +21,14 @@ namespace clblast {
 // =================================================================================================
 
 // Functional implementation of Xgemv (matrix-vector multiplication)
-void DoGemv(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n,
+void DoGemv(const Layout layout, const Transpose a_transpose, const uint32_t m, const uint32_t n,
             const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
             const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
             const tart::Scalar& beta, const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
             const Databases& db, tart::device_ptr device, const tart::DType& dtype);
 
 // Generic version used also for other matrix-vector multiplications
-void MatVec(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n,
+void MatVec(const Layout layout, const Transpose a_transpose, const uint32_t m, const uint32_t n,
             const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
             const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
             const tart::Scalar& beta, const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
@@ -43,7 +43,7 @@ class Xgemv {
 	Xgemv(const tart::DType& dtype, Queue& queue, const std::string& name = "GEMV");
 
 	// Templated-precision implementation of the routine
-	void DoGemv(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n,
+	void DoGemv(const Layout layout, const Transpose a_transpose, const uint32_t m, const uint32_t n,
 							const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
 							const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
 							const tart::Scalar& beta, const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
@@ -51,7 +51,7 @@ class Xgemv {
 							tart::device_ptr device = nullptr, const tart::DType& dtype = tart::dtypes::unknown_type);
 
 	// Generic version used also for other matrix-vector multiplications
-void MatVec(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n,
+void MatVec(const Layout layout, const Transpose a_transpose, const uint32_t m, const uint32_t n,
 						const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
 						const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
 						const tart::Scalar& beta, const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,

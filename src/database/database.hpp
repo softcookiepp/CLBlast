@@ -51,14 +51,13 @@ class Database {
 	const std::map<std::string, uint32_t> getSpecs() const { return mSpecs; }
 	
 	// Accessor of values by key
-	size_t operator[](const std::string& key) const
+	uint32_t operator[](const std::string& key) const
 	{
 		if (hasDef(key))
 			return mDefs.find(key)->second;
 		else if (hasSpec(key))
 			return mSpecs.find(key)->second;
 		throw std::runtime_error("database does not contain the specified key");
-		return 0;
 	}
 
 	// Obtain a list of OpenCL pre-processor defines based on the parameters
@@ -105,7 +104,7 @@ class Databases {
 	Database& operator()(const std::string& kernel_name) { return databases_[kernel_name]; }
 
 	// Retrieves a parameter from the database
-	size_t operator[](const std::string& key) const
+	uint32_t operator[](const std::string& key) const
 	{
 		for (const auto& kernel_name : kernel_names_) {
 			const auto& kernel_db = databases_.find(kernel_name)->second;

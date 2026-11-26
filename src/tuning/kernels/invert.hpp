@@ -88,7 +88,7 @@ void InvertTestValidArguments(const int, const Arguments<T>& args) {
 std::vector<Constraint> InvertSetConstraints(const int) { return {}; }
 template <typename T>
 LocalMemSizeInfo InvertComputeLocalMemSize(const int) {
-  return {[](std::vector<size_t> v) -> size_t { return GetBytes(PrecisionValue<T>()) * (16 + v[0]) * 16; },
+  return {[](std::vector<uint32_t> v) -> uint32_t { return GetBytes(PrecisionValue<T>()) * (16 + v[0]) * 16; },
           {"LOCALPAD"}};
 }
 

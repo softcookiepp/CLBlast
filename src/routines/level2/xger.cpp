@@ -25,11 +25,11 @@ namespace clblast {
 // =================================================================================================
 
 // The main routine
-void DoGer(const Layout layout, const size_t m, const size_t n, const tart::Scalar& alpha,
+void DoGer(const Layout layout, const uint32_t m, const uint32_t n, const tart::Scalar& alpha,
            const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
            const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
            const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
-           const std::string& name, const Databases& db,
+           const std::string& name, [[maybe_unused]] const Databases& db,
            tart::device_ptr device, const tart::DType& dtype) {
 	// Makes sure all dimensions are larger than zero
 	if (m == 0 || n == 0) {
@@ -74,10 +74,10 @@ void DoGer(const Layout layout, const size_t m, const size_t n, const tart::Scal
 	kernel->setArg(12, static_cast<int>(a_is_rowmajor));
 
 	// Launches the kernel
-	auto a_one_ceiled = CeilDiv(CeilDiv(a_one, db["WPT"]), db["WGS1"]);
-	auto a_two_ceiled = CeilDiv(CeilDiv(a_two, db["WPT"]), db["WGS2"]);
+	auto a_one_ceiled = static_cast<uint32_t>(CeilDiv(CeilDiv(a_one, db["WPT"]), db["WGS1"]));
+	auto a_two_ceiled = static_cast<uint32_t>(CeilDiv(CeilDiv(a_two, db["WPT"]), db["WGS2"]));
 	kernel->enqueue({a_one_ceiled, a_two_ceiled}, {
-		db["WGS1"], db["WGS2"], db["WPT"],
+		static_cast<uint32_t>(db["WGS1"]), static_cast<uint32_t>(db["WGS2"]), static_cast<uint32_t>(db["WPT"]),
 		mHPR,
 		mSPR,
 		mGERC,
@@ -89,13 +89,13 @@ void DoGer(const Layout layout, const size_t m, const size_t n, const tart::Scal
 }
 
 // Xger class implementation
-Xger::Xger(const tart::DType& dtype, Queue& queue, const std::string& name) {}
+Xger::Xger(const tart::DType& dtype, [[maybe_unused]] Queue& queue, const std::string& name) {}
 
-void Xger::DoGer(const Layout layout, const size_t m, const size_t n, const tart::Scalar& alpha,
+void Xger::DoGer(const Layout layout, const uint32_t m, const uint32_t n, const tart::Scalar& alpha,
                  const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
                  const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
                  const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
-                 const std::string& name, const Databases& db,
+                 const std::string& name, [[maybe_unused]] const Databases& db,
                  tart::device_ptr device, const tart::DType& dtype) {
     DoGer(layout, m, n, alpha, x_buffer, x_offset, x_inc, y_buffer, y_offset, y_inc,
           a_buffer, a_offset, a_ld, name, db,

@@ -21,7 +21,7 @@ namespace clblast {
 // =================================================================================================
 
 // Functional implementation of Xher2 (Hermitian rank-2 matrix update)
-void DoHer2(const Layout layout, const Triangle triangle, const size_t n, const tart::Scalar& alpha,
+void DoHer2(const Layout layout, const Triangle triangle, const uint32_t n, const tart::Scalar& alpha,
             const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
             const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
             const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
@@ -35,7 +35,7 @@ class Xher2 {
 	Xher2(const tart::DType& dtype, Queue& queue, const std::string& name = "HER2");
 
 	// Templated-precision implementation of the routine
-	void DoHer2(const Layout layout, const Triangle triangle, const size_t n, const tart::Scalar& alpha,
+	void DoHer2(const Layout layout, const Triangle triangle, const uint32_t n, const tart::Scalar& alpha,
 							const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
 							const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
 							const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,

@@ -88,18 +88,9 @@ int main() {
 	}
 
 	// Copy the matrices to the device
-#if 1
-	auto device_a = device->allocateBuffer(host_a);
-	auto device_b = device->allocateBuffer(host_b);
-	auto device_c = device->allocateBuffer(host_c);
-#else
-	auto device_a = cl::Buffer(context, CL_MEM_READ_WRITE, host_a.size() * sizeof(float));
-	auto device_b = cl::Buffer(context, CL_MEM_READ_WRITE, host_b.size() * sizeof(float));
-	auto device_c = cl::Buffer(context, CL_MEM_READ_WRITE, host_c.size() * sizeof(float));
-	queue.enqueueWriteBuffer(device_a, CL_TRUE, 0, host_a.size() * sizeof(float), host_a.data());
-	queue.enqueueWriteBuffer(device_b, CL_TRUE, 0, host_b.size() * sizeof(float), host_b.data());
-	queue.enqueueWriteBuffer(device_c, CL_TRUE, 0, host_c.size() * sizeof(float), host_c.data());
-#endif
+	auto device_a = tart::allocateBuffer(device, host_a);
+	auto device_b = tart::allocateBuffer(device, host_b);
+	auto device_c = tart::allocateBuffer(device, host_c);
 
 	// Start the timer
 	auto start_time = std::chrono::steady_clock::now();

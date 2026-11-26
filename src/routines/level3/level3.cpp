@@ -13,7 +13,7 @@
 namespace clblast
 {
 
-void TestMatrixA(const tart::DType& dtype, const size_t one, const size_t two, const tart::buffer_ptr& buffer, const size_t offset, const size_t ld, const bool test_lead_dim)
+void TestMatrixA(const tart::DType& dtype, const uint32_t one, const uint32_t two, const tart::buffer_ptr& buffer, const uint32_t offset, const uint32_t ld, const bool test_lead_dim)
 {
 	if (test_lead_dim && ld < one)
 	{
@@ -29,7 +29,7 @@ void TestMatrixA(const tart::DType& dtype, const size_t one, const size_t two, c
 	}
 }
 
-void TestMatrixB(const tart::DType& dtype, const size_t one, const size_t two, const tart::buffer_ptr& buffer, const size_t offset, const size_t ld, const bool test_lead_dim)
+void TestMatrixB(const tart::DType& dtype, const uint32_t one, const uint32_t two, const tart::buffer_ptr& buffer, const uint32_t offset, const uint32_t ld, const bool test_lead_dim)
 {
 	if (test_lead_dim && ld < one)
 	{
@@ -45,7 +45,7 @@ void TestMatrixB(const tart::DType& dtype, const size_t one, const size_t two, c
 	}
 }
 
-void TestMatrixC(const tart::DType& dtype, const size_t one, const size_t two, const tart::buffer_ptr& buffer, const size_t offset, const size_t ld, const bool test_lead_dim)
+void TestMatrixC(const tart::DType& dtype, const uint32_t one, const uint32_t two, const tart::buffer_ptr& buffer, const uint32_t offset, const uint32_t ld, const bool test_lead_dim)
 {
 	if (test_lead_dim && ld < one)
 	{

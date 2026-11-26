@@ -16,7 +16,7 @@ namespace clblast {
 
 // Functional implementation of Xsum (sum of values in a vector, non-BLAS)
 void DoSum(const tart::DType& dtype, const tart::device_ptr& device,
-           const size_t n, const tart::buffer_ptr& sum_buffer, const size_t sum_offset,
+           const uint32_t n, const tart::buffer_ptr& sum_buffer, const size_t sum_offset,
            const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
            const Databases& db)
 {

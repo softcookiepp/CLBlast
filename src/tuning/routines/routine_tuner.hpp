@@ -107,7 +107,7 @@ void TuneKernelSelection(const Device& device, Queue& queue,
 		if (indirect[i].second != -1 && direct[i].second != -1) {
 			const auto gflops_indirect = (2 * value * value * value) / (indirect[i].second * 1.0e6);
 			const auto gflops_direct = (2 * value * value * value) / (direct[i].second * 1.0e6);
-			printf("| %7zu || %8.2lf | %10.1lf || %8.2lf | %8.1lf || %8.3lf |\n", value, indirect[i].second, gflops_indirect,
+			printf("| %7u || %8.2lf | %10.1lf || %8.2lf | %8.1lf || %8.3lf |\n", value, indirect[i].second, gflops_indirect,
 						 direct[i].second, gflops_direct, scores[i].score);
 		}
 	}

@@ -24,7 +24,7 @@ namespace clblast {
 // =================================================================================================
 
 // The main routine
-void DoOmatcopy(const Layout layout, const Transpose a_transpose, const size_t m, const size_t n,
+void DoOmatcopy(const Layout layout, const Transpose a_transpose, const uint32_t m, const uint32_t n,
                 const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
                 const tart::buffer_ptr& b_buffer, const size_t b_offset, const size_t b_ld, const Databases& db,
                 tart::device_ptr device, const tart::DType& dtype)

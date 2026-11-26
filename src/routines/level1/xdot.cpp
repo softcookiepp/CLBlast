@@ -24,7 +24,7 @@ namespace clblast {
 
 // Functional implementation of Xdot
 void DoDot(const tart::DType& dtype, const tart::device_ptr& device,
-           const size_t n, const tart::buffer_ptr& dot_buffer, const size_t dot_offset,
+           const uint32_t n, const tart::buffer_ptr& dot_buffer, const size_t dot_offset,
            const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
            const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
            const bool do_conjugate, const Databases& db)
@@ -77,10 +77,10 @@ void DoDot(const tart::DType& dtype, const tart::device_ptr& device,
 	}
 
 	// Launches the main kernel
-	auto global1 = std::vector<size_t>{db["WGS1"] * temp_size};
-	auto local1 = std::vector<size_t>{db["WGS1"]};
+	auto global1 = std::vector<uint32_t>{db["WGS1"] * temp_size};
+	auto local1 = std::vector<uint32_t>{db["WGS1"]};
 	kernel1->setArg(9, static_cast<int>(temp_size));
-	kernel1->enqueue({temp_size}, {db["WGS1"], 1});
+	kernel1->enqueue({static_cast<uint32_t>(temp_size)}, {static_cast<uint32_t>(db["WGS1"]), 1});
 	
 	// Sets the arguments for the epilogue kernel
 	#if VULKAN_USE_BDA
@@ -99,9 +99,9 @@ void DoDot(const tart::DType& dtype, const tart::device_ptr& device,
 	}
 
 	// Launches the epilogue kernel
-	auto global2 = std::vector<size_t>{db["WGS2"]};
-	auto local2 = std::vector<size_t>{db["WGS2"]};
-	kernel2->enqueue({1}, {db["WGS2"], 1});
+	auto global2 = std::vector<uint32_t>{db["WGS2"]};
+	auto local2 = std::vector<uint32_t>{db["WGS2"]};
+	kernel2->enqueue({1}, {static_cast<uint32_t>(db["WGS2"]), 1});
 }
 
 // =================================================================================================

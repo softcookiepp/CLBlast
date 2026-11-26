@@ -41,10 +41,9 @@ template <typename T>
 void RunTrsvRoutine(const size_t block_size, Queue& queue, const std::vector<Buffer<T>>& buffers) {
 	SetBlockSize<T>(block_size, queue.GetDevice());
 	auto queue_plain = queue();
-	auto status = Trsv<T>(Layout::kRowMajor, Triangle::kLower, Transpose::kNo, Diagonal::kNonUnit, size, buffers[0](), 0,
+	auto status = Trsv<T>(Layout::kRowMajor, Triangle::kLower, Transpose::kNo, Diagonal::kNonUnit, size, buffers[0](), static_cast<size_t>(0),
 												size,								// A matrix
-												buffers[1](), 0, 1,	// X vector
-												queue_plain);
+												buffers[1](), static_cast<size_t>(0), static_cast<size_t>(1));	// X vector
 	if (status != StatusCode::kSuccess) {
 		throw RuntimeError("Trsv failed with status " + ToString(status));
 	}

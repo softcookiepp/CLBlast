@@ -25,10 +25,10 @@ namespace clblast {
 // =================================================================================================
 
 // The main routine
-void DoAxpyBatched(const size_t n, const tart::buffer_ptr& alphas_device, const tart::buffer_ptr& x_buffer,
-                   const std::vector<size_t>& x_offsets, const size_t x_inc, const tart::buffer_ptr& y_buffer,
-                   const std::vector<size_t>& y_offsets, const size_t y_inc,
-                   const size_t batch_count, tart::device_ptr device, const tart::DType& dtype, const Databases& db)
+void DoAxpyBatched(const uint32_t n, const tart::buffer_ptr& alphas_device, const tart::buffer_ptr& x_buffer,
+                   const std::vector<uint32_t>& x_offsets, const size_t x_inc, const tart::buffer_ptr& y_buffer,
+                   const std::vector<uint32_t>& y_offsets, const size_t y_inc,
+                   const uint32_t batch_count, tart::device_ptr device, const tart::DType& dtype, const Databases& db)
 {
     // Makes sure all dimensions are larger than zero
     if (n == 0) {
@@ -69,9 +69,9 @@ void DoAxpyBatched(const size_t n, const tart::buffer_ptr& alphas_device, const 
 
     // Launches the kernel
     auto n_ceiled = Ceil(n, db["WGS"] * db["WPT"]);
-    auto global = std::vector<size_t>{n_ceiled / db["WPT"], batch_count};
-    auto local = std::vector<size_t>{db["WGS"], 1};
-    kernel->enqueue({global[0], global[1], 1}, {db["WGS"], db["WPT"]});
+    auto global = std::vector<uint32_t>{n_ceiled / db["WPT"], batch_count};
+    auto local = std::vector<uint32_t>{db["WGS"], 1};
+    kernel->enqueue({static_cast<uint32_t>(global[0]), static_cast<uint32_t>(global[1]), 1}, {static_cast<uint32_t>(db["WGS"]), static_cast<uint32_t>(db["WPT"])});
 }
 
 // =================================================================================================

@@ -34,6 +34,7 @@
 #include "tuning/tuning.hpp"
 #include "utilities/backend.hpp"
 #include "utilities/clblast_exceptions.hpp"
+#include "utilities/compile.hpp"
 #include "utilities/timing.hpp"
 #include "utilities/utilities.hpp"
 
@@ -346,7 +347,7 @@ StatusCode TunerAPI(Queue& queue, const Arguments<T>& args, const int V, const G
 	const auto device_name = GetDeviceName(device);
 
 	// Creates input buffers with random data. Adds a 'canary' region to detect buffer overflows.
-	const auto buffer_sizes = std::vector<size_t>{settings.size_x + kCanarySize, settings.size_y + kCanarySize,
+	const auto buffer_sizes = std::vector<uint32_t>{settings.size_x + kCanarySize, settings.size_y + kCanarySize,
 																								settings.size_a + kCanarySize, settings.size_b + kCanarySize,
 																								settings.size_c + kCanarySize, settings.size_temp + kCanarySize};
 	const auto seed = static_cast<unsigned long>(time(nullptr));

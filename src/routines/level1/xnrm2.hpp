@@ -21,7 +21,7 @@ namespace clblast {
 
 // Functional implementation of Xnrm2 (Euclidean norm)
 void DoNrm2(const tart::DType& dtype, const tart::device_ptr& device,
-            const size_t n, const tart::buffer_ptr& nrm2_buffer, const size_t nrm2_offset,
+            const uint32_t n, const tart::buffer_ptr& nrm2_buffer, const size_t nrm2_offset,
             const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
             const Databases& db);
 

@@ -485,16 +485,16 @@ StatusCode Convgemm(const KernelMode kernel_mode, const size_t channels, const s
 
 // Batched version of AXPY: SAXPYBATCHED/DAXPYBATCHED/CAXPYBATCHED/ZAXPYBATCHED/HAXPYBATCHED
 template <typename T>
-StatusCode AxpyBatched(const size_t n, const T* alphas, const tart::buffer_ptr x_buffer, const size_t* x_offsets,
-											 const size_t x_inc, tart::buffer_ptr y_buffer, const size_t* y_offsets, const size_t y_inc,
+StatusCode AxpyBatched(const size_t n, const T* alphas, const tart::buffer_ptr x_buffer, const uint32_t* x_offsets,
+											 const size_t x_inc, tart::buffer_ptr y_buffer, const uint32_t* y_offsets, const size_t y_inc,
 											 const size_t batch_count);
 
 // Batched version of GEMM: SGEMMBATCHED/DGEMMBATCHED/CGEMMBATCHED/ZGEMMBATCHED/HGEMMBATCHED
 template <typename T>
 StatusCode GemmBatched(const Layout layout, const Transpose a_transpose, const Transpose b_transpose, const size_t m,
-											 const size_t n, const size_t k, const T* alphas, const tart::buffer_ptr a_buffer, const size_t* a_offsets,
-											 const size_t a_ld, const tart::buffer_ptr b_buffer, const size_t* b_offsets, const size_t b_ld,
-											 const T* betas, tart::buffer_ptr c_buffer, const size_t* c_offsets, const size_t c_ld,
+											 const size_t n, const size_t k, const T* alphas, const tart::buffer_ptr a_buffer, const uint32_t* a_offsets,
+											 const size_t a_ld, const tart::buffer_ptr b_buffer, const uint32_t* b_offsets, const size_t b_ld,
+											 const T* betas, tart::buffer_ptr c_buffer, const uint32_t* c_offsets, const size_t c_ld,
 											 const size_t batch_count);
 
 // StridedBatched version of GEMM:

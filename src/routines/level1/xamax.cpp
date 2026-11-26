@@ -24,7 +24,7 @@ namespace clblast {
 
 // Functional implementation of Xamax (index of absolute maximum)
 void DoAmax(const tart::DType& dtype, const tart::device_ptr& device,
-            const size_t n, const tart::buffer_ptr& imax_buffer, const size_t imax_offset,
+            const uint32_t n, const tart::buffer_ptr& imax_buffer, const size_t imax_offset,
             const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
             uint32_t max_flag, uint32_t min_flag, uint32_t amin_flag, const Databases& db) {
 	// Makes sure all dimensions are larger than zero
@@ -69,15 +69,15 @@ void DoAmax(const tart::DType& dtype, const tart::device_ptr& device,
 	}
 
 	// Launches the main kernel
-	//auto global1 = std::vector<size_t>{db["WGS1"] * temp_size};
-	auto global1 = std::vector<uint32_t>{temp_size};
-	//auto local1 = std::vector<size_t>{db["WGS1"]};
+	//auto global1 = std::vector<uint32_t>{db["WGS1"] * temp_size};
+	auto global1 = std::vector<uint32_t>{static_cast<uint32_t>(temp_size)};
+	//auto local1 = std::vector<uint32_t>{db["WGS1"]};
 	
 	// the number of workgroups in the X dimension
 	int num_groups_0 = static_cast<int>(global1[0]);
 	kernel1->setArg(6, num_groups_0);
 	
-	kernel1->enqueue(global1, {db["WGS1"], max_flag, min_flag, amin_flag});
+	kernel1->enqueue(global1, {static_cast<uint32_t>(db["WGS1"]), max_flag, min_flag, amin_flag});
 
 	// Sets the arguments for the epilogue kernel
 #if VULKAN_USE_BDA
@@ -93,10 +93,10 @@ void DoAmax(const tart::DType& dtype, const tart::device_ptr& device,
 #endif
 
 	// Launches the epilogue kernel
-	//auto global2 = std::vector<size_t>{db["WGS2"]};
+	//auto global2 = std::vector<uint32_t>{db["WGS2"]};
 	auto global2 = std::vector<uint32_t>{1};
-	auto local2 = std::vector<size_t>{db["WGS2"]};
-	kernel2->enqueue(global2, {db["WGS2"]});
+	auto local2 = std::vector<uint32_t>{db["WGS2"]};
+	kernel2->enqueue(global2, {static_cast<uint32_t>(db["WGS2"])});
 }
 
 // =================================================================================================

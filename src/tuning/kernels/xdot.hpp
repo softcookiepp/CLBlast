@@ -50,8 +50,8 @@ TunerSettings XdotGetTunerSettings(const int V, const Arguments<T>& args) {
   settings.outputs = {};  // no output checking
 
   // Sets the base thread configuration
-  settings.global_size = (V == 1) ? std::vector<size_t>{2 * 64} : std::vector<size_t>{1};
-  settings.global_size_ref = (V == 1) ? std::vector<size_t>{2 * 64 * 64} : std::vector<size_t>{64};
+  settings.global_size = (V == 1) ? std::vector<uint32_t>{2 * 64} : std::vector<uint32_t>{1};
+  settings.global_size_ref = (V == 1) ? std::vector<uint32_t>{2 * 64 * 64} : std::vector<uint32_t>{64};
   settings.local_size = {1};
   settings.local_size_ref = {64};
 
@@ -77,7 +77,7 @@ void XdotTestValidArguments(const int, const Arguments<T>&) {}
 std::vector<Constraint> XdotSetConstraints(const int) { return {}; }
 template <typename T>
 LocalMemSizeInfo XdotComputeLocalMemSize(const int V) {
-  return {[](std::vector<size_t> v) -> size_t { return GetBytes(PrecisionValue<T>()) * v[0]; },
+  return {[](std::vector<uint32_t> v) -> uint32_t { return GetBytes(PrecisionValue<T>()) * v[0]; },
           {"WGS" + std::to_string(V)}};
 }
 

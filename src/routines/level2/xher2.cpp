@@ -25,11 +25,11 @@ namespace clblast {
 // =================================================================================================
 
 // The main routine
-void DoHer2(const Layout layout, const Triangle triangle, const size_t n, const tart::Scalar& alpha,
+void DoHer2(const Layout layout, const Triangle triangle, const uint32_t n, const tart::Scalar& alpha,
             const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
             const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
             const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
-            const bool packed, const std::string& name, const Databases& db,
+            const bool packed, const std::string& name, [[maybe_unused]] const Databases& db,
             tart::device_ptr device, const tart::DType& dtype) {
 	// Makes sure the dimensions are larger than zero
 	if (n == 0) {
@@ -80,9 +80,9 @@ void DoHer2(const Layout layout, const Triangle triangle, const size_t n, const 
 	// Launches the kernel
 	auto global_one = Ceil(CeilDiv(n, db["WPT"]), db["WGS1"]);
 	auto global_two = Ceil(CeilDiv(n, db["WPT"]), db["WGS2"]);
-	auto global = std::vector<uint32_t>{global_one / db["WGS1"], global_two / db["WGS2"]};
-	auto local = std::vector<size_t>{db["WGS1"], db["WGS2"]};
-	kernel->enqueue(global, {db["WGS1"], db["WGS2"], db["WPT"],
+	auto global = std::vector<uint32_t>{static_cast<uint32_t>(global_one / db["WGS1"]), static_cast<uint32_t>(global_two / db["WGS2"])};
+	auto local = std::vector<uint32_t>{static_cast<uint32_t>(db["WGS1"]), db["WGS2"]};
+	kernel->enqueue(global, {static_cast<uint32_t>(db["WGS1"]), static_cast<uint32_t>(db["WGS2"]), static_cast<uint32_t>(db["WPT"]),
 		mHPR,
 		mSPR,
 		mGERC,
@@ -94,9 +94,9 @@ void DoHer2(const Layout layout, const Triangle triangle, const size_t n, const 
 }
 
 // Xher2 class implementation
-Xher2::Xher2(const tart::DType& dtype, Queue& queue, const std::string& name) {}
+Xher2::Xher2(const tart::DType& dtype, [[maybe_unused]] Queue& queue, const std::string& name) {}
 
-void Xher2::DoHer2(const Layout layout, const Triangle triangle, const size_t n, const tart::Scalar& alpha,
+void Xher2::DoHer2(const Layout layout, const Triangle triangle, const uint32_t n, const tart::Scalar& alpha,
                    const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
                    const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
                    const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,

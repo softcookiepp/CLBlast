@@ -24,7 +24,7 @@ namespace clblast {
 
 // Functional implementation of Xnrm2 (Euclidean norm)
 void DoNrm2(const tart::DType& dtype, const tart::device_ptr& device,
-            const size_t n, const tart::buffer_ptr& nrm2_buffer, const size_t nrm2_offset,
+            const uint32_t n, const tart::buffer_ptr& nrm2_buffer, const size_t nrm2_offset,
             const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
             const Databases& db)
 {
@@ -53,7 +53,7 @@ void DoNrm2(const tart::DType& dtype, const tart::device_ptr& device,
 	kernel1->setArg(4, temp_buffer);
 
 	// Launches the main kernel
-	kernel1->enqueue({temp_size}, {db["WGS1"], 1});
+	kernel1->enqueue({static_cast<uint32_t>(temp_size)}, {static_cast<uint32_t>(db["WGS1"]), 1});
 	
 	// Sets the arguments for the epilogue kernel
 	kernel2->setArg(0, temp_buffer);
@@ -61,7 +61,7 @@ void DoNrm2(const tart::DType& dtype, const tart::device_ptr& device,
 	kernel2->setArg(2, static_cast<int>(nrm2_offset));
 
 	// Launches the epilogue kernel
-	kernel2->enqueue({temp_size}, {db["WGS2"], 1});
+	kernel2->enqueue({static_cast<uint32_t>(temp_size)}, {static_cast<uint32_t>(db["WGS2"]), 1});
 }
 
 // =================================================================================================

@@ -16,7 +16,7 @@ namespace clblast {
 
 // Functional implementation of Xamin (index of absolute minimum value, non-BLAS)
 void DoAmin(const tart::DType& dtype, const tart::device_ptr& device,
-            const size_t n, const tart::buffer_ptr& imin_buffer, const size_t imin_offset,
+            const uint32_t n, const tart::buffer_ptr& imin_buffer, const size_t imin_offset,
             const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
             const Databases& db) {
 	// amin_flag=1, max_flag=0, min_flag=0 indicates "AMIN"

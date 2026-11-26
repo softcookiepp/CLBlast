@@ -24,7 +24,7 @@ namespace clblast {
 
 // Functional implementation of Xasum (absolute sum)
 void DoAsum(const tart::DType& dtype, const tart::device_ptr& device,
-            const size_t n, const tart::buffer_ptr& asum_buffer, const size_t asum_offset,
+            const uint32_t n, const tart::buffer_ptr& asum_buffer, const size_t asum_offset,
             const tart::buffer_ptr& x_buffer, const size_t x_offset, const size_t x_inc,
             uint32_t sum_flag, const Databases& db)
 {
@@ -69,7 +69,7 @@ void DoAsum(const tart::DType& dtype, const tart::device_ptr& device,
 	#endif
 
 	// Launches the main kernel
-	kernel1->enqueue({temp_size, 1, 1}, {db["WGS1"], sum_flag});
+	kernel1->enqueue({static_cast<uint32_t>(temp_size), 1, 1}, {static_cast<uint32_t>(db["WGS1"]), sum_flag});
 
 	// Sets the arguments for the epilogue kernel
 #if VULKAN_USE_BDA
@@ -91,7 +91,7 @@ void DoAsum(const tart::DType& dtype, const tart::device_ptr& device,
 #endif
 
 	// Launches the epilogue kernel
-	kernel2->enqueue({1, 1, 1}, {db["WGS2"], sum_flag});
+	kernel2->enqueue({1, 1, 1}, {static_cast<uint32_t>(db["WGS2"]), sum_flag});
 }
 
 // =================================================================================================

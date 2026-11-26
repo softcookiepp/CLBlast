@@ -226,11 +226,11 @@ struct Arguments {
   size_t num_kernels = 1;
   // Batch-specific arguments
   size_t batch_count = 1;
-  std::vector<size_t> x_offsets;  // = {0};
-  std::vector<size_t> y_offsets;  // = {0};
-  std::vector<size_t> a_offsets;  // = {0};
-  std::vector<size_t> b_offsets;  // = {0};
-  std::vector<size_t> c_offsets;  // = {0};
+  std::vector<uint32_t> x_offsets;  // = {0};
+  std::vector<uint32_t> y_offsets;  // = {0};
+  std::vector<uint32_t> a_offsets;  // = {0};
+  std::vector<uint32_t> b_offsets;  // = {0};
+  std::vector<uint32_t> c_offsets;  // = {0};
   std::vector<T> alphas;          // = {ConstantOne<T>()};
   std::vector<T> betas;           // = {ConstantOne<T>()};
   // Sizes
@@ -336,8 +336,8 @@ void PopulateVector(std::vector<T>& vector, std::mt19937& mt, std::uniform_real_
 // =================================================================================================
 
 // Rounding functions
-size_t CeilDiv(const size_t x, const size_t y);
-size_t Ceil(const size_t x, const size_t y);
+uint32_t CeilDiv(const uint32_t x, const uint32_t y);
+uint32_t Ceil(const uint32_t x, const uint32_t y);
 
 // Returns whether or not 'a' is a multiple of 'b'
 bool IsMultiple(const size_t a, const size_t b);

@@ -26,8 +26,8 @@ namespace clblast {
 // =================================================================================================
 
 // The main routine
-void DoHerk(const Layout layout, const Triangle triangle, const Transpose a_transpose, const size_t n,
-            const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
+void DoHerk(const Layout layout, const Triangle triangle, const Transpose a_transpose, const uint32_t n,
+            const uint32_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
             const size_t a_ld, const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset,
             const size_t c_ld, const Databases& db,
             tart::device_ptr device, const tart::DType& dtype) {
@@ -40,7 +40,7 @@ void DoHerk(const Layout layout, const Triangle triangle, const Transpose a_tran
 }
 
 void HerkAB(const Layout layout, const Triangle triangle, const Transpose a_transpose,
-            const Transpose b_transpose, const size_t n, const size_t k, const tart::Scalar& complex_alpha,
+            const Transpose b_transpose, const uint32_t n, const uint32_t k, const tart::Scalar& complex_alpha,
             const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& b_buffer,
             const size_t b_offset, const size_t b_ld, const tart::Scalar& complex_beta, const tart::buffer_ptr& c_buffer,
             const size_t c_offset, const size_t c_ld,
@@ -121,8 +121,8 @@ void HerkAB(const Layout layout, const Triangle triangle, const Transpose a_tran
     kernel->setArg(8, b_temp);
 
     // Computes the global and local thread sizes
-    auto global = std::vector<uint32_t>{(n_ceiled) / db["MWG"], (n_ceiled) / db["NWG"]};
-    auto local = std::vector<size_t>{db["MDIMC"], db["NDIMC"]};
+    auto global = std::vector<uint32_t>{static_cast<uint32_t>((n_ceiled) / db["MWG"]), static_cast<uint32_t>((n_ceiled) / db["NWG"])};
+    auto local = std::vector<uint32_t>{db["MDIMC"], db["NDIMC"]};
 
     const bool subgroupSupported = device->getMetadata().subgroupAdd;
     std::vector<uint32_t> spec(subgroupSupported ? 16 : 15);
@@ -158,10 +158,10 @@ void HerkAB(const Layout layout, const Triangle triangle, const Transpose a_tran
 }
 
 // Xherk class implementation
-Xherk::Xherk(const tart::DType& dtype, Queue& queue, const std::string& name) {}
+Xherk::Xherk(const tart::DType& dtype, [[maybe_unused]] Queue& queue, const std::string& name) {}
 
-void Xherk::DoHerk(const Layout layout, const Triangle triangle, const Transpose a_transpose, const size_t n,
-                   const size_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
+void Xherk::DoHerk(const Layout layout, const Triangle triangle, const Transpose a_transpose, const uint32_t n,
+                   const uint32_t k, const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset,
                    const size_t a_ld, const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset,
                    const size_t c_ld, const Databases& db,
                    tart::device_ptr device, const tart::DType& dtype) {
@@ -170,7 +170,7 @@ void Xherk::DoHerk(const Layout layout, const Triangle triangle, const Transpose
 }
 
 void Xherk::HerkAB(const Layout layout, const Triangle triangle, const Transpose a_transpose, const Transpose b_transpose,
-                   const size_t n, const size_t k, const tart::Scalar& complex_alpha, const tart::buffer_ptr& a_buffer,
+                   const uint32_t n, const uint32_t k, const tart::Scalar& complex_alpha, const tart::buffer_ptr& a_buffer,
                    const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset,
                    const size_t b_ld, const tart::Scalar& complex_beta, const tart::buffer_ptr& c_buffer,
                    const size_t c_offset, const size_t c_ld, const bool diagonal_to_zero, const Databases& db,

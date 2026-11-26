@@ -81,7 +81,7 @@ void CopyTestValidArguments(const int, const Arguments<T>&) {}
 std::vector<Constraint> CopySetConstraints(const int) { return {}; }
 template <typename T>
 LocalMemSizeInfo CopyComputeLocalMemSize(const int) {
-	return {[](std::vector<size_t>) -> size_t { return 0; }, {}};
+	return {[](std::vector<uint32_t>) -> uint32_t { return 0; }, {}};
 }
 
 // Sets the kernel's arguments

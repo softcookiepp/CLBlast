@@ -33,13 +33,13 @@ namespace clblast {
 template <typename T>
 void RunGemmRoutineMNK(const size_t m, const size_t n, const size_t k, const Queue& queue,
 											 const std::vector<Buffer<T>>& buffers) {
-	auto queue_plain = queue();
-	auto status = Gemm(Layout::kRowMajor, Transpose::kNo, Transpose::kNo, m, n, k, ConstantOne<T>(), buffers[0](), 0, k,
-										 buffers[1](), 0, n, ConstantOne<T>(), buffers[2](), 0, n, queue_plain);
+	auto status = Gemm(Layout::kRowMajor, Transpose::kNo, Transpose::kNo, m, n, k, ConstantOne<T>(), buffers[0](), static_cast<size_t>(0), k,
+										 buffers[1](), static_cast<size_t>(0), n, ConstantOne<T>(), buffers[2](), static_cast<size_t>(0), n);
+	queue();
 	if (status != StatusCode::kSuccess) {
 		throw RuntimeError("Gemm failed with status " + ToString(status));
 	}
-	queue_plain->sync();
+	queue()->sync();
 }
 template <typename T>
 void RunGemmRoutine(const size_t value, const Queue& queue, const std::vector<Buffer<T>>& buffers) {
@@ -48,7 +48,7 @@ void RunGemmRoutine(const size_t value, const Queue& queue, const std::vector<Bu
 
 template <typename T, size_t batch_count>
 void RunGemmBatchedRoutine(const size_t value, const Queue& queue, const std::vector<Buffer<T>>& buffers) {
-	auto offsets = std::vector<size_t>(batch_count);
+	auto offsets = std::vector<uint32_t>(batch_count);
 	auto factors = std::vector<T>(batch_count);
 	for (auto i = size_t{0}; i < batch_count; ++i) {
 		offsets[i] = batch_count * value;
@@ -61,7 +61,7 @@ void RunGemmBatchedRoutine(const size_t value, const Queue& queue, const std::ve
 	if (status != StatusCode::kSuccess) {
 		throw RuntimeError("GemmBatched failed with status " + ToString(status));
 	}
-	queue_plain->sync();
+	queue()->sync();
 }
 
 template <typename T, size_t batch_count>
@@ -74,7 +74,7 @@ void RunGemmStridedBatchedRoutine(const size_t value, const Queue& queue, const 
 	if (status != StatusCode::kSuccess) {
 		throw RuntimeError("Gemm failed with status " + ToString(status));
 	}
-	queue_plain->sync();
+	queue()->sync();
 }
 // =================================================================================================
 

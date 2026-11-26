@@ -21,14 +21,14 @@ namespace clblast {
 // =================================================================================================
 
 // Functional implementation of Xherk (Hermitian rank-K update)
-void DoHerk(const Layout layout, const Triangle triangle, const Transpose a_transpose, const size_t n, const size_t k,
+void DoHerk(const Layout layout, const Triangle triangle, const Transpose a_transpose, const uint32_t n, const uint32_t k,
             const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
             const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset, const size_t c_ld,
             const Databases& db);
 
 // Helper function to be reused for HER2K
 void HerkAB(const Layout layout, const Triangle triangle, const Transpose a_transpose, const Transpose b_transpose,
-            const size_t n, const size_t k, const tart::Scalar& complex_alpha, const tart::buffer_ptr& a_buffer,
+            const uint32_t n, const uint32_t k, const tart::Scalar& complex_alpha, const tart::buffer_ptr& a_buffer,
             const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset,
             const size_t b_ld, const tart::Scalar& complex_beta, const tart::buffer_ptr& c_buffer,
             const size_t c_offset, const size_t c_ld, const bool diagonal_to_zero, const Databases& db,
@@ -41,7 +41,7 @@ class Xherk {
 	Xherk(const tart::DType& dtype, Queue& queue, const std::string& name = "HERK");
 
 	// Templated-precision implementation of the routine
-	void DoHerk(const Layout layout, const Triangle triangle, const Transpose a_transpose, const size_t n, const size_t k,
+	void DoHerk(const Layout layout, const Triangle triangle, const Transpose a_transpose, const uint32_t n, const uint32_t k,
 							const tart::Scalar& alpha, const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
 							const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset, const size_t c_ld,
 							const Databases& db = Databases({"Herk"}),
@@ -49,7 +49,7 @@ class Xherk {
 
 	// Helper function to be reused for HER2K
 	void HerkAB(const Layout layout, const Triangle triangle, const Transpose a_transpose, const Transpose b_transpose,
-							const size_t n, const size_t k, const tart::Scalar& complex_alpha, const tart::buffer_ptr& a_buffer,
+							const uint32_t n, const uint32_t k, const tart::Scalar& complex_alpha, const tart::buffer_ptr& a_buffer,
 							const size_t a_offset, const size_t a_ld, const tart::buffer_ptr& b_buffer, const size_t b_offset,
 							const size_t b_ld, const tart::Scalar& complex_beta, const tart::buffer_ptr& c_buffer,
 							const size_t c_offset, const size_t c_ld, const bool diagonal_to_zero = false,

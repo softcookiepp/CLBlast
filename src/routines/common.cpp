@@ -21,8 +21,8 @@ namespace clblast {
 // =================================================================================================
 
 // Sets all elements of a matrix to a constant value
-void FillMatrix(const tart::DType& dtype, const size_t m, const size_t n, const size_t ld,
-	const size_t offset, const tart::buffer_ptr& dest, const tart::Scalar constant_value, const size_t local_size)
+void FillMatrix(const tart::DType& dtype, const uint32_t m, const uint32_t n, const uint32_t ld,
+	const uint32_t offset, const tart::buffer_ptr& dest, const tart::Scalar constant_value, const uint32_t local_size)
 {
 	tart::kernel_ptr kernel = getFillMatrix(dest->getDevice(), dtype);
 	kernel->setArg(0, static_cast<int>(m));
@@ -31,14 +31,14 @@ void FillMatrix(const tart::DType& dtype, const size_t m, const size_t n, const 
 	kernel->setArg(3, static_cast<int>(offset));
 	kernel->setArg(4, dest);
 	kernel->setArgAs(dtype, 5, constant_value);
-	auto local = std::vector<uint32_t>{local_size, 1};
-	auto global = std::vector<uint32_t>{Ceil(m, local_size) / local_size, n};
+	auto local = std::vector<uint32_t>{static_cast<uint32_t>(local_size), 1};
+	auto global = std::vector<uint32_t>{static_cast<uint32_t>(Ceil(m, local_size) / local_size), static_cast<uint32_t>(n)};
 	kernel->enqueue(global, {});
 }
 
 // Sets all elements of a vector to a constant value
-void FillVector(const tart::DType& dtype, const size_t n, const size_t inc, const size_t offset,
-	const tart::buffer_ptr& dest, const tart::Scalar& constant_value, const size_t local_size)
+void FillVector(const tart::DType& dtype, const uint32_t n, const uint32_t inc, const uint32_t offset,
+	const tart::buffer_ptr& dest, const tart::Scalar& constant_value, const uint32_t local_size)
 {
 	tart::kernel_ptr kernel = getTrsvFillVector(dest->getDevice(), dtype);
 	kernel->setArg(0, static_cast<int>(n));
@@ -46,8 +46,8 @@ void FillVector(const tart::DType& dtype, const size_t n, const size_t inc, cons
 	kernel->setArg(2, static_cast<int>(offset));
 	kernel->setArg(3, dest);
 	kernel->setArgAs(dtype, 4, (constant_value));
-	auto local = std::vector<uint32_t>{local_size};
-	auto global = std::vector<uint32_t>{Ceil(n, local_size) / local_size};
+	auto local = std::vector<uint32_t>{static_cast<uint32_t>(local_size)};
+	auto global = std::vector<uint32_t>{static_cast<uint32_t>(Ceil(n, local_size) / local_size)};
 	kernel->enqueue(global, {});
 }
 

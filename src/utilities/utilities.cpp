@@ -224,6 +224,8 @@ std::string ToString(Layout value) {
 			return ToString(static_cast<int>(value)) + " (row-major)";
 		case Layout::kColMajor:
 			return ToString(static_cast<int>(value)) + " (col-major)";
+	default:
+		return ToString(static_cast<int>(value)) + " (unknown)";
 	}
 }
 template <>
@@ -235,6 +237,8 @@ std::string ToString(Transpose value) {
 			return ToString(static_cast<int>(value)) + " (transposed)";
 		case Transpose::kConjugate:
 			return ToString(static_cast<int>(value)) + " (conjugate)";
+	default:
+		return ToString(static_cast<int>(value)) + " (unknown)";
 	}
 }
 template <>
@@ -244,6 +248,8 @@ std::string ToString(Side value) {
 			return ToString(static_cast<int>(value)) + " (left)";
 		case Side::kRight:
 			return ToString(static_cast<int>(value)) + " (right)";
+	default:
+		return ToString(static_cast<int>(value)) + " (unknown)";
 	}
 }
 template <>
@@ -253,6 +259,8 @@ std::string ToString(Triangle value) {
 			return ToString(static_cast<int>(value)) + " (upper)";
 		case Triangle::kLower:
 			return ToString(static_cast<int>(value)) + " (lower)";
+	default:
+		return ToString(static_cast<int>(value)) + " (unknown)";
 	}
 }
 template <>
@@ -262,6 +270,8 @@ std::string ToString(Diagonal value) {
 			return ToString(static_cast<int>(value)) + " (unit)";
 		case Diagonal::kNonUnit:
 			return ToString(static_cast<int>(value)) + " (non-unit)";
+	default:
+		return ToString(static_cast<int>(value)) + " (unknown)";
 	}
 }
 template <>
@@ -279,6 +289,8 @@ std::string ToString(Precision value) {
 			return ToString(static_cast<int>(value)) + " (complex-double)";
 		case Precision::kAny:
 			return ToString(static_cast<int>(value)) + " (any)";
+	default:
+		return ToString(static_cast<int>(value)) + " (unknown)";
 	}
 }
 template <>
@@ -288,6 +300,8 @@ std::string ToString(KernelMode value) {
 			return ToString(static_cast<int>(value)) + " (cross-correlation)";
 		case KernelMode::kConvolution:
 			return ToString(static_cast<int>(value)) + " (convolution)";
+	default:
+		return ToString(static_cast<int>(value)) + " (unknown)";
 	}
 }
 template <>
@@ -478,8 +492,8 @@ void PopulateVector(std::vector<tart::float16_t>& vector, std::mt19937& mt, std:
 // =================================================================================================
 
 // Rounding functions performing ceiling and division operations
-size_t CeilDiv(const size_t x, const size_t y) { return 1 + ((x - 1) / y); }
-size_t Ceil(const size_t x, const size_t y) { return CeilDiv(x, y) * y; }
+uint32_t CeilDiv(const uint32_t x, const uint32_t y) { return 1 + ((x - 1) / y); }
+uint32_t Ceil(const uint32_t x, const uint32_t y) { return CeilDiv(x, y) * y; }
 
 // Helper function to determine whether or not 'a' is a multiple of 'b'
 bool IsMultiple(const size_t a, const size_t b) { return ((a / b) * b == a) ? true : false; }
@@ -500,6 +514,8 @@ size_t GetBytes(const Precision precision) {
 		case Precision::kComplexDouble:
 			return 16;
 		case Precision::kAny:
+			return -1;
+		default:
 			return -1;
 	}
 }

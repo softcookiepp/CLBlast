@@ -82,12 +82,12 @@ void DoSwap(const tart::DType& dtype, const tart::device_ptr& device,
 	std::vector<size_t> global(3, 1);
 	if (use_fast_kernel)
 	{
-		global[0] = CeilDiv(n, db["WPT"] * db["VW"]) / db["WGS"];
+		global[0] = CeilDiv(n, db["WPT"] * db["VW"]);
 	}
 	else
 	{
 		auto n_ceiled = Ceil(n, db["WGS"] * db["WPT"]);
-		global[0] = n_ceiled / (db["WPT"]*db["WGS"]);
+		global[0] = n_ceiled / db["WPT"];
 	}
 	kernel->enqueue(global, {static_cast<uint32_t>(db["WGS"]), static_cast<uint32_t>(db["WPT"])});
 }

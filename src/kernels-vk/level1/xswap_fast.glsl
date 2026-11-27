@@ -45,6 +45,7 @@ void main()
 	for (int _w = 0; _w < WPT; _w += 1)
 	{
 		const int id = _w*get_global_size(0) + get_global_id(0);
+		if (id >= n) break;
 		realV temp = indexGM(xgm, id);
 		indexGM(xgm, id) = indexGM(ygm, id);
 		indexGM(ygm, id) = temp;

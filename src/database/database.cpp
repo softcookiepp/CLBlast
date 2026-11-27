@@ -177,17 +177,15 @@ database::Parameters Database::Search(
 	const std::vector<database::NewDatabaseEntry>& db)
 {
 	// Selects the right kernel
-	for (auto& db : db)
+	for (const auto& entry : db)
 	{
-		if (db.kernel == this_kernel && db.precision == dtype)
+		if (entry.kernel == this_kernel && entry.precision == dtype)
 		{
 			// Searches for the right vendor and device type, or selects the default if unavailable
-			return SearchVendorAndType(vendorID, deviceID, db.vendors, db.def_names, db.spec_names);
+			return SearchVendorAndType(vendorID, deviceID, entry.vendors, entry.def_names, entry.spec_names);
 		}
 	}
-	throw std::runtime_error("meep!");
-
-	// If we reached this point, the entry was not found in this database
+	// Kernel not found in database; return empty Parameters (will be handled by caller)
 	return database::Parameters();
 }
 
@@ -245,6 +243,21 @@ database::Parameters Database::SearchDevice(
 				mDefs[def_names[i]] = static_cast<uint32_t>(
 					i < device.parameters.size() ? device.parameters[i] : device.defs[i - device.parameters.size()]);
 			}
+			// When device.defs is empty, spec_names are stored in device.parameters
+		// after def_names, starting at index def_names.size()
+		if (device.defs.empty()) {
+			for (size_t i = 0; i < spec_names.size(); i += 1)
+			{
+				size_t idx = def_names.size() + i;
+				if (idx < device.parameters.size()) {
+					parameters[spec_names[i]] = static_cast<size_t>(device.parameters[idx]);
+					mSpecs[spec_names[i]] = static_cast<uint32_t>(device.parameters[idx]);
+				} else {
+					mSpecs[spec_names[i]] = static_cast<uint32_t>(0);
+				}
+			}
+		}
+		else {
 			for (size_t i = 0; i < spec_names.size(); i += 1)
 			{
 				size_t idx = device.parameters.size() + i;
@@ -256,6 +269,7 @@ database::Parameters Database::SearchDevice(
 				mSpecs[spec_names[i]] = static_cast<uint32_t>(
 					idx < device.parameters.size() + device.defs.size() ? device.defs[i] : device.specs[idx - device.parameters.size() - device.defs.size()]);
 			}
+		}
 			return parameters;
 		}
 	}
@@ -283,18 +297,25 @@ Databases GetDatabases(const tart::device_ptr& device,
 	for (const auto& kernel_name : kernel_names) {
 		// Check cache first
 		bool has_db;
-		databases(kernel_name) =
+		auto cached_db =
 			DatabaseCache::Instance().Get(DatabaseKeyRef{device->getMetadata().deviceUUID, dtype, kernel_name}, &has_db);
 		if (has_db) {
+			databases(kernel_name) = cached_db;
 			continue;
 		}
 		
-		// Build database for this kernel
-		Database db(device, kernel_name, dtype);
-		DatabaseCache::Instance().Store(
-			DatabaseKey{device->getMetadata().deviceUUID, dtype, kernel_name},
-			Database{db}
-		);
+		// Build database for this kernel, but don't fail if the kernel name isn't in the database
+		try {
+			Database db(device, kernel_name, dtype);
+			databases(kernel_name) = db;
+			DatabaseCache::Instance().Store(
+				DatabaseKey{device->getMetadata().deviceUUID, dtype, kernel_name},
+				Database{db}
+			);
+		} catch (const RuntimeErrorCode&) {
+			// Kernel not found in database; add empty Database entry so operator[] doesn't crash
+			databases(kernel_name) = Database{};
+		}
 	}
 	
 	return databases;

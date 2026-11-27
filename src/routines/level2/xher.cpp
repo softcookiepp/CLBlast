@@ -101,7 +101,7 @@ void Xher::DoHer(const Layout layout, const Triangle triangle, const uint32_t n,
                  const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
                  const bool packed, const std::string& name2, const Databases& db,
                  tart::device_ptr device, const tart::DType& dtype) {
-    DoHer(layout, triangle, n, alpha, x_buffer, x_offset, x_inc, a_buffer, a_offset, a_ld,
+    clblast::DoHer(layout, triangle, n, alpha, x_buffer, x_offset, x_inc, a_buffer, a_offset, a_ld,
           packed, name2, db, device ? device : device, dtype != tart::dtypes::unknown_type ? dtype : dtype);
 }
 

@@ -165,7 +165,7 @@ void Xherk::DoHerk(const Layout layout, const Triangle triangle, const Transpose
                    const size_t a_ld, const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset,
                    const size_t c_ld, const Databases& db,
                    tart::device_ptr device, const tart::DType& dtype) {
-    DoHerk(layout, triangle, a_transpose, n, k, alpha, a_buffer, a_offset, a_ld, beta, c_buffer, c_offset, c_ld,
+    clblast::DoHerk(layout, triangle, a_transpose, n, k, alpha, a_buffer, a_offset, a_ld, beta, c_buffer, c_offset, c_ld,
            db, device ? device : device, dtype != tart::dtypes::unknown_type ? dtype : dtype);
 }
 
@@ -175,7 +175,7 @@ void Xherk::HerkAB(const Layout layout, const Triangle triangle, const Transpose
                    const size_t b_ld, const tart::Scalar& complex_beta, const tart::buffer_ptr& c_buffer,
                    const size_t c_offset, const size_t c_ld, const bool diagonal_to_zero, const Databases& db,
                    tart::device_ptr device, const tart::DType& dtype) {
-    HerkAB(layout, triangle, a_transpose, b_transpose, n, k, complex_alpha, a_buffer, a_offset, a_ld, b_buffer, b_offset,
+    clblast::HerkAB(layout, triangle, a_transpose, b_transpose, n, k, complex_alpha, a_buffer, a_offset, a_ld, b_buffer, b_offset,
            b_ld, complex_beta, c_buffer, c_offset, c_ld, diagonal_to_zero, db,
            device ? device : device, dtype != tart::dtypes::unknown_type ? dtype : dtype);
 }

@@ -369,7 +369,7 @@ void Xgemm::DoGemm(const Layout layout, const Transpose a_transpose, const Trans
                    const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset, const size_t c_ld,
                    const tart::buffer_ptr& temp_buffer, const bool temp_buffer_provided, const Databases& db,
                    tart::device_ptr device, const tart::DType& dtype) {
-    DoGemm(layout, a_transpose, b_transpose, m, n, k, alpha, a_buffer, a_offset, a_ld, b_buffer, b_offset, b_ld,
+    clblast::DoGemm(layout, a_transpose, b_transpose, m, n, k, alpha, a_buffer, a_offset, a_ld, b_buffer, b_offset, b_ld,
            beta, c_buffer, c_offset, c_ld, temp_buffer, temp_buffer_provided, db,
            device ? device : device, dtype != tart::dtypes::unknown_type ? dtype : dtype);
 }
@@ -382,7 +382,7 @@ void Xgemm::GemmIndirect(const uint32_t m, const uint32_t n, const uint32_t k, c
                          const size_t b_one, const size_t b_two, const size_t c_one, const size_t c_two,
                          const tart::buffer_ptr& temp_buffer, const bool temp_buffer_provided, const Databases& db,
                          tart::device_ptr device, const tart::DType& dtype) {
-    GemmIndirect(m, n, k, alpha, a_buffer, a_offset, a_ld, b_buffer, b_offset, b_ld, beta, c_buffer, c_offset, c_ld,
+    clblast::GemmIndirect(m, n, k, alpha, a_buffer, a_offset, a_ld, b_buffer, b_offset, b_ld, beta, c_buffer, c_offset, c_ld,
                  a_do_transpose, b_do_transpose, c_do_transpose, a_conjugate, b_conjugate, a_one, a_two, b_one, b_two,
                  c_one, c_two, temp_buffer, temp_buffer_provided, db,
                  device ? device : device, dtype != tart::dtypes::unknown_type ? dtype : dtype);
@@ -394,7 +394,7 @@ void Xgemm::GemmDirect(const uint32_t m, const uint32_t n, const uint32_t k, con
                        const size_t c_ld, const bool a_do_transpose, const bool b_do_transpose, const bool c_do_transpose,
                        const bool a_conjugate, const bool b_conjugate, const Databases& db,
                        tart::device_ptr device, const tart::DType& dtype) {
-    GemmDirect(m, n, k, alpha, a_buffer, a_offset, a_ld, b_buffer, b_offset, b_ld, beta, c_buffer, c_offset, c_ld,
+    clblast::GemmDirect(m, n, k, alpha, a_buffer, a_offset, a_ld, b_buffer, b_offset, b_ld, beta, c_buffer, c_offset, c_ld,
                a_do_transpose, b_do_transpose, c_do_transpose, a_conjugate, b_conjugate, db,
                device ? device : device, dtype != tart::dtypes::unknown_type ? dtype : dtype);
 }
@@ -408,7 +408,7 @@ void Xgemv::DoGemv(const Layout layout, const Transpose a_transpose, const uint3
                    const tart::Scalar& beta, const tart::buffer_ptr& y_buffer, const size_t y_offset, const size_t y_inc,
                    const Databases& db,
                    tart::device_ptr device, const tart::DType& dtype) {
-    DoGemv(layout, a_transpose, m, n, alpha, a_buffer, a_offset, a_ld, x_buffer, x_offset, x_inc,
+    clblast::DoGemv(layout, a_transpose, m, n, alpha, a_buffer, a_offset, a_ld, x_buffer, x_offset, x_inc,
            beta, y_buffer, y_offset, y_inc, db,
            device ? device : device, dtype != tart::dtypes::unknown_type ? dtype : dtype);
 }
@@ -420,7 +420,7 @@ void Xgemv::MatVec(const Layout layout, const Transpose a_transpose, const uint3
                    bool fast_kernel, bool fast_kernel_rot, const size_t parameter, const bool packed,
                    const size_t kl, const size_t ku, const std::string& name, [[maybe_unused]] const Databases& db,
                    tart::device_ptr device, const tart::DType& dtype) {
-    MatVec(layout, a_transpose, m, n, alpha, a_buffer, a_offset, a_ld, x_buffer, x_offset, x_inc,
+    clblast::MatVec(layout, a_transpose, m, n, alpha, a_buffer, a_offset, a_ld, x_buffer, x_offset, x_inc,
            beta, y_buffer, y_offset, y_inc, fast_kernel, fast_kernel_rot, parameter, packed, kl, ku, name,
            db, device ? device : device, dtype != tart::dtypes::unknown_type ? dtype : dtype);
 }

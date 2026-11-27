@@ -475,7 +475,7 @@ StatusCode Gemv(const Layout layout, const Transpose a_transpose, const size_t m
 		auto device = a_buffer->getDevice();
 		auto queue_cpp = Queue(device);
 		auto dtype = tart::getDType<T>();
-		auto db = GetDatabases(device, {"Gemm"}, dtype);
+		auto db = GetDatabases(device, {"Gemm", "Xdot", "Xgemv", "XgemvFast", "XgemvFastRot"}, dtype);
 		DoGemv(layout, a_transpose, m, n, alpha, a_buffer, a_offset, a_ld, x_buffer, x_offset,
 					 x_inc, beta, y_buffer, y_offset, y_inc, db, device, dtype);
 		return StatusCode::kSuccess;
@@ -509,7 +509,7 @@ StatusCode Gbmv(const Layout layout, const Transpose a_transpose, const size_t m
 		auto device = a_buffer->getDevice();
 		auto queue_cpp = Queue(device);
 		auto dtype = tart::getDType<T>();
-		auto db = GetDatabases(device, {"Gemm"}, dtype);
+		auto db = GetDatabases(device, {"Gemm", "Xdot", "Xgemv", "XgemvFast", "XgemvFastRot"}, dtype);
 		auto routine = Xgbmv(dtype, queue_cpp);
 		routine.DoGbmv(layout, a_transpose, m, n, kl, ku, alpha, a_buffer, a_offset, a_ld, x_buffer,
 									 x_offset, x_inc, beta, y_buffer, y_offset, y_inc, db);
@@ -548,7 +548,7 @@ StatusCode Hemv(const Layout layout, const Triangle triangle, const size_t n, co
 		auto device = a_buffer->getDevice();
 		auto queue_cpp = Queue(device);
 		auto dtype = tart::getDType<T>();
-		auto db = GetDatabases(device, {"Gemm"}, dtype);
+		auto db = GetDatabases(device, {"Gemm", "Xdot", "Xgemv", "XgemvFast", "XgemvFastRot"}, dtype);
 		auto routine = Xhemv(dtype, queue_cpp);
 		routine.DoHemv(layout, triangle, n, alpha, a_buffer, a_offset, a_ld, x_buffer, x_offset,
 									 x_inc, beta, y_buffer, y_offset, y_inc, db);
@@ -574,7 +574,7 @@ StatusCode Hbmv(const Layout layout, const Triangle triangle, const size_t n, co
 		auto device = a_buffer->getDevice();
 		auto queue_cpp = Queue(device);
 		auto dtype = tart::getDType<T>();
-		auto db = GetDatabases(device, {"Gemm"}, dtype);
+		auto db = GetDatabases(device, {"Gemm", "Xdot", "Xgemv", "XgemvFast", "XgemvFastRot"}, dtype);
 		auto routine = Xhbmv(dtype, queue_cpp);
 		routine.DoHbmv(layout, triangle, n, k, alpha, a_buffer, a_offset, a_ld, x_buffer, x_offset,
 									 x_inc, beta, y_buffer, y_offset, y_inc, db);
@@ -599,7 +599,7 @@ StatusCode Hpmv(const Layout layout, const Triangle triangle, const size_t n, co
 		auto device = ap_buffer->getDevice();
 		auto queue_cpp = Queue(device);
 		auto dtype = tart::getDType<T>();
-		auto db = GetDatabases(device, {"Gemm"}, dtype);
+		auto db = GetDatabases(device, {"Gemm", "Xdot", "Xgemv", "XgemvFast", "XgemvFastRot"}, dtype);
 		auto routine = Xhpmv(dtype, queue_cpp);
 		routine.DoHpmv(layout, triangle, n, alpha, ap_buffer, ap_offset, x_buffer, x_offset, x_inc,
 									 beta, y_buffer, y_offset, y_inc, db);
@@ -624,7 +624,7 @@ StatusCode Symv(const Layout layout, const Triangle triangle, const size_t n, co
 		auto device = a_buffer->getDevice();
 		auto queue_cpp = Queue(device);
 		auto dtype = tart::getDType<T>();
-		auto db = GetDatabases(device, {"Gemm"}, dtype);
+		auto db = GetDatabases(device, {"Gemm", "Xdot", "Xgemv", "XgemvFast", "XgemvFastRot"}, dtype);
 		auto routine = Xsymv(dtype, queue_cpp);
 		routine.DoSymv(layout, triangle, n, alpha, a_buffer, a_offset, a_ld, x_buffer, x_offset,
 									 x_inc, beta, y_buffer, y_offset, y_inc, db);
@@ -653,7 +653,7 @@ StatusCode Sbmv(const Layout layout, const Triangle triangle, const size_t n, co
 		auto device = a_buffer->getDevice();
 		auto queue_cpp = Queue(device);
 		auto dtype = tart::getDType<T>();
-		auto db = GetDatabases(device, {"Gemm"}, dtype);
+		auto db = GetDatabases(device, {"Gemm", "Xdot", "Xgemv", "XgemvFast", "XgemvFastRot"}, dtype);
 		auto routine = Xsbmv(dtype, queue_cpp);
 		routine.DoSbmv(layout, triangle, n, k, alpha, a_buffer, a_offset, a_ld, x_buffer, x_offset,
 									 x_inc, beta, y_buffer, y_offset, y_inc, db);
@@ -681,7 +681,7 @@ StatusCode Spmv(const Layout layout, const Triangle triangle, const size_t n, co
 		auto device = ap_buffer->getDevice();
 		auto queue_cpp = Queue(device);
 		auto dtype = tart::getDType<T>();
-		auto db = GetDatabases(device, {"Gemm"}, dtype);
+		auto db = GetDatabases(device, {"Gemm", "Xdot", "Xgemv", "XgemvFast", "XgemvFastRot"}, dtype);
 		auto routine = Xspmv(dtype, queue_cpp);
 		routine.DoSpmv(layout, triangle, n, alpha, ap_buffer, ap_offset, x_buffer, x_offset, x_inc,
 									 beta, y_buffer, y_offset, y_inc, db);
@@ -709,7 +709,7 @@ StatusCode Trmv(const Layout layout, const Triangle triangle, const Transpose a_
 		auto device = a_buffer->getDevice();
 		auto queue_cpp = Queue(device);
 		auto dtype = tart::getDType<T>();
-		auto db = GetDatabases(device, {"Gemm"}, dtype);
+		auto db = GetDatabases(device, {"Gemm", "Xdot", "Xgemv", "XgemvFast", "XgemvFastRot"}, dtype);
 		auto routine = Xtrmv(dtype, queue_cpp);
 		routine.DoTrmv(layout, triangle, a_transpose, diagonal, n, a_buffer, a_offset, a_ld, x_buffer,
 									 x_offset, x_inc, device, dtype, db);
@@ -741,7 +741,7 @@ StatusCode Tbmv(const Layout layout, const Triangle triangle, const Transpose a_
 		auto device = a_buffer->getDevice();
 		auto queue_cpp = Queue(device);
 		auto dtype = tart::getDType<T>();
-		auto db = GetDatabases(device, {"Gemm"}, dtype);
+		auto db = GetDatabases(device, {"Gemm", "Xdot", "Xgemv", "XgemvFast", "XgemvFastRot"}, dtype);
 		auto routine = Xtbmv(dtype, queue_cpp);
 		routine.DoTbmv(layout, triangle, a_transpose, diagonal, n, k, a_buffer, a_offset, a_ld,
 			x_buffer, x_offset, x_inc, device, dtype, db);
@@ -775,7 +775,7 @@ StatusCode Tpmv(const Layout layout, const Triangle triangle, const Transpose a_
 		auto device = ap_buffer->getDevice();
 		auto queue_cpp = Queue(device);
 		auto dtype = tart::getDType<T>();
-		auto db = GetDatabases(device, {"Gemm"}, dtype);
+		auto db = GetDatabases(device, {"Gemm", "Xdot", "Xgemv", "XgemvFast", "XgemvFastRot"}, dtype);
 		auto routine = Xtpmv(dtype, queue_cpp);
 		routine.DoTpmv(layout, triangle, a_transpose, diagonal, n, ap_buffer, ap_offset, x_buffer,
 									 x_offset, x_inc, device, dtype, db);
@@ -805,7 +805,7 @@ StatusCode Trsv(const Layout layout, const Triangle triangle, const Transpose a_
 		auto device = a_buffer->getDevice();
 		auto queue_cpp = Queue(device);
 		auto dtype = tart::getDType<T>();
-		auto db = GetDatabases(device, {"Trsv"}, dtype);
+		auto db = GetDatabases(device, {"Trsv", "TrsvRoutine", "Xgemv"}, dtype);
 		auto routine = Xtrsv(dtype, queue_cpp);
 		routine.DoTrsv(layout, triangle, a_transpose, diagonal, n, a_buffer, a_offset, a_ld, x_buffer,
 									 x_offset, x_inc, device, dtype, db);
@@ -1152,7 +1152,7 @@ StatusCode Gemm(const Layout layout, const Transpose a_transpose, const Transpos
 		auto device = a_buffer->getDevice();
 		auto queue_cpp = Queue(device);
 		auto dtype = tart::getDType<T>();
-		auto db = GetDatabases(device, {"Xgemm", "GemmRoutine"}, dtype);
+		auto db = GetDatabases(device, {"Xgemm", "GemmRoutine", "XgemmDirect"}, dtype);
 		auto routine = Xgemm(dtype, queue_cpp);
 		const auto temp_buffer_provided = temp_buffer != nullptr;
 		auto temp_buffer_cpp = temp_buffer_provided ? temp_buffer : nullptr;
@@ -1195,7 +1195,7 @@ StatusCode Symm(const Layout layout, const Side side, const Triangle triangle, c
 		auto device = a_buffer->getDevice();
 		auto queue_cpp = Queue(device);
 		auto dtype = tart::getDType<T>();
-		auto db = GetDatabases(device, {"Gemm"}, dtype);
+		auto db = GetDatabases(device, {"Gemm", "Xdot", "Xgemv", "XgemvFast", "XgemvFastRot"}, dtype);
 		auto routine = Xsymm(dtype, queue_cpp);
 		routine.DoSymm(layout, side, triangle, m, n, alpha, a_buffer, a_offset, a_ld, b_buffer,
 									 b_offset, b_ld, beta, c_buffer, c_offset, c_ld, device, dtype, db);
@@ -1233,7 +1233,7 @@ StatusCode Hemm(const Layout layout, const Side side, const Triangle triangle, c
 		auto device = a_buffer->getDevice();
 		auto queue_cpp = Queue(device);
 		auto dtype = tart::getDType<T>();
-		auto db = GetDatabases(device, {"Gemm"}, dtype);
+		auto db = GetDatabases(device, {"Gemm", "Xdot", "Xgemv", "XgemvFast", "XgemvFastRot"}, dtype);
 		auto routine = Xhemm(dtype, queue_cpp);
 		routine.DoHemm(layout, side, triangle, m, n, alpha, a_buffer, a_offset, a_ld, b_buffer,
 									 b_offset, b_ld, beta, c_buffer, c_offset, c_ld, device, dtype, db);
@@ -1386,7 +1386,7 @@ StatusCode Trmm(const Layout layout, const Side side, const Triangle triangle, c
 		auto device = a_buffer->getDevice();
 		auto queue_cpp = Queue(device);
 		auto dtype = tart::getDType<T>();
-		auto db = GetDatabases(device, {"Gemm"}, dtype);
+		auto db = GetDatabases(device, {"Gemm", "Xdot", "Xgemv", "XgemvFast", "XgemvFastRot"}, dtype);
 		auto routine = Xtrmm(dtype, queue_cpp);
 		routine.DoTrmm(layout, side, triangle, a_transpose, diagonal, m, n, alpha, a_buffer, a_offset, a_ld,
 									 b_buffer, b_offset, b_ld,

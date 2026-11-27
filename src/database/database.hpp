@@ -23,6 +23,7 @@
 #include "database/database_structure.hpp"
 #include "utilities/backend.hpp"
 #include "utilities/clblast_exceptions.hpp"
+#include "utilities/utilities.hpp"
 
 namespace clblast {
 // =================================================================================================
@@ -107,7 +108,11 @@ class Databases {
 	uint32_t operator[](const std::string& key) const
 	{
 		for (const auto& kernel_name : kernel_names_) {
-			const auto& kernel_db = databases_.find(kernel_name)->second;
+			auto it = databases_.find(kernel_name);
+			if (it == databases_.end()) {
+				continue;
+			}
+			const auto& kernel_db = it->second;
 			if (kernel_db.hasSpec(key) || kernel_db.hasDef(key))
 			{
 				return kernel_db[key];

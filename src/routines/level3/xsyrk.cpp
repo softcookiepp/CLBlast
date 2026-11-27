@@ -168,7 +168,7 @@ void Xsyrk::DoSyrk(const Layout layout, const Triangle triangle, const Transpose
                    const size_t a_ld, const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset,
                    const size_t c_ld, const Databases& db,
                    tart::device_ptr device, const tart::DType& dtype) {
-    DoSyrk(layout, triangle, a_transpose, n, k, alpha, a_buffer, a_offset, a_ld, beta, c_buffer, c_offset, c_ld,
+    clblast::DoSyrk(layout, triangle, a_transpose, n, k, alpha, a_buffer, a_offset, a_ld, beta, c_buffer, c_offset, c_ld,
            db, device ? device : device, dtype != tart::dtypes::unknown_type ? dtype : dtype);
 }
 
@@ -178,7 +178,7 @@ void Xsyrk::SyrkAB(const Layout layout, const Triangle triangle, const Transpose
                    const size_t b_ld, const tart::Scalar& beta, const tart::buffer_ptr& c_buffer, const size_t c_offset,
                    const size_t c_ld, const Databases& db,
                    tart::device_ptr device, const tart::DType& dtype) {
-    SyrkAB(layout, triangle, a_transpose, b_transpose, n, k, alpha, a_buffer, a_offset, a_ld, b_buffer, b_offset, b_ld,
+    clblast::SyrkAB(layout, triangle, a_transpose, b_transpose, n, k, alpha, a_buffer, a_offset, a_ld, b_buffer, b_offset, b_ld,
            beta, c_buffer, c_offset, c_ld, db,
            device ? device : device, dtype != tart::dtypes::unknown_type ? dtype : dtype);
 }

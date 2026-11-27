@@ -97,7 +97,7 @@ void Xger::DoGer(const Layout layout, const uint32_t m, const uint32_t n, const 
                  const tart::buffer_ptr& a_buffer, const size_t a_offset, const size_t a_ld,
                  const std::string& name, [[maybe_unused]] const Databases& db,
                  tart::device_ptr device, const tart::DType& dtype) {
-    DoGer(layout, m, n, alpha, x_buffer, x_offset, x_inc, y_buffer, y_offset, y_inc,
+    clblast::DoGer(layout, m, n, alpha, x_buffer, x_offset, x_inc, y_buffer, y_offset, y_inc,
           a_buffer, a_offset, a_ld, name, db,
           device ? device : device, dtype != tart::dtypes::unknown_type ? dtype : dtype);
 }

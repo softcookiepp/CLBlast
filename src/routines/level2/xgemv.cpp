@@ -172,7 +172,7 @@ void MatVec(const Layout layout, const Transpose a_transpose, const uint32_t m, 
 	}
 
 	// Launches the kernel
-	auto global = std::vector<uint32_t>{static_cast<uint32_t>(global_size / local_size)};
+	auto global = std::vector<size_t>{static_cast<uint32_t>(global_size / local_size)};
 	//auto local = std::vector<uint32_t>{local_size};
 	
 	std::vector<uint32_t> spec;

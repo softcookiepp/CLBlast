@@ -193,7 +193,7 @@ void BatchedGemmIndirect(const uint32_t m, const uint32_t n, const uint32_t k, c
     kernel->setArg(13, static_cast<int>(c_two_i));
 
     // Computes the global and local thread sizes
-    const auto global = std::vector<uint32_t>{static_cast<uint32_t>((c_one_i) / db["MWG"]), static_cast<uint32_t>((db["NDIMC"]) / db["NWG"]), static_cast<uint32_t>(batch_count)};
+    const auto global = std::vector<size_t>{static_cast<uint32_t>((c_one_i) / db["MWG"]), static_cast<uint32_t>((db["NDIMC"]) / db["NWG"]), static_cast<uint32_t>(batch_count)};
     const auto local = std::vector<uint32_t>{db["MDIMC"], db["NDIMC"], 1};
     
     const bool subgroupSupported = device->getMetadata().subgroupAdd;
@@ -272,7 +272,7 @@ void BatchedGemmDirect(const uint32_t m, const uint32_t n, const uint32_t k, con
     // Computes the global and local thread sizes
     const auto m_ceiled = Ceil(m, db["WGD"]);
     const auto n_ceiled = Ceil(n, db["WGD"]);
-    const auto global = std::vector<uint32_t>{static_cast<uint32_t>(m_ceiled / db["WGD"]), static_cast<uint32_t>(n_ceiled / db["WGD"]), static_cast<uint32_t>(batch_count)};
+    const auto global = std::vector<size_t>{static_cast<uint32_t>(m_ceiled / db["WGD"]), static_cast<uint32_t>(n_ceiled / db["WGD"]), static_cast<uint32_t>(batch_count)};
     
     const std::vector<uint32_t> spec({
         static_cast<uint32_t>(db["WGD"]),

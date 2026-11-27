@@ -39,10 +39,10 @@ double TimeFunction(const uint32_t num_runs, F const& function) {
 // =================================================================================================
 
 double RunKernelTimed(const uint32_t num_runs, const tart::kernel_ptr& kernel, Queue& queue, const Device& device,
-	std::vector<uint32_t> global, const std::vector<uint32_t>& local,
+	std::vector<size_t> global, const std::vector<uint32_t>& local,
 	const std::vector<uint32_t>& spec = {});
 
-double TimeKernel(const uint32_t num_runs, const tart::kernel_ptr& kernel, Queue& queue, const Device& device, std::vector<uint32_t> global,
+double TimeKernel(const uint32_t num_runs, const tart::kernel_ptr& kernel, Queue& queue, const Device& device, std::vector<size_t> global,
 									const std::vector<uint32_t>& local, const bool silent = false, const std::vector<uint32_t>& spec = {});
 
 // =================================================================================================

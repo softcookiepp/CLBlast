@@ -70,7 +70,7 @@ void Xhemm::DoHemm(const Layout layout, const Side side, const Triangle triangle
 
 	// Uses the common padding kernel's thread configuration. This is allowed, since the
 	// hermitian-to-squared kernel uses the same parameters.
-	std::vector<uint32_t> global = {static_cast<uint32_t>(Ceil(CeilDiv(k, db["PAD_WPTX"]), db["PAD_DIMX"])), static_cast<uint32_t>(Ceil(CeilDiv(k, db["PAD_WPTY"]), db["PAD_DIMY"]))};
+	std::vector<size_t> global = {static_cast<uint32_t>(Ceil(CeilDiv(k, db["PAD_WPTX"]), db["PAD_DIMX"])), static_cast<uint32_t>(Ceil(CeilDiv(k, db["PAD_WPTY"]), db["PAD_DIMY"]))};
 	auto local = std::vector<uint32_t>{static_cast<uint32_t>(db["PAD_DIMX"]), static_cast<uint32_t>(db["PAD_DIMY"])};
 	global[0] = global[0] / local[0];
 	global[1] = global[1] / local[1];

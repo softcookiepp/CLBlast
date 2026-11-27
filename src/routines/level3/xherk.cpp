@@ -121,7 +121,7 @@ void HerkAB(const Layout layout, const Triangle triangle, const Transpose a_tran
     kernel->setArg(8, b_temp);
 
     // Computes the global and local thread sizes
-    auto global = std::vector<uint32_t>{static_cast<uint32_t>((n_ceiled) / db["MWG"]), static_cast<uint32_t>((n_ceiled) / db["NWG"])};
+    auto global = std::vector<size_t>{static_cast<uint32_t>((n_ceiled) / db["MWG"]), static_cast<uint32_t>((n_ceiled) / db["NWG"])};
     auto local = std::vector<uint32_t>{db["MDIMC"], db["NDIMC"]};
 
     const bool subgroupSupported = device->getMetadata().subgroupAdd;

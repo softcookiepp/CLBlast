@@ -69,8 +69,8 @@ void DoAmax(const tart::DType& dtype, const tart::device_ptr& device,
 	}
 
 	// Launches the main kernel
-	//auto global1 = std::vector<uint32_t>{db["WGS1"] * temp_size};
-	auto global1 = std::vector<uint32_t>{static_cast<uint32_t>(temp_size)};
+	//auto global1 = std::vector<size_t>{db["WGS1"] * temp_size};
+	auto global1 = std::vector<size_t>{static_cast<uint32_t>(temp_size)};
 	//auto local1 = std::vector<uint32_t>{db["WGS1"]};
 	
 	// the number of workgroups in the X dimension
@@ -93,8 +93,8 @@ void DoAmax(const tart::DType& dtype, const tart::device_ptr& device,
 #endif
 
 	// Launches the epilogue kernel
-	//auto global2 = std::vector<uint32_t>{db["WGS2"]};
-	auto global2 = std::vector<uint32_t>{1};
+	//auto global2 = std::vector<size_t>{db["WGS2"]};
+	auto global2 = std::vector<size_t>{1};
 	auto local2 = std::vector<uint32_t>{db["WGS2"]};
 	kernel2->enqueue(global2, {static_cast<uint32_t>(db["WGS2"])});
 }

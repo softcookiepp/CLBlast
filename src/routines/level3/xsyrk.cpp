@@ -122,7 +122,7 @@ void SyrkAB(const Layout layout, const Triangle triangle, const Transpose a_tran
     kernel->setArg(8, b_temp);
 
     // Computes the global and local thread sizes
-    auto global = std::vector<uint32_t>{static_cast<uint32_t>((n_ceiled * db["MDIMC"]) / db["MWG"]), static_cast<uint32_t>((n_ceiled * db["NDIMC"]) / db["NWG"])};
+    auto global = std::vector<size_t>{static_cast<uint32_t>((n_ceiled * db["MDIMC"]) / db["MWG"]), static_cast<uint32_t>((n_ceiled * db["NDIMC"]) / db["NWG"])};
     auto local = std::vector<uint32_t>{db["MDIMC"], db["NDIMC"]};
     global[0] = global[0] / local[0];
     global[1] = global[1] / local[1];

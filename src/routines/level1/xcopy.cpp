@@ -54,7 +54,7 @@ void DoCopy(const tart::DType& dtype, const tart::device_ptr& device,
 		kernel->setArg(6, static_cast<int>(y_inc));
 	}
 
-	std::vector<uint32_t> global(3, 1);
+	std::vector<size_t> global(3, 1);
 	if (use_fast_kernel)
 	{
 		global[0] = CeilDiv(n, db["WPT"] * db["VW"]) / db["WGS"];

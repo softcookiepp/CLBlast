@@ -269,7 +269,7 @@ void GemmIndirect(const uint32_t m, const uint32_t n, const uint32_t k, const ta
     kernel->setArg(11, static_cast<int>(c_temp_offset / db["VWM"]));
 
     // Computes the global and local thread sizes
-    const auto global = std::vector<uint32_t>{static_cast<uint32_t>(c_one_i / db["MWG"]), static_cast<uint32_t>(c_two_i / db["NWG"])};
+    const auto global = std::vector<size_t>{static_cast<uint32_t>(c_one_i / db["MWG"]), static_cast<uint32_t>(c_two_i / db["NWG"])};
 
     const bool subgroupSupported = device->getMetadata().subgroupAdd;
     std::vector<uint32_t> spec(subgroupSupported ? 16 : 15);
@@ -341,7 +341,7 @@ void GemmDirect(const uint32_t m, const uint32_t n, const uint32_t k, const tart
     // Computes the global and local thread sizes
     const auto m_ceiled = Ceil(m, db["WGD"]);
     const auto n_ceiled = Ceil(n, db["WGD"]);
-    const auto global = std::vector<uint32_t>{static_cast<uint32_t>(m_ceiled / db["WGD"]), static_cast<uint32_t>(n_ceiled / db["WGD"]), 1};
+    const auto global = std::vector<size_t>{static_cast<uint32_t>(m_ceiled / db["WGD"]), static_cast<uint32_t>(n_ceiled / db["WGD"]), 1};
     
     const std::vector<uint32_t> spec({
         static_cast<uint32_t>(db["WGD"]),

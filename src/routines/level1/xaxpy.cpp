@@ -100,7 +100,7 @@ void DoAxpy(const tart::DType& dtype, [[maybe_unused]] const tart::device_ptr& d
 	}
 
 	// Launches the kernel
-	std::vector<uint32_t> global(3, 1);
+	std::vector<size_t> global(3, 1);
 	if (use_fastest_kernel)
 	{
 		global[0] = CeilDiv(n, db["WPT"] * db["VW"])/db["WGS"];

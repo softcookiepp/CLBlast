@@ -70,7 +70,7 @@ void Xsymm::DoSymm(const Layout layout, const Side side, const Triangle triangle
 
 	// Uses the common padding kernel's thread configuration. This is allowed, since the
 	// symmetric-to-squared kernel uses the same parameters.
-	auto global = std::vector<uint32_t>{static_cast<uint32_t>(Ceil(CeilDiv(k, db["PAD_WPTX"]), db["PAD_DIMX"])),
+	auto global = std::vector<size_t>{static_cast<uint32_t>(Ceil(CeilDiv(k, db["PAD_WPTX"]), db["PAD_DIMX"])),
 																		static_cast<uint32_t>(Ceil(CeilDiv(k, db["PAD_WPTY"]), db["PAD_DIMY"]))};
 	auto local = std::vector<uint32_t>{static_cast<uint32_t>(db["PAD_DIMX"]), static_cast<uint32_t>(db["PAD_DIMY"])};
 	global[0] = global[0] / local[0];

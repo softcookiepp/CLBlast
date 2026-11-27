@@ -68,7 +68,7 @@ void DoIm2col(const KernelMode kernel_mode, const size_t channels, const uint32_
     // Launches the kernel
     const auto w_ceiled = Ceil(col_w, db["COPY_DIMX"]);
     const auto h_ceiled = Ceil(col_h, db["COPY_DIMY"]);
-    const auto global = std::vector<uint32_t>{static_cast<uint32_t>(w_ceiled/db["COPY_DIMX"]), static_cast<uint32_t>((h_ceiled * channels)/db["COPY_DIMY"])};
+    const auto global = std::vector<size_t>{static_cast<uint32_t>(w_ceiled/db["COPY_DIMX"]), static_cast<uint32_t>((h_ceiled * channels)/db["COPY_DIMY"])};
     kernel->enqueue(global, {static_cast<uint32_t>(db["COPY_DIMX"]), static_cast<uint32_t>(db["COPY_DIMY"]), static_cast<uint32_t>(kernel_mode == KernelMode::kConvolution)});
 }
 

@@ -53,7 +53,7 @@ TunerSettings InvertGetTunerSettings(const int, const Arguments<T>& args) {
 
   // Sets the base thread configuration
   const auto num_pages = CeilDiv(args.n, args.k * 2);  // CeilDiv(n, current_size*2)
-  settings.global_size = {args.k / 4, num_pages * (args.k / 16) * 4};
+  settings.global_size = {static_cast<uint32_t>(args.k / 4), static_cast<uint32_t>(num_pages * (args.k / 16) * 4)};
   settings.global_size_ref = settings.global_size;
   settings.local_size = {1, 1};
   settings.local_size_ref = {4, 4};

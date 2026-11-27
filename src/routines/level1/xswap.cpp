@@ -79,7 +79,7 @@ void DoSwap(const tart::DType& dtype, const tart::device_ptr& device,
 		}
 	}
 
-	std::vector<uint32_t> global(3, 1);
+	std::vector<size_t> global(3, 1);
 	if (use_fast_kernel)
 	{
 		global[0] = CeilDiv(n, db["WPT"] * db["VW"]) / db["WGS"];

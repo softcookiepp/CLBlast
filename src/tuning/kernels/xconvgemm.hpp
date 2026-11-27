@@ -88,7 +88,7 @@ TunerSettings XConvGemmGetTunerSettings(const int, const Arguments<T>& args) {
   settings.outputs = {4};
 
   // Sets the base thread configuration
-  settings.global_size = {num_patches, args.num_kernels, args.batch_count};
+  settings.global_size = {static_cast<uint32_t>(num_patches), static_cast<uint32_t>(args.num_kernels), static_cast<uint32_t>(args.batch_count)};
   settings.global_size_ref = settings.global_size;
   settings.local_size = {1, 1, 1};
   settings.local_size_ref = {8, 8, 1};

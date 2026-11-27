@@ -50,7 +50,7 @@ TunerSettings TransposeGetTunerSettings(const int, const Arguments<T>& args) {
 	settings.outputs = {3};
 
 	// Sets the base thread configuration
-	settings.global_size = {args.m, args.n};
+	settings.global_size = {static_cast<uint32_t>(args.m), static_cast<uint32_t>(args.n)};
 	settings.global_size_ref = settings.global_size;
 	settings.local_size = {1, 1};
 	settings.local_size_ref = {8, 8};

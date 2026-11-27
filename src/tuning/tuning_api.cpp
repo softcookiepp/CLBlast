@@ -393,7 +393,7 @@ StatusCode TunerAPI(Queue& queue, const Arguments<T>& args, const int V, const G
 		SetArguments(V, kernel, args, device_buffers);
 
 		// Runs the kernel
-		auto global_ref = std::vector<uint32_t>(settings.global_size_ref.begin(), settings.global_size_ref.end());
+		auto global_ref = std::vector<size_t>(settings.global_size_ref.begin(), settings.global_size_ref.end());
 		auto local_ref = std::vector<uint32_t>(settings.local_size_ref.begin(), settings.local_size_ref.end());
 		const auto time_ms =
 				TimeKernel(args.num_runs, kernel.get(), queue, device, global_ref, local_ref, true);
@@ -442,7 +442,7 @@ StatusCode TunerAPI(Queue& queue, const Arguments<T>& args, const int V, const G
 
 			// Runs the kernel
 			SetArguments(V, kernel, args, device_buffers);
-			auto global_u32 = std::vector<uint32_t>(global.begin(), global.end());
+			auto global_u32 = std::vector<size_t>(global.begin(), global.end());
 			auto local_u32 = std::vector<uint32_t>(local.begin(), local.end());
 			const auto time_ms = TimeKernel(args.num_runs, kernel.get(), queue, device, global_u32, local_u32, true);
 

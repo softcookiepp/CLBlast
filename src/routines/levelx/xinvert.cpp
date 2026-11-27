@@ -80,7 +80,7 @@ void InvertMatrixDiagonalBlocks(const Layout layout, const Triangle triangle, co
     kernel->setArg(6, static_cast<int>(unit_diagonal));
     kernel->setArg(7, static_cast<int>(is_upper));
     const auto local_invert = std::vector<uint32_t>{internal_block_size};
-    auto global_invert = std::vector<uint32_t>{static_cast<uint32_t>(num_internal_blocks * internal_block_size)};
+    auto global_invert = std::vector<size_t>{static_cast<uint32_t>(num_internal_blocks * internal_block_size)};
     global_invert[0] = global_invert[0] / local_invert[0];
     std::vector<uint32_t> spec = {
         static_cast<uint32_t>(db["INTERNAL_BLOCK_SIZE"]),
@@ -110,7 +110,7 @@ void InvertMatrixDiagonalBlocks(const Layout layout, const Triangle triangle, co
         const auto npages = CeilDiv(n, current_size * 2);
         const auto local0 = (current_size <= 32) ? current_size / 4 : 16;
         const auto local = std::vector<uint32_t>{local0, 4};
-        auto global = std::vector<uint32_t>{static_cast<uint32_t>(Ceil(current_size / local[1], local[0])), static_cast<uint32_t>(Ceil(npages * (current_size / 16) * local[1], local[1]))};
+        auto global = std::vector<size_t>{static_cast<uint32_t>(Ceil(current_size / local[1], local[0])), static_cast<uint32_t>(Ceil(npages * (current_size / 16) * local[1], local[1]))};
         global[0] = global[0] / local0;
         global[1] = global[1] / 4;
 

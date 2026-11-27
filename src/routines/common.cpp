@@ -32,7 +32,7 @@ void FillMatrix(const tart::DType& dtype, const uint32_t m, const uint32_t n, co
 	kernel->setArg(4, dest);
 	kernel->setArgAs(dtype, 5, constant_value);
 	auto local = std::vector<uint32_t>{static_cast<uint32_t>(local_size), 1};
-	auto global = std::vector<uint32_t>{static_cast<uint32_t>(Ceil(m, local_size) / local_size), static_cast<uint32_t>(n)};
+	auto global = std::vector<size_t>{static_cast<uint32_t>(Ceil(m, local_size) / local_size), static_cast<uint32_t>(n)};
 	kernel->enqueue(global, {});
 }
 
@@ -47,7 +47,7 @@ void FillVector(const tart::DType& dtype, const uint32_t n, const uint32_t inc, 
 	kernel->setArg(3, dest);
 	kernel->setArgAs(dtype, 4, (constant_value));
 	auto local = std::vector<uint32_t>{static_cast<uint32_t>(local_size)};
-	auto global = std::vector<uint32_t>{static_cast<uint32_t>(Ceil(n, local_size) / local_size)};
+	auto global = std::vector<size_t>{static_cast<uint32_t>(Ceil(n, local_size) / local_size)};
 	kernel->enqueue(global, {});
 }
 

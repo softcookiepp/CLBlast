@@ -80,7 +80,7 @@ void DoHer2(const Layout layout, const Triangle triangle, const uint32_t n, cons
 	// Launches the kernel
 	auto global_one = Ceil(CeilDiv(n, db["WPT"]), db["WGS1"]);
 	auto global_two = Ceil(CeilDiv(n, db["WPT"]), db["WGS2"]);
-	auto global = std::vector<uint32_t>{static_cast<uint32_t>(global_one / db["WGS1"]), static_cast<uint32_t>(global_two / db["WGS2"])};
+	auto global = std::vector<size_t>{static_cast<uint32_t>(global_one / db["WGS1"]), static_cast<uint32_t>(global_two / db["WGS2"])};
 	auto local = std::vector<uint32_t>{static_cast<uint32_t>(db["WGS1"]), db["WGS2"]};
 	kernel->enqueue(global, {static_cast<uint32_t>(db["WGS1"]), static_cast<uint32_t>(db["WGS2"]), static_cast<uint32_t>(db["WPT"]),
 		mHPR,

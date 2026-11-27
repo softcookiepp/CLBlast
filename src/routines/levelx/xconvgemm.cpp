@@ -139,7 +139,7 @@ void DoConvgemm(const KernelMode kernel_mode, const size_t channels, const uint3
     // Computes the global and local thread sizes
     const auto m_ceiled = Ceil(num_patches, db["WGD"]);
     const auto n_ceiled = Ceil(num_kernels, db["WGD"]);
-    const auto global = std::vector<uint32_t>{static_cast<uint32_t>(m_ceiled / static_cast<uint32_t>(db["WGD"])), static_cast<uint32_t>((n_ceiled) / static_cast<uint32_t>(db["WGD"])), static_cast<uint32_t>(batch_count)};
+    const auto global = std::vector<size_t>{static_cast<uint32_t>(m_ceiled / static_cast<uint32_t>(db["WGD"])), static_cast<uint32_t>((n_ceiled) / static_cast<uint32_t>(db["WGD"])), static_cast<uint32_t>(batch_count)};
     
     std::vector<uint32_t> spec;
     if (with_im2col)

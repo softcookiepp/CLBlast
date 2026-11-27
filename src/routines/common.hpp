@@ -121,7 +121,7 @@ inline void PadCopyTransposeMatrix(const tart::DType& dtype, const Databases& db
 
 	// Launches the kernel and returns the error code. Uses global and local thread sizes based on
 	// parameters in the database.
-	std::vector<uint32_t> global(3, 1);
+	std::vector<size_t> global(3, 1);
 	std::vector<uint32_t> local(3, 1);
 	std::vector<uint32_t> spec = {
 		static_cast<uint32_t>(db["COPY_DIMX"]),
@@ -217,7 +217,7 @@ inline void PadCopyTransposeMatrixBatched(const tart::DType& dtype, const Databa
 
 	// Launches the kernel and returns the error code. Uses global and local thread sizes based on
 	// parameters in the database.
-	std::vector<uint32_t> global(3, 1);
+	std::vector<size_t> global(3, 1);
 	std::vector<uint32_t> local(3, 1);
 	std::vector<uint32_t> spec = {
 		static_cast<uint32_t>(db["COPY_DIMX"]),
@@ -294,7 +294,7 @@ inline void PadCopyTransposeMatrixStridedBatched(const tart::DType& dtype, const
 
 	// Launches the kernel and returns the error code. Uses global and local thread sizes based on
 	// parameters in the database.
-	std::vector<uint32_t> global(3, 1);
+	std::vector<size_t> global(3, 1);
 	std::vector<uint32_t> local(3, 1);
 	std::vector<uint32_t> spec = {
 		static_cast<uint32_t>(db["COPY_DIMX"]),
